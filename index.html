@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HomeCare AI — 방문진료 통합지원 시스템</title>
+  <meta name="description" content="AI 기반 방문진료 전주기 통합지원 시스템. 방문 전 환자 브리핑부터 문진, SOAP 기록 자동생성까지." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ===== OUTER HEADER ===== -->
+  <header class="outer-header">
+    <div class="outer-header__brand">
+      <span class="brand-icon">🏥</span>
+      <div>
+        <h1 class="brand-title">HomeCare AI</h1>
+        <p class="brand-subtitle">AI 기반 방문진료 전주기 통합지원 시스템</p>
+      </div>
+    </div>
+    <div class="outer-header__modes">
+      <button class="mode-btn active" id="btn-proto" onclick="switchMode('proto')">
+        <span class="mode-btn__label">UI 프로토타입</span>
+        <span class="mode-btn__sub">7화면 전체 플로우</span>
+      </button>
+      <button class="mode-btn" id="btn-live" onclick="switchMode('live')">
+        <span class="mode-btn__label">AI 라이브 데모</span>
+        <span class="mode-btn__sub">LLM API 실시간 연동</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CANVAS ===== -->
+  <main class="canvas">
+
+    <!-- PHONE FRAME -->
+    <div class="phone-frame">
+      <div class="phone-status-bar">
+        <span class="status-time">9:41</span>
+        <span class="status-app" id="status-app-name">HomeCare AI</span>
+        <span class="status-battery">🔋 85%</span>
+      </div>
+
+      <!-- SCREENS CONTAINER -->
+      <div class="screens-container">
+
+        <!-- ============ SCREEN: DASHBOARD ============ -->
+        <div class="screen active" id="screen-dashboard">
+          <div class="screen-scroll">
+            <div class="dashboard-header">
+              <div>
+                <p class="dashboard-date">2026년 3월 5일 목요일</p>
+                <h2 class="dashboard-title">오늘의 방문 일정</h2>
+              </div>
+              <div class="dashboard-badge">3건</div>
+            </div>
+
+            <!-- Patient Cards -->
+            <div class="patient-list">
+
+              <div class="patient-card" id="card-0" onclick="selectPatient(0)">
+                <div class="patient-card__header">
+                  <div>
+                    <h3 class="patient-name">김영수</h3>
+                    <span class="patient-meta">남 · 78세</span>
+                  </div>
+                  <div class="patient-time">
+                    <span class="time-badge">09:00</span>
+                    <span class="risk-dot risk-high"></span>
+                  </div>
+                </div>
+                <p class="patient-address">📍 서울 강남구 역삼동 123-4 (거동 제한)</p>
+                <div class="patient-tags">
+                  <span class="tag tag--disease">제2형 당뇨</span>
+                  <span class="tag tag--disease">고혈압</span>
+                  <span class="tag tag--disease">만성신장질환 3기</span>
+                  <span class="tag tag--disease">골관절염</span>
+                </div>
+                <div class="patient-stats">
+                  <span>약물 8개</span>
+                  <span class="stat-dot">·</span>
+                  <span>Frailty 18/50</span>
+                  <span class="stat-dot">·</span>
+                  <span>K-MMSE 25/30</span>
+                </div>
+              </div>
+
+              <div class="patient-card" id="card-1" onclick="selectPatient(1)">
+                <div class="patient-card__header">
+                  <div>
+                    <h3 class="patient-name">이순자</h3>
+                    <span class="patient-meta">여 · 82세</span>
+                  </div>
+                  <div class="patient-time">
+                    <span class="time-badge">11:30</span>
+                    <span class="risk-dot risk-medium"></span>
+                  </div>
+                </div>
+                <p class="patient-address">📍 서울 관악구 봉천동 456-7</p>
+                <div class="patient-tags">
+                  <span class="tag tag--disease">심부전</span>
+                  <span class="tag tag--disease">골다공증</span>
+                  <span class="tag tag--disease">우울증</span>
+                </div>
+                <div class="patient-stats">
+                  <span>약물 5개</span>
+                  <span class="stat-dot">·</span>
+                  <span>Frailty 22/50</span>
+                  <span class="stat-dot">·</span>
+                  <span>PHQ-9: 11</span>
+                </div>
+              </div>
+
+              <div class="patient-card" id="card-2" onclick="selectPatient(2)">
+                <div class="patient-card__header">
+                  <div>
+                    <h3 class="patient-name">박철호</h3>
+                    <span class="patient-meta">남 · 71세</span>
+                  </div>
+                  <div class="patient-time">
+                    <span class="time-badge">14:00</span>
+                    <span class="risk-dot risk-low"></span>
+                  </div>
+                </div>
+                <p class="patient-address">📍 서울 송파구 문정동 789-1</p>
+                <div class="patient-tags">
+                  <span class="tag tag--disease">COPD</span>
+                  <span class="tag tag--disease">고지혈증</span>
+                </div>
+                <div class="patient-stats">
+                  <span>약물 4개</span>
+                  <span class="stat-dot">·</span>
+                  <span>Frailty 10/50</span>
+                  <span class="stat-dot">·</span>
+                  <span>K-MMSE 28/30</span>
+                </div>
+              </div>
+
+            </div><!-- /patient-list -->
+
+            <div class="dashboard-footer">
+              <div class="stat-card">
+                <span class="stat-card__num">3</span>
+                <span class="stat-card__label">오늘 예약</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card__num stat-high">1</span>
+                <span class="stat-card__label">고위험 환자</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card__num">2</span>
+                <span class="stat-card__label">완료 예정</span>
+              </div>
+            </div>
+
+          </div><!-- /screen-scroll -->
+        </div><!-- /screen-dashboard -->
+
+
+        <!-- ============ SCREEN: STAGE 1 — 방문 전 ============ -->
+        <div class="screen" id="screen-stage1">
+          <!-- Stage Tabs -->
+          <div class="stage-tabs">
+            <button class="stage-tab active" onclick="goToStage(1)">Stage 1: 방문 전</button>
+            <button class="stage-tab" onclick="goToStage(2)">Stage 2: 방문 시</button>
+            <button class="stage-tab" onclick="goToStage(3)">Stage 3: 방문 후</button>
+          </div>
+
+          <div class="screen-scroll">
+            <!-- Patient Info Card -->
+            <div class="patient-info-card" id="s1-patient-card"></div>
+
+            <!-- Generate Briefing Button -->
+            <div id="briefing-section">
+              <button class="primary-btn gradient-btn" id="btn-generate-briefing" onclick="generateBriefing()">
+                ✨ AI 환자 브리핑 생성
+              </button>
+            </div>
+
+            <!-- Briefing Result (hidden initially) -->
+            <div id="briefing-result" class="hidden">
+              <div class="briefing-card">
+                <h4 class="briefing-card__title">🤖 AI 분석 요약</h4>
+                <div id="briefing-content"></div>
+              </div>
+
+              <div class="observe-card">
+                <h4 class="observe-card__title">🔍 AI 권장 관찰항목</h4>
+                <div class="observe-tags" id="observe-tags"></div>
+              </div>
+
+              <div class="prep-card">
+                <h4 class="prep-card__title">📦 방문 준비 리스트</h4>
+                <div id="prep-content"></div>
+              </div>
+
+              <button class="primary-btn" id="btn-start-visit" onclick="startVisit()">
+                방문 시작 →
+              </button>
+            </div>
+
+          </div><!-- /screen-scroll -->
+        </div><!-- /screen-stage1 -->
+
+
+        <!-- ============ SCREEN: STAGE 2 — 방문 시 (문진) ============ -->
+        <div class="screen" id="screen-stage2">
+          <div class="stage-tabs">
+            <button class="stage-tab" onclick="goToStage(1)">Stage 1: 방문 전</button>
+            <button class="stage-tab active" onclick="goToStage(2)">Stage 2: 방문 시</button>
+            <button class="stage-tab" onclick="goToStage(3)">Stage 3: 방문 후</button>
+          </div>
+
+          <div class="screen-scroll">
+            <!-- Frailty Index -->
+            <div class="frailty-bar-wrap">
+              <div class="frailty-info">
+                <span class="frailty-label">이전 Frailty Index</span>
+                <div class="frailty-score"><span class="frailty-num" id="frailty-num">18</span><span
+                    class="frailty-denom">/50</span></div>
+              </div>
+              <span class="frailty-badge" id="frailty-badge">경도 노쇠</span>
+            </div>
+
+            <!-- Interview Tabs (horizontally scrollable) -->
+            <div class="interview-tabs" id="interview-tabs">
+              <button class="itab active" data-tab="0" onclick="switchInterviewTab(0)">🎙️<br />녹음</button>
+              <button class="itab" data-tab="1" onclick="switchInterviewTab(1)">📋<br />병력</button>
+              <button class="itab" data-tab="2" onclick="switchInterviewTab(2)">⚠️<br />낙상</button>
+              <button class="itab" data-tab="3" onclick="switchInterviewTab(3)">💊<br />다약제</button>
+              <button class="itab" data-tab="4" onclick="switchInterviewTab(4)">🏠<br />ADL</button>
+              <button class="itab" data-tab="5" onclick="switchInterviewTab(5)">🥗<br />영양</button>
+              <button class="itab" data-tab="6" onclick="switchInterviewTab(6)">😔<br />우울</button>
+              <button class="itab" data-tab="7" onclick="switchInterviewTab(7)">🧠<br />인지</button>
+              <button class="itab" data-tab="8" onclick="switchInterviewTab(8)">📷<br />사진</button>
+            </div>
+
+            <!-- Interview Content Panels -->
+
+            <!-- ===== TAB 0: 대화 녹음 ===== -->
+            <div class="interview-panel" id="itab-0">
+              <div class="panel-header">
+                <h4>🎙️ #0: 대화 녹음 · STT 분석</h4>
+                <span class="panel-score">자동 문진 채우기</span>
+              </div>
+
+              <!-- Recording controls -->
+              <div class="rec-controls">
+                <div class="rec-status-wrap">
+                  <div class="rec-indicator" id="rec-indicator"></div>
+                  <span class="rec-status-txt" id="rec-status-txt">녹음 대기 중</span>
+                  <span class="rec-timer" id="rec-timer">00:00</span>
+                </div>
+                <div class="rec-btn-row">
+                  <button class="rec-start-btn" id="rec-start-btn" onclick="startRecording()">🎙️ 녹음 시작</button>
+                  <button class="rec-stop-btn hidden" id="rec-stop-btn" onclick="stopRecording()">⏹ 중지</button>
+                  <button class="rec-pause-btn hidden" id="rec-pause-btn" onclick="togglePause()">⏸ 일시정지</button>
+                </div>
+              </div>
+
+              <!-- Realtime transcript -->
+              <div class="transcript-box">
+                <div class="transcript-header">
+                  <span class="transcript-label">🗒️ 실시간 텍스트 변환</span>
+                  <span class="transcript-lang">한국어</span>
+                </div>
+                <div class="transcript-body" id="transcript-body">
+                  <span class="transcript-placeholder">녹음을 시작하면 대화 내용이 여기에 실시간으로 변환됩니다.</span>
+                </div>
+              </div>
+
+              <!-- Key checklist for recording tab -->
+              <div class="rec-checklist-wrap">
+                <div class="rec-checklist-title">📌 방문 중 주요 확인 항목</div>
+                <div class="rec-checklist" id="rec-checklist">
+                  <span class="no-recs">시작 버튼을 누르면 환자별 확인 항목이 표시됩니다.</span>
+                </div>
+              </div>
+
+              <!-- AI analysis trigger -->
+              <div id="rec-analyze-section" class="hidden">
+                <button class="primary-btn gradient-btn" id="btn-analyze-transcript" onclick="analyzeTranscript()">
+                  🤖 대화 내용 AI 분석 · 자동 문진 체크
+                </button>
+              </div>
+
+              <!-- Analysis result -->
+              <div id="rec-analysis-result" class="hidden">
+                <div class="analysis-result-card">
+                  <div class="analysis-result-title">✅ AI 분석 완료 — 자동 체크된 항목</div>
+                  <div id="analysis-checked-items"></div>
+                  <p class="analysis-note">해당 항목들이 각 문진 탭에 자동으로 반영되었습니다. 탭을 널러 확인하세요.</p>
+                </div>
+              </div>
+
+              <!-- Saved recordings -->
+              <div class="saved-recs" id="saved-recs">
+                <div class="saved-recs-title">💾 저장된 녹음</div>
+                <div class="saved-recs-list" id="saved-recs-list">
+                  <span class="no-recs">저장된 녹음이 없습니다.</span>
+                </div>
+              </div>
+
+              <div class="nav-btns">
+                <button class="primary-btn" onclick="switchInterviewTab(1)">다음 영역 →</button>
+              </div>
+            </div>
+
+            <!-- ===== TAB 1: 병력 ===== -->
+            <div class="interview-panel hidden" id="itab-1">
+              <div class="panel-header">
+                <h4>📋 #1: 병력 평가</h4>
+                <span class="panel-score">배점: 20점</span>
+              </div>
+              <div class="qa-list">
+                <div class="qa-item">
+                  <span class="qa-q">고혈압 진단 여부</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q1-0-yes" onclick="answerYN(1,0,'yes')">예</button>
+                    <button class="yn-btn selected" id="q1-0-no" onclick="answerYN(1,0,'no')">아니오</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">당뇨병 진단 여부</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q1-1-yes" onclick="answerYN(1,1,'yes')">예</button>
+                    <button class="yn-btn selected" id="q1-1-no" onclick="answerYN(1,1,'no')">아니오</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">만성신장질환 여부</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q1-2-yes" onclick="answerYN(1,2,'yes')">예</button>
+                    <button class="yn-btn selected" id="q1-2-no" onclick="answerYN(1,2,'no')">아니오</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">골관절염 여부</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q1-3-yes" onclick="answerYN(1,3,'yes')">예</button>
+                    <button class="yn-btn selected" id="q1-3-no" onclick="answerYN(1,3,'no')">아니오</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">뇌졸중 병력</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q1-4-yes" onclick="answerYN(1,4,'yes')">예</button>
+                    <button class="yn-btn selected" id="q1-4-no" onclick="answerYN(1,4,'no')">아니오</button>
+                  </div>
+                </div>
+              </div>
+              <div class="nav-btns">
+                <button class="secondary-btn" onclick="switchInterviewTab(0)">← 이전 영역</button>
+                <button class="primary-btn" onclick="switchInterviewTab(2)">다음 영역 →</button>
+              </div>
+            </div>
+
+            <!-- ===== TAB 2: 낙상 ===== -->
+            <div class="interview-panel hidden" id="itab-2">
+              <div class="panel-header">
+                <h4>⚠️ #2: 낙상 평가</h4>
+                <span class="panel-score">배점: 1점</span>
+              </div>
+              <div class="qa-list">
+                <div class="qa-item">
+                  <span class="qa-q">최근 1년 내 낙상 경험</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q2-0-yes" onclick="answerYN(2,0,'yes')">예</button>
+                    <button class="yn-btn selected" id="q2-0-no" onclick="answerYN(2,0,'no')">아니오</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">낙상 공포감 (외출 꺼림)</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn selected" id="q2-1-yes" onclick="answerYN(2,1,'yes')">예</button>
+                    <button class="yn-btn" id="q2-1-no" onclick="answerYN(2,1,'no')">아니오</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">보행 보조기구 사용</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q2-2-yes" onclick="answerYN(2,2,'yes')">예</button>
+                    <button class="yn-btn selected" id="q2-2-no" onclick="answerYN(2,2,'no')">아니오</button>
+                  </div>
+                </div>
+              </div>
+              <div class="nav-btns">
+                <button class="secondary-btn" onclick="switchInterviewTab(1)">← 이전 영역</button>
+                <button class="primary-btn" onclick="switchInterviewTab(3)">다음 영역 →</button>
+              </div>
+            </div>
+
+            <!-- ===== TAB 3: 다약제 ===== -->
+            <div class="interview-panel hidden" id="itab-3">
+              <div class="panel-header">
+                <h4>💊 #3: 다약제 평가</h4>
+                <span class="panel-score">배점: 5점</span>
+              </div>
+              <div class="qa-list">
+                <div class="qa-item">
+                  <span class="qa-q">복용 약물 5개 이상</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn selected" id="q3p-0-yes" onclick="answerYN(3,0,'yes')">예</button>
+                    <button class="yn-btn" id="q3p-0-no" onclick="answerYN(3,0,'no')">아니오</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">약물 부작용 경험</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q3p-1-yes" onclick="answerYN(3,1,'yes')">예</button>
+                    <button class="yn-btn selected" id="q3p-1-no" onclick="answerYN(3,1,'no')">아니오</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">자의적 약물 중단 경험</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q3p-2-yes" onclick="answerYN(3,2,'yes')">예</button>
+                    <button class="yn-btn selected" id="q3p-2-no" onclick="answerYN(3,2,'no')">아니오</button>
+                  </div>
+                </div>
+              </div>
+              <div class="drug-alert-box">
+                <div class="drug-alert-title">⚠️ Beers Criteria 경고 약물</div>
+                <div class="drug-item drug-red">🔴 클로르페니라민: 강한 항콜린 작용 → 2세대 전환 권고</div>
+                <div class="drug-item drug-orange">🟠 로라제팜 + 낙상 고위험: BZD 낙상위험 2배 → 비약물 수면관리</div>
+                <div class="drug-item drug-yellow">🟡 글리메피리드 + eGFR 38: 저혈당 위험 → 용량 감량 검토</div>
+              </div>
+
+              <!-- Prescription photo upload -->
+              <div class="rx-upload-section">
+                <div class="rx-upload-header">
+                  <span class="rx-upload-icon">📝</span>
+                  <span class="rx-upload-title">처삼전 · 복용독 사진 등록</span>
+                </div>
+                <div class="rx-upload-area" onclick="document.getElementById('rx-file-input').click()">
+                  <div class="rx-upload-icon-lg">📸</div>
+                  <p class="rx-upload-text">처삼전 또는 약 포장을 촬영하세요</p>
+                  <p class="rx-upload-sub">복용독, 라벨, 약 포장 등 어떤 형태도 가능</p>
+                  <input type="file" id="rx-file-input" accept="image/*" capture="environment" multiple
+                    style="display:none" onchange="handleRxUpload(event)" />
+                </div>
+                <div class="rx-preview-grid" id="rx-preview-grid"></div>
+              </div>
+
+              <div class="nav-btns">
+                <button class="secondary-btn" onclick="switchInterviewTab(2)">← 이전 영역</button>
+                <button class="primary-btn" onclick="switchInterviewTab(4)">다음 영역 →</button>
+              </div>
+            </div>
+
+            <!-- ===== TAB 4: ADL/IADL ===== -->
+            <div class="interview-panel hidden" id="itab-4">
+              <div class="panel-header">
+                <h4>🏠 #4: ADL/IADL 평가</h4>
+                <span class="panel-score">배점: 10점</span>
+              </div>
+              <div class="qa-list">
+                <div class="qa-item">
+                  <span class="qa-q">식사 (독립적)</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn selected" id="q4a-0-yes" onclick="answerYN(4,0,'yes')">가능</button>
+                    <button class="yn-btn" id="q4a-0-no" onclick="answerYN(4,0,'no')">불가능</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">이동 (실내)</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn selected" id="q4a-1-yes" onclick="answerYN(4,1,'yes')">가능</button>
+                    <button class="yn-btn" id="q4a-1-no" onclick="answerYN(4,1,'no')">불가능</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">화장실 이용</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn selected" id="q4a-2-yes" onclick="answerYN(4,2,'yes')">가능</button>
+                    <button class="yn-btn" id="q4a-2-no" onclick="answerYN(4,2,'no')">불가능</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">약 복용 관리 (독립)</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q4a-3-yes" onclick="answerYN(4,3,'yes')">가능</button>
+                    <button class="yn-btn selected" id="q4a-3-no" onclick="answerYN(4,3,'no')">불가능</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">외출/대중교통 이용</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q4a-4-yes" onclick="answerYN(4,4,'yes')">가능</button>
+                    <button class="yn-btn selected" id="q4a-4-no" onclick="answerYN(4,4,'no')">불가능</button>
+                  </div>
+                </div>
+              </div>
+              <div class="nav-btns">
+                <button class="secondary-btn" onclick="switchInterviewTab(3)">← 이전 영역</button>
+                <button class="primary-btn" onclick="switchInterviewTab(5)">다음 영역 →</button>
+              </div>
+            </div>
+
+            <!-- ===== TAB 5: 영양 ===== -->
+            <div class="interview-panel hidden" id="itab-5">
+              <div class="panel-header">
+                <h4>🥗 #5: 영양 평가</h4>
+                <span class="panel-score">배점: 5점</span>
+              </div>
+              <div class="qa-list">
+                <div class="qa-item">
+                  <span class="qa-q">최근 3개월 내 체중 감소 (≥3kg)</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q5n-0-yes" onclick="answerYN(5,0,'yes')">예</button>
+                    <button class="yn-btn selected" id="q5n-0-no" onclick="answerYN(5,0,'no')">아니오</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">식욕부진 또는 식사량 현저히 감소</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn selected" id="q5n-1-yes" onclick="answerYN(5,1,'yes')">예</button>
+                    <button class="yn-btn" id="q5n-1-no" onclick="answerYN(5,1,'no')">아니오</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">씹기/삼키기 어려움</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q5n-2-yes" onclick="answerYN(5,2,'yes')">예</button>
+                    <button class="yn-btn selected" id="q5n-2-no" onclick="answerYN(5,2,'no')">아니오</button>
+                  </div>
+                </div>
+              </div>
+              <div class="nav-btns">
+                <button class="secondary-btn" onclick="switchInterviewTab(4)">← 이전 영역</button>
+                <button class="primary-btn" onclick="switchInterviewTab(6)">다음 영역 →</button>
+              </div>
+            </div>
+
+            <!-- ===== TAB 6: 우울 ===== -->
+            <div class="interview-panel hidden" id="itab-6">
+              <div class="panel-header">
+                <h4>😔 #6: 우울 평가 (PHQ-9)</h4>
+                <span class="panel-score">배점: 27점</span>
+              </div>
+              <div class="score-compare">
+                <div class="score-box">
+                  <span class="score-label">이전 (1개월 전)</span>
+                  <span class="score-val">6점</span>
+                </div>
+                <div class="score-arrow">→</div>
+                <div class="score-box score-box--current">
+                  <span class="score-label">현재</span>
+                  <span class="score-val score-worse" id="phq9-score">8점</span>
+                </div>
+                <div class="score-trend score-trend--worse">↑ 악화</div>
+              </div>
+              <div class="qa-list">
+                <div class="qa-item">
+                  <span class="qa-q">흥미/즐거움 상실</span>
+                  <div class="scale-btns" id="phq-0">
+                    <button class="scale-btn" onclick="setScale('phq',0,0)">전혀</button>
+                    <button class="scale-btn selected" onclick="setScale('phq',0,1)">며칠</button>
+                    <button class="scale-btn" onclick="setScale('phq',0,2)">절반</button>
+                    <button class="scale-btn" onclick="setScale('phq',0,3)">거의매일</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">우울·무기력 느낌</span>
+                  <div class="scale-btns" id="phq-1">
+                    <button class="scale-btn" onclick="setScale('phq',1,0)">전혀</button>
+                    <button class="scale-btn selected" onclick="setScale('phq',1,1)">며칠</button>
+                    <button class="scale-btn" onclick="setScale('phq',1,2)">절반</button>
+                    <button class="scale-btn" onclick="setScale('phq',1,3)">거의매일</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">수면 문제</span>
+                  <div class="scale-btns" id="phq-2">
+                    <button class="scale-btn" onclick="setScale('phq',2,0)">전혀</button>
+                    <button class="scale-btn" onclick="setScale('phq',2,1)">며칠</button>
+                    <button class="scale-btn selected" onclick="setScale('phq',2,2)">절반</button>
+                    <button class="scale-btn" onclick="setScale('phq',2,3)">거의매일</button>
+                  </div>
+                </div>
+              </div>
+              <div class="nav-btns">
+                <button class="secondary-btn" onclick="switchInterviewTab(5)">← 이전 영역</button>
+                <button class="primary-btn" onclick="switchInterviewTab(7)">다음 영역 →</button>
+              </div>
+            </div>
+
+            <!-- ===== TAB 7: 인지 ===== -->
+            <div class="interview-panel hidden" id="itab-7">
+              <div class="panel-header">
+                <h4>🧠 #7: 인지 평가 (K-MMSE)</h4>
+                <span class="panel-score">배점: 30점</span>
+              </div>
+              <div class="score-compare">
+                <div class="score-box">
+                  <span class="score-label">이전 (3개월 전)</span>
+                  <span class="score-val">27점</span>
+                </div>
+                <div class="score-arrow">→</div>
+                <div class="score-box score-box--current">
+                  <span class="score-label">현재</span>
+                  <span class="score-val score-worse" id="mmse-score">25점</span>
+                </div>
+                <div class="score-trend score-trend--worse">↓ 감소</div>
+              </div>
+              <div class="qa-list">
+                <div class="qa-item">
+                  <span class="qa-q">지남력: 오늘 날짜는?</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn selected" id="q7m-0-yes" onclick="answerYN(7,0,'yes')">정답</button>
+                    <button class="yn-btn" id="q7m-0-no" onclick="answerYN(7,0,'no')">오답</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">기억력: 사과·연필·차 기억</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn selected" id="q7m-1-yes" onclick="answerYN(7,1,'yes')">2개 이상</button>
+                    <button class="yn-btn" id="q7m-1-no" onclick="answerYN(7,1,'no')">1개 이하</button>
+                  </div>
+                </div>
+                <div class="qa-item">
+                  <span class="qa-q">계산: 100-7 연속 계산</span>
+                  <div class="yn-btns">
+                    <button class="yn-btn" id="q7m-2-yes" onclick="answerYN(7,2,'yes')">3개 이상</button>
+                    <button class="yn-btn selected" id="q7m-2-no" onclick="answerYN(7,2,'no')">2개 이하</button>
+                  </div>
+                </div>
+              </div>
+              <div class="nav-btns">
+                <button class="secondary-btn" onclick="switchInterviewTab(6)">← 이전 영역</button>
+                <button class="primary-btn" onclick="switchInterviewTab(8)">사진 촬영 →</button>
+              </div>
+            </div>
+
+            <!-- ===== TAB 8: 사진 촬영 ===== -->
+            <div class="interview-panel hidden" id="itab-8">
+              <div class="panel-header">
+                <h4>📷 #8: 사진 촬영 · AI 피부 분석</h4>
+                <span class="panel-score">환부 · 거주환경</span>
+              </div>
+
+              <div class="photo-upload-area" id="photo-upload-area"
+                onclick="document.getElementById('photo-file-input').click()">
+                <div class="photo-upload-icon">📷</div>
+                <p class="photo-upload-text">클릭하여 사진 촬영 또는 파일 선택</p>
+                <p class="photo-upload-sub">환부, 피부 상태, 거주환경 등</p>
+                <input type="file" id="photo-file-input" accept="image/*" capture="environment" multiple
+                  style="display:none" onchange="handlePhotoUpload(event)" />
+              </div>
+
+              <div class="photo-category-btns">
+                <button class="photo-cat-btn active" id="pcat-wound" onclick="selectPhotoCategory('wound')">🩹
+                  환부</button>
+                <button class="photo-cat-btn" id="pcat-skin" onclick="selectPhotoCategory('skin')">🔬 피부</button>
+                <button class="photo-cat-btn" id="pcat-env" onclick="selectPhotoCategory('env')">🏠 거주환경</button>
+                <button class="photo-cat-btn" id="pcat-other" onclick="selectPhotoCategory('other')">📌 기타</button>
+              </div>
+
+              <!-- Photo previews -->
+              <div class="photo-previews" id="photo-previews"></div>
+
+              <!-- AI Skin Analysis Result -->
+              <div id="skin-analysis-result" class="hidden">
+                <div class="skin-analysis-card">
+                  <div class="skin-analysis-header">
+                    <span class="skin-analysis-icon">🔬</span>
+                    <span class="skin-analysis-title">AI 피부 분석 결과</span>
+                    <span class="skin-analysis-badge" id="skin-severity-badge">분석 중</span>
+                  </div>
+                  <div class="skin-analysis-body" id="skin-analysis-body"></div>
+                </div>
+              </div>
+
+              <div class="nav-btns">
+                <button class="secondary-btn" onclick="switchInterviewTab(7)">← 이전 영역</button>
+                <button class="primary-btn" onclick="proceedToVitals()">활력징후 측정 →</button>
+              </div>
+            </div>
+
+          </div><!-- /screen-scroll -->
+        </div><!-- /screen-stage2 -->
+
+
+        <!-- ============ SCREEN: VITALS ============ -->
+        <div class="screen" id="screen-vitals">
+          <div class="stage-tabs">
+            <button class="stage-tab" onclick="goToStage(1)">Stage 1: 방문 전</button>
+            <button class="stage-tab active" onclick="goToStage(2)">Stage 2: 방문 시</button>
+            <button class="stage-tab" onclick="goToStage(3)">Stage 3: 방문 후</button>
+          </div>
+          <div class="screen-scroll">
+            <div class="section-header">
+              <h3>🩺 활력징후 측정</h3>
+              <button class="ble-btn" onclick="simulateBLE()">📡 BLE 연동</button>
+            </div>
+
+            <div class="vitals-grid">
+              <div class="vital-item" id="vital-bp">
+                <div class="vital-icon">💓</div>
+                <div class="vital-label">혈압 (mmHg)</div>
+                <div class="vital-inputs">
+                  <input type="number" class="vital-input" id="bp-sys" placeholder="수축기" value="148" />
+                  <span>/</span>
+                  <input type="number" class="vital-input" id="bp-dia" placeholder="이완기" value="92" />
+                </div>
+                <div class="vital-alert vital-alert--warn" id="bp-alert">⚠️ 고혈압 기준 초과</div>
+              </div>
+
+              <div class="vital-item" id="vital-hr">
+                <div class="vital-icon">❤️</div>
+                <div class="vital-label">맥박 (bpm)</div>
+                <input type="number" class="vital-input vital-input--single" id="hr-val" placeholder="맥박" value="78" />
+              </div>
+
+              <div class="vital-item" id="vital-temp">
+                <div class="vital-icon">🌡️</div>
+                <div class="vital-label">체온 (°C)</div>
+                <input type="number" class="vital-input vital-input--single" id="temp-val" placeholder="체온" value="36.5"
+                  step="0.1" />
+              </div>
+
+              <div class="vital-item" id="vital-spo2">
+                <div class="vital-icon">🫧</div>
+                <div class="vital-label">SpO₂ (%)</div>
+                <input type="number" class="vital-input vital-input--single" id="spo2-val" placeholder="산소포화도"
+                  value="97" />
+              </div>
+
+              <div class="vital-item" id="vital-glu">
+                <div class="vital-icon">🩸</div>
+                <div class="vital-label">혈당 (mg/dL)</div>
+                <input type="number" class="vital-input vital-input--single" id="glu-val" placeholder="혈당"
+                  value="185" />
+                <div class="vital-alert vital-alert--danger" id="glu-alert">🔴 공복혈당 기준 초과 — 당뇨 관리 점검 필요</div>
+              </div>
+
+              <div class="vital-item" id="vital-weight">
+                <div class="vital-icon">⚖️</div>
+                <div class="vital-label">체중 (kg)</div>
+                <input type="number" class="vital-input vital-input--single" id="weight-val" placeholder="체중"
+                  value="68.2" step="0.1" />
+              </div>
+            </div>
+
+            <div class="nav-btns" style="margin-top:1rem">
+              <button class="secondary-btn" onclick="showScreen('screen-stage2')">← 문진으로</button>
+              <button class="primary-btn" onclick="goToStage(3)">SOAP 생성 →</button>
+            </div>
+
+          </div>
+        </div><!-- /screen-vitals -->
+
+
+        <!-- ============ SCREEN: STAGE 3 — 방문 후 ============ -->
+        <div class="screen" id="screen-stage3">
+          <div class="stage-tabs">
+            <button class="stage-tab" onclick="goToStage(1)">Stage 1: 방문 전</button>
+            <button class="stage-tab" onclick="goToStage(2)">Stage 2: 방문 시</button>
+            <button class="stage-tab active">Stage 3: 방문 후</button>
+          </div>
+          <div class="screen-scroll">
+            <div id="soap-generate-section">
+              <div class="soap-intro">
+                <div class="soap-intro__icon">🤖</div>
+                <h3 class="soap-intro__title">AI SOAP 진료기록 생성</h3>
+                <p class="soap-intro__desc">방문 중 수집된 모든 데이터를 기반으로<br />표준 SOAP 형식의 진료기록을 자동 생성합니다.</p>
+                <button class="primary-btn gradient-btn" id="btn-generate-soap" onclick="generateSOAP()">
+                  ✨ SOAP 기록 생성
+                </button>
+              </div>
+            </div>
+
+            <!-- Stage 3 severity header (injected by JS after SOAP generation) -->
+            <div id="stage3-severity-header" class="hidden"></div>
+
+            <div id="soap-result" class="hidden">
+              <div class="soap-card">
+                <div class="soap-section">
+                  <div class="soap-section__label soap-s">S — Subjective</div>
+                  <div class="soap-section__content" id="soap-s"></div>
+                </div>
+                <div class="soap-section">
+                  <div class="soap-section__label soap-o">O — Objective</div>
+                  <div class="soap-section__content" id="soap-o"></div>
+                </div>
+                <div class="soap-section">
+                  <div class="soap-section__label soap-a">A — Assessment</div>
+                  <div class="soap-section__content" id="soap-a"></div>
+                </div>
+                <div class="soap-section">
+                  <div class="soap-section__label soap-p">P — Plan</div>
+                  <div class="soap-section__content" id="soap-p"></div>
+                </div>
+              </div>
+              <div class="soap-actions">
+                <button class="action-btn" onclick="copySOAP()">📋 복사</button>
+                <button class="action-btn" onclick="saveSOAP()">💾 저장</button>
+                <button class="primary-btn" onclick="finishVisit()">방문 완료 ✓</button>
+              </div>
+            </div>
+
+          </div>
+        </div><!-- /screen-stage3 -->
+
+
+        <!-- ============ SCREEN: LIVE DEMO ============ -->
+        <div class="screen" id="screen-live">
+          <div class="screen-scroll live-demo-screen">
+            <div class="live-logo">🏥</div>
+            <h2 class="live-title">HomeCare AI</h2>
+            <p class="live-subtitle">Live Demo — LLM API 실시간 연동</p>
+
+            <div class="model-selector">
+              <button class="model-btn active" id="model-claude" onclick="selectModel('claude')">
+                <span class="model-icon">🟠</span>
+                <strong>Claude Sonnet 4.5</strong>
+              </button>
+              <button class="model-btn" id="model-gpt" onclick="selectModel('gpt')">
+                <span class="model-icon">🤖</span>
+                <strong>OpenAI GPT-4o</strong>
+              </button>
+            </div>
+
+            <div class="api-key-box">
+              <label class="api-label" id="api-label">Claude Sonnet 4.5 API Key</label>
+              <input type="password" class="api-input" id="api-key-input" placeholder="sk-ant-api03-..." />
+            </div>
+
+            <button class="primary-btn" id="btn-start-live" onclick="startLiveDemo()">
+              Claude Sonnet 4.5로 시작하기
+            </button>
+            <p class="api-notice">API 키는 브라우저에서 직접 서버로 전송되며<br />별도로 저장되지 않습니다</p>
+
+            <div id="live-chat" class="hidden">
+              <div class="chat-messages" id="chat-messages"></div>
+              <div class="chat-input-row">
+                <input type="text" class="chat-input" id="chat-input" placeholder="환자 정보를 입력하거나 질문하세요..."
+                  onkeydown="handleChatKey(event)" />
+                <button class="send-btn" onclick="sendChat()">전송</button>
+              </div>
+            </div>
+          </div>
+        </div><!-- /screen-live -->
+
+
+      </div><!-- /screens-container -->
+
+      <!-- BOTTOM NAV -->
+      <nav class="bottom-nav" id="bottom-nav">
+        <button class="bnav-btn active" id="bnav-home" onclick="navTo('dashboard')">
+          <span class="bnav-icon">🏠</span>
+          <span class="bnav-label">홈</span>
+        </button>
+        <button class="bnav-btn" id="bnav-interview" onclick="navTo('interview')">
+          <span class="bnav-icon">📋</span>
+          <span class="bnav-label">문진</span>
+        </button>
+        <button class="bnav-btn" id="bnav-records" onclick="navTo('records')">
+          <span class="bnav-icon">📄</span>
+          <span class="bnav-label">기록</span>
+        </button>
+        <button class="bnav-btn" id="bnav-settings" onclick="navTo('settings')">
+          <span class="bnav-icon">⚙️</span>
+          <span class="bnav-label">설정</span>
+        </button>
+      </nav>
+
+    </div><!-- /phone-frame -->
+
+  </main>
+
+  <!-- ===== OUTER FOOTER ===== -->
+  <footer class="outer-footer">
+    2026 바이오·의료 기술사업화 지원사업 — C51 · 업티어 · 고대 안암병원
+  </footer>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
