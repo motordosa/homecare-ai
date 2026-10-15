@@ -1,0 +1,15 @@
+# Free demo only. No paid disk, database, or additional service is provisioned.
+services:
+  - type: web
+    name: homecare-ai-demo
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /tmp/homecare-data

@@ -1,0 +1,13 @@
+services:
+  homecare:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      DATA_DIR: /app/data
+    volumes:
+      - homecare-data:/app/data
+    restart: unless-stopped
+volumes:
+  homecare-data:
