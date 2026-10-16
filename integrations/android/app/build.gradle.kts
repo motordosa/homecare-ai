@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "ai.homecare.connector"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "ai.homecare.connector"

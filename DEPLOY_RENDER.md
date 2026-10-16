@@ -20,7 +20,7 @@
 
 사진 분석은 기본 비활성입니다. Render의 서버 환경 변수에 `HOMECARE_VISION_API_KEY`와 `VISION_ENABLED=true`, `VISION_MODEL=gpt-4.1-mini`를 설정해야 실제 외부 분석을 사용할 수 있습니다. 키를 Git이나 채팅에 넣지 마세요. AI API 비용은 Render 무료 요금과 별개입니다. 설정 후 `/api/capabilities`의 vision.available을 확인하고 합성/동의된 검증 사진으로 결과를 대조합니다. 제공자 키 없는 상태의 fixture 테스트는 실제 정확도 검증이 아닙니다.
 
-건강 연동은 Android 연결 앱을 별도 빌드·설치하고 Health Connect/삼성 헬스 공유·실기기 권한 검증을 거쳐야 합니다. 서버 수신 API가 있다는 것만으로 폰/워치 자동 기록이 완료되지 않습니다. [연결 앱 지침](integrations/android/README.md)을 참고하세요.
+건강 연동은 빌드한 Android 연결 앱을 설치하고 Health Connect/삼성 헬스 공유·실기기 권한 검증을 거쳐야 합니다. 소스에서 재빌드하는 방법과 실제 APK·lint 빌드 결과는 [연결 앱 지침](integrations/android/README.md)을 참고하세요. 서버 수신 API·APK 빌드만으로 폰/워치 자동 기록이 완료되지 않습니다.
 
 ## 계정 연결 및 생성
 

@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
         }
         setContentView(scroll)
         text("HomeCare 건강 연결", 26f)
-        text("개발용 기본 구현 · Android 빌드/실기기 미검증", 17f)
+        text("개발용 연결 앱 · 실기기 자동 연동 미검증", 17f)
         text("공개 데모에 실제 환자·연구 자료를 연결하지 마세요. 승인된 테스트 기기와 검증 서버에서만 사용하세요. 응급·실시간 모니터링 기능이 아닙니다.")
         text("갤럭시 워치 → 삼성 헬스 → Health Connect 공유를 먼저 설정하세요. 워치가 없어도 폰에서 제공하는 걸음 자료는 확인할 수 있지만, 수면 기록이 자동으로 생기지는 않습니다.")
 

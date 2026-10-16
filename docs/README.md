@@ -11,6 +11,7 @@
 | [DEVELOPMENT_PROCESS.md](DEVELOPMENT_PROCESS.md) | 기획 변경→계약 변경→개발→검증→배포 절차 |
 | [CHANGELOG.md](CHANGELOG.md) | 의사결정, 구현/미구현, 검증/미검증 기록 |
 | [ANDROID_CONNECTOR.md](ANDROID_CONNECTOR.md) | Android·갤럭시 워치 우선 연결 경로와 실기기 완료 기준 |
+| [DEMO_ACCEPTANCE.md](DEMO_ACCEPTANCE.md) | 배포 후 메뉴·복약·사진·Android를 직접 확인하는 순서 |
 | `generated/VARIABLES.md` | 코드에서 생성하는 파일별 선언·매개변수·위치 목록 |
 | `generated/SCHEMA.md` | 임시 DB에서 생성하는 실제 테이블·컬럼·FK/제약 기준 |
 

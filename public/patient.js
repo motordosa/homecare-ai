@@ -56,7 +56,7 @@
   }
 
   function clearConnectionToken() {
-    $("#connection-token-value").textContent = "";
+    for (const id of ["connection-token-value", "connection-server-origin", "connection-patient-name", "connection-patient-id"]) $(`#${id}`).textContent = "";
     $("#connection-token").hidden = true;
   }
 
@@ -621,8 +621,13 @@
     try {
       const result = await api(`/api/patients/${encodeURIComponent(patientId)}/health-connections`, { method: "POST", body: JSON.stringify(payload) });
       if (patientId !== state.patientId || state.view !== "connections" || requestId !== state.connectionRequestId) return;
-      $("#connection-token-value").textContent = result.token || "";
-      $("#connection-token").hidden = !result.token;
+      const patient = state.summary?.patient;
+      if (!result.token || result.connection?.patientId !== patientId || patient?.id !== patientId) throw new Error("환자와 연결 정보를 확인하지 못했어요. 다시 시도해 주세요.");
+      $("#connection-server-origin").textContent = location.origin;
+      $("#connection-patient-name").textContent = patient.name;
+      $("#connection-patient-id").textContent = patientId;
+      $("#connection-token-value").textContent = result.token;
+      $("#connection-token").hidden = false;
       await loadConnections();
       toast("테스트 연결을 준비했어요. 자동 수집이 시작된 것은 아니에요.");
     } catch (error) {

@@ -4,6 +4,8 @@
 
 사용자가 제공한 배포 주소: [시작 화면](https://homecare-ai-demo.onrender.com) · [환자 모바일 화면](https://homecare-ai-demo.onrender.com/patient?patientId=p001) · [의료진 데스크톱 화면](https://homecare-ai-demo.onrender.com/clinician?patientId=p001). 무료 서버의 데이터 보존 조건과 점검 방법은 [배포 안내](DEPLOY_RENDER.md)에 있습니다.
 
+새 버전 반영 후 [직접 사용·인수 확인 순서](docs/DEMO_ACCEPTANCE.md)로 메뉴, 약별 복약, 사진 분석과 Android 연결을 차례로 확인할 수 있습니다.
+
 ## 실행
 
 Node.js **24.x**가 필요합니다. 런타임 외의 설치 의존성은 없습니다.
@@ -44,7 +46,7 @@ npm start
 | 식사 사진 AI | 실제 제공자 어댑터·분석 초안·환자 섭취 확인·출처 저장 | 서버 API 키/활성화, 실제 사진 정확도 검증 |
 | 약 사진 보조 | 약봉투/포장 OCR 후보·의료진 대조 확인 | 알약 외형 확정·자동 처방·복용 증명 기능 아님 |
 | 건강 자료 수신 | 연결 토큰·일별 집계·수정/중복 방지·출처별 표시 | 실제 네이티브 앱·권한·기기 검증 |
-| Android·갤럭시 워치 | [연결 앱 기초 코드](integrations/android/README.md), Health Connect 경로 | APK 빌드·설치·삼성 헬스 공유·실기기 검증은 별도 |
+| Android·갤럭시 워치 | [연결 앱과 실제 APK 빌드 결과](integrations/android/README.md), Health Connect 경로 | 설치·삼성 헬스 공유·권한·실기기 검증은 별도 |
 
 기존 개요의 복약 점수는 **일일 자기보고**입니다. 새 약별 일정·회차는 **복약 계획/복약 기록**에서 별도로 확인합니다. 레거시 참고 메모에서 약과 용량을 자동 생성하지 않습니다.
 

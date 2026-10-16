@@ -232,7 +232,17 @@ try {
     await desktop.locator('#modal [data-modal-action=close]').last().click();
   });
 
-  await check('health connection stays in native-program preparation state and its one-time token disappears on navigation', async () => {
+  await check('health connection shows the exact server and patient identity and clears its one-time credentials on dismissal and navigation', async () => {
+    const privateFields = ['connection-token-value', 'connection-server-origin', 'connection-patient-name', 'connection-patient-id'];
+    const assertConnectionIdentity = async () => {
+      assert.equal(await mobile.locator('#connection-server-origin').textContent(), base);
+      assert.equal(await mobile.locator('#connection-patient-name').textContent(), patient.name);
+      assert.equal(await mobile.locator('#connection-patient-id').textContent(), patient.id);
+    };
+    const assertCredentialsCleared = async () => {
+      await assertHidden(mobile.locator('#connection-token'));
+      for (const id of privateFields) assert.equal(await mobile.locator(`#${id}`).textContent(), '', id);
+    };
     await patientPage(mobile, patient.id, '&view=connections');
     await mobile.locator('#connection-list .empty-state-card').waitFor({ state: 'visible' });
     assert.ok((await mobile.locator('#view-connections .connection-help').innerText()).includes('직접 읽지 않아요'));
@@ -242,22 +252,28 @@ try {
     await mobile.locator('#connection-token').waitFor({ state: 'visible' });
     const token = await mobile.locator('#connection-token-value').innerText();
     assert.ok(token.length > 30);
+    await assertConnectionIdentity();
     assert.equal(await mobile.evaluate(value => Object.values(localStorage).some(item => item.includes(value)), token), false);
     assert.ok((await mobile.locator('#connection-list').innerText()).includes('연결 프로그램 대기'));
     const connections = await get(`/api/patients/${patient.id}/health-connections`);
     assert.equal(connections.webDirectCollection, false);
     assert.equal(connections.nativeBridge.verified, false);
     assert.ok(!JSON.stringify(connections).includes(token));
+    await mobile.locator('#connection-token-dismiss').click();
+    await assertCredentialsCleared();
+    await mobile.locator('#connection-create').click();
+    await mobile.locator('#connection-token').waitFor({ state: 'visible' });
+    await assertConnectionIdentity();
     await mobile.locator('.bottom-nav [data-view=guide]').click();
-    assert.equal(await mobile.locator('#connection-token-value').textContent(), '');
+    await assertCredentialsCleared();
     await mobile.goBack();
     await mobile.locator('#view-connections').waitFor({ state: 'visible' });
-    await mobile.locator('#connection-list [data-action=revoke-connection]').waitFor({ state: 'visible' });
-    await assertHidden(mobile.locator('#connection-token'));
+    await mobile.locator('#connection-list [data-action=revoke-connection]').first().waitFor({ state: 'visible' });
+    await assertCredentialsCleared();
     mobile.once('dialog', dialog => dialog.accept());
-    await mobile.locator('#connection-list [data-action=revoke-connection]').click();
+    await mobile.locator('#connection-list [data-action=revoke-connection]').first().click();
     await mobile.locator('.connection-status.revoked').waitFor({ state: 'visible' });
-    assert.equal(await mobile.locator('#connection-token-value').textContent(), '');
+    await assertCredentialsCleared();
   });
 
   await check('unconfigured photo AI offers a working manual meal path and makes no analysis request', async () => {

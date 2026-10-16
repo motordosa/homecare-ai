@@ -9,7 +9,7 @@
 ## 첫 연결 앱 범위
 
 - Android native Kotlin, Health Connect 읽기 권한과 별도 background 권한(지원 기기에서만), WorkManager의 OS가 허용하는 실행.
-- 웹에서 발급받은 연결 token과 HTTPS 서버 origin을 앱에 입력한다. token을 Android Keystore 암호화 저장하며 로그/백업/분석 도구에 보내지 않는다. 서버 origin은 HTTPS만 허용하고 로그인 없는 데모에 실제 연구 자료를 연결하지 않는다.
+- 웹의 일회성 연결 안내에 표시된 HTTPS 서버 origin, 환자 이름/ID를 확인하고 origin·patientId·token을 앱에 입력한다. 환자 이름이나 전체 웹 URL을 ID 대신 입력하지 않는다. token을 Android Keystore 암호화 저장하며 로그/백업/분석 도구에 보내지 않는다. 서버 origin은 HTTPS만 허용하고 로그인 없는 데모에 실제 연구 자료를 연결하지 않는다.
 - 연결 시 **이 휴대폰 건강자료의 주체가 선택 환자인지** 확인한다. 보호자 폰의 걸음 수를 환자에게 전송하지 않는다.
 - 최초 동의 후 최근7일을 수동 동기화한다. 백그라운드는 최근7일 재집계로 수정/삭제를 반영한다. 일별 수정 시각은 재집계 시각을 쓰고 batchId는 전송 재시도 동안 유지한다.
 - StepsRecord.COUNT_TOTAL 등 플랫폼 집계를 우선 사용하고 폰/워치 원자료를 단순 합산하지 않는다. 수면은 실제 수면 분으로 정의한다. 세션 시작~끝/침대시간을 수면으로 대체하지 않는다. 단계가 없거나 의미를 확정할 수 없으면 null과 설명을 유지한다.
@@ -19,6 +19,8 @@
 - 전송은 HTTPS + Authorization Bearer. 401은 연결 만료/폐기 안내, 409는 batch 충돌 점검, 네트워크 오류는 같은 batch 재전송. 영구 오류를 무한 재시도하지 않는다.
 
 ## 완료 기준
+
+빌드 기준 변경: 실제 배포된 Health Connect 1.1.0 AAR metadata가 compileSdk 36 이상을 요구한다. 초기 SDK35/AGP8.9.2 조합은 metadata 검사에서 실패했으므로, 검사 우회 없이 compileSdk36·AGP8.10.1·Gradle8.11.1·JDK17로 검증한다. targetSdk35/minSdk28은 유지한다. 컴파일 도구 변경은 지원 기기·실제 동기화 검증 완료를 의미하지 않는다. 개발용 debug 서명키는 저장소 밖 도구 디렉터리에 두고 release 서명·배포와 구별한다.
 
 1. 코드를 저장하는 것과 Android 빌드 성공을 구별한다. 실제 SDK/Gradle/서명 환경이 없으면 빌드 미실행으로 기록한다.
 2. APK 설치·Health Connect 제공자 설치/업데이트·삼성 헬스 공유를 실제 대상 기종에서 확인한다.
