@@ -31,6 +31,7 @@
 | includesSteps / includesSleep | Android가 허용받아 읽은 항목 여부 | false 항목은 JSON 키 생략, true+null은 조회 후 자료 없음 |
 | dialogBaseline / medicationBaseline | UI 입력 원본과 현재값 비교 | 사용자가 바꾼 입력만 dirty. 미저장 이동 취소 시 값/초안 보존 |
 | patient screen registry | 화면ID/제목/종류/닫기 목적지 | SCREEN_SPEC와 HTML/하단 메뉴/브라우저 검증에 대응 |
+| historyMode / restoreRoute | 의료진 기록 갱신 방식 / URL 복원 | push는 사용자 이동, replace는 정규화·조회. 복원 시 요청 세대 무효화·환자/날짜 일치 확인 |
 
 ## 환경 변수
 

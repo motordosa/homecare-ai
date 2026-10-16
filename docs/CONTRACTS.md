@@ -12,6 +12,8 @@
 
 ## 일일 기록 / 메뉴
 
+의료진 방문 기록은 SCREEN_SPEC C-SHELL/NAV-05 기준이다. 사용자 이동(push)과 조회 갱신(replace)을 구별하며 popstate는 같은 화면·환자·복약 날짜를 복원한다. URL 복원은 조회만 수행하며 저장 API를 호출하지 않는다.
+
 환자 화면의 상단·하단·닫기·미저장/저장 중·역할 전환 계약은 SCREEN_SPEC.md가 기준이다. 단일 화면 registry와 브라우저 검증을 연결한다. 일반 서브 X는 같은 환자 홈, 입력 X는 진입 화면이며 우상단 위치를 의료진 전환으로 재사용하지 않는다.
 
 `POST /api/patients/:id/daily`는 부분 갱신이다. 활동 모드는 `{date,steps}`, 수면 모드는 `{date,sleepHours}`, 기존 일일 복약 모드는 `{date,medicationStatus}`만 보낸다. 전체 폼도 미입력 식욕·기분을 `normal`로 만들지 않는다. 직접 보고한 unknown과 미응답 null을 구별한다. 입력하지 않은 필드를 전송하지 않는다.

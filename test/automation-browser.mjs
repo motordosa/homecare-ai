@@ -103,6 +103,96 @@ try {
   const [patient, otherPatient] = patients;
   await mkdir('test-results', { recursive: true });
 
+  async function clinicianRoute(page, view, id, date = null) {
+    await page.waitForFunction(({ view, id, date }) => {
+      const url = new URL(location.href);
+      return url.pathname === '/clinician' && (url.searchParams.get('view') || 'overview') === view
+        && (!id || url.searchParams.get('patientId') === id)
+        && (!date || url.searchParams.get('medicationDate') === date)
+        && document.querySelector('#main-nav [aria-current="page"]')?.dataset.view === view;
+    }, { view, id, date });
+    await flushUi(page);
+  }
+  await check('clinician menus preserve real Back/Forward history from the landing page without refresh duplicates', async () => {
+    const page = await newPage();
+    await page.clock.install();
+    await page.goto(base);
+    await page.locator('.portal.clinician').click(); await ready(page);
+    const id = new URL(page.url()).searchParams.get('patientId');
+    const views = ['overview', 'patients', 'medications', 'records', 'settings'];
+    for (const view of views.slice(1)) {
+      await page.locator(`#main-nav [data-view="${view}"]`).click();
+      await clinicianRoute(page, view, id);
+    }
+    const length = await page.evaluate(() => history.length);
+    await page.locator('#main-nav [data-view="settings"]').click();
+    await page.locator('#refresh-button').click();
+    await page.waitForFunction(() => !document.querySelector('#refresh-button').disabled);
+    assert.equal(await page.evaluate(() => history.length), length);
+    const autoRefresh = page.waitForResponse(r => r.url() === `${base}/api/dashboard`);
+    await page.clock.fastForward(20_001); await autoRefresh;
+    await page.waitForFunction(() => !document.querySelector('#refresh-button').disabled);
+    assert.equal(await page.evaluate(() => history.length), length);
+    await page.goBack(); await clinicianRoute(page, 'records', id);
+    assert.equal(await page.locator('#page-title').innerText(), '건강 기록');
+    assert.equal(await page.locator('#record-patient').inputValue(), id);
+    await page.goForward(); await clinicianRoute(page, 'settings', id);
+    for (const view of [...views.slice(0, -1)].reverse()) {
+      await page.goBack(); await clinicianRoute(page, view, id);
+    }
+    await page.goBack(); assert.equal(new URL(page.url()).pathname, '/');
+    await page.close();
+  });
+  await check('clinician Back/Forward restores selected patients and medication dates, including reload and direct URL', async () => {
+    const page = await newPage();
+    await page.goto(`${base}/clinician?patientId=${patient.id}&view=records`); await ready(page);
+    await page.locator('#record-patient').selectOption(otherPatient.id);
+    await clinicianRoute(page, 'records', otherPatient.id);
+    await page.waitForFunction(name => document.querySelector('#app-content').textContent.includes(name), otherPatient.name);
+    await page.goBack(); await clinicianRoute(page, 'records', patient.id);
+    await page.waitForFunction(name => document.querySelector('#app-content').textContent.includes(name), patient.name);
+    assert.equal(await page.locator('#record-patient').inputValue(), patient.id);
+    await page.goForward(); await clinicianRoute(page, 'records', otherPatient.id);
+    await page.locator('#main-nav [data-view="medications"]').click();
+    await page.locator('#medication-date').waitFor();
+    const previous = new Date(Date.parse(`${today}T12:00:00+09:00`) - 86400000).toISOString().slice(0, 10);
+    await page.locator('#medication-date').fill(previous);
+    await clinicianRoute(page, 'medications', otherPatient.id, previous);
+    await page.locator('#main-nav [data-view="settings"]').click();
+    await page.goBack(); await clinicianRoute(page, 'medications', otherPatient.id, previous);
+    assert.equal(await page.locator('#medication-date').inputValue(), previous);
+    await page.goBack(); await clinicianRoute(page, 'medications', otherPatient.id, today);
+    assert.equal(await page.locator('#medication-date').inputValue(), today);
+    await page.goForward(); await clinicianRoute(page, 'medications', otherPatient.id, previous);
+    await page.reload(); await ready(page);
+    await clinicianRoute(page, 'medications', otherPatient.id, previous);
+    assert.equal(await page.locator('#medication-date').inputValue(), previous);
+    await page.close();
+  });
+  await check('clinician Back invalidates a delayed patient selection response and preserves the restored route', async () => {
+    const page = await newPage();
+    await page.goto(`${base}/clinician?patientId=${patient.id}&view=records`); await ready(page);
+    let release;
+    const gate = new Promise(resolve => { release = resolve; });
+    let intercepted = false;
+    await page.route(`**/api/patients/${otherPatient.id}/summary`, async route => {
+      intercepted = true;
+      await gate;
+      await route.continue();
+    });
+    await page.locator('#record-patient').selectOption(otherPatient.id);
+    await until(() => intercepted, 'delayed clinician patient request');
+    await page.goBack(); await clinicianRoute(page, 'records', patient.id);
+    await page.locator('#record-patient').waitFor();
+    const response = page.waitForResponse(r => r.url() === `${base}/api/patients/${otherPatient.id}/summary`);
+    release(); await response; await flushUi(page);
+    await clinicianRoute(page, 'records', patient.id);
+    assert.equal(await page.locator('#record-patient').inputValue(), patient.id);
+    assert.equal(await page.locator('#app-content').getByRole('heading', {name: `${patient.name} 님의 건강 기록`}).count(), 1);
+    assert.equal(await page.locator('#app-content').getByRole('heading', {name: `${otherPatient.name} 님의 건강 기록`}).count(), 0);
+    await page.close();
+  });
+
   await check('every patient subpage uses the same upper-right close control and role switching is confined to the guide', async () => {
     for (const width of [320, 390]) {
       await mobile.setViewportSize({ width, height: 844 });

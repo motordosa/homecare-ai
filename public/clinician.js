@@ -58,7 +58,7 @@
   };
   if(!/^\d{4}-\d{2}-\d{2}$/.test(state.medicationDate||''))state.medicationDate=null;
   const urlView = new URLSearchParams(location.search).get('view');
-  if (viewTitles[urlView]) state.view = urlView;
+  if (Object.hasOwn(viewTitles,urlView)) state.view = urlView;
   const $ = selector => document.querySelector(selector);
   document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon); });
   async function api(path, options = {}) {
@@ -67,13 +67,34 @@
     if (!response.ok) throw new Error(result.error || result.message || `요청을 처리하지 못했습니다. (${response.status})`);
     return result;
   }
-  function syncUrl() {
+  function syncUrl(historyMode = 'replace') {
     const url = new URL(location.href);
     if (state.selectedId) url.searchParams.set('patientId',state.selectedId); else url.searchParams.delete('patientId');
     if (state.view === 'overview') url.searchParams.delete('view'); else url.searchParams.set('view',state.view);
     if(state.view==='medications' && medDate())url.searchParams.set('medicationDate',medDate());else url.searchParams.delete('medicationDate');
-    history.replaceState(null,'',url);
+    if(url.href!==location.href)history[historyMode==='push'?'pushState':'replaceState'](null,'',url);
   }
+  function focusPage() {
+    $('#page-title').focus({preventScroll:true});
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+  function restoreRoute() {
+    const params=new URLSearchParams(location.search);
+    const view=params.get('view'),patientId=params.get('patientId'),date=params.get('medicationDate');
+    state.view=Object.hasOwn(viewTitles,view)?view:'overview';
+    state.medicationDate=/^\d{4}-\d{2}-\d{2}$/.test(date||'')?date:state.data?.today||null;
+    ++state.selectionRequest;++state.medicationRequest;
+    state.medications=null;state.medicationLoading=false;state.medicationError='';
+    $('#app-content').removeAttribute('aria-busy');
+    if(state.modal)closeModal();
+    const selected=state.data?.patients.some(p=>p.id===patientId)?patientId:state.data?.patients[0]?.id||null;
+    if(selected!==state.selectedId)state.summary=null;
+    state.selectedId=selected;
+    render();focusPage();
+    if(selected && !state.summary)selectPatient(selected,false,{historyMode:'replace'});
+    else if(state.view==='medications' && selected)loadMedications();
+  }
+  window.addEventListener('popstate',restoreRoute);
   function showError(message) { $('#global-error').textContent=message; $('#global-error').hidden=!message; }
   let toastTimer;
   function toast(message, error = false) { const el=$('#toast');el.textContent=message;el.hidden=false;el.classList.toggle('error',error);clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.hidden=true;},4000); }
@@ -91,9 +112,9 @@
       state.data=data;
       if(!data.patients.some(p=>p.id===state.selectedId)) state.selectedId=[...data.patients].sort((a,b)=>({high:0,watch:1,stable:2,insufficient:3}[a.risk?.level]??3)-({high:0,watch:1,stable:2,insufficient:3}[b.risk?.level]??3))[0]?.id || null;
       if(state.selectedId) {
-        const selected=state.selectedId;
+        const selected=state.selectedId,request=state.selectionRequest;
         const summary=await api(`/api/patients/${encodeURIComponent(selected)}/summary`);
-        if(state.selectedId===selected) state.summary=summary;
+        if(state.selectedId===selected && request===state.selectionRequest) state.summary=summary;
       } else state.summary=null;
       if(!state.medicationDate)state.medicationDate=data.today;
       if(state.view==='medications' && state.selectedId)await loadMedications({renderAfter:false});
@@ -108,13 +129,15 @@
     } catch(error) { showError(`기록을 불러오지 못했어요. ${error.message} 새로고침으로 다시 시도해 주세요.`);$('#loading-state').hidden=true; }
     finally { state.refreshBusy=false;$('#refresh-button').disabled=false; }
   }
-  async function selectPatient(id, changeView = false) {
+  async function selectPatient(id, changeView = false, {historyMode='push'} = {}) {
     if(!state.data?.patients.some(p=>p.id===id)) return;
-    const previousId=state.selectedId;
     state.selectedId=id;
+    state.summary=null;state.medications=null;
+    ++state.medicationRequest;
     const request=++state.selectionRequest;
     $('#app-content').setAttribute('aria-busy','true');
     if(changeView) state.view='patients';
+    showError('');render(historyMode);
     try {
       const summary=await api(`/api/patients/${encodeURIComponent(id)}/summary`);
       if(request!==state.selectionRequest || state.selectedId!==id) return;
@@ -122,7 +145,7 @@
       if(state.view==='medications')await loadMedications({renderAfter:false});
       if(request!==state.selectionRequest || state.selectedId!==id)return;
       render();
-    } catch(error) { if(request===state.selectionRequest)state.selectedId=previousId;toast(error.message,true); }
+    } catch(error) { if(request===state.selectionRequest){showError(`선택 환자의 기록을 불러오지 못했습니다. ${error.message} 새로고침으로 다시 시도해 주세요.`);render();toast(error.message,true);} }
     finally { if(request===state.selectionRequest)$('#app-content').removeAttribute('aria-busy'); }
   }
   function spark(values,color='#80b7a7',width=76,height=25) {
@@ -401,18 +424,20 @@
     finally {modal.saving=false;if(submit.isConnected)submit.disabled=false;}
   }
 
-  function render() {
+  function render(historyMode = 'replace') {
     if(!state.data)return;
     const [eyebrow,title,subtitle,breadcrumb]=viewTitles[state.view];
     $('#page-eyebrow').textContent=eyebrow;$('#page-title').textContent=title;$('#page-subtitle').textContent=subtitle;$('#view-breadcrumb').textContent=breadcrumb;
     document.querySelectorAll('#main-nav [data-view]').forEach(btn=>{const active=btn.dataset.view===state.view;btn.classList.toggle('active',active);if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');});
     const inputFocused=document.activeElement?.id==='patient-search';const cursor=inputFocused?document.activeElement.selectionStart:null;
-    $('#app-content').innerHTML=({overview,patients:patientsView,records:recordsView,medications:medicationsView,settings:settingsView}[state.view])();
+    $('#app-content').innerHTML=state.selectedId && !state.summary && state.view!=='settings'
+      ? ($('#global-error').hidden ? '<div class="loading-state"><span class="spinner"></span><b>선택 환자의 기록을 확인하고 있어요</b></div>' : '<div class="compact-empty">선택 환자의 기록을 확인할 수 없습니다. 상단 새로고침으로 다시 시도해 주세요.</div>')
+      : ({overview,patients:patientsView,records:recordsView,medications:medicationsView,settings:settingsView}[state.view])();
     if(inputFocused&&$('#patient-search')){$('#patient-search').focus();$('#patient-search').setSelectionRange(cursor,cursor);}
     const patientLink=$('.patient-site-link');if(patientLink)patientLink.href=state.selectedId?`/patient?patientId=${encodeURIComponent(state.selectedId)}`:'/patient';
-    syncUrl();
+    syncUrl(historyMode);
   }
-  function changeView(view) { if(!viewTitles[view])return;state.view=view;render();if(view==='medications')loadMedications();window.scrollTo({top:0,behavior:'instant'}); }
+  function changeView(view) { if(!Object.hasOwn(viewTitles,view))return;state.view=view;render('push');if(view==='medications')loadMedications();focusPage(); }
   function closeModal() {
     state.photoAbort?.abort();state.photoAbort=null;state.photoGeneration++;
     $('#modal-backdrop').hidden=true;$('#modal').innerHTML='';$('#modal').classList.remove('medication-modal');state.modal=null;document.body.style.overflow='';if(state.lastFocus?.isConnected)state.lastFocus.focus();
@@ -469,7 +494,7 @@
   $('#app-content').addEventListener('input',event=>{
     if(event.target.id==='patient-search') {state.search=event.target.value;$('#patient-table-body').innerHTML=patientRows(state.view==='patients');$('#patient-count-label').textContent=`전체 ${state.data.patients.length}명 중 ${filteredPatients().length}명 표시`;}
   });
-  $('#app-content').addEventListener('change',event=>{if(['record-patient','medication-patient'].includes(event.target.id))selectPatient(event.target.value);if(event.target.id==='medication-date' && /^\d{4}-\d{2}-\d{2}$/.test(event.target.value)){state.medicationDate=event.target.value;state.medications=null;render();loadMedications();}});
+  $('#app-content').addEventListener('change',event=>{if(['record-patient','medication-patient'].includes(event.target.id))selectPatient(event.target.value);if(event.target.id==='medication-date' && /^\d{4}-\d{2}-\d{2}$/.test(event.target.value)){state.medicationDate=event.target.value;state.medications=null;render('push');loadMedications();focusPage();}});
   $('#modal-backdrop').addEventListener('click',event=>{if(event.target===$('#modal-backdrop')||event.target.closest('[data-modal-action="close"]'))closeModal();});
   $('#modal').addEventListener('submit',submitModal);
   $('#modal').addEventListener('submit',submitMedicationModal);
