@@ -1,6 +1,6 @@
 {
   "name": "homecare-ai-demo",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "HomeCare AI patient mobile web and clinician dashboard demo with a persistent SQLite database",
   "type": "module",
@@ -12,9 +12,14 @@
     "dev": "node --watch --disable-warning=ExperimentalWarning server.mjs",
     "test": "node --disable-warning=ExperimentalWarning --test test/*.test.mjs",
     "test:browser": "node test/browser.mjs",
-    "db:reset": "node --disable-warning=ExperimentalWarning lib/reset.mjs"
+    "db:reset": "node --disable-warning=ExperimentalWarning lib/reset.mjs",
+    "demo:check": "node scripts/check-deployment.mjs",
+    "docs:variables": "node scripts/generate-variable-docs.mjs && node --disable-warning=ExperimentalWarning scripts/generate-schema-docs.mjs",
+    "docs:check": "node scripts/generate-variable-docs.mjs --check && node --disable-warning=ExperimentalWarning scripts/generate-schema-docs.mjs --check",
+    "test:automation": "node test/automation-browser.mjs"
   },
   "devDependencies": {
+    "acorn": "8.15.0",
     "playwright": "1.62.1"
   }
 }

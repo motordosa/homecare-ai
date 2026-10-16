@@ -7,3 +7,10 @@ test-results/
 playwright-report/
 *.log
 .DS_Store
+integrations/android/.gradle/
+integrations/android/**/build/
+integrations/android/local.properties
+*.jks
+*.keystore
+*.apk
+*.aab

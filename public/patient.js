@@ -3,8 +3,11 @@
 (() => {
   const $ = (selector, scope = document) => scope.querySelector(selector);
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
-  const state = { patients: [], patientId: null, summary: null, view: "home", metric: "steps", imageData: null, loading: false, saving: null, photoLoading: false, requestId: 0, dateRequestId: 0, photoRequestId: 0 };
-  const labels = { meal: { breakfast: "아침", lunch: "점심", dinner: "저녁", snack: "간식" }, food: { balanced: "밥과 반찬", porridge: "죽·부드러운 식사", protein: "고기·생선·두부", noodles: "면·빵" }, medication: { taken: "모두 복용", partial: "일부 복용", missed: "미복용", unknown: "확인 전" }, appetite: { good: "좋음", normal: "보통", poor: "적음" }, mood: { good: "좋음", normal: "보통", poor: "가라앉음" } };
+  const views = ["home", "records", "medication", "connections", "guide"];
+  const metrics = ["steps", "sleepHours", "proteinGrams"];
+  const dailyModes = { all: { title: "건강 기록 남기기", fields: ["steps", "sleepHours", "weightKg", "medicationStatus", "appetite", "mood", "note"], hint: "입력하거나 바꾼 항목만 저장해요. 답하지 않은 항목은 미보고로 남아요." }, steps: { title: "걸음 수 기록하기", fields: ["steps"], hint: "이 날짜의 걸음 수만 저장해요. 수면이나 복약 기록은 바뀌지 않아요." }, sleep: { title: "수면 시간 기록하기", fields: ["sleepHours"], hint: "이 날짜의 수면 시간만 저장해요. 활동이나 복약 기록은 바뀌지 않아요." } };
+  const state = { patients: [], patientId: null, summary: null, view: "home", metric: "steps", section: null, imageData: null, loading: false, saving: null, photoLoading: false, requestId: 0, dateRequestId: 0, photoRequestId: 0, dailyMode: "all", dailyBaseline: {}, capabilities: null, analysis: null, analysisBusy: false, analysisRequestId: 0, medicationDate: null, medicationSchedule: null, todayMedication: null, medicationRequestId: 0, medicationBusy: false, connectionRequestId: 0, connections: null, connectionBusy: false };
+  const labels = { meal: { breakfast: "아침", lunch: "점심", dinner: "저녁", snack: "간식" }, food: { balanced: "밥과 반찬", porridge: "죽·부드러운 식사", protein: "고기·생선·두부", noodles: "면·빵" }, medication: { taken: "모두 복용", partial: "일부 복용", missed: "미복용", unknown: "기억나지 않음" }, appetite: { good: "좋음", normal: "보통", poor: "적음" }, mood: { good: "좋음", normal: "보통", poor: "가라앉음" } };
   const icons = {
     steps: '<path d="M10 3 7 7l1 5-3 7m3-7 5 2 2 7m-3-12 3 3h5"/><circle cx="14" cy="4" r="2"/>',
     sleep: '<path d="M20 14a8 8 0 0 1-10-10 9 9 0 1 0 10 10z"/>',
@@ -25,7 +28,7 @@
 
   async function api(path, options = {}) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
+    const timeout = setTimeout(() => controller.abort(), path.endsWith("/photo-analyses") ? 65000 : 20000);
     try {
       const response = await fetch(path, { ...options, headers: { "Content-Type": "application/json", ...(options.headers || {}) }, signal: controller.signal });
       const payload = await response.json().catch(() => ({}));
@@ -52,28 +55,56 @@
     $("#loading-state").hidden = true;
   }
 
-  async function loadPatient(patientId, { initial = false } = {}) {
+  function clearConnectionToken() {
+    $("#connection-token-value").textContent = "";
+    $("#connection-token").hidden = true;
+  }
+
+  function invalidateAnalysis() {
+    ++state.analysisRequestId;
+    state.analysis = null;
+    state.analysisBusy = false;
+    $("#meal-analysis-review").replaceChildren();
+    $("#meal-analysis-review").hidden = true;
+    $("#meal-analysis-error").hidden = true;
+    $("#meal-manual-food").hidden = false;
+    $("#meal-analysis-consent").checked = false;
+    refreshAnalysisControls();
+  }
+
+  async function loadPatient(patientId, { initial = false, historyMode = "replace" } = {}) {
     const requestId = ++state.requestId;
+    const changed = patientId !== state.patientId;
     state.loading = true;
     $("#patient-select").disabled = true;
     $("#load-error").hidden = true;
-    if (initial || patientId !== state.patientId) {
+    if (initial || changed) {
+      ++state.medicationRequestId;
+      ++state.connectionRequestId;
+      ++state.dateRequestId;
+      invalidateAnalysis();
+      clearConnectionToken();
+      state.medicationSchedule = null;
+      state.connections = null;
+      if (!state.saving) $$("dialog[open]").forEach(dialog => dialog.close());
       $("#loading-state").hidden = false;
       $("#app-content").hidden = true;
     }
     try {
-      const summary = await api(`/api/patients/${encodeURIComponent(patientId)}/summary`);
+      const [summary, todayMedication] = await Promise.all([
+        api(`/api/patients/${encodeURIComponent(patientId)}/summary`),
+        api(`/api/patients/${encodeURIComponent(patientId)}/medication-schedule?date=${encodeURIComponent(fallbackToday())}`).catch(() => null),
+      ]);
       if (requestId !== state.requestId) return;
       state.patientId = patientId;
       state.summary = summary;
+      state.todayMedication = todayMedication;
       $("#patient-select").value = patientId;
-      const url = new URL(location.href);
-      url.searchParams.set("patientId", patientId);
-      history.replaceState({}, "", url);
       try { localStorage.setItem("homecarePatientId", patientId); } catch (_) { /* Storage is optional. */ }
       render();
       $("#loading-state").hidden = true;
       $("#app-content").hidden = false;
+      applyView({ historyMode, focus: false });
     } catch (error) {
       if (requestId === state.requestId) showError(error.message);
       throw error;
@@ -102,11 +133,21 @@
     renderRecords();
   }
 
+  function sourceLabel(source, value) {
+    if (!numeric(value)) return "미보고";
+    return ({ "patient-self-report": "직접 입력", "health-connect": "Health Connect에서 수신", "apple-health": "Apple 건강에서 수신" })[source] || "직접 입력";
+  }
+
   function renderHome(record) {
     const meals = currentMeals();
+    const schedule = state.todayMedication;
+    const scheduled = Boolean(schedule?.orders?.length);
+    const slots = schedule?.slots || [];
+    const reported = slots.filter(slot => slot.status !== "pending").length;
+    const taken = slots.filter(slot => slot.status === "taken").length;
     const tasks = [
       { label: "식사", done: meals.length > 0 },
-      { label: "복약", done: Boolean(record && record.medicationStatus && record.medicationStatus !== "unknown") },
+      { label: "복약", done: scheduled ? slots.length > 0 && reported === slots.length : Boolean(record?.medicationStatus) },
       { label: "활동", done: numeric(record?.steps) },
       { label: "수면", done: numeric(record?.sleepHours) },
     ];
@@ -117,12 +158,13 @@
     $("#task-chips").innerHTML = tasks.map((task) => `<span class="task-chip${task.done ? " done" : ""}"><span class="check-dot" aria-hidden="true">${task.done ? "✓" : ""}</span>${task.label}<span class="sr-only">${task.done ? "기록 완료" : "미기록"}</span></span>`).join("");
     const protein = meals.reduce((sum, meal) => sum + (Number(meal.proteinGrams) || 0), 0);
     const cards = [
-      { icon: "steps", label: "걸음 수", value: numeric(record?.steps) ? number(record.steps) : null, unit: "걸음", status: numeric(record?.steps) ? "직접 입력한 기록" : "오늘의 활동을 남겨요", target: "daily" },
-      { icon: "sleep", label: "수면", value: numeric(record?.sleepHours) ? number(record.sleepHours, 1) : null, unit: "시간", status: numeric(record?.sleepHours) ? "직접 입력한 기록" : "어젯밤 얼마나 주무셨나요?", target: "daily" },
-      { icon: "medication", label: "복약", value: record?.medicationStatus ? labels.medication[record.medicationStatus] : null, unit: "", status: record?.medicationStatus ? "오늘의 자기보고" : "오늘의 복약을 남겨요", target: "medication" },
-      { icon: "nutrition", label: "단백질", value: meals.length ? number(protein, 1) : null, unit: "g", status: meals.length ? `식사 ${meals.length}회 · 데모 추정` : "식사를 기록하면 보여요", target: "meal" },
+      { icon: "steps", label: "걸음 수", value: numeric(record?.steps) ? number(record.steps) : null, unit: "걸음", status: numeric(record?.steps) ? sourceLabel(record.stepsSource, record.steps) : "오늘의 활동을 남겨요", target: "steps" },
+      { icon: "sleep", label: "수면", value: numeric(record?.sleepHours) ? number(record.sleepHours, 1) : null, unit: "시간", status: numeric(record?.sleepHours) ? sourceLabel(record.sleepSource, record.sleepHours) : "어젯밤 얼마나 주무셨나요?", target: "sleep" },
+      { icon: "medication", label: "복약", value: scheduled ? `${reported}/${slots.length}회 보고` : record?.medicationStatus ? labels.medication[record.medicationStatus] : null, unit: "", status: scheduled ? `${taken}회 복용 보고 · ${slots.length - reported}회 미보고` : record?.medicationStatus ? "하루 전체 자기보고" : "오늘의 복약을 남겨요", target: "medication" },
+      { icon: "nutrition", label: "단백질", value: meals.length ? number(protein, 1) : null, unit: "g", status: meals.length ? `식사 ${meals.length}회 · 데모 추정` : "식사를 기록하면 보여요", target: "nutrition" },
     ];
-    $("#today-metrics").innerHTML = cards.map((card) => `<button class="health-card" type="button" data-action="${card.target}" aria-label="${escape(card.label)} ${card.value === null ? "미기록" : escape(card.value + " " + card.unit)}. 기록하기"><span class="metric-heading">${svg(card.icon)}${card.label}</span><span class="metric-value${card.value === null ? " empty" : ""}">${card.value === null ? "아직 기록 전" : escape(card.value)}${card.value !== null && card.unit ? `<small>${card.unit}</small>` : ""}</span><span class="metric-status">${escape(card.status)}</span></button>`).join("");
+    $("#today-metrics").innerHTML = cards.map((card) => `<button class="health-card" type="button" data-action="${card.target}" aria-label="${escape(card.label)} ${card.value === null ? "미기록" : escape(card.value + " " + card.unit)}. ${card.target === "nutrition" ? "식사 기록 보기" : card.target === "medication" ? "복약 목록 보기" : "기록하기"}"><span class="metric-heading">${svg(card.icon)}${card.label}</span><span class="metric-value${card.value === null ? " empty" : ""}">${card.value === null ? "아직 기록 전" : escape(card.value)}${card.value !== null && card.unit ? `<small>${card.unit}</small>` : ""}</span><span class="metric-status">${escape(card.status)}</span></button>`).join("");
+    $("#health-source-caption").textContent = `활동: ${sourceLabel(record?.stepsSource, record?.steps)} · 수면: ${sourceLabel(record?.sleepSource, record?.sleepHours)}`;
     renderMeals($("#home-meals"), (state.summary.recentMeals || []).slice(0, 2));
   }
 
@@ -141,7 +183,7 @@
     container.innerHTML = `<div class="meal-list">${meals.map((meal) => {
       const imageUrl = safeImageUrl(meal.imageUrl);
       const portion = Number(meal.portion) === 1 ? "모두" : `${number(Number(meal.portion) * 100)}%`;
-      return `<article class="meal-item">${imageUrl ? `<img class="meal-thumb" src="${escape(imageUrl)}" alt="${escape(labels.meal[meal.mealType] || "식사")} 기록 사진" loading="lazy">` : `<span class="meal-thumb meal-placeholder" aria-hidden="true">${svg("meal")}</span>`}<div class="meal-details"><h3 class="meal-title">${escape(labels.food[meal.foodType] || "식사 기록")}</h3><p class="meal-meta">${escape(shortDate(meal.date))} · ${escape(labels.meal[meal.mealType] || meal.mealType)} · ${escape(portion)}</p></div><p class="meal-nutrition">${number(meal.calories)} <span>kcal</span><small>단백질 ${number(meal.proteinGrams, 1)}g · 추정</small></p></article>`;
+      return `<article class="meal-item">${imageUrl ? `<img class="meal-thumb" src="${escape(imageUrl)}" alt="${escape(labels.meal[meal.mealType] || "식사")} 기록 사진" loading="lazy">` : `<span class="meal-thumb meal-placeholder" aria-hidden="true">${svg("meal")}</span>`}<div class="meal-details"><h3 class="meal-title">${escape(meal.foodLabel || labels.food[meal.foodType] || "식사 기록")}</h3><p class="meal-meta">${escape(shortDate(meal.date))} · ${escape(labels.meal[meal.mealType] || meal.mealType)} · ${escape(portion)}</p></div><p class="meal-nutrition">${number(meal.calories)} <span>kcal</span><small>단백질 ${number(meal.proteinGrams, 1)}g · 추정</small><small class="record-source">${meal.source?.includes("vision") || meal.analysisId ? "AI 초안 확인 기록" : "수동 선택 예시"}</small></p></article>`;
     }).join("")}</div>`;
   }
 
@@ -151,16 +193,18 @@
     $("#daily-history").innerHTML = trends.length ? trends.map((entry) => {
       const hasDaily = entry.hasDaily || numeric(entry.steps) || numeric(entry.sleepHours) || Boolean(entry.medicationStatus);
       const values = [numeric(entry.steps) ? `${number(entry.steps)}걸음` : "활동 미기록", numeric(entry.sleepHours) ? `수면 ${number(entry.sleepHours, 1)}시간` : "수면 미기록"];
-      return `<div class="history-row"><div class="history-date"><strong>${escape(shortDate(entry.date).replace(/\.\s*$/, ""))}</strong><span>${escape(weekday(entry.date))}요일</span></div><p class="history-values">${hasDaily ? values.join("<br>") : "아직 남긴 기록이 없어요"}</p><span class="history-med${!entry.medicationStatus || entry.medicationStatus === "unknown" ? " missing" : ""}">${escape(labels.medication[entry.medicationStatus] || "복약 미기록")}</span></div>`;
+      return `<div class="history-row"><div class="history-date"><strong>${escape(shortDate(entry.date).replace(/\.\s*$/, ""))}</strong><span>${escape(weekday(entry.date))}요일</span></div><p class="history-values">${hasDaily ? values.join("<br>") : "아직 남긴 기록이 없어요"}${hasDaily ? `<small class="record-source">활동 ${escape(sourceLabel(entry.stepsSource, entry.steps))} · 수면 ${escape(sourceLabel(entry.sleepSource, entry.sleepHours))}</small>` : ""}</p><span class="history-med${!entry.medicationStatus || entry.medicationStatus === "unknown" ? " missing" : ""}">${escape(labels.medication[entry.medicationStatus] || "일일 복약 미기록")}</span><button type="button" class="history-edit text-button" data-action="edit-daily" data-date="${escape(entry.date)}" aria-label="${escape(shortDate(entry.date))} 건강 기록 수정">수정</button></div>`;
     }).join("") : '<p class="history-empty">아직 건강 기록이 없어요.</p>';
-    renderMeals($("#all-meals"), state.summary.recentMeals || []);
+    const meals = state.summary.recentMeals || [];
+    renderMeals($("#all-meals"), meals);
+    $("#meal-record-count").textContent = `최근 식사 ${meals.length}건을 보여드려요. 최대 24건까지 표시해요.`;
   }
 
   function renderChart() {
     const config = {
-      steps: { unit: "걸음", label: "걸음 수", digits: 0, note: "기록한 날의 하루 평균 걸음 수예요. 활동은 직접 입력한 값이에요." },
-      sleepHours: { unit: "시간", label: "수면 시간", digits: 1, note: "기록한 날의 하루 평균 수면 시간이에요. 수면은 직접 입력한 값이에요." },
-      proteinGrams: { unit: "g", label: "단백질", digits: 1, note: "식사를 기록한 날의 하루 평균 추정량이에요. 식사 선택·분량으로 계산한 데모 값이에요." },
+      steps: { unit: "걸음", label: "걸음 수", digits: 0, note: "기록이 있는 날의 하루 평균 걸음 수예요." },
+      sleepHours: { unit: "시간", label: "수면 시간", digits: 1, note: "기록이 있는 날의 하루 평균 수면 시간이에요." },
+      proteinGrams: { unit: "g", label: "단백질", digits: 1, note: "식사를 기록한 날의 하루 평균 영양 추정량이에요. 사진 초안 또는 직접 선택한 음식과 섭취 비율로 계산해요." },
     }[state.metric];
     const trends = [...(state.summary.trends || [])].slice(-7);
     const entries = trends.map((entry) => {
@@ -173,28 +217,74 @@
     $("#trend-unit").textContent = config.unit;
     $("#trend-description").textContent = values.length ? `기록한 ${values.length}일의 하루 평균` : "기록을 남기면 변화가 보여요";
     $("#trend-range").textContent = trends.length ? `${shortDate(trends[0].date)} – ${shortDate(trends[trends.length - 1].date)}` : "";
-    $("#chart-note").textContent = `${config.note} 빈 날은 미기록이에요.`;
+    const sourceKey = state.metric === "steps" ? "stepsSource" : "sleepSource";
+    const chartSources = state.metric === "proteinGrams" ? [] : [...new Set(entries.filter(entry => numeric(entry.value)).map(entry => sourceLabel(entry[sourceKey], entry.value)))];
+    $("#chart-note").textContent = `${config.note} ${chartSources.length ? `출처: ${chartSources.join(" / ")}. ` : ""}빈 날은 미기록이에요.`;
     const chart = $("#trend-chart");
     const max = Math.max(...values, state.metric === "sleepHours" ? 10 : 1);
     chart.innerHTML = entries.map((entry) => `<span class="chart-column${entry.value === null ? " missing" : ""}" title="${escape(shortDate(entry.date))}: ${entry.value === null ? "미기록" : escape(number(entry.value, config.digits) + config.unit)}"><span class="chart-bar" style="height:${entry.value === null ? 0 : Math.max(3, (entry.value / max) * 100)}%"></span><span class="chart-label">${entry.date === today() ? "오늘" : escape(weekday(entry.date))}</span></span>`).join("");
     chart.setAttribute("aria-label", `${config.label} 최근 7일 추이. ${entries.map((entry) => `${shortDate(entry.date)} ${entry.value === null ? "미기록" : number(entry.value, config.digits) + config.unit}`).join(", ")}`);
   }
 
-  function switchView(view) {
-    if (!["home", "records", "guide"].includes(view)) return;
-    state.view = view;
-    $$(".app-view").forEach((element) => { element.hidden = element.id !== `view-${view}`; });
-    $$(".bottom-nav [data-view]").forEach((button) => {
-      button.classList.toggle("active", button.dataset.view === view);
-      if (button.dataset.view === view) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
+  function routeFromUrl() {
+    const params = new URL(location.href).searchParams;
+    state.view = views.includes(params.get("view")) ? params.get("view") : "home";
+    state.metric = metrics.includes(params.get("metric")) ? params.get("metric") : "steps";
+    state.section = ["meals", "history", "chart"].includes(params.get("section")) ? params.get("section") : null;
+    const date = params.get("date");
+    if (date && /^\d{4}-\d{2}-\d{2}$/.test(date) && date <= today()) state.medicationDate = date;
+    else state.medicationDate = today();
+    return params.get("patientId");
+  }
+
+  function syncUrl(historyMode = "push") {
+    const url = new URL(location.href);
+    if (state.patientId) url.searchParams.set("patientId", state.patientId);
+    for (const key of ["view", "metric", "section", "date"]) url.searchParams.delete(key);
+    if (state.view !== "home") url.searchParams.set("view", state.view);
+    if (state.view === "records") {
+      url.searchParams.set("metric", state.metric);
+      if (state.section) url.searchParams.set("section", state.section);
+    }
+    if (state.view === "medication" && state.medicationDate) url.searchParams.set("date", state.medicationDate);
+    if (historyMode === "none" || url.href === location.href) return;
+    history[historyMode === "replace" ? "replaceState" : "pushState"]({}, "", url);
+  }
+
+  function applyView({ historyMode = "push", focus = true } = {}) {
+    $$(".app-view").forEach(element => { element.hidden = element.id !== `view-${state.view}`; });
+    $$(".bottom-nav [data-view]").forEach(button => {
+      const active = button.dataset.view === state.view;
+      button.classList.toggle("active", active);
+      if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
     });
-    window.scrollTo({ top: 0, behavior: "instant" });
-    $("#main-content").focus({ preventScroll: true });
+    $$(".chart-tab").forEach(tab => { const active = tab.dataset.metric === state.metric; tab.classList.toggle("active", active); tab.setAttribute("aria-pressed", String(active)); });
+    if (state.summary) renderChart();
+    syncUrl(historyMode);
+    if (state.view === "medication") loadMedicationSchedule();
+    if (state.view === "connections") loadConnections();
+    if (focus) {
+      const section = state.view === "records" ? ({ meals: "#meal-records-section", history: ".history-section", chart: ".trend-card" }[state.section]) : null;
+      const destination = section ? $(section) : $("#main-content");
+      destination.setAttribute("tabindex", "-1");
+      if (section) destination.scrollIntoView({ block: "start", behavior: "instant" }); else window.scrollTo({ top: 0, behavior: "instant" });
+      destination.focus({ preventScroll: true });
+    }
+  }
+
+  function switchView(view, { section = null, metric, historyMode = "push" } = {}) {
+    if (!views.includes(view) || state.saving) return;
+    if (view !== "connections") { clearConnectionToken(); ++state.connectionRequestId; }
+    state.view = view;
+    state.section = section;
+    if (metrics.includes(metric)) state.metric = metric;
+    applyView({ historyMode });
   }
 
   function openMeal() {
-    if (!state.summary) return;
+    if (!state.summary || state.loading || state.saving) return;
     $("#meal-form").reset();
+    invalidateAnalysis();
     $("#meal-date").value = today();
     $("#meal-date").max = today();
     const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Seoul", hour: "numeric", hourCycle: "h23" }).format(new Date()));
@@ -206,34 +296,48 @@
     $("#meal-dialog").showModal();
   }
 
+  function fieldValue(name, record) {
+    return record?.[name] ?? (name === "note" ? "" : null);
+  }
+
   function applyDailyRecord(record) {
-    for (const name of ["steps", "sleepHours", "weightKg", "note"]) $(`#daily-form [name="${name}"]`).value = record?.[name] ?? "";
-    for (const [name, fallback] of [["medicationStatus", "unknown"], ["appetite", "normal"], ["mood", "normal"]]) {
-      const input = $(`#daily-form input[name="${name}"][value="${record?.[name] || fallback}"]`);
-      if (input) input.checked = true;
+    state.dailyBaseline = {};
+    for (const name of ["steps", "sleepHours", "weightKg", "note"]) {
+      $(`#daily-form [name="${name}"]`).value = record?.[name] ?? "";
+      state.dailyBaseline[name] = fieldValue(name, record);
+    }
+    for (const name of ["medicationStatus", "appetite", "mood"]) {
+      $$(`#daily-form input[name="${name}"]`).forEach(input => { input.checked = input.value === record?.[name]; });
+      state.dailyBaseline[name] = fieldValue(name, record);
     }
   }
 
-  function openDaily(focusMedication = false) {
-    if (!state.summary) return;
+  function openDaily(mode = "all", date = today()) {
+    if (!state.summary || state.loading || state.saving || !dailyModes[mode]) return;
     ++state.dateRequestId;
+    state.dailyMode = mode;
+    $("#daily-form").dataset.mode = mode;
     $("#daily-form").reset();
+    const config = dailyModes[mode];
+    $("#daily-dialog-title").textContent = config.title;
+    $("#daily-scope-note").textContent = config.hint;
+    $$("#daily-form [data-daily-fields]").forEach(group => {
+      const names = group.dataset.dailyFields.split(" ");
+      group.hidden = !names.some(name => config.fields.includes(name)) && !(mode === "all" && names.includes("all"));
+    });
     setDailyFieldsDisabled(false);
-    $("#daily-submit").textContent = "건강 기록 저장하기";
-    $("#daily-date").value = today();
+    $("#daily-submit").textContent = mode === "steps" ? "걸음 수 저장하기" : mode === "sleep" ? "수면 시간 저장하기" : "건강 기록 저장하기";
+    $("#daily-date").value = date;
     $("#daily-date").max = today();
-    applyDailyRecord(state.summary.todayRecord);
+    applyDailyRecord(null);
     $("#daily-error").hidden = true;
     $("#daily-dialog").showModal();
-    if (focusMedication) {
-      const selected = $('#medication-fieldset input:checked');
-      selected.focus();
-      $("#medication-fieldset").scrollIntoView({ block: "nearest" });
-    }
+    selectDailyDate();
   }
 
   function clearPhoto() {
     ++state.photoRequestId;
+    invalidateAnalysis();
     state.photoLoading = false;
     state.imageData = null;
     $("#meal-photo").value = "";
@@ -241,14 +345,17 @@
     $("#photo-preview").removeAttribute("src");
     $("#photo-placeholder").hidden = false;
     $("#remove-photo").hidden = true;
-    if (state.saving !== "meal") $("#meal-submit").disabled = false;
+    refreshAnalysisControls();
   }
 
   function updateEstimate() {
     const data = new FormData($("#meal-form"));
     const portion = Number(data.get("portion"));
     const portionLabel = portion === 1 ? "모두" : portion === .5 ? "절반" : `${portion * 100}%`;
-    $("#estimate-selection").textContent = `${labels.food[data.get("foodType")]} · ${portionLabel}`;
+    const proposal = state.analysis?.proposal;
+    $("#estimate-selection").textContent = `${proposal?.foodLabel || labels.food[data.get("foodType")]} · ${portionLabel}`;
+    $("#meal-estimate-badge").textContent = proposal ? "AI 초안 · 섭취 비율 적용" : "수동 선택 · 데모 추정";
+    $("#meal-estimate-note").textContent = proposal ? `저장 시 약 ${number(proposal.calories * portion)} kcal, 단백질 ${number(proposal.proteinGrams * portion, 1)}g으로 추정해요. 실제 섭취량을 확정하지 않아요.` : "사진 분석을 사용하지 않으면 선택한 음식 유형의 예시 영양값을 저장해요.";
   }
 
   function formError(id, message) {
@@ -264,17 +371,23 @@
   }
 
   function setDailyFieldsDisabled(disabled) {
-    $$('#daily-form input:not([name="date"]), #daily-form textarea, #daily-submit').forEach((element) => { element.disabled = disabled; });
+    $$('#daily-form input:not([name="date"]), #daily-form textarea').forEach(element => { element.disabled = disabled || !dailyModes[state.dailyMode].fields.includes(element.name); });
+    $("#daily-submit").disabled = disabled;
   }
 
   async function saveMeal(event) {
     event.preventDefault();
     const button = $("#meal-submit");
-    if (button.disabled || state.saving || state.photoLoading) return;
+    if (button.disabled || state.saving || state.photoLoading || state.analysisBusy) return;
     const data = new FormData(event.currentTarget);
     const patientId = state.patientId;
     const payload = { date: data.get("date"), mealType: data.get("mealType"), foodType: data.get("foodType"), portion: Number(data.get("portion")) };
     if (state.imageData) payload.imageData = state.imageData;
+    if (state.analysis) {
+      if (!$("#meal-analysis-confirm")?.checked) { formError("#meal-error", "먹기 전 전체 음식 사진인지와 식후 실제 드신 비율을 확인한 뒤 체크해 주세요."); return; }
+      payload.analysisId = state.analysis.id;
+      payload.patientConfirmed = true;
+    }
     state.saving = "meal";
     setFormBusy("#meal-form", true);
     button.textContent = "저장하고 있어요…";
@@ -291,6 +404,7 @@
       state.saving = null;
       setFormBusy("#meal-form", false);
       button.textContent = "식사 기록 저장하기";
+      refreshAnalysisControls();
     }
   }
 
@@ -300,11 +414,13 @@
     if (button.disabled || state.saving) return;
     const data = new FormData(event.currentTarget);
     const patientId = state.patientId;
-    const payload = { date: data.get("date"), medicationStatus: data.get("medicationStatus"), appetite: data.get("appetite"), mood: data.get("mood"), note: data.get("note").trim() };
-    for (const name of ["steps", "sleepHours", "weightKg"]) {
-      const value = data.get(name).trim();
-      payload[name] = value === "" ? null : Number(value);
+    const payload = { date: data.get("date") };
+    for (const name of dailyModes[state.dailyMode].fields) {
+      const raw = data.get(name);
+      const value = ["steps", "sleepHours", "weightKg"].includes(name) ? raw === "" ? null : Number(raw) : name === "note" ? String(raw ?? "").trim() : raw;
+      if (value !== state.dailyBaseline[name] && (value !== null || ["steps", "sleepHours", "weightKg"].includes(name))) payload[name] = value;
     }
+    if (Object.keys(payload).length === 1) { toast("바뀐 항목이 없어요. 기록할 값을 입력해 주세요."); return; }
     state.saving = "daily";
     setFormBusy("#daily-form", true);
     button.textContent = "저장하고 있어요…";
@@ -320,7 +436,8 @@
     } finally {
       state.saving = null;
       setFormBusy("#daily-form", false);
-      button.textContent = "건강 기록 저장하기";
+      setDailyFieldsDisabled(false);
+      button.textContent = dailyModes[state.dailyMode].title.replace("기록하기", "저장하기").replace("남기기", "저장하기");
     }
   }
 
@@ -336,8 +453,11 @@
       const result = await api(`/api/patients/${encodeURIComponent(patientId)}/daily?date=${encodeURIComponent(date)}`);
       if (requestId !== state.dateRequestId || patientId !== state.patientId || !$("#daily-dialog").open) return;
       applyDailyRecord(result.record);
+      const effective = state.summary?.trends.find(entry => entry.date === date);
+      const automatic = [state.dailyMode === "sleep" ? "sleepHours" : "steps", ...(state.dailyMode === "all" ? ["sleepHours"] : [])].filter(name => numeric(effective?.[name]) && ["health-connect", "apple-health"].includes(effective[name === "steps" ? "stepsSource" : "sleepSource"]));
+      $("#daily-scope-note").textContent = dailyModes[state.dailyMode].hint + (automatic.length ? " 현재 건강 연결에서 받은 값이 있어요. 직접 입력한 값이 우선 표시되며, 입력값을 지우면 연결 자료로 돌아가요." : "");
       setDailyFieldsDisabled(false);
-      $("#daily-submit").textContent = "건강 기록 저장하기";
+      $("#daily-submit").textContent = state.dailyMode === "steps" ? "걸음 수 저장하기" : state.dailyMode === "sleep" ? "수면 시간 저장하기" : "건강 기록 저장하기";
     } catch (error) {
       if (requestId !== state.dateRequestId || patientId !== state.patientId || !$("#daily-dialog").open) return;
       formError("#daily-error", `${error.message} 날짜를 다시 선택해 주세요.`);
@@ -345,44 +465,264 @@
     }
   }
 
+  async function loadCapabilities() {
+    try { state.capabilities = await api("/api/capabilities"); }
+    catch (_) { state.capabilities = null; }
+    refreshAnalysisControls();
+  }
+
+  function refreshAnalysisControls() {
+    const available = state.capabilities?.vision?.available === true;
+    const ready = available && Boolean(state.imageData) && !state.photoLoading;
+    $("#meal-analysis-availability").textContent = available ? "먹기 전 전체 음식 사진으로 영양 추정 초안을 받아볼 수 있어요. 식사 뒤 실제 드신 비율을 확인해 주세요." : state.capabilities ? "현재 사진 AI가 설정되지 않았어요. 아래에서 음식 유형과 드신 양을 직접 선택해 기록할 수 있어요." : "사진 분석 상태를 확인하지 못했어요. 음식 유형을 직접 선택해 기록할 수 있어요.";
+    $("#meal-analysis-consent").disabled = !available || Boolean(state.saving);
+    $("#meal-analyze").disabled = !ready || !$("#meal-analysis-consent").checked || state.analysisBusy || Boolean(state.saving);
+    $("#meal-analyze").textContent = state.analysisBusy ? "사진을 분석하고 있어요…" : "사진 분석하기";
+    $("#meal-submit").disabled = state.photoLoading || state.analysisBusy || Boolean(state.saving) || Boolean(state.analysis && !$("#meal-analysis-confirm")?.checked);
+    if (state.summary) updateEstimate();
+  }
+
+  async function analyzeMeal() {
+    if ($("#meal-analyze").disabled || !state.imageData || !$("#meal-analysis-consent").checked || state.saving) return;
+    const requestId = ++state.analysisRequestId;
+    const patientId = state.patientId;
+    const imageData = state.imageData;
+    const date = $("#meal-date").value;
+    state.analysis = null;
+    state.analysisBusy = true;
+    $("#meal-manual-food").hidden = false;
+    $("#meal-analysis-review").replaceChildren();
+    $("#meal-analysis-review").hidden = true;
+    $("#meal-analysis-error").hidden = true;
+    refreshAnalysisControls();
+    try {
+      const result = await api(`/api/patients/${encodeURIComponent(patientId)}/photo-analyses`, { method: "POST", body: JSON.stringify({ kind: "meal", imageData, consentExternalProcessing: true }) });
+      if (requestId !== state.analysisRequestId || patientId !== state.patientId || imageData !== state.imageData || date !== $("#meal-date").value || !$("#meal-dialog").open || !$("#meal-analysis-consent").checked) return;
+      const analysis = result.analysis;
+      if (!analysis || analysis.patientId !== patientId || analysis.kind !== "meal" || !analysis.id || !analysis.proposal) throw new Error("사진 분석 결과를 확인하지 못했어요.");
+      state.analysis = analysis;
+      const proposal = analysis.proposal;
+      const choice = $(`#meal-form [name="foodType"][value="${proposal.foodType}"]`);
+      if (choice) choice.checked = true;
+      $("#meal-manual-food").hidden = true;
+      $("#meal-analysis-review").innerHTML = `<h3>확인이 필요한 사진 초안</h3><p class="analysis-foods">${escape(proposal.foodLabel)}${proposal.foods?.length ? ` · ${proposal.foods.map(food => escape(food.name)).join(" · ")}` : ""}</p><div class="analysis-result-values"><span>제공된 전체 음식 약 <b>${number(proposal.calories)} kcal</b></span><span>단백질 약 <b>${number(proposal.proteinGrams, 1)} g</b></span></div><p class="section-description">먹기 전 제공된 전체 음식의 추정이에요. 식사 뒤 실제로 드신 비율을 아래에서 선택해 주세요.</p>${(analysis.warnings || []).map(warning => `<p class="analysis-warning">${escape(warning)}</p>`).join("")}<p class="analysis-meta">${escape(analysis.provider)} · ${escape(analysis.model)} · 실제 영양량을 확정하는 결과가 아니에요.</p><label class="analysis-consent"><input id="meal-analysis-confirm" type="checkbox"><span>먹기 전 전체 음식 사진이며, 음식 내용·추정치와 식후 실제 드신 비율을 확인했어요.</span></label><button type="button" class="text-button" data-action="manual-meal">직접 선택해서 기록하기</button>`;
+      $("#meal-analysis-review").hidden = false;
+    } catch (error) {
+      if (requestId === state.analysisRequestId && patientId === state.patientId && $("#meal-dialog").open) formError("#meal-analysis-error", `${error.message} 음식 유형을 직접 선택해서 기록할 수 있어요.`);
+    } finally {
+      if (requestId === state.analysisRequestId) { state.analysisBusy = false; refreshAnalysisControls(); }
+    }
+  }
+
+  async function loadMedicationSchedule() {
+    if (!state.patientId || !state.summary) return;
+    const requestId = ++state.medicationRequestId;
+    const patientId = state.patientId;
+    const date = state.medicationDate || today();
+    state.medicationDate = date;
+    state.medicationSchedule = null;
+    $("#medication-date").value = date;
+    $("#medication-date").max = today();
+    $("#medication-loading").hidden = false;
+    $("#medication-error").hidden = true;
+    $("#medication-list").replaceChildren();
+    $("#medication-summary").replaceChildren();
+    $("#legacy-medication").hidden = true;
+    try {
+      const schedule = await api(`/api/patients/${encodeURIComponent(patientId)}/medication-schedule?date=${encodeURIComponent(date)}`);
+      if (requestId !== state.medicationRequestId || patientId !== state.patientId || date !== state.medicationDate) return;
+      state.medicationSchedule = schedule;
+      const total = schedule.slots?.length || 0;
+      const pending = (schedule.slots || []).filter(slot => slot.status === "pending").length;
+      $("#medication-summary").textContent = total ? `${shortDate(date)} · 총 ${total}회 중 ${total - pending}회 보고 · ${pending}회 미보고` : "이 날짜에 등록된 약별 일정이 없어요.";
+      if (date === today()) { state.todayMedication = schedule; renderHome(state.summary.todayRecord); }
+      $("#medication-list").innerHTML = (schedule.slots || []).map((slot, index) => {
+        const labels = { pending: "미보고", taken: "복용 보고", missed: "미복용 보고", unknown: "기억나지 않음" };
+        return `<form id="medication-slot-${index}" class="medication-slot" data-slot-index="${index}"><div class="medication-slot-header"><div><h2>${escape(slot.time)} · ${escape(slot.name)}</h2><p class="medication-meta">${escape([slot.strength, slot.dose, slot.route].filter(Boolean).join(" · "))}</p></div><span class="medication-status ${escape(slot.status)}">${escape(labels[slot.status] || "미보고")}</span></div>${slot.instructions ? `<p class="inline-notice">${escape(slot.instructions)}</p>` : ""}<fieldset><legend>이 회차의 복약 상태</legend><div class="choice-grid three slot-actions">${[["taken", "먹었어요"], ["missed", "못 먹었어요"], ["unknown", "기억 안 나요"]].map(([value, label]) => `<label class="choice"><input type="radio" name="status" value="${value}" ${slot.status === value ? "checked" : ""}><span>${label}</span></label>`).join("")}</div></fieldset><div class="form-field slot-reason"><label for="slot-reason-${index}">사유 <span class="optional">선택</span></label><input id="slot-reason-${index}" name="reason" type="text" maxlength="500" value="${escape(slot.reason)}" placeholder="예: 잊었어요, 속이 불편했어요"></div><div class="form-field slot-note"><label for="slot-note-${index}">함께 전할 이야기 <span class="optional">선택</span></label><textarea id="slot-note-${index}" name="note" maxlength="2000" rows="2">${escape(slot.note)}</textarea></div><p class="form-error" data-slot-error role="alert" hidden></p><button class="button button-primary" type="submit">${slot.revision ? "이 회차 기록 수정하기" : "이 회차 기록 저장하기"}</button>${slot.revision ? `<p class="record-source">보고 ${slot.revision}차 · 수정 전 기록도 보관돼요.</p>` : ""}</form>`;
+      }).join("");
+      if (!(schedule.orders || []).length) {
+        const result = await api(`/api/patients/${encodeURIComponent(patientId)}/daily?date=${encodeURIComponent(date)}`);
+        if (requestId !== state.medicationRequestId || patientId !== state.patientId || date !== state.medicationDate) return;
+        $("#legacy-medication-form").reset();
+        $$("#legacy-medication-form [name=medicationStatus]").forEach(input => { input.checked = input.value === result.record?.medicationStatus; });
+        $("#legacy-medication-error").hidden = true;
+        $("#legacy-medication").hidden = false;
+      }
+    } catch (error) {
+      if (requestId === state.medicationRequestId && patientId === state.patientId) formError("#medication-error", `${error.message} 목록을 확인하지 못해 복약 상태를 저장할 수 없어요.`);
+    } finally {
+      if (requestId === state.medicationRequestId) $("#medication-loading").hidden = true;
+    }
+  }
+
+  async function saveMedication(event) {
+    event.preventDefault();
+    if (state.saving || !state.medicationSchedule) return;
+    const form = event.target;
+    const data = new FormData(form);
+    const legacy = form.id === "legacy-medication-form";
+    const status = data.get(legacy ? "medicationStatus" : "status");
+    const errorElement = legacy ? $("#legacy-medication-error") : $("[data-slot-error]", form);
+    if (!status) { errorElement.textContent = "복약 상태를 선택해 주세요. 미보고를 자동으로 미복용 처리하지 않아요."; errorElement.hidden = false; return; }
+    const patientId = state.patientId;
+    const date = state.medicationDate;
+    const slot = legacy ? null : state.medicationSchedule.slots[Number(form.dataset.slotIndex)];
+    if (!legacy && !slot) return;
+    const payload = legacy ? { date, medicationStatus: status } : { orderId: slot.orderId, date, time: slot.time, status, reason: String(data.get("reason") || "").trim(), note: String(data.get("note") || "").trim() };
+    state.saving = "medication";
+    errorElement.hidden = true;
+    $$("#view-medication input, #view-medication textarea, #view-medication button").forEach(input => { input.disabled = true; });
+    $("#patient-select").disabled = true;
+    try {
+      await api(`/api/patients/${encodeURIComponent(patientId)}/${legacy ? "daily" : "medication-events"}`, { method: "POST", body: JSON.stringify(payload) });
+      toast("복약 자기보고를 저장했어요.");
+      await loadPatient(patientId);
+    } catch (error) {
+      errorElement.textContent = error.message;
+      errorElement.hidden = false;
+    } finally {
+      state.saving = null;
+      $$("#view-medication input, #view-medication textarea, #view-medication button").forEach(input => { input.disabled = false; });
+      $("#patient-select").disabled = state.loading;
+    }
+  }
+
+  async function loadConnections() {
+    if (!state.patientId || !state.summary) return;
+    const requestId = ++state.connectionRequestId;
+    const patientId = state.patientId;
+    $("#connections-loading").hidden = false;
+    $("#connections-error").hidden = true;
+    $("#connection-list").replaceChildren();
+    try {
+      const result = await api(`/api/patients/${encodeURIComponent(patientId)}/health-connections`);
+      if (requestId !== state.connectionRequestId || patientId !== state.patientId || state.view !== "connections") return;
+      state.connections = result;
+      $("#connection-list").innerHTML = result.connections?.length ? result.connections.map(connection => `<section class="connection-card"><div class="medication-slot-header"><h2>${escape(connection.label || (connection.platform === "health-connect" ? "Android · Health Connect" : "iPhone · Apple 건강"))}</h2><span class="connection-status ${escape(connection.status)}">${connection.status === "revoked" ? "폐기됨" : connection.status === "connected" ? "기록 수신됨" : "연결 프로그램 대기"}</span></div><p class="section-description">${connection.selected ? "현재 선택한 자료 출처" : "현재 요약의 자료 출처가 아니에요."}</p><p class="record-source">${connection.lastReceivedAt ? `마지막 수신: ${escape(new Date(connection.lastReceivedAt).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }))}` : "아직 받은 건강 기록이 없어요."}</p><p class="section-description">실제 휴대폰·워치의 자동 수집은 검증 전이에요.</p>${connection.status !== "revoked" ? `<button type="button" class="button button-secondary" data-action="revoke-connection" data-connection-id="${escape(connection.id)}">이 연결 폐기하기</button>` : ""}</section>`).join("") : '<div class="empty-state-card"><h2>연결된 건강 기록이 없어요</h2><p>걸음 수와 수면은 직접 입력할 수 있어요. 연결 프로그램이 준비되고 기록을 받으면 여기에 출처와 마지막 수신을 표시해요.</p></div>';
+    } catch (error) {
+      if (requestId === state.connectionRequestId && patientId === state.patientId && state.view === "connections") formError("#connections-error", error.message);
+    } finally {
+      if (requestId === state.connectionRequestId) $("#connections-loading").hidden = true;
+    }
+  }
+
+  async function createConnection(event) {
+    event.preventDefault();
+    if (state.connectionBusy || state.loading || !state.patientId) return;
+    clearConnectionToken();
+    const patientId = state.patientId;
+    const requestId = state.connectionRequestId;
+    const fields = new FormData(event.target);
+    const payload = { platform: fields.get("platform") };
+    if (String(fields.get("label") || "").trim()) payload.label = String(fields.get("label")).trim();
+    state.connectionBusy = true;
+    $("#connection-create").disabled = true;
+    $("#connections-error").hidden = true;
+    try {
+      const result = await api(`/api/patients/${encodeURIComponent(patientId)}/health-connections`, { method: "POST", body: JSON.stringify(payload) });
+      if (patientId !== state.patientId || state.view !== "connections" || requestId !== state.connectionRequestId) return;
+      $("#connection-token-value").textContent = result.token || "";
+      $("#connection-token").hidden = !result.token;
+      await loadConnections();
+      toast("테스트 연결을 준비했어요. 자동 수집이 시작된 것은 아니에요.");
+    } catch (error) {
+      if (patientId === state.patientId && state.view === "connections") formError("#connections-error", error.message);
+    } finally { state.connectionBusy = false; $("#connection-create").disabled = false; }
+  }
+
+  async function revokeConnection(connectionId) {
+    if (state.connectionBusy || !state.patientId || !state.connections?.connections?.some(connection => connection.id === connectionId)) return;
+    if (!window.confirm("이 연결을 폐기할까요? 새 기록 수신은 중단되고 이전 기록은 남아요.")) return;
+    const patientId = state.patientId;
+    state.connectionBusy = true;
+    clearConnectionToken();
+    try {
+      await api(`/api/patients/${encodeURIComponent(patientId)}/health-connections/${encodeURIComponent(connectionId)}`, { method: "DELETE" });
+      if (patientId === state.patientId && state.view === "connections") { await loadConnections(); toast("연결을 폐기했어요. 이전 기록은 보관돼요."); }
+    } catch (error) {
+      if (patientId === state.patientId && state.view === "connections") formError("#connections-error", error.message);
+    } finally { state.connectionBusy = false; }
+  }
+
   function bindEvents() {
-    $("#patient-select").addEventListener("change", (event) => { if (!state.saving) loadPatient(event.target.value).catch(() => {}); });
-    $("#retry-button").addEventListener("click", () => { if (state.patientId) loadPatient(state.patientId, { initial: !state.summary }).catch(() => {}); else initialize(); });
+    $("#patient-select").addEventListener("change", event => { if (!state.saving) loadPatient(event.target.value, { historyMode: "push" }).catch(() => {}); });
+    $("#retry-button").addEventListener("click", () => initialize());
     $("#open-meal").addEventListener("click", openMeal);
-    $("#open-medication").addEventListener("click", () => openDaily(true));
-    $("#open-daily").addEventListener("click", () => openDaily());
-    document.addEventListener("click", (event) => {
+    $("#open-medication").addEventListener("click", () => switchView("medication"));
+    $("#open-daily").addEventListener("click", () => openDaily("all"));
+    document.addEventListener("click", event => {
       const viewButton = event.target.closest("[data-view]");
-      if (viewButton) switchView(viewButton.dataset.view);
+      if (viewButton) switchView(viewButton.dataset.view, { section: viewButton.dataset.section || null });
       const action = event.target.closest("[data-action]");
       if (action?.dataset.action === "meal") openMeal();
-      if (action?.dataset.action === "daily") openDaily();
-      if (action?.dataset.action === "medication") openDaily(true);
+      if (action?.dataset.action === "steps") openDaily("steps");
+      if (action?.dataset.action === "sleep") openDaily("sleep");
+      if (action?.dataset.action === "medication") switchView("medication");
+      if (action?.dataset.action === "nutrition") switchView("records", { metric: "proteinGrams", section: "meals" });
+      if (action?.dataset.action === "edit-daily") openDaily("all", action.dataset.date);
+      if (action?.dataset.action === "manual-meal") { invalidateAnalysis(); updateEstimate(); }
+      if (action?.dataset.action === "refresh-medication") loadMedicationSchedule();
+      if (action?.dataset.action === "revoke-connection") revokeConnection(action.dataset.connectionId);
     });
-    $$(".chart-tab").forEach((button) => button.addEventListener("click", () => {
+    $$(".chart-tab").forEach(button => button.addEventListener("click", () => {
       state.metric = button.dataset.metric;
-      $$(".chart-tab").forEach((tab) => { const active = tab === button; tab.classList.toggle("active", active); tab.setAttribute("aria-pressed", String(active)); });
+      state.section = "chart";
+      $$(".chart-tab").forEach(tab => { const active = tab === button; tab.classList.toggle("active", active); tab.setAttribute("aria-pressed", String(active)); });
       renderChart();
+      syncUrl();
     }));
-    $$(".close-dialog").forEach((button) => button.addEventListener("click", () => { if (!state.saving) button.closest("dialog").close(); }));
-    $$("dialog").forEach((dialog) => {
-      dialog.addEventListener("click", (event) => {
-        if (state.saving) return;
-        if (event.target !== dialog) return;
+    $$(".close-dialog").forEach(button => button.addEventListener("click", () => { if (!state.saving) button.closest("dialog").close(); }));
+    $$("dialog").forEach(dialog => {
+      dialog.addEventListener("click", event => {
+        if (state.saving || event.target !== dialog) return;
         const bounds = dialog.getBoundingClientRect();
         if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
       });
-      dialog.addEventListener("cancel", (event) => { if (state.saving) event.preventDefault(); });
-      dialog.addEventListener("close", () => { if (dialog.id === "daily-dialog") ++state.dateRequestId; });
+      dialog.addEventListener("cancel", event => { if (state.saving) event.preventDefault(); });
+      dialog.addEventListener("close", () => {
+        if (dialog.id === "daily-dialog") ++state.dateRequestId;
+        if (dialog.id === "meal-dialog") clearPhoto();
+      });
     });
     $("#meal-form").addEventListener("submit", saveMeal);
     $("#daily-form").addEventListener("submit", saveDaily);
     $("#daily-date").addEventListener("change", selectDailyDate);
-    $("#meal-form").addEventListener("change", updateEstimate);
+    $("#meal-form").addEventListener("change", event => {
+      if (event.target.id === "meal-date") invalidateAnalysis();
+      if (event.target.name === "portion" && state.analysis) $("#meal-analysis-confirm").checked = false;
+      updateEstimate();
+      refreshAnalysisControls();
+    });
+    $("#meal-analysis-consent").addEventListener("change", () => { if (!$("#meal-analysis-consent").checked) invalidateAnalysis(); refreshAnalysisControls(); });
+    $("#meal-analyze").addEventListener("click", analyzeMeal);
     $("#remove-photo").addEventListener("click", clearPhoto);
+    $("#medication-date").addEventListener("change", () => {
+      const date = $("#medication-date").value;
+      if (!date || date > today() || state.saving) return;
+      state.medicationDate = date;
+      syncUrl();
+      loadMedicationSchedule();
+    });
+    $("#medication-list").addEventListener("submit", saveMedication);
+    $("#legacy-medication-form").addEventListener("submit", saveMedication);
+    $("#connection-form").addEventListener("submit", createConnection);
+    $("#connection-token-dismiss").addEventListener("click", clearConnectionToken);
+    window.addEventListener("pagehide", clearConnectionToken);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) clearConnectionToken(); });
+    window.addEventListener("popstate", () => {
+      const requestedId = routeFromUrl();
+      invalidateAnalysis();
+      clearConnectionToken();
+      ++state.connectionRequestId;
+      ++state.medicationRequestId;
+      if (!state.saving) $$("dialog[open]").forEach(dialog => dialog.close());
+      if (requestedId && requestedId !== state.patientId && state.patients.some(patient => patient.id === requestedId)) loadPatient(requestedId, { historyMode: "none" }).catch(() => {});
+      else applyView({ historyMode: "none" });
+    });
     $("#meal-photo").addEventListener("change", async (event) => {
       const file = event.target.files?.[0];
       if (!file) return;
+      invalidateAnalysis();
       $("#meal-error").hidden = true;
       if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
         clearPhoto(); formError("#meal-error", "JPG, PNG, WebP 사진을 선택해 주세요."); return;
@@ -403,7 +743,7 @@
         $("#remove-photo").hidden = false;
       };
       reader.onerror = () => { if (photoRequestId !== state.photoRequestId) return; clearPhoto(); formError("#meal-error", "사진을 읽지 못했어요. 다른 사진을 선택해 주세요."); };
-      reader.onloadend = () => { if (photoRequestId !== state.photoRequestId) return; state.photoLoading = false; if (state.saving !== "meal") $("#meal-submit").disabled = false; };
+      reader.onloadend = () => { if (photoRequestId !== state.photoRequestId) return; state.photoLoading = false; refreshAnalysisControls(); };
       reader.readAsDataURL(file);
     });
   }
@@ -425,6 +765,8 @@
     } catch (error) { showError(error.message); }
   }
 
+  routeFromUrl();
   bindEvents();
   initialize();
+  loadCapabilities();
 })();

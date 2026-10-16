@@ -41,14 +41,22 @@
   const riskPill = risk => `<span class="risk-pill ${riskClass(risk)}">${esc(riskLabel(risk))}</span>`;
   const medLabel = status => ({taken:'복용 보고',partial:'일부 복용',missed:'미복용 보고',unknown:'알 수 없음'}[status] || '미기록');
   const foodLabel = food => ({balanced:'밥과 반찬',porridge:'죽',protein:'단백질 중심',noodles:'면 요리'}[food] || food || '식사');
+  const healthSourceName = source => ({'patient-self-report':'수동 자기보고','health-connect':'Health Connect 수신','apple-health':'Apple Health 수신'}[source] || '출처 미표시');
+  const healthSourceSummary = metric => {
+    const entries=Object.entries(metric?.sourceCounts||{}).filter(([,days])=>Number(days)>0);
+    return entries.length ? entries.map(([source,days])=>`${healthSourceName(source)} ${num(days)}일`).join(' · ') : metric?.value===null?'측정 기록 없음':'저장 자료 · 출처 확인 필요';
+  };
+  const mealSourceLabel = meal => meal.source==='openai-image-estimate-v1' ? `AI 사진 추정${meal.estimation?.patientConfirmed?' · 환자 확인':''}` : meal.source==='demo-food-table-v1'?'음식 선택·비율 예시 추정':'식사 추정 · 출처 확인 필요';
   const mealLabel = meal => ({breakfast:'아침',lunch:'점심',dinner:'저녁',snack:'간식'}[meal] || '식사');
-  const state = { view:'overview', data:null, summary:null, selectedId:new URLSearchParams(location.search).get('patientId'), filter:'all', search:'', refreshBusy:false, selectionRequest:0, modal:null, lastFocus:null };
+  const state = { view:'overview', data:null, summary:null, selectedId:new URLSearchParams(location.search).get('patientId'), filter:'all', search:'', refreshBusy:false, selectionRequest:0, modal:null, lastFocus:null, medicationDate:new URLSearchParams(location.search).get('medicationDate'), medications:null, medicationRequest:0, medicationLoading:false, medicationError:'', photoGeneration:0, photoAbort:null };
   const viewTitles = {
     overview:['CARE AT A GLANCE','오늘의 돌봄 현황','환자의 일상을 연결하고, 필요한 돌봄을 먼저 살펴보세요.','케어 대시보드'],
     patients:['PATIENT WORKSPACE','환자 관리','기록의 변화와 확인할 내용을 환자별로 자세히 살펴보세요.','환자 관리'],
+    medications:['CONFIRMED MEDICATION PLAN','복약 계획과 보고','의료진이 확인한 계획과 약별·회차별 자기보고를 함께 살펴보세요.','복약 계획'],
     records:['EVERYDAY HEALTH RECORDS','건강 기록','일상의 기록을 확인하고 연구용 파일로 내보내세요.','건강 기록'],
     settings:['DEMO WORKSPACE SETTINGS','데모 설정','테스트 데이터를 관리하고 다음 시연을 준비하세요.','데모 설정'],
   };
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(state.medicationDate||''))state.medicationDate=null;
   const urlView = new URLSearchParams(location.search).get('view');
   if (viewTitles[urlView]) state.view = urlView;
   const $ = selector => document.querySelector(selector);
@@ -63,6 +71,7 @@
     const url = new URL(location.href);
     if (state.selectedId) url.searchParams.set('patientId',state.selectedId); else url.searchParams.delete('patientId');
     if (state.view === 'overview') url.searchParams.delete('view'); else url.searchParams.set('view',state.view);
+    if(state.view==='medications' && medDate())url.searchParams.set('medicationDate',medDate());else url.searchParams.delete('medicationDate');
     history.replaceState(null,'',url);
   }
   function showError(message) { $('#global-error').textContent=message; $('#global-error').hidden=!message; }
@@ -86,6 +95,8 @@
         const summary=await api(`/api/patients/${encodeURIComponent(selected)}/summary`);
         if(state.selectedId===selected) state.summary=summary;
       } else state.summary=null;
+      if(!state.medicationDate)state.medicationDate=data.today;
+      if(state.view==='medications' && state.selectedId)await loadMedications({renderAfter:false});
       showError('');
       $('#current-date').textContent=new Date(`${data.today}T12:00:00+09:00`).toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short',timeZone:'Asia/Seoul'});
       $('#nav-patient-count').textContent=data.patients.length;
@@ -108,6 +119,8 @@
       const summary=await api(`/api/patients/${encodeURIComponent(id)}/summary`);
       if(request!==state.selectionRequest || state.selectedId!==id) return;
       state.summary=summary;
+      if(state.view==='medications')await loadMedications({renderAfter:false});
+      if(request!==state.selectionRequest || state.selectedId!==id)return;
       render();
     } catch(error) { if(request===state.selectionRequest)state.selectedId=previousId;toast(error.message,true); }
     finally { if(request===state.selectionRequest)$('#app-content').removeAttribute('aria-busy'); }
@@ -174,13 +187,13 @@
   }
   function metricPanels() {
     const s=state.summary,m=s.metrics,t=s.trends.slice(-14);
-    const panels=[['steps','steps','평균 활동',num(m.steps.value),'걸음',`${m.steps.coverageDays}/7일 활동 보고`,'환자가 입력한 걸음 수','#7db6a4'],['sleepHours','moon','평균 수면',num(m.sleepHours.value,1),'시간',`${m.sleepHours.coverageDays}/7일 수면 보고`,'환자가 입력한 수면 시간','#a2a0c8'],['medication','pill','복약 자기보고 점수',num(m.medication.value),'%',`${m.medication.takenDays}일 복용 · ${m.medication.reportedDays}일 보고`,'복용 1 · 일부 0.5 · 미복용 0','#b3bf92'],['calories','food','기록된 식사 추정량',num(m.nutrition.value),'kcal/일',`단백질 ${num(m.nutrition.proteinGrams,1)} g/일`,'기록일의 추정 합계 평균 · 미기록 식사 제외','#d1af7b']];
+    const panels=[['steps','steps','평균 활동',num(m.steps.value),'걸음',`${m.steps.coverageDays}/7일 활동 보고`,healthSourceSummary(m.steps),'#7db6a4'],['sleepHours','moon','평균 수면',num(m.sleepHours.value,1),'시간',`${m.sleepHours.coverageDays}/7일 수면 보고`,healthSourceSummary(m.sleepHours),'#a2a0c8'],['medication','pill','일일 복약 자기보고 점수',num(m.medication.value),'%',`${m.medication.takenDays}일 복용 · ${m.medication.reportedDays}일 보고`,'복용 1 · 일부 0.5 · 미복용 0','#b3bf92'],['calories','food','기록된 식사 추정량',num(m.nutrition.value),'kcal/일',`단백질 ${num(m.nutrition.proteinGrams,1)} g/일`,'기록일의 추정 합계 평균 · 미기록 식사 제외','#d1af7b']];
     return `<div class="detail-metric-grid">${panels.map(([key,ic,title,value,unit,caption,source,color])=>`<article class="metric-panel"><div class="metric-panel-top">${icon(ic)}${title}</div><h3>${value}<small>${unit}</small></h3><div class="metric-bottom"><span>${esc(caption)}</span></div><div class="metric-trend">${spark(key==='medication'?t.map(r=>r.medicationStatus==='taken'?100:r.medicationStatus==='partial'?50:r.medicationStatus==='missed'?0:null):t.map(r=>r[key]),color)}</div><div class="source-note">${esc(source)}</div></article>`).join('')}</div>`;
   }
   function detailCharts() {
     const t=state.summary.trends.slice(-14);
     const medication=t.map(r=>({...r,medValue:r.medicationStatus==='taken'?100:r.medicationStatus==='partial'?50:r.medicationStatus==='missed'?0:null}));
-    const panels=[['활동 추이','최근 14일',t,'steps',{unit:'걸음',color:'#73ad98'},'입력한 걸음 수','미기록일은 연결하지 않음'],['수면 추이','최근 14일',t,'sleepHours',{unit:'시간',color:'#a7a1c7'},'입력한 수면 시간','수면 질은 별도 평가 필요'],['복약 보고','최근 14일',medication,'medValue',{unit:'점',color:'#a1b88c',type:'bar',max:100},'100 복용 · 50 일부 · 0 미복용','자기보고 기준'],['식사 기록 추이','최근 14일',t,'calories',{unit:'kcal',color:'#d5b47e',type:'bar'},'기록된 식사의 영양 추정 합계','실제 섭취량을 확정하지 않음']];
+    const panels=[['활동 추이','최근 14일',t,'steps',{unit:'걸음',color:'#73ad98'},healthSourceSummary(state.summary.metrics.steps),'미기록일은 연결하지 않음'],['수면 추이','최근 14일',t,'sleepHours',{unit:'시간',color:'#a7a1c7'},healthSourceSummary(state.summary.metrics.sleepHours),'수면 질은 별도 평가 필요'],['일일 복약 보고','최근 14일',medication,'medValue',{unit:'점',color:'#a1b88c',type:'bar',max:100},'100 복용 · 50 일부 · 0 미복용','자기보고 기준'],['식사 기록 추이','최근 14일',t,'calories',{unit:'kcal',color:'#d5b47e',type:'bar'},'기록된 식사의 영양 추정 합계','실제 섭취량을 확정하지 않음']];
     return `<div class="detail-chart-grid">${panels.map(([title,period,rows,key,options,note,right])=>`<section class="card"><div class="card-header"><h2>${title}</h2><span class="card-count">${period}</span></div><div class="chart-wrap">${chart(rows,key,{...options,height:145,label:title})}</div><div class="chart-footer"><span>${note}</span><span>${right}</span></div></section>`).join('')}</div>`;
   }
   function coverage() {
@@ -193,20 +206,20 @@
   }
   function meals() {
     const meals=state.summary.recentMeals.slice(0,3);
-    return `<section class="card"><div class="card-header"><div><h2>식탁에서 온 기록</h2><p class="subheading">최근 식사 · 음식 유형과 섭취 비율 기반 추정</p></div><span class="small-label">최근 ${meals.length}건</span></div>${meals.length?`<div class="meal-list">${meals.map(m=>`<article class="meal-item"><div class="meal-visual">${m.imageUrl && /^\/uploads\/[a-zA-Z0-9._-]+$/.test(m.imageUrl)?`<img src="${esc(m.imageUrl)}" alt="${esc(shortDate(m.date))} ${esc(mealLabel(m.mealType))} 식사 사진" loading="lazy">`:foodIllustration(m.foodType)}<span class="food-label">${m.imageUrl?'등록 사진':'예시 그림'}</span></div><h4>${shortDate(m.date)} ${mealLabel(m.mealType)} · ${esc(foodLabel(m.foodType))}</h4><p>${num(m.calories)} kcal · 단백질 ${num(m.proteinGrams,1)} g</p><small>섭취 비율 ${num(m.portion*100)}%</small></article>`).join('')}</div>`:'<div class="compact-empty">아직 기록된 식사가 없습니다.</div>'}<div class="source-disclaimer">영양값은 선택한 음식과 섭취 비율을 기준으로 계산한 예시입니다. 사진 분석은 수행하지 않습니다.</div></section>`;
+    return `<section class="card"><div class="card-header"><div><h2>식탁에서 온 기록</h2><p class="subheading">최근 식사 · AI 사진 또는 음식 선택에 따른 영양 추정</p></div><span class="small-label">최근 ${meals.length}건</span></div>${meals.length?`<div class="meal-list">${meals.map(m=>`<article class="meal-item"><div class="meal-visual">${m.imageUrl && /^\/uploads\/[a-zA-Z0-9._-]+$/.test(m.imageUrl)?`<img src="${esc(m.imageUrl)}" alt="${esc(shortDate(m.date))} ${esc(mealLabel(m.mealType))} 식사 사진" loading="lazy">`:foodIllustration(m.foodType)}<span class="food-label">${m.imageUrl?'등록 사진':'예시 그림'}</span></div><h4>${shortDate(m.date)} ${mealLabel(m.mealType)} · ${esc(m.foodLabel||foodLabel(m.foodType))}</h4><p>${num(m.calories)} kcal · 단백질 ${num(m.proteinGrams,1)} g</p><small>섭취 비율 ${num(m.portion*100)}%</small><small class="meal-source-label">${esc(mealSourceLabel(m))}</small>${m.estimation?`<small>${esc(m.estimation.provider)} / ${esc(m.estimation.model)}</small>`:''}</article>`).join('')}</div>`:'<div class="compact-empty">아직 기록된 식사가 없습니다.</div>'}<div class="source-disclaimer">AI 사진 추정과 음식 선택·비율에 따른 예시 추정을 구별합니다. 환자의 섭취 확인은 자기보고이며 실제 영양량의 임상 검증이 아닙니다.</div></section>`;
   }
   function recordTable(full = false) {
     const records=state.summary?.recentRecords.slice(0,full?14:5)||[];
-    return `<div class="table-scroll"><table class="patient-table records-table ${full?'record-full':''}" aria-label="환자 일일 건강 기록"><thead><tr><th>날짜</th><th>활동</th><th>수면</th><th>복약 보고</th>${full?'<th>식욕</th><th>기분</th><th>체중</th>':''}<th>메모</th></tr></thead><tbody>${records.length?records.map(r=>`<tr><td>${shortDate(r.date)}</td><td>${num(r.steps)} <span class="unit-note">걸음</span></td><td>${num(r.sleepHours,1)} <span class="unit-note">h</span></td><td><span class="med-dot ${r.medicationStatus==='missed'?'no':r.medicationStatus==='partial'?'partial':r.medicationStatus==='taken'?'yes':'unknown'}"></span>${medLabel(r.medicationStatus)}</td>${full?`<td>${esc({good:'좋음',normal:'보통',poor:'저하'}[r.appetite]||'미기록')}</td><td>${esc({good:'좋음',normal:'보통',poor:'좋지 않음'}[r.mood]||'미기록')}</td><td>${num(r.weightKg,1)} <span class="unit-note">kg</span></td>`:''}<td class="record-note" title="${esc(r.note)}">${esc(r.note||'—')}</td></tr>`).join(''):`<tr><td colspan="${full?8:5}"><div class="compact-empty">아직 일일 기록이 없습니다. 환자용 사이트에서 첫 기록을 남겨보세요.</div></td></tr>`}</tbody></table></div>`;
+    return `<div class="table-scroll"><table class="patient-table records-table ${full?'record-full':''}" aria-label="환자 일일 건강 기록"><thead><tr><th>날짜</th><th>활동</th><th>수면</th><th>복약 보고</th>${full?'<th>식욕</th><th>기분</th><th>체중</th>':''}<th>메모</th></tr></thead><tbody>${records.length?records.map(r=>`<tr><td>${shortDate(r.date)}</td><td>${num(r.steps)} <span class="unit-note">걸음</span><small class="record-source">${r.steps===null?'미측정':esc(healthSourceName(r.stepsSource))}</small></td><td>${num(r.sleepHours,1)} <span class="unit-note">h</span><small class="record-source">${r.sleepHours===null?'미측정':esc(healthSourceName(r.sleepSource))}</small></td><td><span class="med-dot ${r.medicationStatus==='missed'?'no':r.medicationStatus==='partial'?'partial':r.medicationStatus==='taken'?'yes':'unknown'}"></span>${medLabel(r.medicationStatus)}</td>${full?`<td>${esc({good:'좋음',normal:'보통',poor:'저하'}[r.appetite]||'미기록')}</td><td>${esc({good:'좋음',normal:'보통',poor:'좋지 않음'}[r.mood]||'미기록')}</td><td>${num(r.weightKg,1)} <span class="unit-note">kg</span></td>`:''}<td class="record-note" title="${esc(r.note)}">${esc(r.note||'—')}</td></tr>`).join(''):`<tr><td colspan="${full?8:5}"><div class="compact-empty">아직 일일 기록이 없습니다. 환자용 사이트에서 첫 기록을 남겨보세요.</div></td></tr>`}</tbody></table></div>`;
   }
-  function recentRecords() { return `<section class="card"><div class="card-header"><div><h2>최근 건강 기록</h2><p class="subheading">${esc(state.summary.patient.name)} 님 · 환자 입력 자료</p></div><button class="text-link" data-action="view" data-view="records">전체 보기 ${icon('arrow')}</button></div>${recordTable()}</section>`; }
+  function recentRecords() { return `<section class="card"><div class="card-header"><div><h2>최근 건강 기록</h2><p class="subheading">${esc(state.summary.patient.name)} 님 · 항목별 출처 표시</p></div><button class="text-link" data-action="view" data-view="records">전체 보기 ${icon('arrow')}</button></div>${recordTable()}</section>`; }
   function expandedBriefing() {
     const s=state.summary;
-    return `<section class="card briefing-expanded"><h3>근거와 함께 보는 브리핑 <span class="demo-ai-badge" style="display:inline-flex;margin-left:6px">규칙 기반 데모</span></h3><p>각 요약은 아래에 표시된 저장 기록에서 만들어졌습니다. 충분하지 않은 자료는 추가 확인해 주세요.</p>${s.briefing.items.map(item=>`<article class="briefing-evidence-item"><h4>${esc(item.title)}</h4><p>${esc(item.text)}</p><div class="evidence-list">${item.evidence.slice(-4).map(e=>`<span class="evidence-tag">${shortDate(e.date)} · ${esc(e.source==='demo-food-table-v1'?'음식표 예시 추정':e.source)} · ${esc(typeof e.value==='string'?({taken:'복용',partial:'일부 복용',missed:'미복용',unknown:'알 수 없음'}[e.value]||e.value):num(e.value,1))}</span>`).join('')}</div></article>`).join('')}</section>`;
+    return `<section class="card briefing-expanded"><h3>근거와 함께 보는 브리핑 <span class="demo-ai-badge" style="display:inline-flex;margin-left:6px">규칙 기반 데모</span></h3><p>각 요약은 아래에 표시된 저장 기록에서 만들어졌습니다. 충분하지 않은 자료는 추가 확인해 주세요.</p>${s.briefing.items.map(item=>`<article class="briefing-evidence-item"><h4>${esc(item.title)}</h4><p>${esc(item.text)}</p><div class="evidence-list">${item.evidence.slice(-4).map(e=>`<span class="evidence-tag">${shortDate(e.date)} · ${esc(e.source==='demo-food-table-v1'?'음식표 예시 추정':e.source==='openai-image-estimate-v1'?'AI 사진 영양 추정':['patient-self-report','health-connect','apple-health'].includes(e.source)?healthSourceName(e.source):e.source)} · ${esc(typeof e.value==='string'?({taken:'복용',partial:'일부 복용',missed:'미복용',unknown:'알 수 없음'}[e.value]||e.value):num(e.value,1))}</span>`).join('')}</div></article>`).join('')}</section>`;
   }
   function patientDetails(expanded = false) {
     const s=state.summary;if(!s)return '';
-    return `<section id="patient-detail"><div class="section-heading"><div><div class="detail-topline"><h2>${esc(s.patient.name)} 님의 일상 변화</h2>${riskPill(s.risk)}</div><p>최근 7일 요약 · 보고된 날의 평균과 기록의 충분함을 함께 확인하세요.</p></div><div class="section-action-group"><span class="small-label">${shortDate(s.trends.at(-7)?.date)} — ${shortDate(s.today)}</span><a class="text-link" href="/patient?patientId=${encodeURIComponent(s.patient.id)}" target="_blank" rel="noopener">환자 화면 ${icon('external')}</a></div></div>${metricPanels()}<div class="detail-analysis-grid">${detailCharts()}${coverage()}</div><div class="meals-records-grid">${meals()}${recentRecords()}</div><div class="notes-questions"><h3>${icon('chat')}다음 방문에서 물어보세요</h3><ul>${s.briefing.questions.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div>${expanded?expandedBriefing():''}</section>`;
+    return `<section id="patient-detail"><div class="section-heading"><div><div class="detail-topline"><h2>${esc(s.patient.name)} 님의 일상 변화</h2>${riskPill(s.risk)}</div><p>최근 7일 요약 · 보고된 날의 평균과 기록의 충분함을 함께 확인하세요.</p></div><div class="section-action-group"><span class="small-label">${shortDate(s.trends.at(-7)?.date)} — ${shortDate(s.today)}</span><button class="text-link" data-action="view" data-view="medications">복약 계획 ${icon('pill')}</button><a class="text-link" href="/patient?patientId=${encodeURIComponent(s.patient.id)}" target="_blank" rel="noopener">환자 화면 ${icon('external')}</a></div></div>${metricPanels()}<div class="detail-analysis-grid">${detailCharts()}${coverage()}</div><div class="meals-records-grid">${meals()}${recentRecords()}</div><div class="notes-questions"><h3>${icon('chat')}다음 방문에서 물어보세요</h3><ul>${s.briefing.questions.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div>${expanded?expandedBriefing():''}</section>`;
   }
   function emptyWorkspace() {
     return `<section class="card empty-state"><div class="empty-icon">${icon('users')}</div><h3>새로운 돌봄을 시작할 준비가 되었어요</h3><p>가상 환자를 추가하고 환자용 사이트에서 기록을 남겨보세요.<br>예시 데이터를 복원하면 모든 화면을 바로 체험할 수 있습니다.</p><button class="button button-primary" data-action="add-patient">${icon('plus')}가상 환자 추가</button><button class="button button-secondary" data-action="reset" data-mode="seed">${icon('refresh')}예시 데이터 복원</button></section>`;
@@ -217,28 +230,192 @@
   function patientsView() {
     if(!state.data.patients.length)return emptyWorkspace();
     const s=state.summary;
-    return `${patientList(true)}${s?`<div class="patient-workspace"><section class="selected-patient-banner"><span class="avatar">${esc(s.patient.name[0])}</span><div><h2>${esc(s.patient.name)} <span class="small-label">${s.patient.age}세 · ${sexLabel(s.patient.sex)}</span></h2><p>${esc(s.patient.conditions.join(' · ')||'기저질환 미입력')} · ${esc(s.patient.caregiver||'돌봄 정보 미입력')}</p></div><div class="banner-meta"><div>현재 복약 정보<b>${esc(s.patient.medications.join(' · ')||'미입력')}</b></div>${riskPill(s.risk)}</div><a href="/patient?patientId=${encodeURIComponent(s.patient.id)}" target="_blank" rel="noopener" class="button button-secondary">${icon('external')}환자 화면 열기</a></section>${patientDetails(true)}</div>`:''}`;
+    return `${patientList(true)}${s?`<div class="patient-workspace"><section class="selected-patient-banner"><span class="avatar">${esc(s.patient.name[0])}</span><div><h2>${esc(s.patient.name)} <span class="small-label">${s.patient.age}세 · ${sexLabel(s.patient.sex)}</span></h2><p>${esc(s.patient.conditions.join(' · ')||'기저질환 미입력')} · ${esc(s.patient.caregiver||'돌봄 정보 미입력')}</p></div><div class="banner-meta"><div>이전 참고 메모 · 처방 아님<b>${esc(s.patient.medications.join(' · ')||'미입력')}</b></div>${riskPill(s.risk)}</div><a href="/patient?patientId=${encodeURIComponent(s.patient.id)}" target="_blank" rel="noopener" class="button button-secondary">${icon('external')}환자 화면 열기</a></section>${patientDetails(true)}</div>`:''}`;
   }
   function recordsView() {
     if(!state.data.patients.length)return emptyWorkspace();
-    return `<div class="records-toolbar"><label for="record-patient">환자 선택<select id="record-patient">${state.data.patients.map(p=>`<option value="${esc(p.id)}" ${p.id===state.selectedId?'selected':''}>${esc(p.name)} · ${p.age}세</option>`).join('')}</select></label><a class="button button-secondary" href="/api/export.csv" download>${icon('download')}전체 기록 CSV 내보내기</a></div><section class="card"><div class="card-header"><div><h2>${esc(state.summary?.patient.name)} 님의 건강 기록</h2><p class="subheading">최근 일일 기록 14건 · 빈칸은 미측정으로 보존됩니다.</p></div><span class="small-label">환자 자기보고</span></div>${recordTable(true)}</section><div class="meals-records-grid">${meals()}${coverage()}</div><div class="provenance-card"><b>기록과 분석의 출처</b><br>활동·수면·복약은 환자가 입력한 자기보고이며, 기기로 자동 측정한 값이 아닙니다. 영양값은 음식 유형과 섭취 비율을 고정 음식표에 적용한 예시 추정입니다. CSV에는 환자·일일·식사 기록이 함께 포함됩니다.</div>`;
+    return `<div class="records-toolbar"><label for="record-patient">환자 선택<select id="record-patient">${state.data.patients.map(p=>`<option value="${esc(p.id)}" ${p.id===state.selectedId?'selected':''}>${esc(p.name)} · ${p.age}세</option>`).join('')}</select></label><a class="button button-secondary" href="/api/export.csv" download>${icon('download')}전체 기록 CSV 내보내기</a></div><section class="card"><div class="card-header"><div><h2>${esc(state.summary?.patient.name)} 님의 건강 기록</h2><p class="subheading">최근 일일 기록 14건 · 빈칸은 미측정으로 보존됩니다.</p></div><span class="small-label">환자 자기보고</span></div>${recordTable(true)}</section><div class="meals-records-grid">${meals()}${coverage()}</div><div class="provenance-card"><b>기록과 분석의 출처</b><br>활동·수면은 수동 자기보고와 선택된 건강 연결의 수신 자료를 항목별로 구분합니다. 웹이 기기 자료를 직접 읽지는 않습니다. 복약은 자기보고입니다. 영양값은 AI 사진 추정 또는 음식 선택·비율을 적용한 예시 추정이며 출처를 함께 표시합니다. CSV에는 환자·일일·식사 기록이 함께 포함됩니다.</div>`;
   }
   function settingsView() {
-    return `<div class="settings-grid"><section class="card"><div class="card-header"><div><h2>연결된 데모 환경</h2><p class="subheading">환자와 의료진 화면이 같은 테스트 데이터를 사용합니다.</p></div><span class="settings-tag">연결됨</span></div><div class="settings-body"><div class="settings-row"><div><h3>환자용 모바일 사이트</h3><p>모바일 화면에서 건강·식사 기록을 남기고, 의료진 화면에서 결과를 확인할 수 있습니다.</p></div><a class="button button-secondary" href="/patient${state.selectedId?`?patientId=${encodeURIComponent(state.selectedId)}`:''}" target="_blank" rel="noopener">사이트 열기 ${icon('external')}</a></div><div class="settings-row"><div><h3>테스트 기록 내보내기</h3><p>등록 환자와 일일·식사 기록을 CSV 파일로 내려받습니다. 초기화 전에 필요한 기록을 보관하세요.</p></div><a class="button button-secondary" href="/api/export.csv" download>${icon('download')}CSV 받기</a></div><div class="settings-row"><div><h3>기록 자동 갱신</h3><p>20초마다 새 기록을 확인합니다. 새로고침 버튼으로 즉시 갱신할 수도 있습니다.</p></div><span class="settings-tag">사용 중</span></div></div></section><section class="card danger-card"><div class="card-header"><div><h2>테스트 데이터 초기화</h2><p class="subheading">실행 전 확인 문구를 입력해야 합니다.</p></div>${icon('database')}</div><div class="settings-body"><div class="settings-row"><div><h3>예시 데이터로 다시 시작</h3><p>현재 테스트 기록을 지우고, 가상 환자 6명과 4주 예시 기록을 복원합니다. 업로드 사진도 삭제됩니다.</p></div><button class="button button-secondary" data-action="reset" data-mode="seed">예시 데이터 복원</button></div><div class="settings-row"><div><h3>빈 데이터베이스로 시작</h3><p>환자·건강 기록·식사 기록과 업로드 사진을 모두 삭제합니다. 새 가상 환자를 등록해 테스트할 수 있습니다.</p></div><button class="button button-danger" data-action="reset" data-mode="empty">모든 테스트 데이터 삭제</button></div><p class="settings-detail">초기화 후에는 기록을 되돌릴 수 없습니다. 연구 투입 전에는 로그인·권한·동의·보안·기관 승인을 별도로 갖춰야 합니다.</p></div></section><section class="card"><div class="card-header"><h2>데모 결과를 읽는 방법</h2></div><div class="settings-body settings-detail"><ul><li>확인 우선순위는 기록에 정해진 데모 규칙을 적용한 결과이며, 질병 발생 확률이나 확정 진단이 아닙니다.</li><li>복약은 자기보고이며 실제 복용을 확정하지 않습니다.</li><li>식사 사진은 저장·열람 용도이며 사진으로 영양을 분석하지 않습니다.</li><li>영양값은 선택 음식과 섭취 비율을 적용한 예시 추정입니다.</li><li>미기록은 0 또는 정상으로 대체하지 않으며, 판단 시 기록 일수를 함께 보아야 합니다.</li></ul></div></section><section class="card"><div class="card-header"><h2>현재 워크스페이스</h2></div><div class="settings-body settings-detail">등록 환자 <b>${state.data.stats.patients}명</b><br>오늘 기록 <b>${state.data.stats.reportedToday}명</b><br>예시 기준일 <b>${esc(state.data.today)}</b><br>시간대 <b>대한민국 (Asia/Seoul)</b><br>최근 초기화 <b>${state.data.resetAt?esc(new Date(state.data.resetAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})):'아직 없음'}</b><br><br>저장된 테스트 기록은 페이지를 새로 열어도 유지됩니다. 이 공개 데모에는 실제 환자 개인정보를 입력하지 마세요.</div></section></div>`;
+    return `<div class="settings-grid"><section class="card"><div class="card-header"><div><h2>연결된 데모 환경</h2><p class="subheading">환자와 의료진 화면이 같은 테스트 데이터를 사용합니다.</p></div><span class="settings-tag">연결됨</span></div><div class="settings-body"><div class="settings-row"><div><h3>환자용 모바일 사이트</h3><p>모바일 화면에서 건강·식사 기록을 남기고, 의료진 화면에서 결과를 확인할 수 있습니다.</p></div><a class="button button-secondary" href="/patient${state.selectedId?`?patientId=${encodeURIComponent(state.selectedId)}`:''}" target="_blank" rel="noopener">사이트 열기 ${icon('external')}</a></div><div class="settings-row"><div><h3>테스트 기록 내보내기</h3><p>등록 환자와 일일·식사 기록을 CSV 파일로 내려받습니다. 초기화 전에 필요한 기록을 보관하세요.</p></div><a class="button button-secondary" href="/api/export.csv" download>${icon('download')}CSV 받기</a></div><div class="settings-row"><div><h3>기록 자동 갱신</h3><p>20초마다 새 기록을 확인합니다. 새로고침 버튼으로 즉시 갱신할 수도 있습니다.</p></div><span class="settings-tag">사용 중</span></div></div></section><section class="card danger-card"><div class="card-header"><div><h2>테스트 데이터 초기화</h2><p class="subheading">실행 전 확인 문구를 입력해야 합니다.</p></div>${icon('database')}</div><div class="settings-body"><div class="settings-row"><div><h3>예시 데이터로 다시 시작</h3><p>현재 테스트 기록을 지우고, 가상 환자 6명과 4주 예시 기록을 복원합니다. 업로드 사진도 삭제됩니다.</p></div><button class="button button-secondary" data-action="reset" data-mode="seed">예시 데이터 복원</button></div><div class="settings-row"><div><h3>빈 데이터베이스로 시작</h3><p>환자·건강 기록·식사 기록과 업로드 사진을 모두 삭제합니다. 새 가상 환자를 등록해 테스트할 수 있습니다.</p></div><button class="button button-danger" data-action="reset" data-mode="empty">모든 테스트 데이터 삭제</button></div><p class="settings-detail">초기화 후에는 기록을 되돌릴 수 없습니다. 연구 투입 전에는 로그인·권한·동의·보안·기관 승인을 별도로 갖춰야 합니다.</p></div></section><section class="card"><div class="card-header"><h2>데모 결과를 읽는 방법</h2></div><div class="settings-body settings-detail"><ul><li>확인 우선순위는 기록에 정해진 데모 규칙을 적용한 결과이며, 질병 발생 확률이나 확정 진단이 아닙니다.</li><li>복약은 자기보고이며 실제 복용을 확정하지 않습니다.</li><li>사진 분석이 설정되고 전송에 동의한 경우 AI 검토 초안을 만들며, 사진만으로 처방이나 복용 사실을 확정하지 않습니다.</li><li>영양값은 AI 사진 추정과 수동 음식 선택·비율 예시 추정을 구분하며, 환자가 섭취량을 확인해도 임상적으로 검증된 값은 아닙니다.</li><li>미기록은 0 또는 정상으로 대체하지 않으며, 판단 시 기록 일수를 함께 보아야 합니다.</li></ul></div></section><section class="card"><div class="card-header"><h2>현재 워크스페이스</h2></div><div class="settings-body settings-detail">등록 환자 <b>${state.data.stats.patients}명</b><br>오늘 기록 <b>${state.data.stats.reportedToday}명</b><br>예시 기준일 <b>${esc(state.data.today)}</b><br>시간대 <b>대한민국 (Asia/Seoul)</b><br>최근 초기화 <b>${state.data.resetAt?esc(new Date(state.data.resetAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})):'아직 없음'}</b><br><br>저장된 테스트 기록은 페이지를 새로 열어도 유지됩니다. 이 공개 데모에는 실제 환자 개인정보를 입력하지 마세요.</div></section></div>`;
   }
+  const medicationStatusLabel = status => ({taken:'복용 보고',missed:'미복용 보고',unknown:'기억 안 남',pending:'미응답'}[status] || '미응답');
+  const medicationReason = reason => ({forgot:'깜빡함',side_effect:'불편한 증상',side_effects:'불편한 증상',unavailable:'약이 없음',refused:'복용 원치 않음',other:'기타',not_sure:'잘 모르겠음'}[reason] || reason || '미입력');
+  const reportTime = timestamp => timestamp ? new Date(timestamp).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}) : '보고 없음';
+  const medDate = () => state.medicationDate || state.data?.today || state.summary?.today || '';
+  const medicationCurrent = () => state.medications?.patientId===state.selectedId && state.medications?.date===medDate() ? state.medications : null;
+  const orderActive = order => order.startDate<=state.data.today && (!order.endDate || order.endDate>=state.data.today);
+  function orderPeriodLabel(order) {
+    if(order.startDate>state.data.today)return '시작 예정';
+    if(order.endDate && order.endDate<state.data.today)return '종료';
+    if(order.status==='ended')return '종료 예정';
+    return '진행 중';
+  }
+  async function loadMedications({renderAfter=true}={}) {
+    if(!state.selectedId)return;
+    const patientId=state.selectedId,date=medDate(),generation=++state.medicationRequest;
+    state.medicationLoading=true;state.medicationError='';
+    try {
+      const base=`/api/patients/${encodeURIComponent(patientId)}`;
+      const [orders,schedule,events]=await Promise.all([api(`${base}/medication-orders`),api(`${base}/medication-schedule?date=${encodeURIComponent(date)}`),api(`${base}/medication-events?date=${encodeURIComponent(date)}`)]);
+      if(generation!==state.medicationRequest || patientId!==state.selectedId || date!==medDate())return;
+      state.medications={patientId,date,orders:orders.orders||[],schedule,events:events.events||[],audit:events.audit||[]};
+    } catch(error) {
+      if(generation!==state.medicationRequest || patientId!==state.selectedId || date!==medDate())return;
+      state.medicationError=error.message;
+    } finally {
+      if(generation===state.medicationRequest) {
+        state.medicationLoading=false;
+        if(renderAfter && state.view==='medications')render();
+      }
+    }
+  }
+  function medicationOrdersCard(data) {
+    const active=data.orders.filter(orderActive).length;
+    return `<section class="card medication-orders-card"><div class="card-header"><div><h2>의료진이 확정한 복약 계획 <span class="card-count">현재 ${active}개</span></h2><p class="subheading">이름·용량·시각이 확정된 계획입니다. 종료된 계획도 보존합니다.</p></div><span class="small-label">전체 ${data.orders.length}개</span></div>${data.orders.length?`<div class="medication-order-list">${data.orders.map(order=>`<article class="medication-order ${orderPeriodLabel(order)==='종료'?'ended':''}" data-order-id="${esc(order.id)}"><div class="medication-order-title"><span class="medication-pill-icon">${icon('pill')}</span><div><h3>${esc(order.name)} <small>${esc(order.strength)}</small></h3><p>1회 ${esc(order.dose)}${order.route?` · ${esc(order.route)}`:''}</p></div><span class="order-state ${orderActive(order)?'active':''}">${orderPeriodLabel(order)}</span></div><dl class="medication-order-meta"><div><dt>예정 시각</dt><dd>${order.times.map(time=>`<span class="medication-time">${esc(time)}</span>`).join('')}</dd></div><div><dt>계획 기간</dt><dd>${esc(order.startDate)} — ${esc(order.endDate||'종료일 미지정')}</dd></div><div><dt>주의·안내</dt><dd>${esc(order.instructions||'등록된 안내 없음')}</dd></div></dl><div class="medication-order-foot"><span>의료진 확인 계획 · 기존 보고 보존</span>${order.status!=='ended' && (!order.endDate || order.endDate>=state.data.today)?`<button class="text-link" data-action="end-medication-order" data-id="${esc(order.id)}">계획 종료 ${icon('arrow')}</button>`:'<span>종료일 이후 예정 회차 없음</span>'}</div></article>`).join('')}</div>`:`<div class="medication-empty"><span class="medication-empty-icon">${icon('pill')}</span><h3>확정된 복약 계획이 없습니다</h3><p>약명과 용량을 직접 확인한 뒤 계획을 등록해 주세요.<br>기존 질환명이나 일반적인 복약 문구로 약을 추정하지 않습니다.</p><button class="button button-primary" data-action="add-medication-order">${icon('plus')}확정 복약 계획 등록</button></div>`}${data.orders.length && !active?'<div class="source-disclaimer">현재 진행 중인 확정 계획은 0개입니다. 위 목록은 시작 예정 또는 종료된 계획이며, 과거 기록은 그대로 보존됩니다.</div>':''}</section>`;
+  }
+  function medicationScheduleCard(data) {
+    const schedule=data.schedule,totals=schedule.summary||{},slots=schedule.slots||[];
+    return `<section class="card medication-schedule-card"><div class="card-header"><div><h2>날짜별 복약 자기보고</h2><p class="subheading">${esc(data.date)} · 예정 회차 ${slots.length}개</p></div><span class="small-label">보고 시각 ≠ 실제 복용 시각</span></div><div class="medication-report-stats">${[['taken','복용'],['missed','미복용'],['unknown','기억 안 남'],['pending','미응답']].map(([key,label])=>`<div><b class="medication-text-${key}">${num(totals[key]??slots.filter(s=>s.status===key).length)}</b><span>${label}</span></div>`).join('')}</div>${slots.length?`<div class="medication-slots">${slots.map(slot=>`<article class="medication-slot"><div class="medication-slot-top"><span class="medication-slot-time">${esc(slot.time)}</span><div><strong>${esc(slot.name)}</strong><span>${esc([slot.strength,slot.dose].filter(Boolean).join(' · '))}</span></div><span class="medication-status ${['taken','missed','unknown','pending'].includes(slot.status)?slot.status:'pending'}">${medicationStatusLabel(slot.status)}</span></div>${slot.status!=='pending'?`<div class="medication-slot-report"><p><b>사유</b>${esc(medicationReason(slot.reason))}</p><p><b>메모</b>${esc(slot.note||'미입력')}</p></div><div class="medication-slot-foot"><span>${reportTime(slot.reportedAt)} · 보고 수정 ${Math.max(0,Number(slot.revision||1)-1)}회</span><button class="text-link" data-action="medication-history" data-order-id="${esc(slot.orderId)}" data-time="${esc(slot.time)}">보고·변경 이력 ${icon('arrow')}</button></div>`:'<p class="medication-pending-note">아직 응답이 없습니다. 미복용으로 처리하지 않습니다.</p>'}</article>`).join('')}</div>`:'<div class="compact-empty">선택한 날짜에 예정된 복약 회차가 없습니다.<br>계획 기간과 예정 시각을 확인해 주세요.</div>'}<div class="source-disclaimer">약별 회차 자기보고입니다. 기존 ‘일일 복약 자기보고 점수’와 별개의 기록이며, 실제 복용을 증명하지 않습니다.</div></section>`;
+  }
+  function medicationsView() {
+    if(!state.data.patients.length)return emptyWorkspace();
+    const data=medicationCurrent();
+    return `<div class="medication-toolbar"><label for="medication-patient">환자<select id="medication-patient">${state.data.patients.map(p=>`<option value="${esc(p.id)}" ${p.id===state.selectedId?'selected':''}>${esc(p.name)} · ${p.age}세</option>`).join('')}</select></label><label for="medication-date">보고 날짜<input id="medication-date" type="date" value="${esc(medDate())}"></label><button class="button button-primary" data-action="add-medication-order">${icon('plus')}확정 복약 계획 등록</button></div><div class="medication-context-note">${icon('shield')}<p><b>${esc(state.summary?.patient.name||'선택 환자')} 님의 확정 계획과 자기보고</b><br>약 사진은 읽을 수 있는 글자의 후보만 제공합니다. 1회량·복용 시각은 의료진이 확인하여 등록합니다.</p></div>${state.medicationError?`<div class="medication-load-error" role="alert">복약 자료를 불러오지 못했습니다. ${esc(state.medicationError)}<button class="button button-secondary" data-action="reload-medications">다시 불러오기</button></div>`:''}${!data?`<div class="loading-state medication-loading"><span class="spinner"></span><b>${state.medicationLoading?'복약 계획과 보고를 불러오고 있어요':'복약 자료를 불러와 주세요'}</b></div>`:`<div class="medication-layout">${medicationOrdersCard(data)}${medicationScheduleCard(data)}</div>`}<div class="medication-legacy-note"><b>이전 참고 메모 · 확정 처방 아님</b><p>${esc((state.summary?.patient.medications||[]).join(' · ')||'등록된 참고 메모 없음')}</p><span>위 일반 문구는 복약 계획으로 자동 전환하거나 용량·시간을 추론하지 않습니다.</span></div>`;
+  }
+  function medicationModalFrame(type,title,description) {
+    state.lastFocus=document.activeElement;
+    state.modal={type,patientId:state.selectedId,date:medDate(),photoGeneration:++state.photoGeneration,photo:null,busy:false};
+    $('#modal-backdrop').hidden=false;document.body.style.overflow='hidden';
+    $('#modal').classList.add('medication-modal');
+    $('#modal').innerHTML=`<div class="modal-top"><h2 id="modal-title">${esc(title)}</h2><button class="icon-button" data-modal-action="close" aria-label="닫기">${icon('close')}</button></div><p class="modal-description">${esc(description)}</p>`;
+  }
+  function openMedicationOrder() {
+    if(!state.selectedId)return;
+    medicationModalFrame('medication-order','확정 복약 계획 등록',`${state.summary?.patient.name||'선택 환자'} 님의 약명·함량·1회량·용법·시각을 직접 확인한 뒤 등록해 주세요.`);
+    $('#modal').insertAdjacentHTML('beforeend',`<form id="medication-order-form"><details class="medication-photo-helper"><summary>${icon('spark')}약 봉투·포장 사진으로 이름·함량 작성 보조</summary><p class="medication-photo-notice" id="medication-vision-status">사진 분석 설정을 확인하고 있습니다. 아래 항목은 수동으로 작성할 수 있습니다.</p><div class="medication-photo-controls"><input id="medication-photo" type="file" accept="image/jpeg,image/png,image/webp" disabled aria-label="약 봉투 또는 포장 사진"><img id="medication-photo-preview" alt="확인할 약 봉투·포장 사진" hidden><label class="medication-consent"><input id="medication-photo-consent" type="checkbox" disabled>약 사진을 외부 AI 제공자에게 전송하는 데 동의합니다. 실제 개인정보가 보이지 않는 사진을 사용합니다.</label><button type="button" id="analyze-medication-photo" class="button button-secondary" disabled>${icon('spark')}약명·함량 후보 읽기</button><p class="form-error" id="medication-photo-error" role="alert" hidden></p><div id="medication-photo-candidates" aria-live="polite"></div></div></details><div class="form-row"><div class="field"><label for="medication-name">약명 *</label><input id="medication-name" name="name" maxlength="120" required placeholder="확인한 정확한 약명" autocomplete="off"></div><div class="field"><label for="medication-strength">함량 <small>선택 · 확인한 값만</small></label><input id="medication-strength" name="strength" maxlength="100" placeholder="예: 5 mg" autocomplete="off"></div></div><div class="form-row"><div class="field"><label for="medication-dose">1회량 *</label><input id="medication-dose" name="dose" maxlength="100" required placeholder="예: 1정" autocomplete="off"></div><div class="field"><label for="medication-route">투여 방법 <small>선택</small></label><input id="medication-route" name="route" maxlength="80" placeholder="예: 경구" autocomplete="off"></div></div><fieldset class="medication-times-field"><legend>복용 예정 시각 *</legend><div id="medication-times"><div class="medication-time-row"><input type="time" name="times" required aria-label="복용 예정 시각 1"><button type="button" class="text-link" data-modal-action="add-time">${icon('plus')}시각 추가</button></div></div><p>정기적으로 보고할 회차를 정합니다. 사진이나 기존 메모에서 자동 추정하지 않습니다.</p></fieldset><div class="form-row"><div class="field"><label for="medication-start-date">시작일 *</label><input id="medication-start-date" name="startDate" type="date" value="${esc(state.data.today)}" required></div><div class="field"><label for="medication-end-date">종료일 <small>선택 · 해당일 포함</small></label><input id="medication-end-date" name="endDate" type="date" min="${esc(state.data.today)}"></div></div><div class="field"><label for="medication-instructions">주의·복용 안내 <small>선택</small></label><textarea id="medication-instructions" name="instructions" rows="2" maxlength="2000" placeholder="의료진이 확인한 복용 안내"></textarea></div><label class="medication-confirmation"><input id="medication-order-confirmed" type="checkbox" required>확인한 약명·1회량·기간·시각과 선택 입력 항목을 검토했으며 이 계획을 등록합니다.</label><p class="form-error" id="modal-error" role="alert" hidden></p><div class="modal-actions"><button type="button" class="button button-secondary" data-modal-action="close">취소</button><button type="submit" class="button button-primary">복약 계획 확정 등록</button></div></form>`);
+    $('#medication-name').focus();
+    loadMedicationCapability(state.modal.photoGeneration);
+  }
+  async function loadMedicationCapability(generation) {
+    try {
+      const capabilities=await api('/api/capabilities');
+      if(!state.modal || state.modal.type!=='medication-order' || state.modal.photoGeneration!==generation)return;
+      const enabled=capabilities.vision?.available===true;
+      state.modal.visionEnabled=enabled;
+      $('#medication-vision-status').textContent=enabled?'사진의 읽을 수 있는 약명·함량 후보를 찾습니다. 복용량·시각은 자동 확정하지 않습니다.':`${capabilities.vision?.reason||'현재 사진 분석을 사용할 수 없습니다.'} 아래에서 복약 계획을 직접 작성해 주세요.`;
+      $('#medication-photo').disabled=!enabled;$('#medication-photo-consent').disabled=!enabled;
+    } catch(error) {
+      if(state.modal?.type==='medication-order' && state.modal.photoGeneration===generation)$('#medication-vision-status').textContent='사진 분석 설정을 확인하지 못했습니다. 복약 계획은 직접 작성할 수 있습니다.';
+    }
+  }
+  function updatePhotoAnalyzeButton() {
+    if(state.modal?.type!=='medication-order' || !$('#analyze-medication-photo'))return;
+    $('#analyze-medication-photo').disabled=!state.modal.visionEnabled || !state.modal.photo?.imageData || !$('#medication-photo-consent').checked || state.modal.busy;
+  }
+  function clearMedicationPhoto() {
+    state.photoAbort?.abort();state.photoAbort=null;
+    if(state.modal?.type!=='medication-order')return;
+    state.modal.photoGeneration=++state.photoGeneration;state.modal.photo=null;state.modal.busy=false;
+    $('#medication-photo-candidates').innerHTML='';$('#medication-photo-error').hidden=true;
+    $('#medication-photo-preview').hidden=true;$('#medication-photo-preview').removeAttribute('src');
+    updatePhotoAnalyzeButton();
+  }
+  function readMedicationPhoto(file) {
+    clearMedicationPhoto();
+    if(!file)return;
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size>5*1024*1024) {
+      $('#medication-photo-error').textContent='JPEG·PNG·WebP 사진을 5MB 이하로 선택해 주세요.';$('#medication-photo-error').hidden=false;return;
+    }
+    const generation=state.modal.photoGeneration,patientId=state.modal.patientId;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      if(state.modal?.type!=='medication-order' || state.modal.photoGeneration!==generation || state.modal.patientId!==patientId)return;
+      state.modal.photo={imageData:reader.result,analysis:null};$('#medication-photo-preview').src=reader.result;$('#medication-photo-preview').hidden=false;updatePhotoAnalyzeButton();
+    };
+    reader.onerror=()=>{if(state.modal?.photoGeneration===generation){$('#medication-photo-error').textContent='사진을 읽지 못했습니다. 다른 사진을 선택하거나 직접 작성해 주세요.';$('#medication-photo-error').hidden=false;}};
+    reader.readAsDataURL(file);
+  }
+  async function analyzeMedicationPhoto() {
+    const modal=state.modal;
+    if(modal?.type!=='medication-order' || !modal.photo?.imageData || !$('#medication-photo-consent').checked || modal.busy)return;
+    const generation=modal.photoGeneration,patientId=modal.patientId;
+    modal.busy=true;$('#medication-photo-error').hidden=true;$('#medication-photo-candidates').innerHTML='';updatePhotoAnalyzeButton();
+    state.photoAbort=new AbortController();
+    try {
+      const result=await api(`/api/patients/${encodeURIComponent(patientId)}/photo-analyses`,{method:'POST',body:JSON.stringify({kind:'medication',imageData:modal.photo.imageData,consentExternalProcessing:true}),signal:state.photoAbort.signal});
+      if(state.modal!==modal || modal.photoGeneration!==generation || state.selectedId!==patientId)return;
+      const analysis=result.analysis;
+      if(analysis?.patientId!==patientId || analysis.kind!=='medication')throw new Error('현재 환자의 약 사진 초안이 아닙니다. 다시 확인해 주세요.');
+      modal.photo.analysis=analysis;
+      const candidates=analysis.proposal?.medications||[];
+      $('#medication-photo-candidates').innerHTML=`<div class="medication-analysis-source">검토 초안 · ${esc(analysis.provider)} / ${esc(analysis.model)} · ${reportTime(analysis.createdAt)}</div>${candidates.length?candidates.map((candidate,index)=>`<article class="medication-candidate"><h4>${esc(candidate.name||'약명 판독 안 됨')} <small>${esc(candidate.strength||'함량 판독 안 됨')}</small></h4><p>읽은 글자: ${esc(candidate.labelText||'판독 가능한 글자 없음')}</p><label><input type="checkbox" data-candidate-confirm="${index}">포장·원문과 이름·함량을 직접 대조했습니다.</label><button type="button" class="button button-secondary" data-modal-action="use-medication-candidate" data-candidate="${index}" disabled>이름·함량만 가져오기</button></article>`).join(''):'<p class="medication-photo-notice">확인 가능한 약명 후보를 찾지 못했습니다. 아래 항목을 직접 작성해 주세요.</p>'}${(analysis.warnings||[]).map(w=>`<p class="medication-photo-notice">${esc(w)}</p>`).join('')}<p class="medication-photo-notice">사진은 복용 사실이나 처방을 확정하지 않습니다. 1회량·용법·복용 시각은 별도로 확인하세요.</p>`;
+    } catch(error) {
+      if(state.modal!==modal || modal.photoGeneration!==generation || error.name==='AbortError')return;
+      $('#medication-photo-error').textContent=`${error.message} 사진 분석 없이 아래 항목을 직접 작성할 수 있습니다.`;$('#medication-photo-error').hidden=false;
+    } finally {
+      if(state.modal===modal && modal.photoGeneration===generation){modal.busy=false;updatePhotoAnalyzeButton();}
+    }
+  }
+  function useMedicationCandidate(index) {
+    const candidate=state.modal?.photo?.analysis?.proposal?.medications?.[index];
+    if(!candidate || !$('#modal').querySelector(`[data-candidate-confirm="${index}"]`)?.checked)return;
+    $('#medication-name').value=candidate.name||'';$('#medication-strength').value=candidate.strength||'';
+    $('#medication-order-confirmed').checked=false;
+    $('#medication-name').focus();
+    toast('이름·함량 후보를 가져왔습니다. 1회량·용법·시각을 직접 확인해 주세요.');
+  }
+  function openMedicationEnd(id) {
+    const order=medicationCurrent()?.orders.find(item=>item.id===id);if(!order)return;
+    medicationModalFrame('medication-end','복약 계획 종료',`${order.name} · ${order.strength} 계획의 마지막 유효일을 정합니다. 약 복용 중단 여부는 의료진의 판단으로 확인해 주세요.`);
+    state.modal.orderId=id;
+    const minimum=order.startDate>state.data.today?order.startDate:state.data.today;
+    $('#modal').insertAdjacentHTML('beforeend',`<div class="medication-end-notice">선택한 날짜의 예정 회차까지 유효합니다. 다음 날부터 예정 회차가 없어지며, 기존 복약 보고와 변경 이력은 삭제되지 않습니다. 약명·용량 변경이 필요하면 기존 계획을 종료하고 새 계획을 등록하세요.</div><form id="medication-end-form"><div class="field"><label for="medication-stop-date">마지막 유효일 · 해당일 포함 *</label><input id="medication-stop-date" type="date" name="endDate" min="${minimum}" ${order.endDate?`max="${esc(order.endDate)}"`:''} value="${minimum}" required></div><label class="medication-confirmation"><input id="medication-end-confirmed" type="checkbox" required>종료일과 과거 기록 보존을 확인했습니다.</label><p class="form-error" id="modal-error" role="alert" hidden></p><div class="modal-actions"><button type="button" class="button button-secondary" data-modal-action="close">취소</button><button type="submit" class="button button-primary">종료일 확정</button></div></form>`);
+    $('#medication-stop-date').focus();
+  }
+  function openMedicationHistory(orderId,time) {
+    const data=medicationCurrent();if(!data)return;
+    const slot=data.schedule.slots.find(s=>s.orderId===orderId && s.time===time);if(!slot)return;
+    medicationModalFrame('medication-history','복약 보고와 변경 이력',`${slot.name} · ${data.date} ${time} 예정 회차`);
+    const audit=data.audit.filter(item=>item.orderId===orderId && item.time===time && item.date===data.date).sort((a,b)=>Number(b.revision)-Number(a.revision));
+    $('#modal').insertAdjacentHTML('beforeend',`<div class="medication-history-current"><span class="medication-status ${esc(slot.status)}">${medicationStatusLabel(slot.status)}</span><p><b>현재 사유</b>${esc(medicationReason(slot.reason))}</p><p><b>현재 메모</b>${esc(slot.note||'미입력')}</p><small>${reportTime(slot.reportedAt)} · 자기보고 수정 ${Math.max(0,Number(slot.revision||1)-1)}회</small></div><h3 class="medication-history-heading">보존된 보고·수정 이력</h3><div class="medication-history-timeline">${audit.length?audit.map(entry=>`<article><span class="medication-history-dot"></span><strong>${entry.previous?'보고 수정':'최초 보고'} · ${reportTime(entry.changedAt)}</strong><p>${entry.previous?`${medicationStatusLabel(entry.previous.status)} → `:''}${medicationStatusLabel(entry.current?.status)}</p><dl><div><dt>이전 사유 / 메모</dt><dd>${entry.previous?`${esc(medicationReason(entry.previous.reason))} / ${esc(entry.previous.note||'미입력')}`:'최초 보고 전 기록 없음'}</dd></div><div><dt>변경 사유 / 메모</dt><dd>${esc(medicationReason(entry.current?.reason))} / ${esc(entry.current?.note||'미입력')}</dd></div></dl></article>`).join(''):'<p class="compact-empty">표시할 변경 이력이 없습니다.</p>'}</div><p class="medication-photo-notice">보고 시각은 서버에 기록된 시각입니다. 실제 약을 복용한 시각이나 복용 사실을 확정하지 않습니다.</p><div class="modal-actions"><button type="button" class="button button-secondary" data-modal-action="close">닫기</button></div>`);
+    $('#modal').focus();
+  }
+  async function submitMedicationModal(event) {
+    const form=event.target;if(!['medication-order-form','medication-end-form'].includes(form.id))return;
+    event.preventDefault();const modal=state.modal;if(!modal || modal.saving)return;
+    const patientId=modal.patientId,err=$('#modal-error');err.hidden=true;
+    if(patientId!==state.selectedId){err.textContent='선택 환자가 변경되었습니다. 창을 닫고 다시 확인해 주세요.';err.hidden=false;return;}
+    const submit=form.querySelector('[type="submit"]');modal.saving=true;submit.disabled=true;
+    try {
+      const fields=new FormData(form);
+      if(form.id==='medication-order-form') {
+        const times=fields.getAll('times').filter(Boolean);
+        if(new Set(times).size!==times.length)throw new Error('같은 복용 시각을 중복 등록할 수 없습니다.');
+        const payload={name:String(fields.get('name')).trim(),strength:String(fields.get('strength')).trim(),dose:String(fields.get('dose')).trim(),route:String(fields.get('route')).trim(),times:times.sort(),startDate:fields.get('startDate'),endDate:fields.get('endDate')||null,instructions:String(fields.get('instructions')).trim()};
+        await api(`/api/patients/${encodeURIComponent(patientId)}/medication-orders`,{method:'POST',body:JSON.stringify(payload)});
+      } else await api(`/api/medication-orders/${encodeURIComponent(modal.orderId)}`,{method:'PATCH',body:JSON.stringify({endDate:fields.get('endDate')})});
+      if(state.modal===modal)closeModal();
+      await refresh({quiet:true});toast(form.id==='medication-order-form'?'확정 복약 계획을 등록했습니다.':'복약 계획의 종료일을 저장했습니다. 과거 보고는 보존됩니다.');
+    } catch(error) { if(state.modal===modal){err.textContent=error.message;err.hidden=false;}else toast(error.message,true); }
+    finally {modal.saving=false;if(submit.isConnected)submit.disabled=false;}
+  }
+
   function render() {
     if(!state.data)return;
     const [eyebrow,title,subtitle,breadcrumb]=viewTitles[state.view];
     $('#page-eyebrow').textContent=eyebrow;$('#page-title').textContent=title;$('#page-subtitle').textContent=subtitle;$('#view-breadcrumb').textContent=breadcrumb;
     document.querySelectorAll('#main-nav [data-view]').forEach(btn=>{const active=btn.dataset.view===state.view;btn.classList.toggle('active',active);if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');});
     const inputFocused=document.activeElement?.id==='patient-search';const cursor=inputFocused?document.activeElement.selectionStart:null;
-    $('#app-content').innerHTML=({overview,patients:patientsView,records:recordsView,settings:settingsView}[state.view])();
+    $('#app-content').innerHTML=({overview,patients:patientsView,records:recordsView,medications:medicationsView,settings:settingsView}[state.view])();
     if(inputFocused&&$('#patient-search')){$('#patient-search').focus();$('#patient-search').setSelectionRange(cursor,cursor);}
+    const patientLink=$('.patient-site-link');if(patientLink)patientLink.href=state.selectedId?`/patient?patientId=${encodeURIComponent(state.selectedId)}`:'/patient';
     syncUrl();
   }
-  function changeView(view) { if(!viewTitles[view])return;state.view=view;render();window.scrollTo({top:0,behavior:'instant'}); }
+  function changeView(view) { if(!viewTitles[view])return;state.view=view;render();if(view==='medications')loadMedications();window.scrollTo({top:0,behavior:'instant'}); }
   function closeModal() {
-    $('#modal-backdrop').hidden=true;$('#modal').innerHTML='';state.modal=null;document.body.style.overflow='';if(state.lastFocus?.isConnected)state.lastFocus.focus();
+    state.photoAbort?.abort();state.photoAbort=null;state.photoGeneration++;
+    $('#modal-backdrop').hidden=true;$('#modal').innerHTML='';$('#modal').classList.remove('medication-modal');state.modal=null;document.body.style.overflow='';if(state.lastFocus?.isConnected)state.lastFocus.focus();
   }
   function openModal(type, mode='seed') {
     state.lastFocus=document.activeElement;state.modal={type,mode};
@@ -282,19 +459,37 @@
     if(action==='filter'){state.filter=el.dataset.filter;render();}
     if(action==='add-patient')openModal('add');
     if(action==='reset')openModal('reset',el.dataset.mode);
+    if(action==='add-medication-order')openMedicationOrder();
+    if(action==='end-medication-order')openMedicationEnd(el.dataset.id);
+    if(action==='medication-history')openMedicationHistory(el.dataset.orderId,el.dataset.time);
+    if(action==='reload-medications')loadMedications();
     if(action==='open-detail'){event.preventDefault();$('#patient-detail')?.scrollIntoView({behavior:'smooth',block:'start'});}
   });
   $('#app-content').addEventListener('keydown',event=>{const row=event.target.closest('.patient-row');if(row&&['Enter',' '].includes(event.key)){event.preventDefault();selectPatient(row.dataset.id);}});
   $('#app-content').addEventListener('input',event=>{
     if(event.target.id==='patient-search') {state.search=event.target.value;$('#patient-table-body').innerHTML=patientRows(state.view==='patients');$('#patient-count-label').textContent=`전체 ${state.data.patients.length}명 중 ${filteredPatients().length}명 표시`;}
   });
-  $('#app-content').addEventListener('change',event=>{if(event.target.id==='record-patient')selectPatient(event.target.value);});
+  $('#app-content').addEventListener('change',event=>{if(['record-patient','medication-patient'].includes(event.target.id))selectPatient(event.target.value);if(event.target.id==='medication-date' && /^\d{4}-\d{2}-\d{2}$/.test(event.target.value)){state.medicationDate=event.target.value;state.medications=null;render();loadMedications();}});
   $('#modal-backdrop').addEventListener('click',event=>{if(event.target===$('#modal-backdrop')||event.target.closest('[data-modal-action="close"]'))closeModal();});
   $('#modal').addEventListener('submit',submitModal);
+  $('#modal').addEventListener('submit',submitMedicationModal);
+  $('#modal').addEventListener('click',event=>{
+    const button=event.target.closest('[data-modal-action]');
+    if(button?.dataset.modalAction==='add-time'){const rows=$('#medication-times');const count=rows.querySelectorAll('input').length;if(count>=12){toast('하루 예정 시각은 최대 12개까지 등록할 수 있습니다.',true);return;}rows.insertAdjacentHTML('beforeend',`<div class="medication-time-row"><input type="time" name="times" required aria-label="복용 예정 시각 ${count+1}"><button type="button" class="text-link" data-modal-action="remove-time">삭제</button></div>`);rows.lastElementChild.querySelector('input').focus();}
+    if(button?.dataset.modalAction==='remove-time')button.closest('.medication-time-row').remove();
+    if(button?.dataset.modalAction==='use-medication-candidate')useMedicationCandidate(Number(button.dataset.candidate));
+    if(event.target.closest('#analyze-medication-photo'))analyzeMedicationPhoto();
+  });
+  $('#modal').addEventListener('change',event=>{
+    if(event.target.id==='medication-photo')readMedicationPhoto(event.target.files?.[0]);
+    if(event.target.id==='medication-photo-consent')updatePhotoAnalyzeButton();
+    if(event.target.dataset.candidateConfirm!==undefined){const index=event.target.dataset.candidateConfirm;const btn=$('#modal').querySelector(`[data-candidate="${index}"]`);if(btn)btn.disabled=!event.target.checked;}
+    if(event.target.id==='medication-start-date')$('#medication-end-date').min=event.target.value;
+  });
   document.addEventListener('keydown',event=>{
     if(!state.modal)return;
     if(event.key==='Escape'){closeModal();return;}
-    if(event.key==='Tab') {const items=[...$('#modal').querySelectorAll('button:not([disabled]),input,select,a[href]')];const first=items[0],last=items.at(-1);if(event.shiftKey&&document.activeElement===first){last?.focus();event.preventDefault();}else if(!event.shiftKey&&document.activeElement===last){first?.focus();event.preventDefault();}}
+    if(event.key==='Tab') {const items=[...$('#modal').querySelectorAll('button:not([disabled]),input:not([disabled]),select,textarea,a[href]')];const first=items[0],last=items.at(-1);if(event.shiftKey&&document.activeElement===first){last?.focus();event.preventDefault();}else if(!event.shiftKey&&document.activeElement===last){first?.focus();event.preventDefault();}}
   });
   refresh({quiet:true});
   setInterval(()=>{if(!document.hidden)refresh({quiet:true});},20000);

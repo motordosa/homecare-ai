@@ -2,6 +2,26 @@
 
 이 구성은 `plan: free`인 Docker 웹서비스 하나만 생성합니다. 유료 디스크, 유료 데이터베이스, 추가 유료 서비스는 포함하지 않습니다. 환자 사이트·의료진 사이트·SQLite API를 같은 서버에서 실행합니다.
 
+## 현재 배포 주소
+
+사용자가 제공한 배포 주소는 [homecare-ai-demo.onrender.com](https://homecare-ai-demo.onrender.com)입니다.
+
+- [환자 모바일 화면](https://homecare-ai-demo.onrender.com/patient?patientId=p001)
+- [의료진 데스크톱 화면](https://homecare-ai-demo.onrender.com/clinician?patientId=p001)
+- [서버·DB 상태](https://homecare-ai-demo.onrender.com/api/health)
+
+휴대폰과 PC에서 같은 환자를 선택하면 같은 서버의 기록을 확인합니다. 무료 서버가 절전 상태였다면 첫 화면이 열리기까지 기다려야 할 수 있습니다.
+
+2026-10-16에 **v0.2 배포본(e635e69)**의 공개 HTTPS 주소에서 서버·SQLite·CSV·정적 파일 일치·모바일/데스크톱 화면·차트 등 읽기 검사 22개를 통과했습니다. 별도로 환자 화면의 임시 식사사진 저장 → 의료진 화면 반영 → 새로고침 후 보존을 확인한 뒤, 그 테스트 기록과 사진만 삭제했습니다. 검사 전후 기존 환자·일일 기록·식사 수는 같았습니다. 이후 배포나 데이터가 바뀌면 다시 점검해야 합니다. 이 기록은 v0.3 배포 완료의 증거가 아닙니다.
+
+## v0.3 반영 절차
+
+기획/계약, 목적별 메뉴, 약별 복약, 사진 분석 어댑터, 건강 수신 기반의 새 코드는 로컬 통합 검증을 거칩니다. GitHub `main`의 새 커밋을 Render **Manual Deploy → Deploy latest commit**으로 반영한 뒤 `/api/health`의 schemaVersion이2인지 확인하고 공개 점검 도구를 실행합니다. 소스를 푸시한 상태와 실제 서버 갱신을 구별합니다.
+
+사진 분석은 기본 비활성입니다. Render의 서버 환경 변수에 `HOMECARE_VISION_API_KEY`와 `VISION_ENABLED=true`, `VISION_MODEL=gpt-4.1-mini`를 설정해야 실제 외부 분석을 사용할 수 있습니다. 키를 Git이나 채팅에 넣지 마세요. AI API 비용은 Render 무료 요금과 별개입니다. 설정 후 `/api/capabilities`의 vision.available을 확인하고 합성/동의된 검증 사진으로 결과를 대조합니다. 제공자 키 없는 상태의 fixture 테스트는 실제 정확도 검증이 아닙니다.
+
+건강 연동은 Android 연결 앱을 별도 빌드·설치하고 Health Connect/삼성 헬스 공유·실기기 권한 검증을 거쳐야 합니다. 서버 수신 API가 있다는 것만으로 폰/워치 자동 기록이 완료되지 않습니다. [연결 앱 지침](integrations/android/README.md)을 참고하세요.
+
 ## 계정 연결 및 생성
 
 [Render 무료 배포 시작](https://dashboard.render.com/blueprint/new?repo=https://github.com/motordosa/homecare-ai)
@@ -30,14 +50,26 @@
 
 Render 무료 웹서비스는 미사용 시 절전되며 영구 디스크를 지원하지 않습니다. 이 구성은 `/tmp/homecare-data`에 SQLite DB와 사진을 저장합니다. **서버 재시작·재배포 시 테스트 기록과 업로드 사진은 삭제될 수 있습니다.** 보관할 테스트 결과는 CSV로 내보내세요. 새 파일시스템으로 시작하면 샘플 데이터가 다시 생성됩니다.
 
+CSV는 기록 표이며 사진 파일·환자 전체 속성·수정 이력·연결 비밀을 포함하는 전체 DB 백업/복원본이 아닙니다. 실제 연구 전에는 영구 DB/파일 보관과 정식 백업·복원 절차를 별도 준비합니다.
+
 같은 서버 인스턴스가 실행되는 동안 환자·의료진은 같은 DB를 공유합니다. 페이지 새로고침만으로 DB가 지워지지는 않습니다. 이는 무료 기능 검증을 위한 구성이며 실제 연구자료 보관용 서버가 아닙니다.
 
 ## 배포 후 확인
 
+개발 환경에서 기존 데이터를 변경하지 않고 배포본을 점검할 수 있습니다. Playwright와 Chromium 준비는 README의 테스트 안내를 따릅니다.
+
+```bash
+npm run demo:check -- https://homecare-ai-demo.onrender.com
+```
+
+이 명령은 GET 요청만 사용하며 화면·API·CSV와 배포된 정적 파일을 확인합니다. 결과와 화면 캡처는 Git에 포함되지 않는 `test-results/deployment/`에 저장합니다. `test:browser`는 별도의 로컬 임시 DB에서 초기화까지 검사하는 명령이며 공개 배포본 검사와 구별합니다.
+
 - `/api/health`의 `ok`가 `true`, `storage`가 `sqlite`인지 확인합니다.
 - 환자·의료진 화면이 열리고, 저장한 식사·복약 기록이 두 화면에 반영되는지 확인합니다.
 - 새로고침 후에도 현재 인스턴스에 기록이 남는지 확인합니다.
-- 테스트를 마친 뒤 의료진의 데모 설정에서 비우거나 샘플로 복원합니다.
+- 입력·사진 저장 검증은 가상 환자로 수행합니다. 전체 초기화는 현재 테스트 기록이 필요 없을 때만 의료진의 데모 설정에서 실행합니다.
+
+`render.yaml`의 자동 배포는 꺼져 있습니다. 소스 변경을 반영하려면 Render 서비스의 **Manual Deploy → Deploy latest commit**을 사용합니다. 재배포 전에 보관할 테스트 결과를 내보내세요. GitHub에 올린 변경이 실제 서버에 반영됐는지는 배포 완료 후 다시 점검해야 합니다.
 
 ## 근거
 

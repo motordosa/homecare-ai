@@ -65,8 +65,8 @@ try {
   await check('mobile daily entry saves to the shared database', async () => {
     await mobile.goto(`${base}/patient?patientId=${id}`, { waitUntil: 'networkidle' });
     await ready(mobile);
-    await mobile.locator('#open-medication').click();
-    await mobile.getByText('모두 먹었어요', { exact: true }).click();
+    await mobile.locator('#open-daily').click();
+    await mobile.locator('#daily-form').getByText('모두 먹었어요', { exact: true }).click();
     await mobile.locator('#daily-steps').fill('4321');
     await mobile.locator('#daily-sleep').fill('7.8');
     await mobile.locator('#daily-weight').fill('63.5');

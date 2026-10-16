@@ -3,17 +3,24 @@ import { createReadStream, existsSync, statSync, unlinkSync, writeFileSync } fro
 import { join, resolve, extname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { foodTable, mealFromRow, openDatabase, recordFromRow, todayKorea } from './lib/db.mjs';
-import { dashboard, getPatient, getPatients, patientSummary, provenance } from './lib/analysis.mjs';
+import { foodTable, mealFromRow, openDatabase, recordFromRow, todayKorea, transaction } from './lib/db.mjs';
+import { dashboard, effectiveRecords, getPatient, getPatients, patientSummary, provenance } from './lib/analysis.mjs';
 import { resetDemo } from './lib/reset.mjs';
 import { allowedKeys, choice, csvCell, dateValue, decodeImage, HttpError, numberValue, objectBody, textList, textValue } from './lib/validation.mjs';
+import { ensureMedicationSchema, getMedicationOrders, createMedicationOrder, endMedicationOrder, medicationSchedule, saveMedicationEvent, getMedicationEvents } from './lib/medications.mjs';
+import { ensureVisionSchema, visionCapabilities, analyzePhoto, resolveMealAnalysis, markAnalysisApplied } from './lib/vision.mjs';
+import { ensureHealthSchema, getHealthConnections, createHealthConnection, revokeHealthConnection, receiveHealthBatch, getHealthConnectionIdentity } from './lib/health-sync.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const publicDir = join(root, 'public');
 const { db, uploadDir } = openDatabase(process.env.DATA_DIR || join(root, 'data'));
+ensureMedicationSchema(db);
+ensureVisionSchema(db);
+ensureHealthSchema(db);
+db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','2') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
 const port = Number(process.env.PORT || 3000);
 const bodyLimit = 7 * 1024 * 1024;
-const schemaVersion = 1;
+const schemaVersion = 2;
 
 function respond(res, status, value, extraHeaders = {}) {
   const body = JSON.stringify(value);
@@ -104,12 +111,14 @@ function saveDaily(id, body) {
 
 function saveMeal(id, body) {
   requirePatient(id);
-  allowedKeys(body, ['date', 'mealType', 'foodType', 'portion', 'imageData']);
+  allowedKeys(body, ['date', 'mealType', 'foodType', 'portion', 'imageData', 'analysisId', 'patientConfirmed']);
   const date = dateValue(body.date ?? todayKorea());
   const mealType = choice(body.mealType, '식사 종류', ['breakfast', 'lunch', 'dinner', 'snack']);
-  const foodType = choice(body.foodType, '음식 유형', Object.keys(foodTable));
   const portion = choice(body.portion, '섭취 비율', [.25, .5, .75, 1]);
-  const food = foodTable[foodType];
+  const analysis = body.analysisId === undefined ? null : resolveMealAnalysis(db, { analysisId: body.analysisId, patientId: id, imageData: body.imageData, patientConfirmed: body.patientConfirmed });
+  if (!analysis && 'patientConfirmed' in body) throw new HttpError(400, '분석 초안이 없는 확인 요청입니다.');
+  const foodType = analysis?.foodType ?? choice(body.foodType, '음식 유형', Object.keys(foodTable));
+  const food = analysis || foodTable[foodType];
   let filename = null;
   if (body.imageData) {
     const decoded = decodeImage(body.imageData);
@@ -118,17 +127,23 @@ function saveMeal(id, body) {
   }
   const mealId = randomUUID();
   try {
-    db.prepare('INSERT INTO meals (id,patient_id,date,meal_type,food_type,portion,calories,protein_grams,image_filename,source,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
-      .run(mealId, id, date, mealType, foodType, portion, Math.round(food.calories * portion), Math.round(food.proteinGrams * portion * 10) / 10, filename, 'demo-food-table-v1', new Date().toISOString());
+    transaction(db, () => {
+      db.prepare('INSERT INTO meals (id,patient_id,date,meal_type,food_type,portion,calories,protein_grams,image_filename,source,created_at,analysis_id,food_label,estimation_json) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+        .run(mealId, id, date, mealType, foodType, portion, Math.round(food.calories * portion), Math.round(food.proteinGrams * portion * 10) / 10, filename, analysis?.source ?? 'demo-food-table-v1', new Date().toISOString(), analysis?.analysisId ?? null, analysis?.foodLabel ?? null, analysis ? JSON.stringify(analysis.estimation) : null);
+      if (analysis) markAnalysisApplied(db, analysis.analysisId, mealId);
+    });
   } catch (error) { if (filename) unlinkSync(join(uploadDir, filename)); throw error; }
   return mealFromRow(db.prepare('SELECT * FROM meals WHERE id=?').get(mealId));
 }
 
 function exportCsv(res) {
-  const columns = ['recordType', 'id', 'patientId', 'patientName', 'date', 'steps', 'sleepHours', 'medicationStatus', 'appetite', 'mood', 'note', 'weightKg', 'mealType', 'foodType', 'portion', 'calories', 'proteinGrams', 'source', 'createdAt', 'updatedAt'];
+  const columns = ['recordType', 'id', 'patientId', 'patientName', 'date', 'steps', 'sleepHours', 'medicationStatus', 'appetite', 'mood', 'note', 'weightKg', 'mealType', 'foodType', 'portion', 'calories', 'proteinGrams', 'source', 'createdAt', 'updatedAt', 'stepsSource', 'sleepSource', 'orderId', 'time', 'status', 'reason', 'revision', 'reportedAt', 'name', 'strength', 'dose', 'route', 'times', 'startDate', 'endDate', 'instructions', 'connectionId'];
   const names = new Map(getPatients(db).map(p => [p.id, p.name]));
-  const rows = db.prepare('SELECT * FROM daily_records ORDER BY date,patient_id').all().map(recordFromRow).map(r => ({ ...r, recordType: 'daily', patientName: names.get(r.patientId), source: 'patient-self-report-demo' }));
+  const rows = getPatients(db).flatMap(patient => effectiveRecords(db, patient.id, '1900-01-01', '2200-01-01')).map(r => ({ ...r, recordType: 'daily', patientName: names.get(r.patientId), source: r.dataOrigin }));
   rows.push(...db.prepare('SELECT * FROM meals ORDER BY date,patient_id,created_at').all().map(mealFromRow).map(m => ({ ...m, recordType: 'meal', patientName: names.get(m.patientId) })));
+  rows.push(...db.prepare('SELECT * FROM medication_orders ORDER BY patient_id,created_at').all().map(row => ({ recordType: 'medication-order', id: row.id, patientId: row.patient_id, patientName: names.get(row.patient_id), name: row.name, strength: row.strength, dose: row.dose, route: row.route, times: JSON.parse(row.times).join('|'), startDate: row.start_date, endDate: row.end_date, instructions: row.instructions, status: row.status, createdAt: row.created_at, updatedAt: row.updated_at, source: 'clinician-entered-demo' })));
+  rows.push(...db.prepare('SELECT * FROM medication_events ORDER BY date,patient_id,time').all().map(row => ({ recordType: 'medication', id: row.id, patientId: row.patient_id, patientName: names.get(row.patient_id), date: row.date, orderId: row.order_id, time: row.time, status: row.status, reason: row.reason, note: row.note, revision: row.revision, reportedAt: row.reported_at, source: 'patient-self-report' })));
+  rows.push(...db.prepare('SELECT d.*,c.platform FROM health_daily d JOIN health_connections c ON c.id=d.connection_id ORDER BY d.date,d.patient_id').all().map(row => ({ recordType: 'health', patientId: row.patient_id, patientName: names.get(row.patient_id), date: row.date, steps: row.steps, sleepHours: row.sleep_minutes === null ? null : row.sleep_minutes / 60, updatedAt: row.updated_at, source: row.platform, connectionId: row.connection_id })));
   const body = '\ufeff' + [columns.map(csvCell).join(','), ...rows.map(row => columns.map(column => csvCell(row[column])).join(','))].join('\r\n') + '\r\n';
   res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="homecare-demo-${todayKorea()}.csv"`, 'Cache-Control': 'no-store', 'Content-Length': Buffer.byteLength(body) });
   res.end(body);
@@ -167,10 +182,46 @@ const server = http.createServer(async (req, res) => {
     const method = req.method;
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) assertSameOrigin(req);
     if (path === '/api/health' && method === 'GET') return respond(res, 200, health());
+    if (path === '/api/capabilities' && method === 'GET') return respond(res, 200, {
+      vision: visionCapabilities(process.env),
+      health: { webDirectCollection: false, nativeBridge: { implemented: false, verified: false }, preferredPlatform: 'health-connect' },
+      medications: { perDose: true, clinicianPlans: true },
+    });
+    if (path === '/api/health-sync/connection' && method === 'GET') {
+      const token = /^Bearer ([^\s]+)$/.exec(req.headers.authorization || '')?.[1];
+      if (!token) throw new HttpError(401, '유효한 연결 토큰이 필요합니다.');
+      return respond(res, 200, getHealthConnectionIdentity(db, token));
+    }
+    if (path === '/api/health-sync' && method === 'POST') {
+      const header = req.headers.authorization || '';
+      const token = /^Bearer ([^\s]+)$/.exec(header)?.[1];
+      if (!token) throw new HttpError(401, '유효한 연결 토큰이 필요합니다.');
+      return respond(res, 200, receiveHealthBatch(db, token, await readJson(req)));
+    }
     if (path === '/api/dashboard' && method === 'GET') return respond(res, 200, dashboard(db));
     if (path === '/api/patients' && method === 'GET') return respond(res, 200, { patients: getPatients(db), today: todayKorea(), provenance });
     if (path === '/api/patients' && method === 'POST') return respond(res, 201, { patient: createPatient(await readJson(req)) });
-    let match = /^\/api\/patients\/([^/]+)(?:\/(summary|daily|meals))?$/.exec(path);
+    let match = /^\/api\/patients\/([^/]+)\/(medication-orders|medication-schedule|medication-events|photo-analyses|health-connections)$/.exec(path);
+    if (match) {
+      const [, id, operation] = match;
+      requirePatient(id);
+      if (operation === 'medication-orders' && method === 'GET') return respond(res, 200, { orders: getMedicationOrders(db, id) });
+      if (operation === 'medication-orders' && method === 'POST') return respond(res, 201, { order: createMedicationOrder(db, id, await readJson(req)) });
+      if (operation === 'medication-schedule' && method === 'GET') return respond(res, 200, medicationSchedule(db, id, dateValue(url.searchParams.get('date') ?? todayKorea())));
+      if (operation === 'medication-events' && method === 'GET') return respond(res, 200, getMedicationEvents(db, id, dateValue(url.searchParams.get('date') ?? todayKorea())));
+      if (operation === 'medication-events' && method === 'POST') return respond(res, 200, { event: saveMedicationEvent(db, id, await readJson(req)) });
+      if (operation === 'photo-analyses' && method === 'POST') return respond(res, 201, await analyzePhoto({ db, patientId: id, body: await readJson(req) }));
+      if (operation === 'health-connections' && method === 'GET') return respond(res, 200, getHealthConnections(db, id));
+      if (operation === 'health-connections' && method === 'POST') return respond(res, 201, createHealthConnection(db, id, await readJson(req)));
+    }
+    match = /^\/api\/medication-orders\/([^/]+)$/.exec(path);
+    if (match && method === 'PATCH') return respond(res, 200, { order: endMedicationOrder(db, match[1], await readJson(req)) });
+    match = /^\/api\/patients\/([^/]+)\/health-connections\/([^/]+)$/.exec(path);
+    if (match && method === 'DELETE') {
+      requirePatient(match[1]);
+      return respond(res, 200, revokeHealthConnection(db, match[1], match[2]));
+    }
+    match = /^\/api\/patients\/([^/]+)(?:\/(summary|daily|meals))?$/.exec(path);
     if (match) {
       const [, id, operation] = match;
       requirePatient(id);
