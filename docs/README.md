@@ -1,10 +1,13 @@
 # 개발 문서의 기준과 사용 순서
 
-문서 기준: 2026-10-16, 변경 계획 v0.3. 구현 상태의 최종 근거는 CHANGELOG의 검증 결과다.
+문서 기준: 2026-10-17 KST, 변경 계획 v0.4. 구현 상태의 최종 근거는 CHANGELOG의 검증 결과다.
 
 | 문서 | 책임 |
 |---|---|
 | [PRODUCT_PLAN.md](PRODUCT_PLAN.md) | 목적, 요구사항 ID, 개발 순서, 인수조건 |
+| [SCREEN_SPEC.md](SCREEN_SPEC.md) | 환자·의료진 페이지별 상단/하단·닫기·입력·상태·코드 대응 제작 규약 |
+| [SMARTPHONE_SYNC_SPEC.md](SMARTPHONE_SYNC_SPEC.md) | 일부 권한·항목 생략/삭제·revision·Android 코드의 상세 계약 |
+| [USER_ACTION_REPORT.md](USER_ACTION_REPORT.md) | 사용자 계정·기기·API 실행 요청과 단계별 완료 기준·회신 양식 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 구성요소, 화면별 동작, 데이터 흐름·경계 |
 | [CONTRACTS.md](CONTRACTS.md) | API·상태·자료형·단위·동시성·출처 계약 |
 | [DATA_DICTIONARY.md](DATA_DICTIONARY.md) | 핵심 변수·DB·설정의 의미와 소유권 |

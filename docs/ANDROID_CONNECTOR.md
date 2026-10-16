@@ -8,6 +8,8 @@
 
 ## 첫 연결 앱 범위
 
+2026-10-17 KST 확장: SMARTPHONE_SYNC_SPEC.md에 따라 걸음/수면 중 허용된 항목만 읽는다. 미허용 키 생략과 조회 후 null을 구별하고 서버 schema3의 항목별 revision을 사용한다. 새 앱은 서버의 partialMetrics/selected를 먼저 확인한다. 철회 항목이 있는 대기 배치는 전송하지 않고 새 batchId로 재집계한다. 실제 Kotlin JVM 단위검사도 빌드와 함께 수행한다. 사용자 외부 실행 요청은 USER_ACTION_REPORT.md를 따른다.
+
 - Android native Kotlin, Health Connect 읽기 권한과 별도 background 권한(지원 기기에서만), WorkManager의 OS가 허용하는 실행.
 - 웹의 일회성 연결 안내에 표시된 HTTPS 서버 origin, 환자 이름/ID를 확인하고 origin·patientId·token을 앱에 입력한다. 환자 이름이나 전체 웹 URL을 ID 대신 입력하지 않는다. token을 Android Keystore 암호화 저장하며 로그/백업/분석 도구에 보내지 않는다. 서버 origin은 HTTPS만 허용하고 로그인 없는 데모에 실제 연구 자료를 연결하지 않는다.
 - 연결 시 **이 휴대폰 건강자료의 주체가 선택 환자인지** 확인한다. 보호자 폰의 걸음 수를 환자에게 전송하지 않는다.

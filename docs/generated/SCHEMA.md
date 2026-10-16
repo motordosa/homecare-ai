@@ -100,6 +100,8 @@ CREATE TABLE health_connections (
 | date | TEXT | yes |  | 2 |
 | steps | INTEGER | no |  |  |
 | sleep_minutes | REAL | no |  |  |
+| steps_updated_at | TEXT | no |  |  |
+| sleep_updated_at | TEXT | no |  |  |
 | updated_at | TEXT | yes |  |  |
 | received_at | TEXT | yes |  |  |
 
@@ -112,6 +114,8 @@ CREATE TABLE health_daily (
       date TEXT NOT NULL,
       steps INTEGER CHECK(steps IS NULL OR (steps BETWEEN 0 AND 100000 AND steps=CAST(steps AS INTEGER))),
       sleep_minutes REAL CHECK(sleep_minutes IS NULL OR sleep_minutes BETWEEN 0 AND 1440),
+      steps_updated_at TEXT,
+      sleep_updated_at TEXT,
       updated_at TEXT NOT NULL,
       received_at TEXT NOT NULL,
       PRIMARY KEY(connection_id,date),

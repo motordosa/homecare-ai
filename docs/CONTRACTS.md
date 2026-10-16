@@ -1,4 +1,4 @@
-# 데이터와 API 계약 v0.3
+# 데이터와 API 계약 v0.4
 
 이 문서는 구현 전 합의한 기준이다. 세부 계약을 변경할 때 구현보다 먼저 이 문서와 CHANGELOG를 갱신한다. 기존 v0.2 경로는 삭제하지 않는다. 구현 여부는 CHANGELOG에서 확인한다.
 
@@ -11,6 +11,8 @@
 - 상태 변경은 같은 출처 검사. 네이티브 수신은 환자에 바인딩한 Bearer 연결 토큰을 추가 요구한다.
 
 ## 일일 기록 / 메뉴
+
+환자 화면의 상단·하단·닫기·미저장/저장 중·역할 전환 계약은 SCREEN_SPEC.md가 기준이다. 단일 화면 registry와 브라우저 검증을 연결한다. 일반 서브 X는 같은 환자 홈, 입력 X는 진입 화면이며 우상단 위치를 의료진 전환으로 재사용하지 않는다.
 
 `POST /api/patients/:id/daily`는 부분 갱신이다. 활동 모드는 `{date,steps}`, 수면 모드는 `{date,sleepHours}`, 기존 일일 복약 모드는 `{date,medicationStatus}`만 보낸다. 전체 폼도 미입력 식욕·기분을 `normal`로 만들지 않는다. 직접 보고한 unknown과 미응답 null을 구별한다. 입력하지 않은 필드를 전송하지 않는다.
 
@@ -40,12 +42,14 @@
 
 ## 건강 수신 기반
 
+v0.4 부분 권한/항목별 revision 확장은 SMARTPHONE_SYNC_SPEC.md가 기준이다. day의 steps/sleepMinutes는 최소 하나 필수이며 생략은 보존, null은 명시적 삭제다. health_daily의 steps_updated_at/sleep_updated_at으로 각 항목의 최신 수정만 적용한다. 이전 전체 스냅샷 및 batch hash 호환은 유지한다. preflight는 partialMetrics:true/selected를 추가하며 새 Android는 이를 먼저 확인한다. schemaVersion3 추가 마이그레이션으로 기존 자료를 보존한다. 아래 v0.3의 두 항목 전체 전송은 계속 유효하다.
+
 - `GET /api/patients/:id/health-connections`: 연결과 마지막 수신, 웹 직접수집 불가, 선택 출처, 준비 상태.
 - `POST /api/patients/:id/health-connections`: `{platform:'health-connect'|'apple-health',label?}` → 연결 ID와 최초1회 표시하는 비밀 token. 토큰 hash만 DB 저장. 새 선택 출처는 기존 자료를 삭제하거나 두 플랫폼 합계를 가산하지 않는다.
 - 웹의 일회성 연결 안내에는 서버 origin, 환자 이름, 정확한 patientId를 함께 표시한다. 앱 입력값과 대조할 수 있어야 하며 화면 이동·환자 변경·코드 숨김 시 token과 함께 이전 연결 정보를 지운다. URL 전체나 환자 이름을 patientId 대신 사용하지 않는다.
 - `DELETE /api/patients/:id/health-connections/:connectionId`: 해당 연결 폐기. 새 수신 차단, 과거 자료 보존.
 - `POST /api/health-sync`: `Authorization: Bearer ...`, `{batchId,timeZone:'Asia/Seoul',days:[{date,steps,sleepMinutes,updatedAt}]}`. 최대31일, steps정수0..100000 또는null, sleepMinutes0..1440 또는null. updatedAt은 플랫폼 집계 revision의 시각이다. 같은 connection/date는 upsert, 오래된 revision은 무시, 같은 batch 재전송은 중복 생성 금지.
-- `GET /api/health-sync/connection`: 같은 Bearer로 `{connectionId,patientId,platform}`만 확인한다. 네이티브 앱은 환자 ID·연결 주체를 먼저 대조한 뒤 건강 저장소를 읽고 전송한다. 잘못 복사한 토큰으로 다른 환자에게 자료를 먼저 보내지 않는다. 토큰 폐기/오류는401이며 원문 토큰은 반환하지 않는다.
+- `GET /api/health-sync/connection`: 같은 Bearer로 `{connectionId,patientId,platform,partialMetrics:true,selected}`를 확인한다. 네이티브 앱은 환자 ID·연결 주체를 먼저 대조한 뒤 건강 저장소를 읽고 전송한다. 잘못 복사한 토큰으로 다른 환자에게 자료를 먼저 보내지 않는다. 토큰 폐기/오류는401이며 원문 토큰은 반환하지 않는다.
 - 일별 입력은 플랫폼이 폰·워치 원자료 중복을 정리한 집계다. 서버가 서로 다른 기기/플랫폼 값을 더하지 않는다. 원자료 삭제로 수정된 합계는 더 최신 revision의 null/0을 포함해 교체한다.
 - 수동 일일 기록과 기기 전송을 별도 저장한다. 요약 출처의 우선순위는 명시적 수동값이 있으면 수동, 없으면 선택된 연결의 집계다. 0도 명시적 수동값이다. 수동 보완을 지우면 기기값으로 복귀한다. UI에 선택 출처·마지막 수신·미연결을 표시한다.
 - 이 수신 API의 구현/fixture 테스트는 실제 폰·워치 자동 연동 완료를 뜻하지 않는다. 네이티브 권한/기기/백그라운드 검증은 별도 인수조건이다.

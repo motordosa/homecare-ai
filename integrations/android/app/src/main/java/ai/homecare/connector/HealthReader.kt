@@ -3,7 +3,6 @@ package ai.homecare.connector
 import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.HealthConnectFeatures
-import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.AggregateRequest
@@ -33,9 +32,10 @@ internal class HealthReader(private val context: Context) {
     suspend fun readRecentDays(background: Boolean): List<DailyReading> {
         val health = client()
         val granted = health.permissionController.getGrantedPermissions()
-        if (!granted.containsAll(READ_PERMISSIONS)) {
+        val access = MetricAccess.from(granted)
+        if (!access.any) {
             // A revoked permission must not overwrite earlier valid observations with null.
-            throw ConnectorFailure("걸음 수·수면 읽기 권한을 모두 허용해야 동기화할 수 있습니다. 기존 서버 자료는 변경하지 않았습니다.")
+            throw ConnectorFailure("걸음 수 또는 수면 중 하나 이상의 읽기 권한을 허용하세요. 기존 서버 자료는 변경하지 않았습니다.")
         }
         if (background && (!backgroundAvailable() || BACKGROUND_PERMISSION !in granted)) {
             throw ConnectorFailure("백그라운드 읽기가 허용되지 않았습니다. 앱을 열어 동기화하세요.")
@@ -47,7 +47,7 @@ internal class HealthReader(private val context: Context) {
         val sleep = mutableListOf<SleepSessionRecord>()
         var page: String? = null
         var pages = 0
-        do {
+        if (access.sleep) do {
             val result = health.readRecords(ReadRecordsRequest(
                 recordType = SleepSessionRecord::class,
                 timeRangeFilter = TimeRangeFilter.between(first.minusDays(1).atStartOfDay(STUDY_ZONE).toInstant(), now),
@@ -64,14 +64,13 @@ internal class HealthReader(private val context: Context) {
             val day = first.plusDays(offset)
             val start = day.atStartOfDay(STUDY_ZONE).toInstant()
             val end = minOf(day.plusDays(1).atStartOfDay(STUDY_ZONE).toInstant(), now)
-            if (!start.isBefore(end)) return@map DailyReading(day.toString(), null, null)
-            val aggregate = health.aggregate(AggregateRequest(
+            if (!start.isBefore(end)) return@map DailyReading(day.toString(), null, null, access.steps, access.sleep)
+            val steps = if (access.steps) health.aggregate(AggregateRequest(
                 metrics = setOf(StepsRecord.COUNT_TOTAL),
                 timeRangeFilter = TimeRangeFilter.between(start, end),
-            ))
-            val steps = aggregate[StepsRecord.COUNT_TOTAL]
+            ))[StepsRecord.COUNT_TOTAL] else null
             if (steps != null && steps !in 0L..100_000L) throw ConnectorFailure("걸음 수가 서버의 허용 범위를 벗어났습니다. 원본 기록을 확인하세요.")
-            DailyReading(day.toString(), steps, asleepMinutes(sleep, start, end))
+            DailyReading(day.toString(), steps, if (access.sleep) asleepMinutes(sleep, start, end) else null, access.steps, access.sleep)
         }
     }
 
@@ -104,8 +103,8 @@ internal class HealthReader(private val context: Context) {
     companion object {
         val STUDY_ZONE: ZoneId = ZoneId.of("Asia/Seoul")
         val READ_PERMISSIONS = setOf(
-            HealthPermission.getReadPermission(StepsRecord::class),
-            HealthPermission.getReadPermission(SleepSessionRecord::class),
+            MetricAccess.STEPS_PERMISSION,
+            MetricAccess.SLEEP_PERMISSION,
         )
         const val BACKGROUND_PERMISSION = "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND"
     }

@@ -1,11 +1,13 @@
 "use strict";
 
+import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
+
 (() => {
   const $ = (selector, scope = document) => scope.querySelector(selector);
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
-  const views = ["home", "records", "medication", "connections", "guide"];
+  const views = Object.keys(PATIENT_SCREENS);
   const metrics = ["steps", "sleepHours", "proteinGrams"];
-  const dailyModes = { all: { title: "건강 기록 남기기", fields: ["steps", "sleepHours", "weightKg", "medicationStatus", "appetite", "mood", "note"], hint: "입력하거나 바꾼 항목만 저장해요. 답하지 않은 항목은 미보고로 남아요." }, steps: { title: "걸음 수 기록하기", fields: ["steps"], hint: "이 날짜의 걸음 수만 저장해요. 수면이나 복약 기록은 바뀌지 않아요." }, sleep: { title: "수면 시간 기록하기", fields: ["sleepHours"], hint: "이 날짜의 수면 시간만 저장해요. 활동이나 복약 기록은 바뀌지 않아요." } };
+  const dailyModes = { all: { fields: ["steps", "sleepHours", "weightKg", "medicationStatus", "appetite", "mood", "note"], hint: "입력하거나 바꾼 항목만 저장해요. 답하지 않은 항목은 미보고로 남아요." }, steps: { fields: ["steps"], hint: "이 날짜의 걸음 수만 저장해요. 수면이나 복약 기록은 바뀌지 않아요." }, sleep: { fields: ["sleepHours"], hint: "이 날짜의 수면 시간만 저장해요. 활동이나 복약 기록은 바뀌지 않아요." } };
   const state = { patients: [], patientId: null, summary: null, view: "home", metric: "steps", section: null, imageData: null, loading: false, saving: null, photoLoading: false, requestId: 0, dateRequestId: 0, photoRequestId: 0, dailyMode: "all", dailyBaseline: {}, capabilities: null, analysis: null, analysisBusy: false, analysisRequestId: 0, medicationDate: null, medicationSchedule: null, todayMedication: null, medicationRequestId: 0, medicationBusy: false, connectionRequestId: 0, connections: null, connectionBusy: false };
   const labels = { meal: { breakfast: "아침", lunch: "점심", dinner: "저녁", snack: "간식" }, food: { balanced: "밥과 반찬", porridge: "죽·부드러운 식사", protein: "고기·생선·두부", noodles: "면·빵" }, medication: { taken: "모두 복용", partial: "일부 복용", missed: "미복용", unknown: "기억나지 않음" }, appetite: { good: "좋음", normal: "보통", poor: "적음" }, mood: { good: "좋음", normal: "보통", poor: "가라앉음" } };
   const icons = {
@@ -25,6 +27,56 @@
   const fallbackToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
   const today = () => state.summary?.today || fallbackToday();
   let toastTimer;
+  const dialogBaseline = new Map();
+  const dialogOpeners = new Map();
+  const medicationBaseline = new Map();
+  let dailyLoadedDate;
+
+  function formSnapshot(form) {
+    return JSON.stringify([...form.elements].filter(element => element.name && !(form.id === 'daily-form' && element.name === 'date') && !['submit', 'button', 'file'].includes(element.type)).map(element =>
+      [element.name, element.value, ['radio', 'checkbox'].includes(element.type) ? element.checked : null]
+    ).concat(form.id === 'meal-form' ? [['imageData', state.imageData]] : []));
+  }
+
+  function dialogDirty(dialog) {
+    const form = $('form', dialog);
+    return dialogBaseline.has(dialog.id) && dialogBaseline.get(dialog.id) !== formSnapshot(form);
+  }
+
+  function medicationDirty() {
+    return state.view === 'medication' && $$('#medication-list form, #legacy-medication-form').some(form =>
+      medicationBaseline.has(form.id) && medicationBaseline.get(form.id) !== formSnapshot(form));
+  }
+
+  function canLeavePatient() {
+    if (state.saving || state.loading) return false;
+    return !($$('dialog[open]').some(dialogDirty) || medicationDirty()) || window.confirm('저장하지 않은 입력이 있어요. 저장하지 않고 나갈까요?');
+  }
+
+  function openRecordDialog(id) {
+    const dialog = $(`#${id}`);
+    dialogBaseline.set(id, formSnapshot($('form', dialog)));
+    dialogOpeners.set(id, document.activeElement);
+    dialog.showModal();
+  }
+
+  function closeRecordDialog(dialog) {
+    if (state.saving || (dialogDirty(dialog) && !window.confirm('저장하지 않은 입력이 있어요. 저장하지 않고 나갈까요?'))) return;
+    dialog.close();
+  }
+
+  function renderNavigation() {
+    const screen = PATIENT_SCREENS[state.view];
+    if (state.view !== 'home') $(`#view-${state.view} h1`).textContent = screen.title;
+    const locked = Boolean(state.saving || state.loading);
+    $('#patient-view-close').hidden = !screen.closeTarget;
+    $('#patient-view-close').disabled = locked;
+    $('#patient-view-close').dataset.screenId = screen.id;
+    $('#patient-home-link').href = `/patient?patientId=${encodeURIComponent(state.patientId || '')}`;
+    $('#patient-home-link').setAttribute('aria-disabled', String(locked));
+    $$('.bottom-nav button').forEach(button => { button.disabled = locked; });
+    $('#patient-select').disabled = locked;
+  }
 
   async function api(path, options = {}) {
     const controller = new AbortController();
@@ -72,10 +124,11 @@
     refreshAnalysisControls();
   }
 
-  async function loadPatient(patientId, { initial = false, historyMode = "replace" } = {}) {
+  async function loadPatient(patientId, { initial = false, historyMode = "replace", preserveMedicationInputs = false } = {}) {
     const requestId = ++state.requestId;
     const changed = patientId !== state.patientId;
     state.loading = true;
+    renderNavigation();
     $("#patient-select").disabled = true;
     $("#load-error").hidden = true;
     if (initial || changed) {
@@ -104,14 +157,14 @@
       render();
       $("#loading-state").hidden = true;
       $("#app-content").hidden = false;
-      applyView({ historyMode, focus: false });
+      applyView({ historyMode, focus: false, refreshMedication: !preserveMedicationInputs || changed });
     } catch (error) {
       if (requestId === state.requestId) showError(error.message);
       throw error;
     } finally {
       if (requestId === state.requestId) {
         state.loading = false;
-        $("#patient-select").disabled = Boolean(state.saving);
+        renderNavigation();
       }
     }
   }
@@ -127,7 +180,6 @@
     $("#patient-name").textContent = name;
     $("#today-label").textContent = dateObject(today()).toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short", timeZone: "Asia/Seoul" });
     const clinicianUrl = `/clinician?patientId=${encodeURIComponent(state.patientId)}`;
-    $("#clinician-link").href = clinicianUrl;
     $("#guide-clinician-link").href = clinicianUrl;
     renderHome(record);
     renderRecords();
@@ -147,7 +199,7 @@
     const taken = slots.filter(slot => slot.status === "taken").length;
     const tasks = [
       { label: "식사", done: meals.length > 0 },
-      { label: "복약", done: scheduled ? slots.length > 0 && reported === slots.length : Boolean(record?.medicationStatus) },
+      { label: "복약", done: Boolean(schedule) && (scheduled ? slots.length > 0 && reported === slots.length : Boolean(record?.medicationStatus)) },
       { label: "활동", done: numeric(record?.steps) },
       { label: "수면", done: numeric(record?.sleepHours) },
     ];
@@ -160,7 +212,7 @@
     const cards = [
       { icon: "steps", label: "걸음 수", value: numeric(record?.steps) ? number(record.steps) : null, unit: "걸음", status: numeric(record?.steps) ? sourceLabel(record.stepsSource, record.steps) : "오늘의 활동을 남겨요", target: "steps" },
       { icon: "sleep", label: "수면", value: numeric(record?.sleepHours) ? number(record.sleepHours, 1) : null, unit: "시간", status: numeric(record?.sleepHours) ? sourceLabel(record.sleepSource, record.sleepHours) : "어젯밤 얼마나 주무셨나요?", target: "sleep" },
-      { icon: "medication", label: "복약", value: scheduled ? `${reported}/${slots.length}회 보고` : record?.medicationStatus ? labels.medication[record.medicationStatus] : null, unit: "", status: scheduled ? `${taken}회 복용 보고 · ${slots.length - reported}회 미보고` : record?.medicationStatus ? "하루 전체 자기보고" : "오늘의 복약을 남겨요", target: "medication" },
+      { icon: "medication", label: "복약", value: !schedule ? "일정 확인 필요" : scheduled ? `${reported}/${slots.length}회 보고` : record?.medicationStatus ? labels.medication[record.medicationStatus] : null, unit: "", status: !schedule ? "목록을 다시 불러와 주세요" : scheduled ? `${taken}회 복용 보고 · ${slots.length - reported}회 미보고` : record?.medicationStatus ? "하루 전체 자기보고" : "오늘의 복약을 남겨요", target: "medication" },
       { icon: "nutrition", label: "단백질", value: meals.length ? number(protein, 1) : null, unit: "g", status: meals.length ? `식사 ${meals.length}회 · 데모 추정` : "식사를 기록하면 보여요", target: "nutrition" },
     ];
     $("#today-metrics").innerHTML = cards.map((card) => `<button class="health-card" type="button" data-action="${card.target}" aria-label="${escape(card.label)} ${card.value === null ? "미기록" : escape(card.value + " " + card.unit)}. ${card.target === "nutrition" ? "식사 기록 보기" : card.target === "medication" ? "복약 목록 보기" : "기록하기"}"><span class="metric-heading">${svg(card.icon)}${card.label}</span><span class="metric-value${card.value === null ? " empty" : ""}">${card.value === null ? "아직 기록 전" : escape(card.value)}${card.value !== null && card.unit ? `<small>${card.unit}</small>` : ""}</span><span class="metric-status">${escape(card.status)}</span></button>`).join("");
@@ -251,7 +303,8 @@
     history[historyMode === "replace" ? "replaceState" : "pushState"]({}, "", url);
   }
 
-  function applyView({ historyMode = "push", focus = true } = {}) {
+  function applyView({ historyMode = "push", focus = true, refreshMedication = true } = {}) {
+    renderNavigation();
     $$(".app-view").forEach(element => { element.hidden = element.id !== `view-${state.view}`; });
     $$(".bottom-nav [data-view]").forEach(button => {
       const active = button.dataset.view === state.view;
@@ -261,7 +314,7 @@
     $$(".chart-tab").forEach(tab => { const active = tab.dataset.metric === state.metric; tab.classList.toggle("active", active); tab.setAttribute("aria-pressed", String(active)); });
     if (state.summary) renderChart();
     syncUrl(historyMode);
-    if (state.view === "medication") loadMedicationSchedule();
+    if (state.view === "medication" && refreshMedication) loadMedicationSchedule();
     if (state.view === "connections") loadConnections();
     if (focus) {
       const section = state.view === "records" ? ({ meals: "#meal-records-section", history: ".history-section", chart: ".trend-card" }[state.section]) : null;
@@ -273,8 +326,9 @@
   }
 
   function switchView(view, { section = null, metric, historyMode = "push" } = {}) {
-    if (!views.includes(view) || state.saving) return;
+    if (!views.includes(view) || !canLeavePatient()) return;
     if (view !== "connections") { clearConnectionToken(); ++state.connectionRequestId; }
+    if (view !== "medication") ++state.medicationRequestId;
     state.view = view;
     state.section = section;
     if (metrics.includes(metric)) state.metric = metric;
@@ -284,6 +338,7 @@
   function openMeal() {
     if (!state.summary || state.loading || state.saving) return;
     $("#meal-form").reset();
+    $("#meal-dialog-title").textContent = PATIENT_INPUT_SCREENS.meal.title;
     invalidateAnalysis();
     $("#meal-date").value = today();
     $("#meal-date").max = today();
@@ -293,7 +348,7 @@
     clearPhoto();
     $("#meal-error").hidden = true;
     updateEstimate();
-    $("#meal-dialog").showModal();
+    openRecordDialog(PATIENT_INPUT_SCREENS.meal.dialog);
   }
 
   function fieldValue(name, record) {
@@ -310,6 +365,8 @@
       $$(`#daily-form input[name="${name}"]`).forEach(input => { input.checked = input.value === record?.[name]; });
       state.dailyBaseline[name] = fieldValue(name, record);
     }
+    dailyLoadedDate = $('#daily-date').value;
+    dialogBaseline.set('daily-dialog', formSnapshot($('#daily-form')));
   }
 
   function openDaily(mode = "all", date = today()) {
@@ -319,7 +376,7 @@
     $("#daily-form").dataset.mode = mode;
     $("#daily-form").reset();
     const config = dailyModes[mode];
-    $("#daily-dialog-title").textContent = config.title;
+    $("#daily-dialog-title").textContent = PATIENT_INPUT_SCREENS[mode].title;
     $("#daily-scope-note").textContent = config.hint;
     $$("#daily-form [data-daily-fields]").forEach(group => {
       const names = group.dataset.dailyFields.split(" ");
@@ -331,7 +388,7 @@
     $("#daily-date").max = today();
     applyDailyRecord(null);
     $("#daily-error").hidden = true;
-    $("#daily-dialog").showModal();
+    openRecordDialog(PATIENT_INPUT_SCREENS[mode].dialog);
     selectDailyDate();
   }
 
@@ -367,7 +424,7 @@
 
   function setFormBusy(formId, busy) {
     $$('input, textarea, button', $(formId)).forEach((element) => { element.disabled = busy; });
-    $("#patient-select").disabled = busy || state.loading;
+    renderNavigation();
   }
 
   function setDailyFieldsDisabled(disabled) {
@@ -437,13 +494,17 @@
       state.saving = null;
       setFormBusy("#daily-form", false);
       setDailyFieldsDisabled(false);
-      button.textContent = dailyModes[state.dailyMode].title.replace("기록하기", "저장하기").replace("남기기", "저장하기");
+      button.textContent = PATIENT_INPUT_SCREENS[state.dailyMode].title.replace("기록하기", "저장하기").replace("남기기", "저장하기");
     }
   }
 
   async function selectDailyDate() {
     const date = $("#daily-date").value;
     if (!date || date > today()) return;
+    if (dailyLoadedDate && date !== dailyLoadedDate && dialogDirty($('#daily-dialog')) && !window.confirm('저장하지 않은 입력이 있어요. 다른 날짜를 불러올까요?')) {
+      $('#daily-date').value = dailyLoadedDate;
+      return;
+    }
     const requestId = ++state.dateRequestId;
     const patientId = state.patientId;
     $("#daily-error").hidden = true;
@@ -514,10 +575,17 @@
     }
   }
 
+  function renderMedicationSummary(schedule) {
+    const total = schedule.slots?.length || 0;
+    const pending = (schedule.slots || []).filter(slot => slot.status === 'pending').length;
+    $('#medication-summary').textContent = total ? `${shortDate(schedule.date)} · 총 ${total}회 중 ${total - pending}회 보고 · ${pending}회 미보고` : '이 날짜에 등록된 약별 일정이 없어요.';
+  }
+
   async function loadMedicationSchedule() {
     if (!state.patientId || !state.summary) return;
     const requestId = ++state.medicationRequestId;
     const patientId = state.patientId;
+    medicationBaseline.clear();
     const date = state.medicationDate || today();
     state.medicationDate = date;
     state.medicationSchedule = null;
@@ -532,9 +600,7 @@
       const schedule = await api(`/api/patients/${encodeURIComponent(patientId)}/medication-schedule?date=${encodeURIComponent(date)}`);
       if (requestId !== state.medicationRequestId || patientId !== state.patientId || date !== state.medicationDate) return;
       state.medicationSchedule = schedule;
-      const total = schedule.slots?.length || 0;
-      const pending = (schedule.slots || []).filter(slot => slot.status === "pending").length;
-      $("#medication-summary").textContent = total ? `${shortDate(date)} · 총 ${total}회 중 ${total - pending}회 보고 · ${pending}회 미보고` : "이 날짜에 등록된 약별 일정이 없어요.";
+      renderMedicationSummary(schedule);
       if (date === today()) { state.todayMedication = schedule; renderHome(state.summary.todayRecord); }
       $("#medication-list").innerHTML = (schedule.slots || []).map((slot, index) => {
         const labels = { pending: "미보고", taken: "복용 보고", missed: "미복용 보고", unknown: "기억나지 않음" };
@@ -548,6 +614,7 @@
         $("#legacy-medication-error").hidden = true;
         $("#legacy-medication").hidden = false;
       }
+      $$('#medication-list form, #legacy-medication-form').forEach(form => medicationBaseline.set(form.id, formSnapshot(form)));
     } catch (error) {
       if (requestId === state.medicationRequestId && patientId === state.patientId) formError("#medication-error", `${error.message} 목록을 확인하지 못해 복약 상태를 저장할 수 없어요.`);
     } finally {
@@ -570,20 +637,36 @@
     if (!legacy && !slot) return;
     const payload = legacy ? { date, medicationStatus: status } : { orderId: slot.orderId, date, time: slot.time, status, reason: String(data.get("reason") || "").trim(), note: String(data.get("note") || "").trim() };
     state.saving = "medication";
+    renderNavigation();
     errorElement.hidden = true;
     $$("#view-medication input, #view-medication textarea, #view-medication button").forEach(input => { input.disabled = true; });
     $("#patient-select").disabled = true;
     try {
-      await api(`/api/patients/${encodeURIComponent(patientId)}/${legacy ? "daily" : "medication-events"}`, { method: "POST", body: JSON.stringify(payload) });
+      const saved = await api(`/api/patients/${encodeURIComponent(patientId)}/${legacy ? "daily" : "medication-events"}`, { method: "POST", body: JSON.stringify(payload) });
+      if (!legacy) {
+        Object.assign(slot, { eventId: saved.event.id, status: saved.event.status, reason: saved.event.reason,
+          note: saved.event.note, revision: saved.event.revision, reportedAt: saved.event.reportedAt });
+        const badge = $('.medication-status', form);
+        badge.className = `medication-status ${slot.status}`;
+        badge.textContent = ({ taken: '복용 보고', missed: '미복용 보고', unknown: '기억나지 않음' })[slot.status];
+        $('[name=reason]', form).value = slot.reason;
+        $('[name=note]', form).value = slot.note;
+        $('button[type=submit]', form).textContent = '이 회차 기록 수정하기';
+        let revision = $('.record-source', form);
+        if (!revision) { revision = document.createElement('p'); revision.className = 'record-source'; form.append(revision); }
+        revision.textContent = `보고 ${slot.revision}차 · 수정 전 기록도 보관돼요.`;
+        renderMedicationSummary(state.medicationSchedule);
+      }
+      medicationBaseline.set(form.id, formSnapshot(form));
       toast("복약 자기보고를 저장했어요.");
-      await loadPatient(patientId);
+      await loadPatient(patientId, { preserveMedicationInputs: true });
     } catch (error) {
       errorElement.textContent = error.message;
       errorElement.hidden = false;
     } finally {
       state.saving = null;
       $$("#view-medication input, #view-medication textarea, #view-medication button").forEach(input => { input.disabled = false; });
-      $("#patient-select").disabled = state.loading;
+      renderNavigation();
     }
   }
 
@@ -650,8 +733,13 @@
   }
 
   function bindEvents() {
-    $("#patient-select").addEventListener("change", event => { if (!state.saving) loadPatient(event.target.value, { historyMode: "push" }).catch(() => {}); });
-    $("#retry-button").addEventListener("click", () => initialize());
+    $('#patient-home-link').addEventListener('click', event => { event.preventDefault(); switchView('home', { historyMode: 'replace' }); });
+    $('#patient-view-close').addEventListener('click', () => switchView(PATIENT_SCREENS[state.view].closeTarget, { historyMode: 'replace' }));
+    $("#patient-select").addEventListener("change", event => {
+      if (!canLeavePatient()) { event.target.value = state.patientId; return; }
+      loadPatient(event.target.value, { historyMode: "push" }).catch(() => {});
+    });
+    $("#retry-button").addEventListener("click", () => state.patientId ? loadPatient(state.patientId).catch(() => {}) : initialize());
     $("#open-meal").addEventListener("click", openMeal);
     $("#open-medication").addEventListener("click", () => switchView("medication"));
     $("#open-daily").addEventListener("click", () => openDaily("all"));
@@ -666,7 +754,7 @@
       if (action?.dataset.action === "nutrition") switchView("records", { metric: "proteinGrams", section: "meals" });
       if (action?.dataset.action === "edit-daily") openDaily("all", action.dataset.date);
       if (action?.dataset.action === "manual-meal") { invalidateAnalysis(); updateEstimate(); }
-      if (action?.dataset.action === "refresh-medication") loadMedicationSchedule();
+      if (action?.dataset.action === "refresh-medication" && canLeavePatient()) loadMedicationSchedule();
       if (action?.dataset.action === "revoke-connection") revokeConnection(action.dataset.connectionId);
     });
     $$(".chart-tab").forEach(button => button.addEventListener("click", () => {
@@ -676,17 +764,21 @@
       renderChart();
       syncUrl();
     }));
-    $$(".close-dialog").forEach(button => button.addEventListener("click", () => { if (!state.saving) button.closest("dialog").close(); }));
+    $$(".close-dialog").forEach(button => button.addEventListener("click", () => closeRecordDialog(button.closest("dialog"))));
     $$("dialog").forEach(dialog => {
       dialog.addEventListener("click", event => {
         if (state.saving || event.target !== dialog) return;
         const bounds = dialog.getBoundingClientRect();
-        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) closeRecordDialog(dialog);
       });
-      dialog.addEventListener("cancel", event => { if (state.saving) event.preventDefault(); });
+      dialog.addEventListener("cancel", event => { event.preventDefault(); closeRecordDialog(dialog); });
       dialog.addEventListener("close", () => {
+        dialogBaseline.delete(dialog.id);
         if (dialog.id === "daily-dialog") ++state.dateRequestId;
         if (dialog.id === "meal-dialog") clearPhoto();
+        const opener = dialogOpeners.get(dialog.id);
+        dialogOpeners.delete(dialog.id);
+        if (opener?.isConnected && !opener.disabled) opener.focus({ preventScroll: true });
       });
     });
     $("#meal-form").addEventListener("submit", saveMeal);
@@ -704,6 +796,7 @@
     $("#medication-date").addEventListener("change", () => {
       const date = $("#medication-date").value;
       if (!date || date > today() || state.saving) return;
+      if (!canLeavePatient()) { $('#medication-date').value = state.medicationDate; return; }
       state.medicationDate = date;
       syncUrl();
       loadMedicationSchedule();
@@ -713,8 +806,15 @@
     $("#connection-form").addEventListener("submit", createConnection);
     $("#connection-token-dismiss").addEventListener("click", clearConnectionToken);
     window.addEventListener("pagehide", clearConnectionToken);
+    window.addEventListener('beforeunload', event => {
+      if (state.saving || $$('dialog[open]').some(dialogDirty) || medicationDirty()) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    });
     document.addEventListener("visibilitychange", () => { if (document.hidden) clearConnectionToken(); });
     window.addEventListener("popstate", () => {
+      if (!canLeavePatient()) { syncUrl('replace'); return; }
       const requestedId = routeFromUrl();
       invalidateAnalysis();
       clearConnectionToken();

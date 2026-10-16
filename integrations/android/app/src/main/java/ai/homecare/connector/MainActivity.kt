@@ -90,7 +90,8 @@ class MainActivity : ComponentActivity() {
                 testingConfirmed.isChecked = false
             }
         }
-        button("2. 걸음 수·수면 읽기 허용") {
+        text("걸음 수 또는 수면 중 필요한 항목만 허용할 수 있습니다. 허용하지 않은 항목은 전송하지 않으며 기존 웹 기록도 지우지 않습니다.")
+        button("2. 걸음 수·수면 읽기 권한 선택") {
             runAction {
                 requireConnection()
                 val reader = HealthReader(this)
@@ -109,7 +110,8 @@ class MainActivity : ComponentActivity() {
                 ensureAvailable(reader)
                 if (!reader.backgroundAvailable()) throw ConnectorFailure("이 기기는 백그라운드 읽기를 지원하지 않습니다. 앱을 열어 동기화하세요.")
                 val required = HealthReader.READ_PERMISSIONS + HealthReader.BACKGROUND_PERMISSION
-                if (reader.grantedPermissions().containsAll(required)) SyncCoordinator(this).setBackground(true)
+                val granted = reader.grantedPermissions()
+                if (MetricAccess.from(granted).any && HealthReader.BACKGROUND_PERMISSION in granted) SyncCoordinator(this).setBackground(true)
                 else {
                     enablingBackground = true
                     permissionRequest.launch(required)
@@ -117,6 +119,15 @@ class MainActivity : ComponentActivity() {
             }
         }
         button("자동 동기화 끄기") { runAction { SyncCoordinator(this).setBackground(false) } }
+        button("같은 환자의 웹 기록 열기") {
+            try {
+                val config = SecureStore(this).config() ?: throw ConnectorFailure("연결을 먼저 저장하세요.")
+                val url = Uri.parse(config.origin + "/patient").buildUpon()
+                    .appendQueryParameter("patientId", config.patientId)
+                    .appendQueryParameter("view", "connections").build()
+                startActivity(Intent(Intent.ACTION_VIEW, url))
+            } catch (_: Exception) { status.text = "환자 웹을 열지 못했습니다. 연결 설정을 확인하세요." }
+        }
         text("자동 동기화는 운영체제의 배터리·네트워크 정책에 따라 지연됩니다. 최소 15분 작업 간격은 정시 전송 보장이 아닙니다.")
         button("Health Connect 설정 / 설치 확인") {
             try {
@@ -195,7 +206,9 @@ class MainActivity : ComponentActivity() {
             }
             val reader = HealthReader(this)
             val permissions = try { reader.grantedPermissions() } catch (_: Exception) { emptySet() }
-            val permissionText = if (permissions.containsAll(HealthReader.READ_PERMISSIONS)) "걸음 수·수면 읽기 허용" else "읽기 권한 또는 Health Connect 상태 확인 필요"
+            val access = MetricAccess.from(permissions)
+            val permissionText = "걸음 수: ${if (access.steps) "읽기 허용" else "미허용·전송 안 함"}\n" +
+                "수면: ${if (access.sleep) "읽기 허용" else "미허용·전송 안 함"}"
             status.text = "연결 환자 ID: ${config.patientId}\n$permissionText\n" +
                 "자동 동기화: ${if (config.backgroundEnabled) "요청됨 (실시간 보장 없음)" else "꺼짐"}\n\n" +
                 (store.status() ?: "아직 서버 수신을 확인하지 않았습니다.") +

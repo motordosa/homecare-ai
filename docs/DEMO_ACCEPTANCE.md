@@ -6,7 +6,7 @@
 
 1. 보관할 기존 테스트 기록은 먼저 내보낸다. 무료 Render의 재배포는 DB/사진을 잃을 수 있으며 CSV는 전체 복원본이 아니다.
 2. Render 서비스에서 **Manual Deploy → Deploy latest commit**을 실행한다.
-3. `/api/health`에서 `ok:true`, `storage:"sqlite"`, `schemaVersion:2`를 확인한다. `npm run demo:check -- https://homecare-ai-demo.onrender.com`으로 해당 소스와 화면의 일치 여부도 확인한다. schema만으로 전체 배포 일치를 판단하지 않는다.
+3. `/api/health`에서 `ok:true`, `storage:"sqlite"`, `schemaVersion:3`를 확인한다. `npm run demo:check -- https://homecare-ai-demo.onrender.com`으로 해당 소스와 화면의 일치 여부도 확인한다. schema만으로 전체 배포 일치를 판단하지 않는다.
 
 ## 2. 메뉴·약별 복약
 

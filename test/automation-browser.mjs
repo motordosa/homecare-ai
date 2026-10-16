@@ -5,7 +5,7 @@ import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -101,6 +101,111 @@ try {
     patients.push((await response.json()).patient);
   }
   const [patient, otherPatient] = patients;
+  await mkdir('test-results', { recursive: true });
+
+  await check('every patient subpage uses the same upper-right close control and role switching is confined to the guide', async () => {
+    for (const width of [320, 390]) {
+      await mobile.setViewportSize({ width, height: 844 });
+      await patientPage(mobile, patient.id);
+      await assertHidden(mobile.locator('#patient-view-close'));
+      let closeBounds;
+      for (const view of ['records', 'medication', 'connections', 'guide']) {
+        await mobile.locator(`.bottom-nav [data-view=${view}]`).click();
+        await mobile.locator(`#view-${view}`).waitFor({ state: 'visible' });
+        const close = mobile.getByRole('button', { name: '홈으로 돌아가기', exact: true });
+        assert.equal(await close.isVisible(), true);
+        const bounds = await close.boundingBox();
+        assert.ok(bounds.width >= 44 && bounds.height >= 44);
+        if (closeBounds) assert.deepEqual(bounds, closeBounds); else closeBounds = bounds;
+        assert.equal(await mobile.locator('.patient-header a[href^="/clinician"]').count(), 0);
+        assert.equal(await mobile.locator('#guide-clinician-link').isVisible(), view === 'guide');
+        assert.equal(await mobile.locator('.bottom-nav [aria-current=page]').getAttribute('data-view'), view);
+        assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+        if (width === 390 && view === 'medication') await mobile.screenshot({ path: 'test-results/patient-navigation-medication.png', fullPage: true });
+        await close.click();
+        await mobile.locator('#view-home').waitFor({ state: 'visible' });
+        assert.equal(new URL(mobile.url()).searchParams.get('patientId'), patient.id);
+        assert.equal(new URL(mobile.url()).searchParams.get('view'), null);
+      }
+    }
+  });
+
+  await check('a failed medication lookup does not turn a legacy self-report into verified daily completion', async () => {
+    const page = await newPage(true);
+    await post(`/api/patients/${patient.id}/daily`, { date: today, medicationStatus: 'taken' });
+    await page.route('**/medication-schedule?*', route => route.fulfill({ status: 503, json: { error: '명시적 조회 실패 fixture' } }));
+    await patientPage(page, patient.id);
+    assert.ok((await page.locator('#today-metrics [data-action=medication]').innerText()).includes('일정 확인 필요'));
+    assert.equal(await page.locator('#task-chips .task-chip.done').filter({ hasText: '복약' }).count(), 0);
+    await page.close();
+  });
+
+  await check('all input close controls return to the opener and unsaved input survives a cancelled close', async () => {
+    await patientPage(mobile, patient.id);
+    await mobile.locator('#open-meal').click();
+    await mobile.locator('#meal-dialog .close-dialog').click();
+    await assertHidden(mobile.locator('#meal-dialog'));
+    assert.equal(await mobile.evaluate(() => document.activeElement?.id), 'open-meal');
+    await mobile.locator('#open-meal').click();
+    await mobile.locator('#meal-form input[name=portion][value="0.5"]').check();
+    mobile.once('dialog', dialog => dialog.dismiss());
+    await mobile.locator('#meal-dialog .close-dialog').click();
+    assert.equal(await mobile.locator('#meal-dialog').isVisible(), true);
+    assert.equal(await mobile.locator('#meal-form input[name=portion][value="0.5"]').isChecked(), true);
+    mobile.once('dialog', dialog => dialog.accept());
+    await mobile.keyboard.press('Escape');
+    await assertHidden(mobile.locator('#meal-dialog'));
+    await mobile.locator('#open-daily').click();
+    await mobile.waitForFunction(() => !document.querySelector('#daily-submit').disabled);
+    await mobile.locator('#daily-dialog .close-dialog').click();
+    await assertHidden(mobile.locator('#daily-dialog'));
+    await mobile.locator('.bottom-nav [data-view=connections]').click();
+    for (const action of ['steps', 'sleep']) {
+      await mobile.locator(`#view-connections [data-action=${action}]`).click();
+      await mobile.waitForFunction(() => !document.querySelector('#daily-submit').disabled);
+      if (action === 'steps') {
+        await mobile.locator('#daily-steps').fill('2468');
+        mobile.once('dialog', dialog => dialog.dismiss());
+        await mobile.locator('#daily-dialog .close-dialog').click();
+        assert.equal(await mobile.locator('#daily-steps').inputValue(), '2468');
+        mobile.once('dialog', dialog => dialog.accept());
+      }
+      await mobile.locator('#daily-dialog .close-dialog').click();
+      await assertHidden(mobile.locator('#daily-dialog'));
+      assert.equal(await mobile.locator('#view-connections').isVisible(), true);
+    }
+  });
+
+  await check('unsaved medication input blocks accidental role, patient and home changes, and save locks navigation', async () => {
+    await patientPage(mobile, otherPatient.id, '&view=medication');
+    await mobile.locator('#legacy-medication').waitFor({ state: 'visible' });
+    await mobile.locator('#legacy-medication-form input[value=taken]').check();
+    mobile.once('dialog', dialog => dialog.dismiss());
+    await mobile.locator('#patient-view-close').click();
+    assert.equal(await mobile.locator('#view-medication').isVisible(), true);
+    mobile.once('dialog', dialog => dialog.dismiss());
+    await mobile.locator('#patient-select').selectOption(patient.id);
+    assert.equal(await mobile.locator('#patient-select').inputValue(), otherPatient.id);
+    let release;
+    await mobile.route(`**/api/patients/${otherPatient.id}/daily`, async route => {
+      if (route.request().method() !== 'POST') return route.continue();
+      await new Promise(resolve => { release = resolve; });
+      await route.continue();
+    });
+    await mobile.locator('#legacy-medication-submit').click();
+    await until(() => release, 'delayed medication write');
+    assert.equal(await mobile.locator('#patient-view-close').isDisabled(), true);
+    assert.equal(await mobile.locator('#patient-select').isDisabled(), true);
+    assert.equal(await mobile.locator('.bottom-nav button:enabled').count(), 0);
+    await mobile.evaluate(() => { history.pushState({}, '', '/patient?view=guide'); dispatchEvent(new PopStateEvent('popstate')); });
+    assert.equal(new URL(mobile.url()).searchParams.get('view'), 'medication');
+    assert.equal(new URL(mobile.url()).searchParams.get('patientId'), otherPatient.id);
+    release();
+    await mobile.waitForFunction(() => !document.querySelector('#legacy-medication-submit').disabled);
+    await mobile.unroute(`**/api/patients/${otherPatient.id}/daily`);
+    await mobile.locator('#patient-view-close').click();
+    await mobile.locator('#view-home').waitFor({ state: 'visible' });
+  });
 
   await check('purpose-specific activity/sleep forms send only changed fields and preserve zero, null and unrelated values', async () => {
     const original = { date: today, steps: 1234, sleepHours: 6.5, medicationStatus: 'partial', appetite: 'poor', mood: 'poor', note: '다른 항목 보존', weightKg: 50.2 };
@@ -173,7 +278,7 @@ try {
     await mobile.locator('.bottom-nav [data-view=home]').click();
     await mobile.locator('#view-home [data-view=records][data-section=meals]').click();
     assert.equal(new URL(mobile.url()).searchParams.get('section'), 'meals');
-    assert.ok((await mobile.locator('#clinician-link').getAttribute('href')).includes(encodeURIComponent(patient.id)));
+    assert.ok((await mobile.locator('#guide-clinician-link').getAttribute('href')).includes(encodeURIComponent(patient.id)));
     await mobile.locator('#patient-select').selectOption(otherPatient.id); await settledPatient(mobile);
     assert.equal(new URL(mobile.url()).searchParams.get('patientId'), otherPatient.id);
     await mobile.goBack();
@@ -232,6 +337,38 @@ try {
     await desktop.locator('#modal [data-modal-action=close]').last().click();
   });
 
+  await check('saving one medication slot preserves a different slot draft and its unsaved-navigation protection', async () => {
+    await patientPage(mobile, patient.id, '&view=medication');
+    await mobile.locator('#medication-slot-1').waitFor({ state: 'visible' });
+    await mobile.locator('#slot-note-0').fill('첫 회차 추가 정정');
+    await mobile.locator('#medication-slot-1 input[value=unknown]').check();
+    await mobile.locator('#slot-note-1').fill('다른 회차의 아직 저장하지 않은 입력');
+    await mobile.locator('#medication-slot-0 button[type=submit]').click();
+    await mobile.waitForFunction(() => !document.querySelector('#medication-slot-0 button[type=submit]').disabled);
+    assert.equal(await mobile.locator('#slot-note-1').inputValue(), '다른 회차의 아직 저장하지 않은 입력');
+    assert.equal(await mobile.locator('#medication-slot-1 input[value=unknown]').isChecked(), true);
+    mobile.once('dialog', dialog => dialog.dismiss());
+    await mobile.locator('#patient-view-close').click();
+    assert.equal(await mobile.locator('#view-medication').isVisible(), true);
+    const leavePrompt = mobile.waitForEvent('dialog');
+    // A deliberately cancelled document navigation never reaches "load".
+    // Use actual browser history and verify the beforeunload prompt instead of waiting for a load.
+    await mobile.evaluate(() => history.back());
+    const prompt = await leavePrompt;
+    assert.equal(prompt.type(), 'beforeunload');
+    await prompt.dismiss();
+    await flushUi(mobile);
+    assert.equal(await mobile.locator('#view-medication').isVisible(), true);
+    assert.equal(await mobile.locator('#slot-note-1').inputValue(), '다른 회차의 아직 저장하지 않은 입력');
+    await mobile.locator('#medication-slot-1 button[type=submit]').click();
+    await mobile.waitForFunction(() => !document.querySelector('#medication-slot-1 button[type=submit]').disabled);
+    const schedule = await get(`/api/patients/${patient.id}/medication-schedule?date=${today}`);
+    assert.equal(schedule.slots[1].status, 'unknown');
+    assert.equal(schedule.slots[1].note, '다른 회차의 아직 저장하지 않은 입력');
+    await mobile.locator('#patient-view-close').click();
+    await mobile.locator('#view-home').waitFor({ state: 'visible' });
+  });
+
   await check('health connection shows the exact server and patient identity and clears its one-time credentials on dismissal and navigation', async () => {
     const privateFields = ['connection-token-value', 'connection-server-origin', 'connection-patient-name', 'connection-patient-id'];
     const assertConnectionIdentity = async () => {
@@ -274,6 +411,42 @@ try {
     await mobile.locator('#connection-list [data-action=revoke-connection]').first().click();
     await mobile.locator('.connection-status.revoked').waitFor({ state: 'visible' });
     await assertCredentialsCleared();
+  });
+
+  await check('partial-permission device fixtures merge independently into patient cards and manual zero remains authoritative', async () => {
+    const created = await post('/api/patients', { name: '부분권한수신검증', age: 76, sex: 'female', conditions: ['합성 자료'] });
+    const fixturePatient = (await created.json()).patient;
+    const path = `/api/patients/${fixturePatient.id}`;
+    const connection = await (await post(`${path}/health-connections`, { platform: 'health-connect' })).json();
+    const headers = { Authorization: `Bearer ${connection.token}`, 'Content-Type': 'application/json' };
+    const identity = await (await fetch(base + '/api/health-sync/connection', { headers })).json();
+    assert.equal(identity.partialMetrics, true);
+    assert.equal(identity.selected, true);
+    const send = (batchId, day) => fetch(base + '/api/health-sync', { method: 'POST', headers, body: JSON.stringify({ batchId, timeZone: 'Asia/Seoul', days: [{ date: today, ...day }] }) });
+    assert.equal((await send('steps-only-browser', { steps: 1200, updatedAt: new Date(Date.now() - 60000).toISOString() })).status, 200);
+    assert.equal((await send('sleep-only-browser', { sleepMinutes: 360, updatedAt: new Date(Date.now() - 120000).toISOString() })).status, 200);
+    let summary = await get(`${path}/summary`);
+    assert.equal(summary.todayRecord.steps, 1200);
+    assert.equal(summary.todayRecord.sleepHours, 6);
+    assert.equal(summary.todayRecord.stepsSource, 'health-connect');
+    assert.equal(summary.todayRecord.sleepSource, 'health-connect');
+    assert.equal((await get(`${path}/daily?date=${today}`)).record, null);
+    await patientPage(mobile, fixturePatient.id);
+    assert.ok((await mobile.locator('#today-metrics [data-action=steps]').innerText()).includes('1,200'));
+    assert.ok((await mobile.locator('#today-metrics [data-action=sleep]').innerText()).includes('Health Connect'));
+    await mobile.locator('#today-metrics [data-action=steps]').click();
+    await mobile.waitForFunction(() => !document.querySelector('#daily-submit').disabled);
+    await mobile.locator('#daily-steps').fill('0');
+    await saveDaily(mobile, fixturePatient.id, { date: today, steps: 0 });
+    summary = await get(`${path}/summary`);
+    assert.equal(summary.todayRecord.steps, 0);
+    assert.equal(summary.todayRecord.stepsSource, 'patient-self-report');
+    assert.equal(summary.todayRecord.sleepHours, 6);
+    await mobile.locator('#today-metrics [data-action=steps]').click();
+    await mobile.waitForFunction(() => !document.querySelector('#daily-submit').disabled);
+    await mobile.locator('#daily-steps').fill('');
+    await saveDaily(mobile, fixturePatient.id, { date: today, steps: null });
+    assert.equal((await get(`${path}/summary`)).todayRecord.steps, 1200);
   });
 
   await check('unconfigured photo AI offers a working manual meal path and makes no analysis request', async () => {
@@ -374,6 +547,7 @@ try {
     await page.locator('#photo-preview').waitFor({ state: 'visible' });
     await page.locator('#meal-analysis-consent').check(); await page.locator('#meal-analyze').click();
     await until(() => pending.length === 2, 'second mocked analysis request');
+    page.once('dialog', dialog => dialog.accept());
     await page.locator('#meal-dialog .close-dialog').click(); await page.locator('#open-meal').click();
     const closedLate = page.waitForResponse(response => response.url().endsWith('/photo-analyses'));
     pending[1].release(); await (await closedLate).finished(); await flushUi(page);

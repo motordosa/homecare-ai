@@ -92,7 +92,7 @@ test('native preflight exposes only its patient binding and shares receiver auth
   const db = setup(t);
   const original = createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' });
   assert.deepEqual(getHealthConnectionIdentity(db, original.token), {
-    connectionId: original.connection.id, patientId: 'fixture-patient-a', platform: 'health-connect',
+    connectionId: original.connection.id, patientId: 'fixture-patient-a', platform: 'health-connect', partialMetrics: true, selected: true,
   });
   let state = getHealthConnections(db, 'fixture-patient-a');
   assert.equal(state.connections[0].status, 'awaiting_native');
@@ -100,6 +100,7 @@ test('native preflight exposes only its patient binding and shares receiver auth
   assert.equal(db.prepare('SELECT COUNT(*) AS count FROM health_batches').get().count, 0);
   const replacement = createHealthConnection(db, 'fixture-patient-a', { platform: 'apple-health' });
   assert.equal(getHealthConnectionIdentity(db, original.token).connectionId, original.connection.id);
+  assert.equal(getHealthConnectionIdentity(db, original.token).selected, false);
   receiveHealthBatch(db, original.token, batch());
   state = getHealthConnections(db, 'fixture-patient-a');
   assert.equal(state.selectedConnectionId, replacement.connection.id);
@@ -269,4 +270,76 @@ test('stored snapshots, selection and replay protection survive a fresh DB conne
     assert.equal(healthDailyForPatient(second, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0].steps, 2400);
     assert.equal(receiveHealthBatch(second, connection.token, batch()).duplicate, true);
   } finally { second.close(); }
+});
+
+test('partial snapshots preserve omitted metrics and distinguish omission, null and zero in replay hashes', t => {
+  const db = setup(t);
+  const connection = createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' });
+  const stepsOnly = { date: '2026-01-02', steps: 0, updatedAt: '2026-01-03T03:00:00Z' };
+  const payload = batch({ days: [stepsOnly] });
+  receiveHealthBatch(db, connection.token, payload);
+  ensureHealthSchema(db);
+  let record = healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0];
+  assert.equal(record.steps, 0);
+  assert.equal(record.sleepMinutes, null);
+  assert.equal(record.sleepUpdatedAt, null, 'restart must not invent a sleep revision');
+  assert.equal(record.stepsUpdatedAt, '2026-01-03T03:00:00.000000000Z');
+  assert.equal(receiveHealthBatch(db, connection.token, payload).duplicate, true);
+  expectStatus(409, () => receiveHealthBatch(db, connection.token, batch({ days: [{ ...stepsOnly, sleepMinutes: null }] })));
+  receiveHealthBatch(db, connection.token, batch({ batchId: 'sleep-before-step', days: [{ date: stepsOnly.date, sleepMinutes: 120, updatedAt: '2026-01-03T02:00:00Z' }] }));
+  record = healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0];
+  assert.equal(record.steps, 0);
+  assert.equal(record.sleepMinutes, 120);
+  assert.equal(record.updatedAt, record.stepsUpdatedAt);
+});
+
+test('metric revisions merge independently across partial and legacy full snapshots', t => {
+  const db = setup(t);
+  const connection = createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' });
+  receiveHealthBatch(db, connection.token, batch());
+  receiveHealthBatch(db, connection.token, batch({ batchId: 'steps-latest', days: [{ date: '2026-01-02', steps: 900, updatedAt: '2026-01-03T05:00:00Z' }] }));
+  const mixed = receiveHealthBatch(db, connection.token, batch({ batchId: 'legacy-in-between', days: [day({ steps: 1, sleepMinutes: 360, updatedAt: '2026-01-03T04:00:00Z' })] }));
+  assert.equal(mixed.acceptedDays, 1);
+  let record = healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0];
+  assert.equal(record.steps, 900, 'older step value must not replace newer steps');
+  assert.equal(record.sleepMinutes, 360, 'newer sleep value can arrive before the step revision');
+  const stale = receiveHealthBatch(db, connection.token, batch({ batchId: 'stale', days: [day()] }));
+  assert.equal(stale.ignoredDays, 1);
+  receiveHealthBatch(db, connection.token, batch({ batchId: 'clear-sleep', days: [{ date: '2026-01-02', sleepMinutes: null, updatedAt: '2026-01-03T06:00:00Z' }] }));
+  record = healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0];
+  assert.equal(record.steps, 900);
+  assert.equal(record.sleepMinutes, null);
+  assert.equal(record.stepsUpdatedAt, '2026-01-03T05:00:00.000000000Z');
+  assert.equal(record.sleepUpdatedAt, '2026-01-03T06:00:00.000000000Z');
+});
+
+test('old health tables and pending full-batch hashes migrate without losing values or replay protection', t => {
+  const db = setup(t);
+  const connection = createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' });
+  receiveHealthBatch(db, connection.token, batch());
+  const oldNormalized = { batchId: 'fixture-1', timeZone: 'Asia/Seoul', days: [{ date: '2026-01-02', steps: 2400, sleepMinutes: 420, updatedAt: '2026-01-03T03:00:00.000000000Z' }] };
+  assert.equal(db.prepare('SELECT body_hash FROM health_batches').get().body_hash, createHash('sha256').update(JSON.stringify(oldNormalized)).digest('hex'));
+  db.exec('ALTER TABLE health_daily DROP COLUMN steps_updated_at; ALTER TABLE health_daily DROP COLUMN sleep_updated_at;');
+  ensureHealthSchema(db);
+  const record = healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0];
+  assert.equal(record.steps, 2400);
+  assert.equal(record.sleepMinutes, 420);
+  assert.equal(record.stepsUpdatedAt, record.updatedAt);
+  assert.equal(record.sleepUpdatedAt, record.updatedAt);
+  assert.equal(receiveHealthBatch(db, connection.token, batch()).duplicate, true);
+  ensureHealthSchema(db);
+  assert.equal(db.prepare('SELECT COUNT(*) AS count FROM health_daily').get().count, 1);
+});
+
+test('a missing metric is accepted only when another metric is present and invalid batches roll back completely', t => {
+  const db = setup(t);
+  const connection = createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' });
+  const first = { date: '2026-01-01', steps: 10, updatedAt: '2026-01-03T03:00:00Z' };
+  for (const invalid of [
+    { date: '2026-01-02', updatedAt: first.updatedAt },
+    { date: '2026-01-02', steps: undefined, updatedAt: first.updatedAt },
+    { date: '2026-01-02', sleepMinutes: -1, updatedAt: first.updatedAt },
+  ]) expectStatus(400, () => receiveHealthBatch(db, connection.token, batch({ days: [first, invalid] })));
+  assert.equal(db.prepare('SELECT COUNT(*) AS count FROM health_daily').get().count, 0);
+  assert.equal(db.prepare('SELECT COUNT(*) AS count FROM health_batches').get().count, 0);
 });

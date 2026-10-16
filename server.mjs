@@ -17,10 +17,10 @@ const { db, uploadDir } = openDatabase(process.env.DATA_DIR || join(root, 'data'
 ensureMedicationSchema(db);
 ensureVisionSchema(db);
 ensureHealthSchema(db);
-db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','2') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
+db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','3') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
 const port = Number(process.env.PORT || 3000);
 const bodyLimit = 7 * 1024 * 1024;
-const schemaVersion = 2;
+const schemaVersion = 3;
 
 function respond(res, status, value, extraHeaders = {}) {
   const body = JSON.stringify(value);
@@ -184,7 +184,7 @@ const server = http.createServer(async (req, res) => {
     if (path === '/api/health' && method === 'GET') return respond(res, 200, health());
     if (path === '/api/capabilities' && method === 'GET') return respond(res, 200, {
       vision: visionCapabilities(process.env),
-      health: { webDirectCollection: false, nativeBridge: { implemented: false, verified: false }, preferredPlatform: 'health-connect' },
+      health: { webDirectCollection: false, nativeBridge: { implemented: false, verified: false }, preferredPlatform: 'health-connect', partialMetrics: true },
       medications: { perDose: true, clinicianPlans: true },
     });
     if (path === '/api/health-sync/connection' && method === 'GET') {

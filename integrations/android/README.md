@@ -2,19 +2,19 @@
 
 상태: **개발용 APK 빌드·Android lint 통과 / 설치·갤럭시 워치 실기기 연동 미검증**. 실제 환자·연구 자료를 공개 데모 서버에 연결하지 않는다. APK가 빌드된 사실만으로 웹의 네이티브 연동 상태를 검증 완료로 바꾸지 않는다.
 
-선행 계약은 [`docs/ANDROID_CONNECTOR.md`](../../docs/ANDROID_CONNECTOR.md)와 [`docs/CONTRACTS.md`](../../docs/CONTRACTS.md)다. 요구사항 `SYNC-01`, `SYNC-02`, `QA-01`, 변경 `CHG-2026-10-16-04`와 빌드 검증 `CHG-2026-10-16-07`에 해당한다. 앱/서버가 모두 아래 preflight 계약을 지원해야 하며, 미지원 서버는 자료 전송 전에 중지한다.
+선행 계약은 [`docs/ANDROID_CONNECTOR.md`](../../docs/ANDROID_CONNECTOR.md)와 [`docs/CONTRACTS.md`](../../docs/CONTRACTS.md)다. 요구사항 `SYNC-01`, `SYNC-02`, `QA-01`, 변경 `CHG-2026-10-16-04/07` 및 부분 권한 계약 [`SMARTPHONE_SYNC_SPEC.md`](../../docs/SMARTPHONE_SYNC_SPEC.md)에 해당한다. 앱/서버가 모두 아래 preflight 계약을 지원해야 하며, 미지원 서버는 자료 전송 전에 중지한다.
 
 ## 구현한 경로
 
 갤럭시 워치 → 삼성 헬스 등 호환 앱 → 폰 Health Connect → 이 연결 앱 → 입력한 HTTPS 서버 → 기존 환자/의료진 웹.
 
 - 로그인 없는 웹에서 발급한 **Health Connect 연결 토큰**을 입력한다. 앱의 별도 사용자 로그인은 구현하지 않았다.
-- 건강자료 소유자 확인과 웹 환자 ID 입력 후 `GET /api/health-sync/connection`의 Bearer 응답 `{connectionId,patientId,platform}`를 대조한다. 일치해야 연결을 저장한다. 매 동기화에서도 건강자료 읽기와 대기 배치 전송 전에 재확인한다.
-- 걸음·수면 읽기를 모두 허용한 경우 최근 7일(오늘 포함)을 `Asia/Seoul` 경계로 조회한다. 한 종류 권한이 없으면 부분 자료를 null로 덮어쓰지 않고 전체 전송을 중지한다.
+- 건강자료 소유자 확인과 웹 환자 ID 입력 후 `GET /api/health-sync/connection`의 Bearer 응답의 환자/연결 ID, `platform`, `partialMetrics:true`, `selected:true`를 대조한다. 이전 서버나 다른 연결이 선택된 경우 설정/읽기/전송을 중지한다. 일치해야 연결을 저장한다. 매 동기화에서도 건강자료 읽기와 대기 배치 전송 전에 재확인한다.
+- 걸음 또는 수면 읽기 중 하나 이상 허용하면 해당 항목만 최근 7일(오늘 포함)을 `Asia/Seoul` 경계로 조회한다. 허용되지 않은 항목은 JSON 키를 생략해 기존 값을 유지한다. 허용받아 조회했으나 자료가 없으면 명시적 null로 보낸다. 두 항목 모두 미허용이면 전송하지 않는다.
 - 걸음 수는 Health Connect `StepsRecord.COUNT_TOTAL` 집계를 사용한다. 폰과 워치 원시 합계를 다시 더하지 않는다.
 - 수면은 알려진 asleep/light/deep/REM 단계 구간을 날짜 경계로 자른 합집합이다. awake/out-of-bed/awake-in-bed는 제외한다. 기록 없음, 단계 없음, 알 수 없는 단계는 null로 처리한다. 세션 길이나 침대 시간을 수면으로 바꾸지 않는다. 알려진 단계 사이의 미기록 간격은 잠든 시간에 포함하지 않는다. 이 값은 확인된 단계의 합계이며 전일 완전측정을 보장하지 않는다.
-- `POST /api/health-sync`로 `{batchId,timeZone,days:[{date,steps,sleepMinutes,updatedAt}]}`를 전송한다. 수정 시각은 재집계 시각이다. 수정·삭제는 7일 스냅샷 재조회와 null/0 교체로 반영한다. 7일보다 오래된 변경을 자동으로 소급하지 않는 범위다.
-- 요청 전에 정확한 직렬화 본문을 암호화 저장한다. 네트워크 실패·서버 오류 재시도는 같은 본문·batchId를 유지한다. 서버 응답의 환자·연결·배치 ID와 수신 시각을 확인한 뒤 큐에서 삭제한다. 대기 배치 재전송 후 최신 재집계는 다음 동기화에서 수행한다.
+- `POST /api/health-sync`로 `{batchId,timeZone,days:[{date,steps?,sleepMinutes?,updatedAt}]}`를 전송한다. 각 날짜에 하나 이상의 항목이 필요하고 서버가 항목별 최신 revision을 관리한다. 수정 시각은 재집계 시각이다. 수정·삭제는 7일 스냅샷 재조회와 null/0 교체로 반영한다. 7일보다 오래된 변경을 자동으로 소급하지 않는 범위다.
+- 요청 전에 정확한 직렬화 본문을 암호화 저장한다. 네트워크 실패·서버 오류 재시도는 같은 본문·batchId를 유지한다. 서버 응답의 환자·연결·배치 ID와 수신 시각을 확인한 뒤 큐에서 삭제한다. 대기 배치에 현재 철회된 항목이 있으면 그 배치를 삭제한 뒤 허용된 항목만 새 batchId로 재집계한다. 읽기 후 실제 전송 직전에도 권한을 재확인한다. 허용된 대기 배치 재전송 후 최신 재집계는 다음 동기화에서 수행한다.
 - 별도 Health Connect background 기능·권한과 사용자의 앱 내 선택이 모두 있어야 WorkManager를 예약한다. 최소 15분 주기는 정시·상시 전송 보장이 아니다. OS 강제 종료·절전·잠금·공유 지연 조건의 실제 동작은 검증하지 않았다.
 - 401/403, 409, 잘못된 응답·권한 등의 영구 실패는 자동 작업을 끄고 사용자 확인으로 돌린다. 일시 오류는 배치 본문을 보존하며 각 작업에서 제한적으로 backoff 재시도한다.
 
@@ -52,7 +52,7 @@ HTTPS origin만 허용하고 URL의 계정·경로·query·fragment를 거부한
 
 ```sh
 gradle --version
-gradle :app:assembleDebug :app:lintDebug
+gradle :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
 ```
 
 Gradle wrapper와 wrapper JAR는 이 작업에서 다운로드·생성하지 않았다. 따라서 아직 `./gradlew`는 없다. 검증된 로컬 Gradle로 wrapper를 생성해 관리하려면 공식 배포판 체크섬을 확인하고 별도 리뷰한다. debug APK 위치는 `app/build/outputs/apk/debug/app-debug.apk`다. 개발용 debug 키로 서명했으며 release 서명키·스토어 배포는 수행하지 않았다.
@@ -60,7 +60,7 @@ Gradle wrapper와 wrapper JAR는 이 작업에서 다운로드·생성하지 않
 이 클라우드의 도구·캐시·debug 키·검증 로그는 Git 밖 `/workspace/homecare-deploy-research/android-toolchain/`에 있다. 기존 `HOME`을 바꾸지 않고 `JAVA_HOME`, `ANDROID_USER_HOME`, Gradle user home과 debug signing init script를 작업 디렉터리로 지정했다. 환경에서 제공한 CA를 복사한 truststore에 추가해 TLS 검증을 유지했다. 환경별 프록시 설정은 권한 0600 파일에 실행 중에만 기록하고 끝나면 제거한다. 현재 작업공간에서 동일 검사를 재현하는 명령은 다음과 같다.
 
 ```sh
-python /workspace/homecare-deploy-research/android-toolchain/run-gradle.py build-recheck.log :app:assembleDebug :app:lintDebug
+python /workspace/homecare-deploy-research/android-toolchain/run-gradle.py build-recheck.log :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
 ```
 
 이 명령은 해당 클라우드에 설치한 도구를 사용한다. 새 환경에서는 위 공식 도구를 먼저 설치하고 SDK 라이선스 수락·로컬 경로·환경 CA를 준비해야 한다. 앱이 서버에 보내는 Health Connect 연결 토큰은 빌드에 필요하지 않다.
@@ -77,15 +77,17 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 2026-10-16 공식 Gradle/JDK 배포판의 게시 체크섬, Android command-line tools의 공식 SDK 메타데이터 체크섬을 확인하고 도구를 설치했다. SDK 35를 사용한 첫 시도는 Health Connect AAR의 compile SDK 36 요구 검사에서 중지됐다. 검사 우회 없이 계약과 도구 버전을 갱신한 뒤 **`:app:assembleDebug :app:lintDebug`가 성공했다.** Kotlin·Java 컴파일, manifest merge, APK 패키징, lint를 실행했다. **기기 설치·UI 실행·실제 Health Connect/갤럭시 워치 동기화는 아직 검증하지 않았다.**
 
+2026-10-17 KST v0.4: **`:app:testDebugUnitTest :app:assembleDebug :app:lintDebug` 성공**, 실제 DailyReading/MetricAccess Kotlin JVM 검사 **8개 통과**. 시험용 org.json과 JUnit을 사용하며 Android 제공자/실기기 실행과 구별한다. 개발 APK 서명 v2 검증도 통과했다.
+
 실행한 검사는 다음과 같다.
 
 - 앱이 실제 호출하는 `ServerOrigin.java`, `SleepIntervals.java`를 Java compiler 모듈로 직접 컴파일·호출: **16개 통과**. HTTPS origin 제한, 서울 자정 절단, 수면 겹침/중복/각성 간격/분 소수값/일일 상한을 검사했다. Kotlin 구현을 복제한 검사가 아니다.
-- Android lint: **오류 0, 경고 22**. 경고는 target SDK 35 유지, 개발용 앱 아이콘 미지정, 한국어 문자열 리소스화와 KTX 사용 제안이다. lint를 끄거나 오류를 무시하도록 설정하지 않았다. 보고서는 `app/build/reports/lint-results-debug.html`에 생성된다.
+- Android lint: **오류 0, 경고 23** (2026-10-17 v0.4 재검증). 경고는 target SDK 35 유지, 개발용 앱 아이콘 미지정, 한국어 문자열 리소스화와 KTX 사용 제안이다. lint를 끄거나 오류를 무시하도록 설정하지 않았다. 보고서는 `app/build/reports/lint-results-debug.html`에 생성된다.
 - Health Connect 1.1.0의 Google Maven 공식 sources JAR에서 `features`, background feature 상수, permission contract, 페이지 인자, 수면 단계 상수를 확인했다. 실제 폰에서 기능 제공·권한·백그라운드 제약은 별도 확인해야 한다.
 
-앱 ID는 `ai.homecare.connector`, versionCode는 `1`, versionName은 `0.1.0-unverified`다. `unverified`는 실기기 연동 미검증을 나타낸다. APK의 debug 서명·체크섬과 정확한 빌드 소스 목록은 도구 디렉터리의 `BUILD-RECORD.md`에 기록한다. 이 개발 APK를 운영 배포 파일로 사용하지 않는다.
+앱 ID는 `ai.homecare.connector`, versionCode는 `2`, versionName은 `0.2.0-unverified`다. `unverified`는 실기기 연동 미검증을 나타낸다. APK의 debug 서명·체크섬과 정확한 빌드 소스 목록은 도구 디렉터리의 `BUILD-RECORD-v0.4.md`에 기록한다. 이 개발 APK를 운영 배포 파일로 사용하지 않는다.
 
-이번 최종 개발 APK는 **13,219,849 bytes**, SHA-256 `2730642226671b5d69664240f65429e14f22f80ce4725d09bcde42db87e81f13`이다. APK Signature Scheme v2 검증을 통과했다. 복사본은 현재 작업공간의 `/workspace/homecare-deploy-research/HomeCareAI-connector-debug.apk`에 있으며 APK·debug 키는 Git에 포함하지 않는다. 이 체크섬은 이번 산출물의 값이고 향후 재빌드 산출물의 동일 바이트를 보장하지 않는다.
+이번 최종 개발 APK는 **13,139,429 bytes**, SHA-256 `2c7cc5747a7b370b7e072e9106d2b236a7241601a42a12321267370f547f496f`이다. APK Signature Scheme v2 검증을 통과했다. 복사본은 현재 작업공간의 `/workspace/homecare-deploy-research/HomeCareAI-connector-0.2.0-debug.apk`에 있으며 APK·debug 키는 Git에 포함하지 않는다. 이 체크섬은 이번 산출물의 값이고 향후 재빌드 산출물의 동일 바이트를 보장하지 않는다.
 
 핵심 Java 검사 재실행:
 

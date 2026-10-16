@@ -11,8 +11,8 @@ android {
         applicationId = "ai.homecare.connector"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0-unverified"
+        versionCode = 2
+        versionName = "0.2.0-unverified"
     }
 
     compileOptions {
@@ -29,4 +29,6 @@ dependencies {
     implementation("androidx.health.connect:connect-client:1.1.0")
     implementation("androidx.work:work-runtime-ktx:2.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20250517")
 }

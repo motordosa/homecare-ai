@@ -27,6 +27,10 @@
 | token / tokenHash | 네이티브 연결 비밀 / DB hash | 최초 발급만 노출, 로그/CSV 제외 |
 | batchId / updatedAt | 수신 중복키 / 집계 revision 시각 | 재전송 안전, 오래된 갱신 거부 |
 | healthDaily / effective source | 기기 집계 / 표시 우선 출처 | 수동값과 별도 저장, 명시적 수동값 우선 |
+| steps_updated_at / sleep_updated_at | 항목별 최신 플랫폼 재집계 revision | 생략은 보존, null도 새 revision으로 반영. 기존 행 1회 backfill, 재시작 시 생략 항목을 채우지 않음 |
+| includesSteps / includesSleep | Android가 허용받아 읽은 항목 여부 | false 항목은 JSON 키 생략, true+null은 조회 후 자료 없음 |
+| dialogBaseline / medicationBaseline | UI 입력 원본과 현재값 비교 | 사용자가 바꾼 입력만 dirty. 미저장 이동 취소 시 값/초안 보존 |
+| patient screen registry | 화면ID/제목/종류/닫기 목적지 | SCREEN_SPEC와 HTML/하단 메뉴/브라우저 검증에 대응 |
 
 ## 환경 변수
 

@@ -16,6 +16,12 @@ internal class ConnectorApi {
         if (result.optString("platform") != "health-connect") {
             throw ConnectorFailure("Android Health Connect용 연결 토큰이 아닙니다.")
         }
+        if (!result.optBoolean("partialMetrics", false)) {
+            throw ConnectorFailure("서버가 부분 권한 동기화를 지원하지 않습니다. 웹 서버를 최신 버전으로 배포한 뒤 다시 연결하세요.")
+        }
+        if (!result.optBoolean("selected", false)) {
+            throw ConnectorFailure("웹에서 다른 연결이 선택되었습니다. 현재 선택 환자의 새 연결 토큰으로 다시 설정하세요.")
+        }
         val patientId = result.optString("patientId")
         val connectionId = result.optString("connectionId")
         if (patientId.isBlank() || connectionId.isBlank()) throw ConnectorFailure("서버의 연결 확인 응답이 올바르지 않습니다.")

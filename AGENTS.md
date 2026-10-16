@@ -2,6 +2,8 @@
 
 사용자가 요청한 개발 프로세스다. 기능 변경 전 `docs/README.md`, `docs/PRODUCT_PLAN.md`, `docs/CONTRACTS.md`, `docs/ARCHITECTURE.md`, `docs/DATA_DICTIONARY.md`, `docs/CHANGELOG.md`를 읽는다.
 
+화면 변경은 반드시 `docs/SCREEN_SPEC.md`의 해당 화면ID와 공통 규약을 먼저 읽고 수정한다. 새 화면/동작은 문서의 진입·상단/하단·닫기·자료/상태·코드 대응·인수조건을 먼저 채운다. `public/patient-screens.js` registry/HTML/문서 일치 검사를 통과해야 한다. 변수 목록 생성만으로 화면 검증을 대체하지 않는다. 스마트폰 변경은 `docs/SMARTPHONE_SYNC_SPEC.md`를 먼저 읽으며 외부 실행 요청은 `docs/USER_ACTION_REPORT.md`에 기록한다.
+
 1. 요구사항 ID와 인수조건을 먼저 정한다. 기획·화면 동작·데이터 의미가 달라지면 문서와 계약을 먼저 수정한다.
 2. 데이터/API/단위/상태/출처/오류 계약을 정리한 뒤 구현한다. 구상 중인 기능을 구현 완료로 표시하지 않는다.
 3. 기존 DB는 삭제하지 않고 추가 마이그레이션한다. 실제 공개 DB에서 전체 초기화나 파괴적인 회귀 테스트를 수행하지 않는다.

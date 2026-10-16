@@ -43,8 +43,8 @@ internal class SyncCoordinator(private val context: Context) {
         if (enabled) {
             if (!health.backgroundAvailable()) throw ConnectorFailure("이 기기는 백그라운드 읽기를 지원하지 않습니다. 앱을 열어 동기화하세요.")
             val granted = health.grantedPermissions()
-            if (!granted.containsAll(HealthReader.READ_PERMISSIONS) || HealthReader.BACKGROUND_PERMISSION !in granted) {
-                throw ConnectorFailure("걸음 수·수면·백그라운드 읽기 권한이 필요합니다.")
+            if (!MetricAccess.from(granted).any || HealthReader.BACKGROUND_PERMISSION !in granted) {
+                throw ConnectorFailure("걸음 수 또는 수면 중 하나 이상과 백그라운드 읽기 권한이 필요합니다.")
             }
         }
         store.saveConfig(config.withBackground(enabled))
@@ -62,14 +62,19 @@ internal class SyncCoordinator(private val context: Context) {
                 throw ConnectorFailure("연결 대상이 바뀌었습니다. 건강자료 전송을 중지했습니다.")
             }
             val granted = health.grantedPermissions()
-            if (!granted.containsAll(HealthReader.READ_PERMISSIONS) ||
+            val access = MetricAccess.from(granted)
+            if (!access.any ||
                 (background && (!health.backgroundAvailable() || HealthReader.BACKGROUND_PERMISSION !in granted))) {
                 // Revocation stops pending uploads too; no previously queued data is sent.
                 throw ConnectorFailure("건강정보 읽기 권한을 확인하세요. 전송을 중지했습니다.")
             }
 
             // An interrupted request keeps its exact serialized payload and batchId on disk.
-            val pending = store.pending()
+            val queued = store.pending()
+            // A permission revoked since queuing removes that pending batch before re-reading.
+            // Never modify the old payload under the same batchId or transmit revoked fields.
+            val pending = queued?.takeIf(access::permitsPayload)
+            if (queued != null && pending == null) store.savePending(null)
             val payload = pending ?: run {
                 val readings = health.readRecentDays(background)
                 val revision = Instant.now().truncatedTo(ChronoUnit.MILLIS)
@@ -79,15 +84,23 @@ internal class SyncCoordinator(private val context: Context) {
                     put("days", JSONArray().apply { readings.forEach { put(it.toJson(revision)) } })
                 }.toString().also(store::savePending)
             }
+            val beforeSend = health.grantedPermissions()
+            if (!MetricAccess.from(beforeSend).permitsPayload(payload) || (background && HealthReader.BACKGROUND_PERMISSION !in beforeSend)) {
+                throw ConnectorFailure("집계 중 읽기 권한이 바뀌어 전송하지 않았습니다. 권한을 확인한 뒤 다시 동기화하세요.")
+            }
             val receipt = api.send(config, payload)
             store.savePending(null)
             val days = JSONObject(payload).getJSONArray("days")
             val withSteps = (0 until days.length()).count { !days.getJSONObject(it).isNull("steps") }
             val withSleep = (0 until days.length()).count { !days.getJSONObject(it).isNull("sleepMinutes") }
+            val sendsSteps = (0 until days.length()).any { days.getJSONObject(it).has("steps") }
+            val sendsSleep = (0 until days.length()).any { days.getJSONObject(it).has("sleepMinutes") }
             val message = (if (pending != null) "보관한 배치의 재전송을 확인했습니다. 다음 동기화에서 최신 자료를 다시 집계합니다.\n" else "") +
+                (if (queued != null && pending == null) "권한이 바뀌어 예전 대기 배치를 폐기하고 허용된 항목을 새로 집계했습니다.\n" else "") +
                 "서버 수신 확인: ${receipt.receivedAt}\n" +
                 "반영 ${receipt.acceptedDays}일 · 기존/재전송 ${receipt.ignoredDays}일\n" +
-                "전송한 걸음 자료 ${withSteps}일 · 수면 단계 자료 ${withSleep}일" +
+                "걸음 수: ${if (sendsSteps) "자료 ${withSteps}일" else "이번 배치에서 생략"}\n" +
+                "수면 단계: ${if (sendsSleep) "자료 ${withSleep}일" else "이번 배치에서 생략"}" +
                 if (withSteps == 0 || withSleep == 0) "\n없는 자료는 0으로 채우지 않았습니다. 삼성 헬스 공유·기록 여부를 확인하세요." else ""
             store.setStatus(message)
             message

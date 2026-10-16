@@ -14,9 +14,9 @@
 
 2026-10-16에 **v0.2 배포본(e635e69)**의 공개 HTTPS 주소에서 서버·SQLite·CSV·정적 파일 일치·모바일/데스크톱 화면·차트 등 읽기 검사 22개를 통과했습니다. 별도로 환자 화면의 임시 식사사진 저장 → 의료진 화면 반영 → 새로고침 후 보존을 확인한 뒤, 그 테스트 기록과 사진만 삭제했습니다. 검사 전후 기존 환자·일일 기록·식사 수는 같았습니다. 이후 배포나 데이터가 바뀌면 다시 점검해야 합니다. 이 기록은 v0.3 배포 완료의 증거가 아닙니다.
 
-## v0.3 반영 절차
+## v0.4 반영 절차
 
-기획/계약, 목적별 메뉴, 약별 복약, 사진 분석 어댑터, 건강 수신 기반의 새 코드는 로컬 통합 검증을 거칩니다. GitHub `main`의 새 커밋을 Render **Manual Deploy → Deploy latest commit**으로 반영한 뒤 `/api/health`의 schemaVersion이2인지 확인하고 공개 점검 도구를 실행합니다. 소스를 푸시한 상태와 실제 서버 갱신을 구별합니다.
+기획/계약, 목적별 메뉴, 약별 복약, 사진 분석 어댑터, 건강 수신 기반의 새 코드는 로컬 통합 검증을 거칩니다. GitHub `main`의 새 커밋을 Render **Manual Deploy → Deploy latest commit**으로 반영한 뒤 `/api/health`의 schemaVersion이3인지 확인하고 공개 점검 도구를 실행합니다. 소스를 푸시한 상태와 실제 서버 갱신을 구별합니다.
 
 사진 분석은 기본 비활성입니다. Render의 서버 환경 변수에 `HOMECARE_VISION_API_KEY`와 `VISION_ENABLED=true`, `VISION_MODEL=gpt-4.1-mini`를 설정해야 실제 외부 분석을 사용할 수 있습니다. 키를 Git이나 채팅에 넣지 마세요. AI API 비용은 Render 무료 요금과 별개입니다. 설정 후 `/api/capabilities`의 vision.available을 확인하고 합성/동의된 검증 사진으로 결과를 대조합니다. 제공자 키 없는 상태의 fixture 테스트는 실제 정확도 검증이 아닙니다.
 

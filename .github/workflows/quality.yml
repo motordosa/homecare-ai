@@ -39,4 +39,4 @@ jobs:
         with:
           gradle-version: '8.11.1'
       - run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
-      - run: gradle --no-daemon --max-workers=2 :app:assembleDebug :app:lintDebug
+      - run: gradle --no-daemon --max-workers=2 :app:testDebugUnitTest :app:assembleDebug :app:lintDebug

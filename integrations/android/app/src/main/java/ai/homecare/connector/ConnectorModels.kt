@@ -43,11 +43,15 @@ internal class Identity(val patientId: String, val connectionId: String)
 
 internal class SyncReceipt(val receivedAt: String, val acceptedDays: Int, val ignoredDays: Int, val duplicate: Boolean)
 
-internal class DailyReading(val date: String, val steps: Long?, val sleepMinutes: Double?) {
+internal class DailyReading(
+    val date: String, val steps: Long?, val sleepMinutes: Double?,
+    val includesSteps: Boolean = true, val includesSleep: Boolean = true,
+) {
     fun toJson(revision: Instant): JSONObject = JSONObject().apply {
+        require(includesSteps || includesSleep)
         put("date", date)
-        put("steps", steps ?: JSONObject.NULL)
-        put("sleepMinutes", sleepMinutes ?: JSONObject.NULL)
+        if (includesSteps) put("steps", steps ?: JSONObject.NULL)
+        if (includesSleep) put("sleepMinutes", sleepMinutes ?: JSONObject.NULL)
         put("updatedAt", revision.toString())
     }
 }
