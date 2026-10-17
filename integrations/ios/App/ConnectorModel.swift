@@ -15,7 +15,8 @@ import Combine
     private let reader = HealthReader()
     private var started = false
 
-    func start() async {
+    func start() async { bootstrap() }
+    func bootstrap() {
         guard !started else { return }; started = true
         busy = true; defer { busy = false }
         do {
@@ -24,7 +25,7 @@ import Combine
                 _ = try ConnectionSettings(origin: stored.settings.origin.absoluteString, patientId: stored.settings.patientId, token: stored.settings.token)
                 saved = stored; origin = stored.settings.origin.absoluteString; patientId = stored.settings.patientId; metrics = stored.metrics
                 status = "저장한 연결을 불러왔습니다. 권한·자료 공유는 Apple 건강에서 확인해 주세요."
-                if stored.background { await configureObservers() }
+                if stored.background { installObservers(stored.metrics) }
             }
         } catch { status = ConnectorError.invalidSettings.localizedDescription }
     }
@@ -105,18 +106,24 @@ import Combine
             else { status = "자동 수신을 껐습니다. 앱을 열어 수동 동기화할 수 있습니다." }
         } catch { status = safeMessage(error) }
     }
+    private func installObservers(_ selection: MetricSelection) {
+        reader.installObservers(selection) { [weak self] completion in
+            Task { @MainActor in
+                defer { completion() }
+                guard let self = self, self.saved?.background == true else { return }
+                await self.sync()
+            }
+        }
+    }
     private func configureObservers() async {
         guard let connection = saved, connection.background else { return }
         do {
-            try await reader.observe(connection.metrics) { [weak self] completion in
-                Task { @MainActor in
-                    defer { completion() }
-                    guard let self = self, self.saved?.background == true else { return }
-                    await self.sync()
-                }
-            }
+            await reader.disableDelivery()
+            installObservers(connection.metrics)
+            try await reader.enableDelivery(connection.metrics)
             status = "자동 수신을 요청했습니다. 잠금·절전·강제 종료 등 iOS 정책에 따라 지연되며 정시 전송을 보장하지 않습니다."
         } catch {
+            await reader.disableDelivery()
             if var value = saved { value.background = false; try? secure.save(value, account: "connection"); saved = value }
             status = "자동 수신을 설정하지 못했습니다. 앱을 열어 동기화해 주세요."
         }

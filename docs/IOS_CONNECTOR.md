@@ -35,6 +35,7 @@
 - 요청 전 preflight, 수집 후 전송 직전 다시 preflight. 플랫폼·환자·선택·부분수신을 검사한다. 서버가 반환하는 serverTime을 revision 기준으로 사용해 폰의 미래 시각으로 거부되는 일을 피한다. 이전 서버에서 serverTime이 없으면 갱신 안내로 중지한다.
 - batchId/본문은 재시도 동안 동일하게 유지한다. 네트워크/5xx 후 대기는 Keychain에 보존한다. 401/403/409/기타4xx는 자동 반복하지 않고 연결 확인 안내. 새 연결/항목 선택 변경 시 대기 제거. 건강 권한은 시스템상 재검증 불가하므로 대기배치는 다음 실행 때 재사용하지 않고 **같은 실행에서 생성한 전송이 실패하면 다음 실행은 새로 조회**한다. 사용자/시스템 권한 철회 뒤 과거 대기값을 보내지 않도록 재시도 전에 재조회하며 빈/변경 결과면 새 batchId로 교체한다.
 - 외부 HTTP redirect는 따르지 않는다. 토큰이 다른 origin으로 전달되지 않는다. HTTPS만 허용하고 URL의 자격증명/경로/쿼리/fragment를 거부한다.
+- 앱 cold/background launch는 AppDelegate의 didFinishLaunchingWithOptions가 **반환하기 전에 observer를 동기적으로 설치**한다. 비동기 Task 안에서 뒤늦게 등록하지 않는다. 자료 조회·HTTPS는 handler에서 비동기로 실행하고 완료 콜백은 성공/실패 모두 호출한다.
 - 서버 기존 API/DB schema3/출처 apple-health/수동값 우선 계약 유지. 새 serverTime과 플랫폼별 구현/검증 metadata는 추가 필드다. nativeBridge.implemented/verified의 기존 보수적 false를 유지하고 platforms 목록에서 소스 구현/검증 단계를 구별한다.
 
 ## 인수조건

@@ -4,7 +4,7 @@
 
 JavaScript는 Acorn AST로 import·변수(구조 분해 포함)·함수/매개변수·class·catch를 추출한다. Kotlin/Java/Swift는 선언/타입 이름의 보조 인덱스이며 컴파일러 AST 전수 분석과 다르다. 객체의 데이터 필드/API 단위/상태 의미는 [자료 사전](../DATA_DICTIONARY.md)과 [계약](../CONTRACTS.md)을 함께 읽는다.
 
-소스 49개, 선언/매개변수 3526개. node_modules·DB·업로드·생성 캡처는 제외한다. 코드에 비밀값을 직접 넣지 않는다.
+소스 49개, 선언/매개변수 3529개. node_modules·DB·업로드·생성 캡처는 제외한다. 코드에 비밀값을 직접 넣지 않는다.
 
 ## integrations/android/app/build.gradle.kts
 
@@ -465,54 +465,56 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 15 | reader | let | native source | let reader = HealthReader() |
 | 16 | started | var | native source | var started = false |
 | 18 | start | declaration | native source |  |
-| 22 | stored | let | native source | let stored = try secure.load(SavedConnection.self, account: "connection") { |
-| 24 | origin | typed name / parameter | native source | stored.settings.origin.absoluteString, patientId |
-| 24 | token | typed name / parameter | native source | stored.settings.token |
-| 31 | save | declaration | native source |  |
-| 37 | origin | typed name / parameter | native source | origin, patientId |
-| 37 | settings | let | native source | let settings = try ConnectionSettings(origin: origin, patientId: patientId, token: token) |
-| 37 | token | typed name / parameter | native source | token |
-| 38 | identity | let | native source | let identity = try await ConnectorAPI(settings: settings).preflight() |
-| 38 | settings | typed name / parameter | native source | settings |
-| 39 | for | typed name / parameter | native source | settings |
-| 40 | background | typed name / parameter | native source | false |
-| 40 | settings | typed name / parameter | native source | settings, metrics |
-| 40 | value | let | native source | let value = SavedConnection(settings: settings, metrics: metrics, background: false) |
-| 47 | requestAccess | declaration | native source |  |
-| 55 | updateMetrics | declaration | native source |  |
-| 56 | value | var | native source | var value = saved else { return } |
-| 63 | sync | declaration | native source |  |
-| 64 | connection | let | native source | let connection = saved else { return } |
-| 67 | api | let | native source | let api = ConnectorAPI(settings: connection.settings) |
-| 67 | settings | typed name / parameter | native source | connection.settings |
-| 68 | identity | let | native source | let identity = try await api.preflight() |
-| 69 | for | typed name / parameter | native source | connection.settings |
-| 69 | now | let | native source | let now = try identity.validate(for: connection.settings) |
-| 70 | now | typed name / parameter | native source | now |
-| 70 | readings | let | native source | let readings = try await reader.read(connection.metrics, now: now) |
-| 71 | freshIdentity | let | native source | let freshIdentity = try await api.preflight() |
-| 72 | for | typed name / parameter | native source | connection.settings |
-| 72 | revision | let | native source | let revision = try freshIdentity.validate(for: connection.settings) |
-| 74 | fresh | let | native source | let fresh = try SyncBatch.make(readings: readings, metrics: connection.metrics, revision: revision) |
-| 74 | readings | typed name / parameter | native source | readings, metrics |
-| 74 | revision | typed name / parameter | native source | revision |
-| 75 | pending | let | native source | let pending = try secure.load(PendingUpload.self, account: "pending") |
-| 76 | as | typed name / parameter | native source | fresh |
-| 76 | batch | let | native source | let batch = pending?.connectionId == identity.connectionId &amp;&amp; pending?.metrics == connection.metrics &amp;&amp; pending?.batch.hasSameValu |
-| 77 | batch | typed name / parameter | native source | batch, metrics |
-| 77 | connectionId | typed name / parameter | native source | identity.connectionId |
-| 78 | receipt | let | native source | let receipt = try await api.upload(batch) |
-| 81 | updated | var | native source | var updated = connection; updated.lastReceivedAt = receipt.receivedAt |
-| 87 | issue | let | native source | let issue = error as? ConnectorError { |
-| 96 | setBackground | declaration | native source |  |
-| 97 | value | var | native source | var value = saved else { return } |
-| 108 | configureObservers | declaration | native source |  |
-| 109 | connection | let | native source | let connection = saved, connection.background else { return } |
-| 114 | self | let | native source | let self = self, self.saved?.background == true else { return } |
-| 120 | value | var | native source | var value = saved { value.background = false; try? secure.save(value, account: "connection"); saved = value } |
-| 124 | foreground | declaration | native source |  |
-| 125 | disconnect | declaration | native source |  |
-| 132 | safeMessage | declaration | native source |  |
+| 19 | bootstrap | declaration | native source |  |
+| 23 | stored | let | native source | let stored = try secure.load(SavedConnection.self, account: "connection") { |
+| 25 | origin | typed name / parameter | native source | stored.settings.origin.absoluteString, patientId |
+| 25 | token | typed name / parameter | native source | stored.settings.token |
+| 32 | save | declaration | native source |  |
+| 38 | origin | typed name / parameter | native source | origin, patientId |
+| 38 | settings | let | native source | let settings = try ConnectionSettings(origin: origin, patientId: patientId, token: token) |
+| 38 | token | typed name / parameter | native source | token |
+| 39 | identity | let | native source | let identity = try await ConnectorAPI(settings: settings).preflight() |
+| 39 | settings | typed name / parameter | native source | settings |
+| 40 | for | typed name / parameter | native source | settings |
+| 41 | background | typed name / parameter | native source | false |
+| 41 | settings | typed name / parameter | native source | settings, metrics |
+| 41 | value | let | native source | let value = SavedConnection(settings: settings, metrics: metrics, background: false) |
+| 48 | requestAccess | declaration | native source |  |
+| 56 | updateMetrics | declaration | native source |  |
+| 57 | value | var | native source | var value = saved else { return } |
+| 64 | sync | declaration | native source |  |
+| 65 | connection | let | native source | let connection = saved else { return } |
+| 68 | api | let | native source | let api = ConnectorAPI(settings: connection.settings) |
+| 68 | settings | typed name / parameter | native source | connection.settings |
+| 69 | identity | let | native source | let identity = try await api.preflight() |
+| 70 | for | typed name / parameter | native source | connection.settings |
+| 70 | now | let | native source | let now = try identity.validate(for: connection.settings) |
+| 71 | now | typed name / parameter | native source | now |
+| 71 | readings | let | native source | let readings = try await reader.read(connection.metrics, now: now) |
+| 72 | freshIdentity | let | native source | let freshIdentity = try await api.preflight() |
+| 73 | for | typed name / parameter | native source | connection.settings |
+| 73 | revision | let | native source | let revision = try freshIdentity.validate(for: connection.settings) |
+| 75 | fresh | let | native source | let fresh = try SyncBatch.make(readings: readings, metrics: connection.metrics, revision: revision) |
+| 75 | readings | typed name / parameter | native source | readings, metrics |
+| 75 | revision | typed name / parameter | native source | revision |
+| 76 | pending | let | native source | let pending = try secure.load(PendingUpload.self, account: "pending") |
+| 77 | as | typed name / parameter | native source | fresh |
+| 77 | batch | let | native source | let batch = pending?.connectionId == identity.connectionId &amp;&amp; pending?.metrics == connection.metrics &amp;&amp; pending?.batch.hasSameValu |
+| 78 | batch | typed name / parameter | native source | batch, metrics |
+| 78 | connectionId | typed name / parameter | native source | identity.connectionId |
+| 79 | receipt | let | native source | let receipt = try await api.upload(batch) |
+| 82 | updated | var | native source | var updated = connection; updated.lastReceivedAt = receipt.receivedAt |
+| 88 | issue | let | native source | let issue = error as? ConnectorError { |
+| 97 | setBackground | declaration | native source |  |
+| 98 | value | var | native source | var value = saved else { return } |
+| 109 | installObservers | declaration | native source |  |
+| 113 | self | let | native source | let self = self, self.saved?.background == true else { return } |
+| 118 | configureObservers | declaration | native source |  |
+| 119 | connection | let | native source | let connection = saved, connection.background else { return } |
+| 127 | value | var | native source | var value = saved { value.background = false; try? secure.save(value, account: "connection"); saved = value } |
+| 131 | foreground | declaration | native source |  |
+| 132 | disconnect | declaration | native source |  |
+| 139 | safeMessage | declaration | native source |  |
 
 ## integrations/ios/App/ContentView.swift
 
@@ -595,12 +597,13 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 68 | steps | typed name / parameter | native source | stepValues |
 | 70 | stopObservers | declaration | native source |  |
 | 73 | disableDelivery | declaration | native source |  |
-| 79 | observe | declaration | native source |  |
-| 83 | query | let | native source | let query = HKObserverQuery(sampleType: type, predicate: nil) { _, completion, error in |
-| 83 | sampleType | typed name / parameter | native source | type, predicate |
-| 88 | continuation | typed name / parameter | native source | CheckedContinuation&lt;Void, Error&gt; |
-| 89 | for | typed name / parameter | native source | type, frequency |
-| 91 | throwing | typed name / parameter | native source | ConnectorError.noReadableData |
+| 79 | installObservers | declaration | native source |  |
+| 82 | query | let | native source | let query = HKObserverQuery(sampleType: type, predicate: nil) { _, completion, error in |
+| 82 | sampleType | typed name / parameter | native source | type, predicate |
+| 89 | enableDelivery | declaration | native source |  |
+| 91 | continuation | typed name / parameter | native source | CheckedContinuation&lt;Void, Error&gt; |
+| 92 | for | typed name / parameter | native source | type, frequency |
+| 94 | throwing | typed name / parameter | native source | ConnectorError.noReadableData |
 
 ## integrations/ios/App/HomeCareConnectorApp.swift
 

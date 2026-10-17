@@ -22,6 +22,8 @@
 
 앞선 전략 근거는 `/workspace/homecare-strategy/HomeCareAI_개발전략.md`와 그 research 자료다. 원문 문서의 제안은 요구 검토 자료이며 사용자 지시와 동일하지 않다. 이번 사용자 지시를 현재 요구사항으로 반영했다.
 
+v0.5 공식 확인 근거: [iPhone·GPT 자료](research/iphone-gpt-evidence-2026-10-17.md).
+
 이번 검토의 저장소 내 근거: [임상 검토](research/automation-clinical-review-2026-10-16.md), [건강 연동 근거](research/automation-evidence-2026-10-16.md). 공식 자료로 확인한 내용과 실제 서비스/기기에서 아직 확인하지 않은 내용을 구분했다.
 
 개발자는 작업 시작 시 이 색인→해당 요구사항→해당 계약→변수 의미를 확인한다. 코드와 문서가 다르면 조용히 코드에 맞추지 말고 원래 의도를 확인해 의사결정을 기록한다. 계획과 구현 상태는 별도로 관리한다.

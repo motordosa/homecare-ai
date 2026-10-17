@@ -76,22 +76,24 @@ final class HealthReader {
             store.disableAllBackgroundDelivery { _, _ in continuation.resume() }
         }
     }
-    func observe(_ metrics: MetricSelection, onChange: @escaping (@escaping () -> Void) -> Void) async throws {
-        await disableDelivery()
-        do {
-            for type in types(metrics) {
-                let query = HKObserverQuery(sampleType: type, predicate: nil) { _, completion, error in
-                    guard error == nil else { completion(); return }
-                    onChange(completion)
-                }
-                observers.append(query); store.execute(query)
-                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-                    store.enableBackgroundDelivery(for: type, frequency: .hourly) { success, error in
-                        if success && error == nil { continuation.resume() }
-                        else { continuation.resume(throwing: ConnectorError.noReadableData) }
-                    }
+    func installObservers(_ metrics: MetricSelection, onChange: @escaping (@escaping () -> Void) -> Void) {
+        stopObservers()
+        for type in types(metrics) {
+            let query = HKObserverQuery(sampleType: type, predicate: nil) { _, completion, error in
+                guard error == nil else { completion(); return }
+                onChange(completion)
+            }
+            observers.append(query); store.execute(query)
+        }
+    }
+    func enableDelivery(_ metrics: MetricSelection) async throws {
+        for type in types(metrics) {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                store.enableBackgroundDelivery(for: type, frequency: .hourly) { success, error in
+                    if success && error == nil { continuation.resume() }
+                    else { continuation.resume(throwing: ConnectorError.noReadableData) }
                 }
             }
-        } catch { await disableDelivery(); throw error }
+        }
     }
 }
