@@ -19,6 +19,8 @@
 - 현재 `ai:check`는 키/flag가 없어 configuration 단계에서 실패(의도된 미설정 진단)했다. 실제 GPT 인증·추론은 미검증이다. 공개 GET capabilities는 vision.enabled/configured=false, preferredPlatform=health-connect로 현재 소스의 미배포를 확인했다. 공개 DB에는 쓰지 않았다. USER_ACTION_REPORT를 iPhone/GPT 중심 U01..04로 갱신했다.
 - GitHub 67d7228의 verify와 iOS job은 실제 성공했다. iOS는 production Swift core와 unsigned simulator xcodebuild 모두 통과했으며 서명/실기기와 구별한다. Android는 이전 dee6e70과 동일하게 setup-android 단계에서 실패하고 Gradle 검사에 도달하지 못했다. 설치 action 대신 GitHub runner에 제공된 SDK 존재·실행권한을 먼저 확인해 재사용하고 기존 Kotlin/assemble/lint 검사는 그대로 실행하도록 CI를 보완한다. 검사 생략이나 의존성 후퇴로 성공 처리하지 않는다.
 - Docker context에서 iOS 소스/빌드 캐시를 제외했다. 비특권 Docker/PORT10000/임시 DB에서 schema3·현재 patient/clinician JS SHA·apple-health 부분 수신/출처와 신규 capabilities/serverTime smoke 통과. 검증 컨테이너는 정리하고 공개 DB·기존 볼륨은 보존했다.
+- **461b402 최종 기능 소스**의 GitHub Actions run38987315942에서 **verify/iOS/Android 모두 실제 성공**했다. 동기 launch observer 보완본도 iOS simulator SDK 컴파일을 통과했고 Android는 재사용 SDK에서 testDebugUnitTest/assembleDebug/lintDebug까지 통과했다. 설치 서명·실기기·실제 GPT는 여전히 별도다. 최신 생성 변수는 **49파일/3529선언**이다.
+- 화면 캡처 검토에서 기존 초기화 카드 SVG 크기가 제한되지 않아 제목을 밀어내는 것을 확인했다. C-SETTINGS 제작 규약에 24px 제한을 먼저 추가하고 CSS를 수정한다. iPhone 안내·GPT 설정을 임시 DB의 실제 화면으로 확인하며 무료 Render 유휴 시작과 iOS 배경 수신의 실제 검증 한계도 보고서에 명시한다.
 
 ## CHG-2026-10-17-10 — 의료진 뒤로가기 복원 (수정 전)
 
