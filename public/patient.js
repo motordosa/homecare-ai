@@ -535,7 +535,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   function refreshAnalysisControls() {
     const available = state.capabilities?.vision?.available === true;
     const ready = available && Boolean(state.imageData) && !state.photoLoading;
-    $("#meal-analysis-availability").textContent = available ? "먹기 전 전체 음식 사진으로 영양 추정 초안을 받아볼 수 있어요. 식사 뒤 실제 드신 비율을 확인해 주세요." : state.capabilities ? "현재 사진 AI가 설정되지 않았어요. 아래에서 음식 유형과 드신 양을 직접 선택해 기록할 수 있어요." : "사진 분석 상태를 확인하지 못했어요. 음식 유형을 직접 선택해 기록할 수 있어요.";
+    $("#meal-analysis-availability").textContent = available ? "GPT로 먹기 전 전체 음식의 칼로리·단백질 추정 초안을 받아볼 수 있어요. 식사 뒤 실제 드신 비율을 확인해 주세요." : state.capabilities ? "현재 사진 AI가 설정되지 않았어요. 아래에서 음식 유형과 드신 양을 직접 선택해 기록할 수 있어요." : "사진 분석 상태를 확인하지 못했어요. 음식 유형을 직접 선택해 기록할 수 있어요.";
     $("#meal-analysis-consent").disabled = !available || Boolean(state.saving);
     $("#meal-analyze").disabled = !ready || !$("#meal-analysis-consent").checked || state.analysisBusy || Boolean(state.saving);
     $("#meal-analyze").textContent = state.analysisBusy ? "사진을 분석하고 있어요…" : "사진 분석하기";

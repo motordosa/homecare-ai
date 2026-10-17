@@ -91,8 +91,10 @@ test('real receiver acceptance changes state without claiming native verificatio
 test('native preflight exposes only its patient binding and shares receiver authentication rules', t => {
   const db = setup(t);
   const original = createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' });
-  assert.deepEqual(getHealthConnectionIdentity(db, original.token), {
-    connectionId: original.connection.id, patientId: 'fixture-patient-a', platform: 'health-connect', partialMetrics: true, selected: true,
+  const identity = getHealthConnectionIdentity(db, original.token);
+  assert.ok(Math.abs(Date.now() - Date.parse(identity.serverTime)) < 2000);
+  assert.deepEqual(identity, {
+    connectionId: original.connection.id, patientId: 'fixture-patient-a', platform: 'health-connect', partialMetrics: true, selected: true, serverTime: identity.serverTime,
   });
   let state = getHealthConnections(db, 'fixture-patient-a');
   assert.equal(state.connections[0].status, 'awaiting_native');

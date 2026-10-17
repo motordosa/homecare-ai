@@ -1,4 +1,4 @@
-# 화면별 제작·동작 명세 v0.4
+# 화면별 제작·동작 명세 v0.5
 
 작성일: 2026-10-17 KST. 요구사항 NAV-04/GOV-02/QA-02. **코드 수정 전에 작성한 제작 기준**이며 완료 증거는 CHANGELOG에 별도로 기록한다. 제품 목적·의료 의미는 PRODUCT_PLAN/CONTRACTS가 기준이다.
 
@@ -60,6 +60,8 @@
 | 분석/조회 늦은 응답 | requestId/patientId/date/image hash/current view 검사 | 화면 이동 뒤 다른 화면에 결과 생성 금지 |
 
 ## 3. 의료진 화면별 계약
+
+v0.5 IMG-04/SYNC-04: P-MEAL의 GPT 동작·오류는 GPT_ACTIVATION.md, P-CONNECT와 iOS I-CONNECT/I-ACCESS/I-SYNC/I-BACKGROUND/I-WEB/I-DISCONNECT는 IOS_CONNECTOR.md를 먼저 따른다. P-CONNECT는 iPhone 기본 선택·같은 화면의 접기식 설치/권한/동기화 안내를 추가한다. 별도 페이지 이동이나 상단 닫기 변경 없음. C-SETTINGS에는 GPT 설정 상태/모델/준비와 실제 검증의 구별·조회 실패/재시도 구역을 추가한다. 서버 설정 확인은 GET capabilities만 호출하며 키 입력/노출·유료 추론은 하지 않는다. 기존 5개 메뉴·popstate 복원을 유지한다.
 
 데스크톱 공통 셸은 좌측 5개 메뉴 순서 고정, 상단 페이지 제목/새로고침, 선택 환자 유지다. 일반 페이지 X를 환자 앱처럼 임의 추가하지 않는다. 등록·종료·이력 대화상자만 우상단 X/취소를 사용하고 열었던 페이지로 복귀한다. 다른 역할로 이동하는 링크는 ‘환자 화면’이라고 명시한다.
 

@@ -13,3 +13,9 @@ services:
         value: production
       - key: DATA_DIR
         value: /tmp/homecare-data
+      - key: VISION_ENABLED
+        value: "true"
+      - key: VISION_MODEL
+        value: gpt-4.1-mini
+      - key: HOMECARE_VISION_API_KEY
+        sync: false

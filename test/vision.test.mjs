@@ -4,7 +4,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { analyzePhoto, ensureVisionSchema, markAnalysisApplied, resolveMealAnalysis, visionCapabilities } from '../lib/vision.mjs';
+import { analyzePhoto, ensureVisionSchema, markAnalysisApplied, resolveMealAnalysis, visionCapabilities, checkVisionAccess } from '../lib/vision.mjs';
 import { openDatabase, seedDatabase } from '../lib/db.mjs';
 import { resetDemo } from '../lib/reset.mjs';
 
@@ -65,7 +65,7 @@ test('additive vision migration is repeatable and preserves existing meals', t =
 test('capabilities separate explicit enablement from configuration without revealing secrets', () => {
   assert.deepEqual(visionCapabilities({}), {
     enabled: false, configured: false, available: false, provider: 'openai', model: 'gpt-4.1-mini',
-    reason: '외부 사진 분석이 비활성화되어 있습니다. 수동으로 입력해 주세요.',
+    reason: '외부 사진 분석이 비활성화되어 있습니다. 수동으로 입력해 주세요.', reasonCode: 'disabled',
   });
   assert.equal(visionCapabilities(enabledEnv).available, true);
   assert.equal(visionCapabilities({ HOMECARE_VISION_API_KEY: 'mock-only' }).configured, true);
@@ -409,5 +409,40 @@ test('a delayed provider response cannot attach to a recreated same-ID patient a
   } finally {
     db.close();
     rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+
+test('vision diagnostics distinguish configuration, model access and provider authorization without image inference', async () => {
+  let calls = 0;
+  const fetchImpl = async (url, request) => {
+    calls++;
+    assert.equal(url, 'https://api.openai.com/v1/models/gpt-4.1-mini');
+    assert.equal(request.body, undefined);
+    assert.equal(request.redirect, 'error');
+    assert.ok(request.headers.Authorization.startsWith('Bearer '));
+    return new Response(JSON.stringify({ id: 'gpt-4.1-mini' }), { status: 200 });
+  };
+  assert.equal((await checkVisionAccess({ env: {}, fetchImpl })).reasonCode, 'disabled');
+  assert.equal((await checkVisionAccess({ env: { VISION_ENABLED: 'true' }, fetchImpl })).reasonCode, 'missing_key');
+  assert.equal(calls, 0);
+  const ready = await checkVisionAccess({ env: enabledEnv, fetchImpl });
+  assert.equal(ready.ok, true); assert.equal(ready.imageInferenceVerified, false); assert.equal(calls, 1);
+  for (const [status, reason] of [[401,'access_denied'],[403,'access_denied'],[429,'quota_or_rate_limit'],[404,'model_not_available'],[500,'provider_error']]) {
+    const result = await checkVisionAccess({ env: enabledEnv, fetchImpl: async () => new Response('do not expose provider details', { status }) });
+    assert.equal(result.reasonCode, reason);
+    assert.ok(!JSON.stringify(result).includes('provider details'));
+    assert.ok(!JSON.stringify(result).includes(enabledEnv.HOMECARE_VISION_API_KEY));
+  }
+});
+
+test('photo inference reports actionable authentication and quota failures without disclosing upstream bodies', async t => {
+  for (const [status, text] of [[401,'API 키'],[403,'접근 권한'],[429,'API 잔액'],[500,'수동']]) {
+    const db = database(t);
+    await assert.rejects(analyze(db, { fetchImpl: async () => new Response('secret-key-and-provider-detail', { status }) }), error => {
+      assert.equal(error.status, 502); assert.ok(error.message.includes(text));
+      assert.ok(!error.message.includes('secret-key')); return true;
+    });
+    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM photo_analyses').get().n, 0);
   }
 });

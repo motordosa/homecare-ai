@@ -32,6 +32,10 @@
 | dialogBaseline / medicationBaseline | UI 입력 원본과 현재값 비교 | 사용자가 바꾼 입력만 dirty. 미저장 이동 취소 시 값/초안 보존 |
 | patient screen registry | 화면ID/제목/종류/닫기 목적지 | SCREEN_SPEC와 HTML/하단 메뉴/브라우저 검증에 대응 |
 | historyMode / restoreRoute | 의료진 기록 갱신 방식 / URL 복원 | push는 사용자 이동, replace는 정규화·조회. 복원 시 요청 세대 무효화·환자/날짜 일치 확인 |
+| reasonCode / available | GPT 설정 사유 / 준비 상태 | disabled/missing_key/invalid_model/ready. 실제 인증·추론 성공 증거가 아님 |
+| serverTime | preflight 서버 ISO 시각 | iOS 배치 revision 기준, 폰 미래시각 방지 |
+| MetricSelection / DayReading | iOS 선택 항목 / 서울 날짜 집계 | 선택 안 함·빈 결과는 키 생략, 실제0은 보존. 수면 분·합집합 |
+| ConnectionSettings / PendingUpload | iOS 대상·비밀 / 재시도 JSON | Keychain ThisDeviceOnly, 로그·URL·UserDefaults 제외 |
 
 ## 환경 변수
 

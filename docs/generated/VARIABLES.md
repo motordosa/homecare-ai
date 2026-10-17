@@ -2,415 +2,415 @@
 
 자동 생성 파일. 직접 편집하지 않는다. 생성: `npm run docs:variables`, 최신 여부 검사: `npm run docs:check`.
 
-JavaScript는 Acorn AST로 import·변수(구조 분해 포함)·함수/매개변수·class·catch를 추출한다. Kotlin/Java는 선언/타입 이름의 보조 인덱스이며 컴파일러 AST 전수 분석과 다르다. 객체의 데이터 필드/API 단위/상태 의미는 [자료 사전](../DATA_DICTIONARY.md)과 [계약](../CONTRACTS.md)을 함께 읽는다.
+JavaScript는 Acorn AST로 import·변수(구조 분해 포함)·함수/매개변수·class·catch를 추출한다. Kotlin/Java/Swift는 선언/타입 이름의 보조 인덱스이며 컴파일러 AST 전수 분석과 다르다. 객체의 데이터 필드/API 단위/상태 의미는 [자료 사전](../DATA_DICTIONARY.md)과 [계약](../CONTRACTS.md)을 함께 읽는다.
 
-소스 39개, 선언/매개변수 3043개. node_modules·DB·업로드·생성 캡처는 제외한다. 코드에 비밀값을 직접 넣지 않는다.
+소스 49개, 선언/매개변수 3526개. node_modules·DB·업로드·생성 캡처는 제외한다. 코드에 비밀값을 직접 넣지 않는다.
 
 ## integrations/android/app/build.gradle.kts
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 19 | targetCompatibility | Java typed declaration / parameter | Kotlin source | JavaVersion.VERSION_17 targetCompatibility  |
+| 19 | targetCompatibility | native typed declaration / parameter | native source | JavaVersion.VERSION_17 targetCompatibility  |
 
 ## integrations/android/app/src/main/java/ai/homecare/connector/BackgroundSync.kt
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 15 | context | typed name / parameter | Kotlin source | Context, parameters |
-| 15 | HealthSyncWorker | declaration | Kotlin source |  |
-| 16 | doWork | declaration | Kotlin source |  |
-| 20 | cancelled | typed name / parameter | Kotlin source | CancellationException |
-| 22 | failure | typed name / parameter | Kotlin source | ConnectorFailure |
-| 27 | _ | typed name / parameter | Kotlin source | Exception |
-| 35 | BackgroundSync | declaration | Kotlin source |  |
-| 36 | NAME | val | Kotlin source | val NAME = "homecare-health-connect-sync" |
-| 38 | context | typed name / parameter | Kotlin source | Context |
-| 38 | schedule | declaration | Kotlin source |  |
-| 39 | request | val | Kotlin source | val request = PeriodicWorkRequestBuilder&lt;HealthSyncWorker&gt;(15, TimeUnit.MINUTES) |
-| 46 | cancel | declaration | Kotlin source |  |
-| 46 | context | typed name / parameter | Kotlin source | Context |
+| 15 | context | typed name / parameter | native source | Context, parameters |
+| 15 | HealthSyncWorker | declaration | native source |  |
+| 16 | doWork | declaration | native source |  |
+| 20 | cancelled | typed name / parameter | native source | CancellationException |
+| 22 | failure | typed name / parameter | native source | ConnectorFailure |
+| 27 | _ | typed name / parameter | native source | Exception |
+| 35 | BackgroundSync | declaration | native source |  |
+| 36 | NAME | val | native source | val NAME = "homecare-health-connect-sync" |
+| 38 | context | typed name / parameter | native source | Context |
+| 38 | schedule | declaration | native source |  |
+| 39 | request | val | native source | val request = PeriodicWorkRequestBuilder&lt;HealthSyncWorker&gt;(15, TimeUnit.MINUTES) |
+| 46 | cancel | declaration | native source |  |
+| 46 | context | typed name / parameter | native source | Context |
 
 ## integrations/android/app/src/main/java/ai/homecare/connector/ConnectorApi.kt
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 13 | ConnectorApi | declaration | Kotlin source |  |
-| 14 | identity | declaration | Kotlin source |  |
-| 14 | origin | typed name / parameter | Kotlin source | String, token |
-| 15 | result | val | Kotlin source | val result = request(origin, token, "/api/health-sync/connection", null) |
-| 25 | patientId | val | Kotlin source | val patientId = result.optString("patientId") |
-| 26 | connectionId | val | Kotlin source | val connectionId = result.optString("connectionId") |
-| 31 | config | typed name / parameter | Kotlin source | ConnectionConfig, body |
-| 31 | send | declaration | Kotlin source |  |
-| 32 | result | val | Kotlin source | val result = request(config.origin, config.token, "/api/health-sync", body) |
-| 38 | receivedAt | val | Kotlin source | val receivedAt = result.getString("receivedAt") |
-| 40 | accepted | val | Kotlin source | val accepted = result.getInt("acceptedDays") |
-| 41 | ignored | val | Kotlin source | val ignored = result.getInt("ignoredDays") |
-| 42 | sentDays | val | Kotlin source | val sentDays = JSONObject(body).getJSONArray("days").length() |
-| 43 | duplicate | val | Kotlin source | val duplicate = result.getBoolean("duplicate") |
-| 47 | _ | typed name / parameter | Kotlin source | Exception |
-| 52 | origin | typed name / parameter | Kotlin source | String, token |
-| 52 | path | typed name / parameter | Kotlin source | String, body |
-| 52 | request | declaration | Kotlin source |  |
-| 54 | _ | typed name / parameter | Kotlin source | IllegalArgumentException |
-| 54 | canonical | val | Kotlin source | val canonical = try { ServerOrigin.normalize(origin) } catch (_: IllegalArgumentException) { |
-| 57 | connection | val | Kotlin source | val connection = URL(canonical + path).openConnection() as HttpsURLConnection |
-| 68 | bytes | val | Kotlin source | val bytes = body.toByteArray(Charsets.UTF_8) |
-| 72 | status | val | Kotlin source | val status = connection.responseCode |
-| 83 | bytes | val | Kotlin source | val bytes = ByteArrayOutputStream() |
-| 85 | buffer | val | Kotlin source | val buffer = ByteArray(4096) |
-| 87 | read | val | Kotlin source | val read = input.read(buffer) |
-| 93 | _ | typed name / parameter | Kotlin source | Exception |
-| 96 | failure | typed name / parameter | Kotlin source | ConnectorFailure |
-| 98 | _ | typed name / parameter | Kotlin source | IOException |
-| 105 | TOKEN | val | Kotlin source | val TOKEN = Regex("^hc_[A-Za-z0-9_-]{43}$") } |
+| 13 | ConnectorApi | declaration | native source |  |
+| 14 | identity | declaration | native source |  |
+| 14 | origin | typed name / parameter | native source | String, token |
+| 15 | result | val | native source | val result = request(origin, token, "/api/health-sync/connection", null) |
+| 25 | patientId | val | native source | val patientId = result.optString("patientId") |
+| 26 | connectionId | val | native source | val connectionId = result.optString("connectionId") |
+| 31 | config | typed name / parameter | native source | ConnectionConfig, body |
+| 31 | send | declaration | native source |  |
+| 32 | result | val | native source | val result = request(config.origin, config.token, "/api/health-sync", body) |
+| 38 | receivedAt | val | native source | val receivedAt = result.getString("receivedAt") |
+| 40 | accepted | val | native source | val accepted = result.getInt("acceptedDays") |
+| 41 | ignored | val | native source | val ignored = result.getInt("ignoredDays") |
+| 42 | sentDays | val | native source | val sentDays = JSONObject(body).getJSONArray("days").length() |
+| 43 | duplicate | val | native source | val duplicate = result.getBoolean("duplicate") |
+| 47 | _ | typed name / parameter | native source | Exception |
+| 52 | origin | typed name / parameter | native source | String, token |
+| 52 | path | typed name / parameter | native source | String, body |
+| 52 | request | declaration | native source |  |
+| 54 | _ | typed name / parameter | native source | IllegalArgumentException |
+| 54 | canonical | val | native source | val canonical = try { ServerOrigin.normalize(origin) } catch (_: IllegalArgumentException) { |
+| 57 | connection | val | native source | val connection = URL(canonical + path).openConnection() as HttpsURLConnection |
+| 68 | bytes | val | native source | val bytes = body.toByteArray(Charsets.UTF_8) |
+| 72 | status | val | native source | val status = connection.responseCode |
+| 83 | bytes | val | native source | val bytes = ByteArrayOutputStream() |
+| 85 | buffer | val | native source | val buffer = ByteArray(4096) |
+| 87 | read | val | native source | val read = input.read(buffer) |
+| 93 | _ | typed name / parameter | native source | Exception |
+| 96 | failure | typed name / parameter | native source | ConnectorFailure |
+| 98 | _ | typed name / parameter | native source | IOException |
+| 105 | TOKEN | val | native source | val TOKEN = Regex("^hc_[A-Za-z0-9_-]{43}$") } |
 
 ## integrations/android/app/src/main/java/ai/homecare/connector/ConnectorModels.kt
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 7 | ConnectionConfig | declaration | Kotlin source |  |
-| 8 | origin | val | Kotlin source | val origin: String, |
-| 8 | origin | typed name / parameter | Kotlin source | String, |
-| 9 | token | val | Kotlin source | val token: String, |
-| 9 | token | typed name / parameter | Kotlin source | String, |
-| 10 | patientId | val | Kotlin source | val patientId: String, |
-| 10 | patientId | typed name / parameter | Kotlin source | String, |
-| 11 | connectionId | val | Kotlin source | val connectionId: String, |
-| 11 | connectionId | typed name / parameter | Kotlin source | String, |
-| 12 | ownerConfirmedAt | val | Kotlin source | val ownerConfirmedAt: String, |
-| 12 | ownerConfirmedAt | typed name / parameter | Kotlin source | String, |
-| 13 | backgroundEnabled | val | Kotlin source | val backgroundEnabled: Boolean = false, |
-| 13 | backgroundEnabled | typed name / parameter | Kotlin source | Boolean  |
-| 15 | toJson | declaration | Kotlin source |  |
-| 24 | enabled | typed name / parameter | Kotlin source | Boolean |
-| 24 | withBackground | declaration | Kotlin source |  |
-| 29 | fromJson | declaration | Kotlin source |  |
-| 29 | value | typed name / parameter | Kotlin source | String |
-| 39 | ConnectorFailure | declaration | Kotlin source |  |
-| 39 | retryable | val | Kotlin source | val retryable: Boolean = false) : |
-| 39 | safeMessage | val | Kotlin source | val safeMessage: String, val retryable: Boolean = false) : |
-| 39 | safeMessage | typed name / parameter | Kotlin source | String, val retryable |
-| 42 | connectionId | val | Kotlin source | val connectionId: String) |
-| 42 | Identity | declaration | Kotlin source |  |
-| 42 | patientId | val | Kotlin source | val patientId: String, val connectionId: String) |
-| 42 | patientId | typed name / parameter | Kotlin source | String, val connectionId |
-| 44 | acceptedDays | val | Kotlin source | val acceptedDays: Int, val ignoredDays: Int, val duplicate: Boolean) |
-| 44 | duplicate | val | Kotlin source | val duplicate: Boolean) |
-| 44 | ignoredDays | val | Kotlin source | val ignoredDays: Int, val duplicate: Boolean) |
-| 44 | ignoredDays | typed name / parameter | Kotlin source | Int, val duplicate |
-| 44 | receivedAt | val | Kotlin source | val receivedAt: String, val acceptedDays: Int, val ignoredDays: Int, val duplicate: Boolean) |
-| 44 | receivedAt | typed name / parameter | Kotlin source | String, val acceptedDays |
-| 44 | SyncReceipt | declaration | Kotlin source |  |
-| 46 | DailyReading | declaration | Kotlin source |  |
-| 47 | date | val | Kotlin source | val date: String, val steps: Long?, val sleepMinutes: Double?, |
-| 47 | date | typed name / parameter | Kotlin source | String, val steps |
-| 47 | sleepMinutes | val | Kotlin source | val sleepMinutes: Double?, |
-| 47 | sleepMinutes | typed name / parameter | Kotlin source | Double?, |
-| 47 | steps | val | Kotlin source | val steps: Long?, val sleepMinutes: Double?, |
-| 48 | includesSleep | val | Kotlin source | val includesSleep: Boolean = true, |
-| 48 | includesSleep | typed name / parameter | Kotlin source | Boolean  |
-| 48 | includesSteps | val | Kotlin source | val includesSteps: Boolean = true, val includesSleep: Boolean = true, |
-| 48 | includesSteps | typed name / parameter | Kotlin source | Boolean  |
-| 50 | revision | typed name / parameter | Kotlin source | Instant |
-| 50 | toJson | declaration | Kotlin source |  |
+| 7 | ConnectionConfig | declaration | native source |  |
+| 8 | origin | val | native source | val origin: String, |
+| 8 | origin | typed name / parameter | native source | String, |
+| 9 | token | val | native source | val token: String, |
+| 9 | token | typed name / parameter | native source | String, |
+| 10 | patientId | val | native source | val patientId: String, |
+| 10 | patientId | typed name / parameter | native source | String, |
+| 11 | connectionId | val | native source | val connectionId: String, |
+| 11 | connectionId | typed name / parameter | native source | String, |
+| 12 | ownerConfirmedAt | val | native source | val ownerConfirmedAt: String, |
+| 12 | ownerConfirmedAt | typed name / parameter | native source | String, |
+| 13 | backgroundEnabled | val | native source | val backgroundEnabled: Boolean = false, |
+| 13 | backgroundEnabled | typed name / parameter | native source | Boolean  |
+| 15 | toJson | declaration | native source |  |
+| 24 | enabled | typed name / parameter | native source | Boolean |
+| 24 | withBackground | declaration | native source |  |
+| 29 | fromJson | declaration | native source |  |
+| 29 | value | typed name / parameter | native source | String |
+| 39 | ConnectorFailure | declaration | native source |  |
+| 39 | retryable | val | native source | val retryable: Boolean = false) : |
+| 39 | safeMessage | val | native source | val safeMessage: String, val retryable: Boolean = false) : |
+| 39 | safeMessage | typed name / parameter | native source | String, val retryable |
+| 42 | connectionId | val | native source | val connectionId: String) |
+| 42 | Identity | declaration | native source |  |
+| 42 | patientId | val | native source | val patientId: String, val connectionId: String) |
+| 42 | patientId | typed name / parameter | native source | String, val connectionId |
+| 44 | acceptedDays | val | native source | val acceptedDays: Int, val ignoredDays: Int, val duplicate: Boolean) |
+| 44 | duplicate | val | native source | val duplicate: Boolean) |
+| 44 | ignoredDays | val | native source | val ignoredDays: Int, val duplicate: Boolean) |
+| 44 | ignoredDays | typed name / parameter | native source | Int, val duplicate |
+| 44 | receivedAt | val | native source | val receivedAt: String, val acceptedDays: Int, val ignoredDays: Int, val duplicate: Boolean) |
+| 44 | receivedAt | typed name / parameter | native source | String, val acceptedDays |
+| 44 | SyncReceipt | declaration | native source |  |
+| 46 | DailyReading | declaration | native source |  |
+| 47 | date | val | native source | val date: String, val steps: Long?, val sleepMinutes: Double?, |
+| 47 | date | typed name / parameter | native source | String, val steps |
+| 47 | sleepMinutes | val | native source | val sleepMinutes: Double?, |
+| 47 | sleepMinutes | typed name / parameter | native source | Double?, |
+| 47 | steps | val | native source | val steps: Long?, val sleepMinutes: Double?, |
+| 48 | includesSleep | val | native source | val includesSleep: Boolean = true, |
+| 48 | includesSleep | typed name / parameter | native source | Boolean  |
+| 48 | includesSteps | val | native source | val includesSteps: Boolean = true, val includesSleep: Boolean = true, |
+| 48 | includesSteps | typed name / parameter | native source | Boolean  |
+| 50 | revision | typed name / parameter | native source | Instant |
+| 50 | toJson | declaration | native source |  |
 
 ## integrations/android/app/src/main/java/ai/homecare/connector/HealthReader.kt
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 14 | context | val | Kotlin source | val context: Context) { |
-| 14 | context | typed name / parameter | Kotlin source | Context |
-| 14 | HealthReader | declaration | Kotlin source |  |
-| 15 | availability | declaration | Kotlin source |  |
-| 17 | client | declaration | Kotlin source |  |
-| 26 | backgroundAvailable | declaration | Kotlin source |  |
-| 30 | grantedPermissions | declaration | Kotlin source |  |
-| 32 | background | typed name / parameter | Kotlin source | Boolean |
-| 32 | readRecentDays | declaration | Kotlin source |  |
-| 33 | health | val | Kotlin source | val health = client() |
-| 34 | granted | val | Kotlin source | val granted = health.permissionController.getGrantedPermissions() |
-| 35 | access | val | Kotlin source | val access = MetricAccess.from(granted) |
-| 43 | now | val | Kotlin source | val now = Instant.now() |
-| 44 | today | val | Kotlin source | val today = now.atZone(STUDY_ZONE).toLocalDate() |
-| 45 | first | val | Kotlin source | val first = today.minusDays(6) |
-| 47 | sleep | val | Kotlin source | val sleep = mutableListOf&lt;SleepSessionRecord&gt;() |
-| 48 | page | var | Kotlin source | var page: String? = null |
-| 48 | page | typed name / parameter | Kotlin source | String?  |
-| 49 | pages | var | Kotlin source | var pages = 0 |
-| 51 | result | val | Kotlin source | val result = health.readRecords(ReadRecordsRequest( |
-| 64 | day | val | Kotlin source | val day = first.plusDays(offset) |
-| 65 | start | val | Kotlin source | val start = day.atStartOfDay(STUDY_ZONE).toInstant() |
-| 66 | end | val | Kotlin source | val end = minOf(day.plusDays(1).atStartOfDay(STUDY_ZONE).toInstant(), now) |
-| 68 | steps | val | Kotlin source | val steps = if (access.steps) health.aggregate(AggregateRequest( |
-| 77 | asleepMinutes | declaration | Kotlin source |  |
-| 77 | end | typed name / parameter | Kotlin source | Instant |
-| 77 | records | typed name / parameter | Kotlin source | List&lt;SleepSessionRecord&gt;, start |
-| 78 | relevant | val | Kotlin source | val relevant = records.filter { it.startTime &lt; end &amp;&amp; it.endTime &gt; start } |
-| 80 | intervals | val | Kotlin source | val intervals = mutableListOf&lt;SleepIntervals.Interval&gt;() |
-| 81 | knownStage | var | Kotlin source | var knownStage = false |
-| 104 | STUDY_ZONE | val | Kotlin source | val STUDY_ZONE: ZoneId = ZoneId.of("Asia/Seoul") |
-| 104 | STUDY_ZONE | typed name / parameter | Kotlin source | ZoneId  |
-| 105 | READ_PERMISSIONS | val | Kotlin source | val READ_PERMISSIONS = setOf( |
-| 109 | BACKGROUND_PERMISSION | val | Kotlin source | val BACKGROUND_PERMISSION = "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" |
+| 14 | context | val | native source | val context: Context) { |
+| 14 | context | typed name / parameter | native source | Context |
+| 14 | HealthReader | declaration | native source |  |
+| 15 | availability | declaration | native source |  |
+| 17 | client | declaration | native source |  |
+| 26 | backgroundAvailable | declaration | native source |  |
+| 30 | grantedPermissions | declaration | native source |  |
+| 32 | background | typed name / parameter | native source | Boolean |
+| 32 | readRecentDays | declaration | native source |  |
+| 33 | health | val | native source | val health = client() |
+| 34 | granted | val | native source | val granted = health.permissionController.getGrantedPermissions() |
+| 35 | access | val | native source | val access = MetricAccess.from(granted) |
+| 43 | now | val | native source | val now = Instant.now() |
+| 44 | today | val | native source | val today = now.atZone(STUDY_ZONE).toLocalDate() |
+| 45 | first | val | native source | val first = today.minusDays(6) |
+| 47 | sleep | val | native source | val sleep = mutableListOf&lt;SleepSessionRecord&gt;() |
+| 48 | page | var | native source | var page: String? = null |
+| 48 | page | typed name / parameter | native source | String?  |
+| 49 | pages | var | native source | var pages = 0 |
+| 51 | result | val | native source | val result = health.readRecords(ReadRecordsRequest( |
+| 64 | day | val | native source | val day = first.plusDays(offset) |
+| 65 | start | val | native source | val start = day.atStartOfDay(STUDY_ZONE).toInstant() |
+| 66 | end | val | native source | val end = minOf(day.plusDays(1).atStartOfDay(STUDY_ZONE).toInstant(), now) |
+| 68 | steps | val | native source | val steps = if (access.steps) health.aggregate(AggregateRequest( |
+| 77 | asleepMinutes | declaration | native source |  |
+| 77 | end | typed name / parameter | native source | Instant |
+| 77 | records | typed name / parameter | native source | List&lt;SleepSessionRecord&gt;, start |
+| 78 | relevant | val | native source | val relevant = records.filter { it.startTime &lt; end &amp;&amp; it.endTime &gt; start } |
+| 80 | intervals | val | native source | val intervals = mutableListOf&lt;SleepIntervals.Interval&gt;() |
+| 81 | knownStage | var | native source | var knownStage = false |
+| 104 | STUDY_ZONE | val | native source | val STUDY_ZONE: ZoneId = ZoneId.of("Asia/Seoul") |
+| 104 | STUDY_ZONE | typed name / parameter | native source | ZoneId  |
+| 105 | READ_PERMISSIONS | val | native source | val READ_PERMISSIONS = setOf( |
+| 109 | BACKGROUND_PERMISSION | val | native source | val BACKGROUND_PERMISSION = "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" |
 
 ## integrations/android/app/src/main/java/ai/homecare/connector/MainActivity.kt
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 26 | MainActivity | declaration | Kotlin source |  |
-| 27 | originInput | var | Kotlin source | var originInput: EditText |
-| 27 | originInput | typed name / parameter | Kotlin source | EditText |
-| 28 | patientInput | var | Kotlin source | var patientInput: EditText |
-| 28 | patientInput | typed name / parameter | Kotlin source | EditText |
-| 29 | tokenInput | var | Kotlin source | var tokenInput: EditText |
-| 29 | tokenInput | typed name / parameter | Kotlin source | EditText |
-| 30 | ownerConfirmed | var | Kotlin source | var ownerConfirmed: CheckBox |
-| 30 | ownerConfirmed | typed name / parameter | Kotlin source | CheckBox |
-| 31 | testingConfirmed | var | Kotlin source | var testingConfirmed: CheckBox |
-| 31 | testingConfirmed | typed name / parameter | Kotlin source | CheckBox |
-| 32 | status | var | Kotlin source | var status: TextView |
-| 32 | status | typed name / parameter | Kotlin source | TextView |
-| 33 | controls | var | Kotlin source | var controls: LinearLayout |
-| 33 | controls | typed name / parameter | Kotlin source | LinearLayout |
-| 34 | busy | var | Kotlin source | var busy = false |
-| 35 | enablingBackground | var | Kotlin source | var enablingBackground = false |
-| 37 | permissionRequest | val | Kotlin source | val permissionRequest = registerForActivityResult( |
-| 49 | onCreate | declaration | Kotlin source |  |
-| 49 | savedInstanceState | typed name / parameter | Kotlin source | Bundle? |
-| 53 | scroll | val | Kotlin source | val scroll = ScrollView(this) |
-| 57 | bars | val | Kotlin source | val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime()) |
-| 97 | reader | val | Kotlin source | val reader = HealthReader(this) |
-| 109 | reader | val | Kotlin source | val reader = HealthReader(this) |
-| 112 | required | val | Kotlin source | val required = HealthReader.READ_PERMISSIONS + HealthReader.BACKGROUND_PERMISSION |
-| 113 | granted | val | Kotlin source | val granted = reader.grantedPermissions() |
-| 124 | config | val | Kotlin source | val config = SecureStore(this).config() ?: throw ConnectorFailure("연결을 먼저 저장하세요.") |
-| 125 | url | val | Kotlin source | val url = Uri.parse(config.origin + "/patient").buildUpon() |
-| 129 | _ | typed name / parameter | Kotlin source | Exception |
-| 134 | settings | val | Kotlin source | val settings = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS) |
-| 137 | _ | typed name / parameter | Kotlin source | Exception |
-| 158 | _ | typed name / parameter | Kotlin source | Exception |
-| 161 | onResume | declaration | Kotlin source |  |
-| 166 | requireConnection | declaration | Kotlin source |  |
-| 170 | ensureAvailable | declaration | Kotlin source |  |
-| 170 | reader | typed name / parameter | Kotlin source | HealthReader |
-| 177 | action | typed name / parameter | Kotlin source | suspend  |
-| 177 | runAction | declaration | Kotlin source |  |
-| 186 | cancelled | typed name / parameter | Kotlin source | CancellationException |
-| 188 | failure | typed name / parameter | Kotlin source | ConnectorFailure |
-| 190 | _ | typed name / parameter | Kotlin source | Exception |
-| 199 | refreshStatus | declaration | Kotlin source |  |
-| 201 | store | val | Kotlin source | val store = SecureStore(this) |
-| 202 | config | val | Kotlin source | val config = store.config() |
-| 207 | reader | val | Kotlin source | val reader = HealthReader(this) |
-| 208 | _ | typed name / parameter | Kotlin source | Exception |
-| 208 | permissions | val | Kotlin source | val permissions = try { reader.grantedPermissions() } catch (_: Exception) { emptySet() } |
-| 209 | access | val | Kotlin source | val access = MetricAccess.from(permissions) |
-| 210 | permissionText | val | Kotlin source | val permissionText = "걸음 수: ${if (access.steps) "읽기 허용" else "미허용·전송 안 함"}\n" + |
-| 216 | _ | typed name / parameter | Kotlin source | Exception |
-| 221 | text | declaration | Kotlin source |  |
-| 221 | value | typed name / parameter | Kotlin source | String, size |
-| 227 | field | declaration | Kotlin source |  |
-| 227 | label | typed name / parameter | Kotlin source | String, hintValue |
-| 227 | type | typed name / parameter | Kotlin source | Int |
-| 239 | button | declaration | Kotlin source |  |
-| 239 | label | typed name / parameter | Kotlin source | String, action |
-| 249 | enabled | typed name / parameter | Kotlin source | Boolean |
-| 249 | setButtonsEnabled | declaration | Kotlin source |  |
-| 251 | child | val | Kotlin source | val child = controls.getChildAt(index) |
-| 256 | dp | declaration | Kotlin source |  |
-| 256 | value | typed name / parameter | Kotlin source | Int |
+| 26 | MainActivity | declaration | native source |  |
+| 27 | originInput | var | native source | var originInput: EditText |
+| 27 | originInput | typed name / parameter | native source | EditText |
+| 28 | patientInput | var | native source | var patientInput: EditText |
+| 28 | patientInput | typed name / parameter | native source | EditText |
+| 29 | tokenInput | var | native source | var tokenInput: EditText |
+| 29 | tokenInput | typed name / parameter | native source | EditText |
+| 30 | ownerConfirmed | var | native source | var ownerConfirmed: CheckBox |
+| 30 | ownerConfirmed | typed name / parameter | native source | CheckBox |
+| 31 | testingConfirmed | var | native source | var testingConfirmed: CheckBox |
+| 31 | testingConfirmed | typed name / parameter | native source | CheckBox |
+| 32 | status | var | native source | var status: TextView |
+| 32 | status | typed name / parameter | native source | TextView |
+| 33 | controls | var | native source | var controls: LinearLayout |
+| 33 | controls | typed name / parameter | native source | LinearLayout |
+| 34 | busy | var | native source | var busy = false |
+| 35 | enablingBackground | var | native source | var enablingBackground = false |
+| 37 | permissionRequest | val | native source | val permissionRequest = registerForActivityResult( |
+| 49 | onCreate | declaration | native source |  |
+| 49 | savedInstanceState | typed name / parameter | native source | Bundle? |
+| 53 | scroll | val | native source | val scroll = ScrollView(this) |
+| 57 | bars | val | native source | val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime()) |
+| 97 | reader | val | native source | val reader = HealthReader(this) |
+| 109 | reader | val | native source | val reader = HealthReader(this) |
+| 112 | required | val | native source | val required = HealthReader.READ_PERMISSIONS + HealthReader.BACKGROUND_PERMISSION |
+| 113 | granted | val | native source | val granted = reader.grantedPermissions() |
+| 124 | config | val | native source | val config = SecureStore(this).config() ?: throw ConnectorFailure("연결을 먼저 저장하세요.") |
+| 125 | url | val | native source | val url = Uri.parse(config.origin + "/patient").buildUpon() |
+| 129 | _ | typed name / parameter | native source | Exception |
+| 134 | settings | val | native source | val settings = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS) |
+| 137 | _ | typed name / parameter | native source | Exception |
+| 158 | _ | typed name / parameter | native source | Exception |
+| 161 | onResume | declaration | native source |  |
+| 166 | requireConnection | declaration | native source |  |
+| 170 | ensureAvailable | declaration | native source |  |
+| 170 | reader | typed name / parameter | native source | HealthReader |
+| 177 | action | typed name / parameter | native source | suspend  |
+| 177 | runAction | declaration | native source |  |
+| 186 | cancelled | typed name / parameter | native source | CancellationException |
+| 188 | failure | typed name / parameter | native source | ConnectorFailure |
+| 190 | _ | typed name / parameter | native source | Exception |
+| 199 | refreshStatus | declaration | native source |  |
+| 201 | store | val | native source | val store = SecureStore(this) |
+| 202 | config | val | native source | val config = store.config() |
+| 207 | reader | val | native source | val reader = HealthReader(this) |
+| 208 | _ | typed name / parameter | native source | Exception |
+| 208 | permissions | val | native source | val permissions = try { reader.grantedPermissions() } catch (_: Exception) { emptySet() } |
+| 209 | access | val | native source | val access = MetricAccess.from(permissions) |
+| 210 | permissionText | val | native source | val permissionText = "걸음 수: ${if (access.steps) "읽기 허용" else "미허용·전송 안 함"}\n" + |
+| 216 | _ | typed name / parameter | native source | Exception |
+| 221 | text | declaration | native source |  |
+| 221 | value | typed name / parameter | native source | String, size |
+| 227 | field | declaration | native source |  |
+| 227 | label | typed name / parameter | native source | String, hintValue |
+| 227 | type | typed name / parameter | native source | Int |
+| 239 | button | declaration | native source |  |
+| 239 | label | typed name / parameter | native source | String, action |
+| 249 | enabled | typed name / parameter | native source | Boolean |
+| 249 | setButtonsEnabled | declaration | native source |  |
+| 251 | child | val | native source | val child = controls.getChildAt(index) |
+| 256 | dp | declaration | native source |  |
+| 256 | value | typed name / parameter | native source | Int |
 
 ## integrations/android/app/src/main/java/ai/homecare/connector/MetricAccess.kt
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 6 | MetricAccess | declaration | Kotlin source |  |
-| 6 | sleep | val | Kotlin source | val sleep: Boolean) { |
-| 6 | steps | val | Kotlin source | val steps: Boolean, val sleep: Boolean) { |
-| 6 | steps | typed name / parameter | Kotlin source | Boolean, val sleep |
-| 7 | any | val | Kotlin source | val any: Boolean get() = steps \|\| sleep |
-| 7 | any | typed name / parameter | Kotlin source | Boolean get |
-| 9 | body | typed name / parameter | Kotlin source | String |
-| 9 | permitsPayload | declaration | Kotlin source |  |
-| 11 | days | val | Kotlin source | val days = JSONObject(body).getJSONArray("days") |
-| 14 | day | val | Kotlin source | val day = days.getJSONObject(index) |
-| 15 | hasSteps | val | Kotlin source | val hasSteps = day.has("steps") |
-| 16 | hasSleep | val | Kotlin source | val hasSleep = day.has("sleepMinutes") |
-| 22 | STEPS_PERMISSION | val | Kotlin source | val STEPS_PERMISSION = "android.permission.health.READ_STEPS" |
-| 23 | SLEEP_PERMISSION | val | Kotlin source | val SLEEP_PERMISSION = "android.permission.health.READ_SLEEP" |
-| 24 | from | declaration | Kotlin source |  |
-| 24 | granted | typed name / parameter | Kotlin source | Set&lt;String&gt; |
+| 6 | MetricAccess | declaration | native source |  |
+| 6 | sleep | val | native source | val sleep: Boolean) { |
+| 6 | steps | val | native source | val steps: Boolean, val sleep: Boolean) { |
+| 6 | steps | typed name / parameter | native source | Boolean, val sleep |
+| 7 | any | val | native source | val any: Boolean get() = steps \|\| sleep |
+| 7 | any | typed name / parameter | native source | Boolean get |
+| 9 | body | typed name / parameter | native source | String |
+| 9 | permitsPayload | declaration | native source |  |
+| 11 | days | val | native source | val days = JSONObject(body).getJSONArray("days") |
+| 14 | day | val | native source | val day = days.getJSONObject(index) |
+| 15 | hasSteps | val | native source | val hasSteps = day.has("steps") |
+| 16 | hasSleep | val | native source | val hasSleep = day.has("sleepMinutes") |
+| 22 | STEPS_PERMISSION | val | native source | val STEPS_PERMISSION = "android.permission.health.READ_STEPS" |
+| 23 | SLEEP_PERMISSION | val | native source | val SLEEP_PERMISSION = "android.permission.health.READ_SLEEP" |
+| 24 | from | declaration | native source |  |
+| 24 | granted | typed name / parameter | native source | Set&lt;String&gt; |
 
 ## integrations/android/app/src/main/java/ai/homecare/connector/PrivacyActivity.kt
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 9 | PrivacyActivity | declaration | Kotlin source |  |
-| 10 | onCreate | declaration | Kotlin source |  |
-| 10 | savedInstanceState | typed name / parameter | Kotlin source | Bundle? |
-| 12 | text | val | Kotlin source | val text = TextView(this).apply { |
+| 9 | PrivacyActivity | declaration | native source |  |
+| 10 | onCreate | declaration | native source |  |
+| 10 | savedInstanceState | typed name / parameter | native source | Bundle? |
+| 12 | text | val | native source | val text = TextView(this).apply { |
 
 ## integrations/android/app/src/main/java/ai/homecare/connector/SecureStore.kt
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 14 | context | typed name / parameter | Kotlin source | Context |
-| 14 | SecureStore | declaration | Kotlin source |  |
-| 15 | preferences | val | Kotlin source | val preferences = context.getSharedPreferences("encrypted_connector", Context.MODE_PRIVATE) |
-| 17 | key | declaration | Kotlin source |  |
-| 18 | store | val | Kotlin source | val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) } |
-| 30 | name | typed name / parameter | Kotlin source | String, value |
-| 30 | put | declaration | Kotlin source |  |
-| 35 | cipher | val | Kotlin source | val cipher = Cipher.getInstance("AES/GCM/NoPadding") |
-| 38 | encoded | val | Kotlin source | val encoded = Base64.encodeToString(cipher.iv, Base64.NO_WRAP) + ":" + |
-| 44 | get | declaration | Kotlin source |  |
-| 44 | name | typed name / parameter | Kotlin source | String |
-| 45 | value | val | Kotlin source | val value = preferences.getString(name, null) ?: return null |
-| 46 | parts | val | Kotlin source | val parts = value.split(':', limit = 2) |
-| 48 | cipher | val | Kotlin source | val cipher = Cipher.getInstance("AES/GCM/NoPadding") |
-| 54 | config | declaration | Kotlin source |  |
-| 55 | config | typed name / parameter | Kotlin source | ConnectionConfig |
-| 55 | saveConfig | declaration | Kotlin source |  |
-| 56 | pending | declaration | Kotlin source |  |
-| 57 | body | typed name / parameter | Kotlin source | String? |
-| 57 | savePending | declaration | Kotlin source |  |
-| 58 | status | declaration | Kotlin source |  |
-| 59 | message | typed name / parameter | Kotlin source | String |
-| 59 | setStatus | declaration | Kotlin source |  |
-| 62 | clear | declaration | Kotlin source |  |
-| 67 | KEY_ALIAS | val | Kotlin source | val KEY_ALIAS = "homecare_connector_v1" } |
+| 14 | context | typed name / parameter | native source | Context |
+| 14 | SecureStore | declaration | native source |  |
+| 15 | preferences | val | native source | val preferences = context.getSharedPreferences("encrypted_connector", Context.MODE_PRIVATE) |
+| 17 | key | declaration | native source |  |
+| 18 | store | val | native source | val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) } |
+| 30 | name | typed name / parameter | native source | String, value |
+| 30 | put | declaration | native source |  |
+| 35 | cipher | val | native source | val cipher = Cipher.getInstance("AES/GCM/NoPadding") |
+| 38 | encoded | val | native source | val encoded = Base64.encodeToString(cipher.iv, Base64.NO_WRAP) + ":" + |
+| 44 | get | declaration | native source |  |
+| 44 | name | typed name / parameter | native source | String |
+| 45 | value | val | native source | val value = preferences.getString(name, null) ?: return null |
+| 46 | parts | val | native source | val parts = value.split(':', limit = 2) |
+| 48 | cipher | val | native source | val cipher = Cipher.getInstance("AES/GCM/NoPadding") |
+| 54 | config | declaration | native source |  |
+| 55 | config | typed name / parameter | native source | ConnectionConfig |
+| 55 | saveConfig | declaration | native source |  |
+| 56 | pending | declaration | native source |  |
+| 57 | body | typed name / parameter | native source | String? |
+| 57 | savePending | declaration | native source |  |
+| 58 | status | declaration | native source |  |
+| 59 | message | typed name / parameter | native source | String |
+| 59 | setStatus | declaration | native source |  |
+| 62 | clear | declaration | native source |  |
+| 67 | KEY_ALIAS | val | native source | val KEY_ALIAS = "homecare_connector_v1" } |
 
 ## integrations/android/app/src/main/java/ai/homecare/connector/ServerOrigin.java
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 7 | ServerOrigin | declaration | Kotlin source |  |
-| 10 | raw | Java typed declaration / parameter | Kotlin source | String raw |
-| 12 | uri | Java typed declaration / parameter | Kotlin source | URI uri  |
-| 13 | port | Java typed declaration / parameter | Kotlin source | int port  |
-| 14 | path | Java typed declaration / parameter | Kotlin source | String path  |
-| 23 | e | Java typed declaration / parameter | Kotlin source | URISyntaxException e |
+| 7 | ServerOrigin | declaration | native source |  |
+| 10 | raw | native typed declaration / parameter | native source | String raw |
+| 12 | uri | native typed declaration / parameter | native source | URI uri  |
+| 13 | port | native typed declaration / parameter | native source | int port  |
+| 14 | path | native typed declaration / parameter | native source | String path  |
+| 23 | e | native typed declaration / parameter | native source | URISyntaxException e |
 
 ## integrations/android/app/src/main/java/ai/homecare/connector/SleepIntervals.java
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 10 | SleepIntervals | declaration | Kotlin source |  |
-| 13 | Interval | declaration | Kotlin source |  |
-| 14 | start | Java typed declaration / parameter | Kotlin source | Instant start |
-| 15 | end | Java typed declaration / parameter | Kotlin source | Instant end |
-| 17 | end | Java typed declaration / parameter | Kotlin source | Instant end |
-| 17 | start | Java typed declaration / parameter | Kotlin source | Instant start |
-| 26 | asleep | Java typed declaration / parameter | Kotlin source | List&lt;Interval&gt; asleep |
-| 26 | end | Java typed declaration / parameter | Kotlin source | Instant end |
-| 26 | start | Java typed declaration / parameter | Kotlin source | Instant start |
-| 28 | clipped | Java typed declaration / parameter | Kotlin source | List&lt;Interval&gt; clipped  |
-| 30 | left | Java typed declaration / parameter | Kotlin source | Instant left  |
-| 31 | right | Java typed declaration / parameter | Kotlin source | Instant right  |
-| 36 | left | Java typed declaration / parameter | Kotlin source | Instant left  |
-| 37 | right | Java typed declaration / parameter | Kotlin source | Instant right  |
-| 38 | seconds | Java typed declaration / parameter | Kotlin source | double seconds  |
-| 39 | index | Java typed declaration / parameter | Kotlin source | int index  |
-| 40 | interval | Java typed declaration / parameter | Kotlin source | Interval interval  |
+| 10 | SleepIntervals | declaration | native source |  |
+| 13 | Interval | declaration | native source |  |
+| 14 | start | native typed declaration / parameter | native source | Instant start |
+| 15 | end | native typed declaration / parameter | native source | Instant end |
+| 17 | end | native typed declaration / parameter | native source | Instant end |
+| 17 | start | native typed declaration / parameter | native source | Instant start |
+| 26 | asleep | native typed declaration / parameter | native source | List&lt;Interval&gt; asleep |
+| 26 | end | native typed declaration / parameter | native source | Instant end |
+| 26 | start | native typed declaration / parameter | native source | Instant start |
+| 28 | clipped | native typed declaration / parameter | native source | List&lt;Interval&gt; clipped  |
+| 30 | left | native typed declaration / parameter | native source | Instant left  |
+| 31 | right | native typed declaration / parameter | native source | Instant right  |
+| 36 | left | native typed declaration / parameter | native source | Instant left  |
+| 37 | right | native typed declaration / parameter | native source | Instant right  |
+| 38 | seconds | native typed declaration / parameter | native source | double seconds  |
+| 39 | index | native typed declaration / parameter | native source | int index  |
+| 40 | interval | native typed declaration / parameter | native source | Interval interval  |
 
 ## integrations/android/app/src/main/java/ai/homecare/connector/SyncCoordinator.kt
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 14 | context | val | Kotlin source | val context: Context) { |
-| 14 | context | typed name / parameter | Kotlin source | Context |
-| 14 | SyncCoordinator | declaration | Kotlin source |  |
-| 15 | store | val | Kotlin source | val store = SecureStore(context) |
-| 16 | api | val | Kotlin source | val api = ConnectorApi() |
-| 17 | health | val | Kotlin source | val health = HealthReader(context) |
-| 19 | origin | typed name / parameter | Kotlin source | String, token |
-| 19 | patientId | typed name / parameter | Kotlin source | String |
-| 19 | saveConnection | declaration | Kotlin source |  |
-| 20 | _ | typed name / parameter | Kotlin source | Exception |
-| 20 | canonical | val | Kotlin source | val canonical = try { ServerOrigin.normalize(origin) } catch (_: Exception) { |
-| 26 | identity | val | Kotlin source | val identity = api.identity(canonical, token) |
-| 36 | clearConnection | declaration | Kotlin source |  |
-| 41 | enabled | typed name / parameter | Kotlin source | Boolean |
-| 41 | setBackground | declaration | Kotlin source |  |
-| 42 | config | val | Kotlin source | val config = store.config() ?: throw ConnectorFailure("연결을 먼저 저장하세요.") |
-| 45 | granted | val | Kotlin source | val granted = health.grantedPermissions() |
-| 55 | background | typed name / parameter | Kotlin source | Boolean |
-| 55 | sync | declaration | Kotlin source |  |
-| 56 | config | val | Kotlin source | val config = store.config() ?: throw ConnectorFailure("연결 설정이 없습니다.") |
-| 60 | identity | val | Kotlin source | val identity = api.identity(config.origin, config.token) |
-| 64 | granted | val | Kotlin source | val granted = health.grantedPermissions() |
-| 65 | access | val | Kotlin source | val access = MetricAccess.from(granted) |
-| 73 | queued | val | Kotlin source | val queued = store.pending() |
-| 76 | pending | val | Kotlin source | val pending = queued?.takeIf(access::permitsPayload) |
-| 78 | payload | val | Kotlin source | val payload = pending ?: run { |
-| 79 | readings | val | Kotlin source | val readings = health.readRecentDays(background) |
-| 80 | revision | val | Kotlin source | val revision = Instant.now().truncatedTo(ChronoUnit.MILLIS) |
-| 87 | beforeSend | val | Kotlin source | val beforeSend = health.grantedPermissions() |
-| 91 | receipt | val | Kotlin source | val receipt = api.send(config, payload) |
-| 93 | days | val | Kotlin source | val days = JSONObject(payload).getJSONArray("days") |
-| 94 | withSteps | val | Kotlin source | val withSteps = (0 until days.length()).count { !days.getJSONObject(it).isNull("steps") } |
-| 95 | withSleep | val | Kotlin source | val withSleep = (0 until days.length()).count { !days.getJSONObject(it).isNull("sleepMinutes") } |
-| 96 | sendsSteps | val | Kotlin source | val sendsSteps = (0 until days.length()).any { days.getJSONObject(it).has("steps") } |
-| 97 | sendsSleep | val | Kotlin source | val sendsSleep = (0 until days.length()).any { days.getJSONObject(it).has("sleepMinutes") } |
-| 98 | message | val | Kotlin source | val message = (if (pending != null) "보관한 배치의 재전송을 확인했습니다. 다음 동기화에서 최신 자료를 다시 집계합니다.\n" else "") + |
-| 107 | cancelled | typed name / parameter | Kotlin source | CancellationException |
-| 109 | failure | typed name / parameter | Kotlin source | ConnectorFailure |
-| 118 | _ | typed name / parameter | Kotlin source | SecurityException |
-| 123 | _ | typed name / parameter | Kotlin source | Exception |
-| 132 | LOCK | val | Kotlin source | val LOCK = Mutex() } |
+| 14 | context | val | native source | val context: Context) { |
+| 14 | context | typed name / parameter | native source | Context |
+| 14 | SyncCoordinator | declaration | native source |  |
+| 15 | store | val | native source | val store = SecureStore(context) |
+| 16 | api | val | native source | val api = ConnectorApi() |
+| 17 | health | val | native source | val health = HealthReader(context) |
+| 19 | origin | typed name / parameter | native source | String, token |
+| 19 | patientId | typed name / parameter | native source | String |
+| 19 | saveConnection | declaration | native source |  |
+| 20 | _ | typed name / parameter | native source | Exception |
+| 20 | canonical | val | native source | val canonical = try { ServerOrigin.normalize(origin) } catch (_: Exception) { |
+| 26 | identity | val | native source | val identity = api.identity(canonical, token) |
+| 36 | clearConnection | declaration | native source |  |
+| 41 | enabled | typed name / parameter | native source | Boolean |
+| 41 | setBackground | declaration | native source |  |
+| 42 | config | val | native source | val config = store.config() ?: throw ConnectorFailure("연결을 먼저 저장하세요.") |
+| 45 | granted | val | native source | val granted = health.grantedPermissions() |
+| 55 | background | typed name / parameter | native source | Boolean |
+| 55 | sync | declaration | native source |  |
+| 56 | config | val | native source | val config = store.config() ?: throw ConnectorFailure("연결 설정이 없습니다.") |
+| 60 | identity | val | native source | val identity = api.identity(config.origin, config.token) |
+| 64 | granted | val | native source | val granted = health.grantedPermissions() |
+| 65 | access | val | native source | val access = MetricAccess.from(granted) |
+| 73 | queued | val | native source | val queued = store.pending() |
+| 76 | pending | val | native source | val pending = queued?.takeIf(access::permitsPayload) |
+| 78 | payload | val | native source | val payload = pending ?: run { |
+| 79 | readings | val | native source | val readings = health.readRecentDays(background) |
+| 80 | revision | val | native source | val revision = Instant.now().truncatedTo(ChronoUnit.MILLIS) |
+| 87 | beforeSend | val | native source | val beforeSend = health.grantedPermissions() |
+| 91 | receipt | val | native source | val receipt = api.send(config, payload) |
+| 93 | days | val | native source | val days = JSONObject(payload).getJSONArray("days") |
+| 94 | withSteps | val | native source | val withSteps = (0 until days.length()).count { !days.getJSONObject(it).isNull("steps") } |
+| 95 | withSleep | val | native source | val withSleep = (0 until days.length()).count { !days.getJSONObject(it).isNull("sleepMinutes") } |
+| 96 | sendsSteps | val | native source | val sendsSteps = (0 until days.length()).any { days.getJSONObject(it).has("steps") } |
+| 97 | sendsSleep | val | native source | val sendsSleep = (0 until days.length()).any { days.getJSONObject(it).has("sleepMinutes") } |
+| 98 | message | val | native source | val message = (if (pending != null) "보관한 배치의 재전송을 확인했습니다. 다음 동기화에서 최신 자료를 다시 집계합니다.\n" else "") + |
+| 107 | cancelled | typed name / parameter | native source | CancellationException |
+| 109 | failure | typed name / parameter | native source | ConnectorFailure |
+| 118 | _ | typed name / parameter | native source | SecurityException |
+| 123 | _ | typed name / parameter | native source | Exception |
+| 132 | LOCK | val | native source | val LOCK = Mutex() } |
 
 ## integrations/android/app/src/test/java/ai/homecare/connector/MetricAccessTest.kt
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 9 | MetricAccessTest | declaration | Kotlin source |  |
-| 10 | revision | val | Kotlin source | val revision = Instant.parse("2026-01-03T03:00:00Z") |
-| 11 | payload | declaration | Kotlin source |  |
-| 16 | stepsOnlyOmitsSleepWithoutTurningItIntoNull | declaration | Kotlin source |  |
-| 17 | day | val | Kotlin source | val day = DailyReading("2026-01-02", 0, null, true, false).toJson(revision) |
-| 24 | authorizedMissingSleepIsAnExplicitNull | declaration | Kotlin source |  |
-| 25 | day | val | Kotlin source | val day = DailyReading("2026-01-02", null, null, false, true).toJson(revision) |
-| 31 | fullSnapshotsRetainLegacyZeroAndNullSemantics | declaration | Kotlin source |  |
-| 32 | day | val | Kotlin source | val day = DailyReading("2026-01-02", null, 0.0).toJson(revision) |
-| 39 | noSelectedMetricCannotCreateAnEmptyDay | declaration | Kotlin source |  |
-| 43 | permissionSetsSupportBothSingleMetricsAndNone | declaration | Kotlin source |  |
-| 50 | revokedMetricBlocksEvenANullFieldInAPendingBatch | declaration | Kotlin source |  |
-| 51 | both | val | Kotlin source | val both = payload(DailyReading("2026-01-02", 4, null).toJson(revision)) |
-| 58 | authorizedSingleMetricPendingBatchCanBeRetriedUnchanged | declaration | Kotlin source |  |
-| 59 | step | val | Kotlin source | val step = payload(DailyReading("2026-01-02", 4, null, true, false).toJson(revision)) |
-| 65 | permissionCheckCoversEveryDayAndRejectsAnEmptyBatch | declaration | Kotlin source |  |
-| 66 | mixed | val | Kotlin source | val mixed = payload( |
+| 9 | MetricAccessTest | declaration | native source |  |
+| 10 | revision | val | native source | val revision = Instant.parse("2026-01-03T03:00:00Z") |
+| 11 | payload | declaration | native source |  |
+| 16 | stepsOnlyOmitsSleepWithoutTurningItIntoNull | declaration | native source |  |
+| 17 | day | val | native source | val day = DailyReading("2026-01-02", 0, null, true, false).toJson(revision) |
+| 24 | authorizedMissingSleepIsAnExplicitNull | declaration | native source |  |
+| 25 | day | val | native source | val day = DailyReading("2026-01-02", null, null, false, true).toJson(revision) |
+| 31 | fullSnapshotsRetainLegacyZeroAndNullSemantics | declaration | native source |  |
+| 32 | day | val | native source | val day = DailyReading("2026-01-02", null, 0.0).toJson(revision) |
+| 39 | noSelectedMetricCannotCreateAnEmptyDay | declaration | native source |  |
+| 43 | permissionSetsSupportBothSingleMetricsAndNone | declaration | native source |  |
+| 50 | revokedMetricBlocksEvenANullFieldInAPendingBatch | declaration | native source |  |
+| 51 | both | val | native source | val both = payload(DailyReading("2026-01-02", 4, null).toJson(revision)) |
+| 58 | authorizedSingleMetricPendingBatchCanBeRetriedUnchanged | declaration | native source |  |
+| 59 | step | val | native source | val step = payload(DailyReading("2026-01-02", 4, null, true, false).toJson(revision)) |
+| 65 | permissionCheckCoversEveryDayAndRejectsAnEmptyBatch | declaration | native source |  |
+| 66 | mixed | val | native source | val mixed = payload( |
 
 ## integrations/android/build.gradle.kts
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
@@ -418,31 +418,509 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 
 ## integrations/android/checks/CoreChecks.java
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 9 | CoreChecks | declaration | Kotlin source |  |
-| 10 | passed | Java typed declaration / parameter | Kotlin source | int passed |
-| 11 | value | Java typed declaration / parameter | Kotlin source | String value |
-| 12 | end | Java typed declaration / parameter | Kotlin source | String end |
-| 12 | start | Java typed declaration / parameter | Kotlin source | String start |
-| 15 | actual | Java typed declaration / parameter | Kotlin source | double actual |
-| 15 | expected | Java typed declaration / parameter | Kotlin source | double expected |
-| 15 | name | Java typed declaration / parameter | Kotlin source | String name |
-| 19 | origin | Java typed declaration / parameter | Kotlin source | String origin |
-| 20 | expected | Java typed declaration / parameter | Kotlin source | IllegalArgumentException expected |
-| 23 | args | Java typed declaration / parameter | Kotlin source | String[] args |
-| 24 | start | Java typed declaration / parameter | Kotlin source | Instant start  |
-| 25 | end | Java typed declaration / parameter | Kotlin source | Instant end  |
+| 9 | CoreChecks | declaration | native source |  |
+| 10 | passed | native typed declaration / parameter | native source | int passed |
+| 11 | value | native typed declaration / parameter | native source | String value |
+| 12 | end | native typed declaration / parameter | native source | String end |
+| 12 | start | native typed declaration / parameter | native source | String start |
+| 15 | actual | native typed declaration / parameter | native source | double actual |
+| 15 | expected | native typed declaration / parameter | native source | double expected |
+| 15 | name | native typed declaration / parameter | native source | String name |
+| 19 | origin | native typed declaration / parameter | native source | String origin |
+| 20 | expected | native typed declaration / parameter | native source | IllegalArgumentException expected |
+| 23 | args | native typed declaration / parameter | native source | String[] args |
+| 24 | start | native typed declaration / parameter | native source | Instant start  |
+| 25 | end | native typed declaration / parameter | native source | Instant end  |
 
 ## integrations/android/settings.gradle.kts
 
-Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
 
+
+## integrations/ios/App/ConnectorModel.swift
+
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 4 | ConnectorModel | declaration | native source |  |
+| 5 | shared | let | native source | let shared = ConnectorModel() |
+| 6 | origin | var | native source | var origin = "https://homecare-ai-demo.onrender.com" |
+| 7 | patientId | var | native source | var patientId = "" |
+| 8 | token | var | native source | var token = "" |
+| 9 | confirmed | var | native source | var confirmed = false |
+| 10 | metrics | var | native source | var metrics = MetricSelection() |
+| 11 | saved | var | native source | var saved: SavedConnection? |
+| 11 | saved | typed name / parameter | native source | SavedConnection? |
+| 12 | busy | var | native source | var busy = false |
+| 13 | status | var | native source | var status = "웹의 건강 연결에서 iPhone 연결 코드를 준비해 주세요." |
+| 14 | secure | let | native source | let secure = SecureStore() |
+| 15 | reader | let | native source | let reader = HealthReader() |
+| 16 | started | var | native source | var started = false |
+| 18 | start | declaration | native source |  |
+| 22 | stored | let | native source | let stored = try secure.load(SavedConnection.self, account: "connection") { |
+| 24 | origin | typed name / parameter | native source | stored.settings.origin.absoluteString, patientId |
+| 24 | token | typed name / parameter | native source | stored.settings.token |
+| 31 | save | declaration | native source |  |
+| 37 | origin | typed name / parameter | native source | origin, patientId |
+| 37 | settings | let | native source | let settings = try ConnectionSettings(origin: origin, patientId: patientId, token: token) |
+| 37 | token | typed name / parameter | native source | token |
+| 38 | identity | let | native source | let identity = try await ConnectorAPI(settings: settings).preflight() |
+| 38 | settings | typed name / parameter | native source | settings |
+| 39 | for | typed name / parameter | native source | settings |
+| 40 | background | typed name / parameter | native source | false |
+| 40 | settings | typed name / parameter | native source | settings, metrics |
+| 40 | value | let | native source | let value = SavedConnection(settings: settings, metrics: metrics, background: false) |
+| 47 | requestAccess | declaration | native source |  |
+| 55 | updateMetrics | declaration | native source |  |
+| 56 | value | var | native source | var value = saved else { return } |
+| 63 | sync | declaration | native source |  |
+| 64 | connection | let | native source | let connection = saved else { return } |
+| 67 | api | let | native source | let api = ConnectorAPI(settings: connection.settings) |
+| 67 | settings | typed name / parameter | native source | connection.settings |
+| 68 | identity | let | native source | let identity = try await api.preflight() |
+| 69 | for | typed name / parameter | native source | connection.settings |
+| 69 | now | let | native source | let now = try identity.validate(for: connection.settings) |
+| 70 | now | typed name / parameter | native source | now |
+| 70 | readings | let | native source | let readings = try await reader.read(connection.metrics, now: now) |
+| 71 | freshIdentity | let | native source | let freshIdentity = try await api.preflight() |
+| 72 | for | typed name / parameter | native source | connection.settings |
+| 72 | revision | let | native source | let revision = try freshIdentity.validate(for: connection.settings) |
+| 74 | fresh | let | native source | let fresh = try SyncBatch.make(readings: readings, metrics: connection.metrics, revision: revision) |
+| 74 | readings | typed name / parameter | native source | readings, metrics |
+| 74 | revision | typed name / parameter | native source | revision |
+| 75 | pending | let | native source | let pending = try secure.load(PendingUpload.self, account: "pending") |
+| 76 | as | typed name / parameter | native source | fresh |
+| 76 | batch | let | native source | let batch = pending?.connectionId == identity.connectionId &amp;&amp; pending?.metrics == connection.metrics &amp;&amp; pending?.batch.hasSameValu |
+| 77 | batch | typed name / parameter | native source | batch, metrics |
+| 77 | connectionId | typed name / parameter | native source | identity.connectionId |
+| 78 | receipt | let | native source | let receipt = try await api.upload(batch) |
+| 81 | updated | var | native source | var updated = connection; updated.lastReceivedAt = receipt.receivedAt |
+| 87 | issue | let | native source | let issue = error as? ConnectorError { |
+| 96 | setBackground | declaration | native source |  |
+| 97 | value | var | native source | var value = saved else { return } |
+| 108 | configureObservers | declaration | native source |  |
+| 109 | connection | let | native source | let connection = saved, connection.background else { return } |
+| 114 | self | let | native source | let self = self, self.saved?.background == true else { return } |
+| 120 | value | var | native source | var value = saved { value.background = false; try? secure.save(value, account: "connection"); saved = value } |
+| 124 | foreground | declaration | native source |  |
+| 125 | disconnect | declaration | native source |  |
+| 132 | safeMessage | declaration | native source |  |
+
+## integrations/ios/App/ContentView.swift
+
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 3 | ContentView | declaration | native source |  |
+| 4 | model | var | native source | var model = ConnectorModel.shared |
+| 5 | scenePhase | var | native source | var scenePhase |
+| 6 | openURL | var | native source | var openURL |
+| 7 | confirmDisconnect | var | native source | var confirmDisconnect = false |
+| 8 | body | var | native source | var body: some View { |
+| 8 | body | typed name / parameter | native source | some View  |
+| 23 | isOn | typed name / parameter | native source | Binding |
+| 24 | isOn | typed name / parameter | native source | Binding |
+| 29 | saved | let | native source | let saved = model.saved { |
+| 33 | isOn | typed name / parameter | native source | Binding |
+| 46 | of | typed name / parameter | native source | scenePhase |
+
+## integrations/ios/App/HealthReader.swift
+
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 4 | HealthReader | declaration | native source |  |
+| 5 | store | let | native source | let store = HKHealthStore() |
+| 6 | observers | var | native source | var observers: [HKObserverQuery] = [] |
+| 7 | available | var | native source | var available: Bool { HKHealthStore.isHealthDataAvailable() } |
+| 7 | available | typed name / parameter | native source | Bool  |
+| 8 | stepsType | var | native source | var stepsType: HKQuantityType { HKObjectType.quantityType(forIdentifier: .stepCount)! } |
+| 8 | stepsType | typed name / parameter | native source | HKQuantityType  |
+| 9 | sleepType | var | native source | var sleepType: HKCategoryType { HKObjectType.categoryType(forIdentifier: .sleepAnalysis)! } |
+| 9 | sleepType | typed name / parameter | native source | HKCategoryType  |
+| 10 | types | declaration | native source |  |
+| 13 | requestAccess | declaration | native source |  |
+| 16 | continuation | typed name / parameter | native source | CheckedContinuation&lt;Void, Error&gt; |
+| 17 | read | typed name / parameter | native source | Set |
+| 18 | throwing | typed name / parameter | native source | ConnectorError.noReadableData |
+| 23 | steps | declaration | native source |  |
+| 24 | first | let | native source | let first = windows.first, let last = windows.last else { return [:] } |
+| 24 | last | let | native source | let last = windows.last else { return [:] } |
+| 26 | predicate | let | native source | let predicate = HKQuery.predicateForSamples(withStart: first.start, end: last.end, options: []) |
+| 26 | withStart | typed name / parameter | native source | first.start, end |
+| 27 | interval | var | native source | var interval = DateComponents(); interval.day = 1; interval.timeZone = SeoulDays.calendar.timeZone |
+| 28 | quantityType | typed name / parameter | native source | stepsType, quantitySamplePredicate |
+| 28 | query | let | native source | let query = HKStatisticsCollectionQuery(quantityType: stepsType, quantitySamplePredicate: predicate, |
+| 29 | anchorDate | typed name / parameter | native source | first.start, intervalComponents |
+| 31 | result | let | native source | let result = result else { continuation.resume(throwing: ConnectorError.noReadableData); return } |
+| 31 | throwing | typed name / parameter | native source | ConnectorError.noReadableData |
+| 32 | readings | var | native source | var readings: [String: Int] = [:] |
+| 33 | from | typed name / parameter | native source | first.start, to |
+| 34 | quantity | let | native source | let quantity = statistics.sumQuantity() { |
+| 35 | number | let | native source | let number = quantity.doubleValue(for: .count()) |
+| 41 | returning | typed name / parameter | native source | readings |
+| 46 | sleep | declaration | native source |  |
+| 47 | first | let | native source | let first = windows.first, let last = windows.last else { return [:] } |
+| 47 | last | let | native source | let last = windows.last else { return [:] } |
+| 48 | samples | let | native source | let samples: [SleepInterval] = try await withCheckedThrowingContinuation { continuation in |
+| 49 | predicate | let | native source | let predicate = HKQuery.predicateForSamples(withStart: first.start, end: last.end, options: []) |
+| 49 | withStart | typed name / parameter | native source | first.start, end |
+| 50 | query | let | native source | let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: 50000, sortDescriptors: nil) { _, samples, error in |
+| 50 | sampleType | typed name / parameter | native source | sleepType, predicate |
+| 50 | sortDescriptors | typed name / parameter | native source | nil |
+| 51 | samples | let | native source | let samples = samples as? [HKCategorySample], samples.count &lt; 50000 else { |
+| 52 | throwing | typed name / parameter | native source | ConnectorError.noReadableData |
+| 54 | returning | typed name / parameter | native source | samples.map  |
+| 58 | uniqueKeysWithValues | typed name / parameter | native source | windows.compactMap  |
+| 59 | in | typed name / parameter | native source | window |
+| 62 | now | typed name / parameter | native source | Date |
+| 62 | read | declaration | native source |  |
+| 64 | now | typed name / parameter | native source | now |
+| 64 | windows | let | native source | let windows = SeoulDays.recent(now: now) |
+| 66 | in | typed name / parameter | native source | windows |
+| 66 | stepValues | let | native source | let stepValues = metrics.steps ? try await steps(in: windows) : [:] |
+| 67 | in | typed name / parameter | native source | windows |
+| 67 | sleepValues | let | native source | let sleepValues = metrics.sleep ? try await sleep(in: windows) : [:] |
+| 68 | sleepMinutes | typed name / parameter | native source | sleepValues |
+| 68 | steps | typed name / parameter | native source | stepValues |
+| 70 | stopObservers | declaration | native source |  |
+| 73 | disableDelivery | declaration | native source |  |
+| 79 | observe | declaration | native source |  |
+| 83 | query | let | native source | let query = HKObserverQuery(sampleType: type, predicate: nil) { _, completion, error in |
+| 83 | sampleType | typed name / parameter | native source | type, predicate |
+| 88 | continuation | typed name / parameter | native source | CheckedContinuation&lt;Void, Error&gt; |
+| 89 | for | typed name / parameter | native source | type, frequency |
+| 91 | throwing | typed name / parameter | native source | ConnectorError.noReadableData |
+
+## integrations/ios/App/HomeCareConnectorApp.swift
+
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 4 | AppDelegate | declaration | native source |  |
+| 5 | application | declaration | native source |  |
+| 11 | HomeCareConnectorApp | declaration | native source |  |
+| 12 | delegate | var | native source | var delegate |
+| 13 | body | var | native source | var body: some Scene { WindowGroup { ContentView() } } |
+| 13 | body | typed name / parameter | native source | some Scene  |
+
+## integrations/ios/App/SecureStore.swift
+
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 4 | SavedConnection | declaration | native source |  |
+| 5 | settings | var | native source | var settings: ConnectionSettings |
+| 5 | settings | typed name / parameter | native source | ConnectionSettings |
+| 6 | metrics | var | native source | var metrics: MetricSelection |
+| 6 | metrics | typed name / parameter | native source | MetricSelection |
+| 7 | background | var | native source | var background: Bool |
+| 7 | background | typed name / parameter | native source | Bool |
+| 8 | lastReceivedAt | var | native source | var lastReceivedAt: String? |
+| 8 | lastReceivedAt | typed name / parameter | native source | String? |
+| 10 | PendingUpload | declaration | native source |  |
+| 11 | batch | let | native source | let batch: SyncBatch |
+| 12 | metrics | let | native source | let metrics: MetricSelection |
+| 13 | connectionId | let | native source | let connectionId: String |
+| 16 | SecureStore | declaration | native source |  |
+| 17 | service | let | native source | let service = "ai.homecare.connector.ios" |
+| 18 | account | typed name / parameter | native source | String |
+| 18 | load | declaration | native source |  |
+| 19 | query | var | native source | var query = base(account) |
+| 21 | result | var | native source | var result: CFTypeRef? |
+| 21 | result | typed name / parameter | native source | CFTypeRef? |
+| 22 | status | let | native source | let status = SecItemCopyMatching(query as CFDictionary, &amp;result) |
+| 24 | data | let | native source | let data = result as? Data else { throw ConnectorError.invalidSettings } |
+| 25 | from | typed name / parameter | native source | data |
+| 28 | save | declaration | native source |  |
+| 28 | ue | typed name / parameter | native source | T, account |
+| 29 | attributes | let | native source | let attributes: [String: Any] = [kSecValueData as String: try JSONEncoder().encode(value), |
+| 31 | status | var | native source | var status = SecItemUpdate(base(account) as CFDictionary, attributes as CFDictionary) |
+| 37 | remove | declaration | native source |  |
+| 38 | base | declaration | native source |  |
+
+## integrations/ios/Core/ConnectorAPI.swift
+
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 6 | NoRedirect | declaration | native source |  |
+| 7 | task | typed name / parameter | native source | URLSessionTask, willPerformHTTPRedirection response |
+| 7 | urlSession | declaration | native source |  |
+| 13 | ConnectorAPI | declaration | native source |  |
+| 14 | settings | let | native source | let settings: ConnectionSettings |
+| 15 | session | let | native source | let session: URLSession |
+| 16 | settings | typed name / parameter | native source | ConnectionSettings, session |
+| 18 | configuration | let | native source | let configuration = URLSessionConfiguration.ephemeral |
+| 22 | configuration | typed name / parameter | native source | configuration, delegate |
+| 22 | delegateQueue | typed name / parameter | native source | nil |
+| 24 | body | typed name / parameter | native source | Data?  |
+| 24 | request | declaration | native source |  |
+| 25 | request | var | native source | var request = URLRequest(url: settings.origin.appendingPathComponent(path)) |
+| 25 | url | typed name / parameter | native source | settings.origin.appendingPathComponent |
+| 30 | data | let | native source | let data: Data, response: URLResponse |
+| 30 | response | typed name / parameter | native source | URLResponse |
+| 31 | for | typed name / parameter | native source | request |
+| 33 | http | let | native source | let http = response as? HTTPURLResponse else { throw ConnectorError.invalidResponse } |
+| 43 | from | typed name / parameter | native source | data |
+| 46 | preflight | declaration | native source |  |
+| 47 | upload | declaration | native source |  |
+| 48 | body | typed name / parameter | native source | batch.encoded |
+| 48 | receipt | let | native source | let receipt: SyncReceipt = try await request("api/health-sync", body: batch.encoded()) |
+
+## integrations/ios/Core/SyncPayload.swift
+
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 3 | ConnectorError | declaration | native source |  |
+| 6 | errorDescription | var | native source | var errorDescription: String? { |
+| 6 | errorDescription | typed name / parameter | native source | String?  |
+| 25 | MetricSelection | declaration | native source |  |
+| 26 | steps | var | native source | var steps = true |
+| 27 | sleep | var | native source | var sleep = true |
+| 28 | any | var | native source | var any: Bool { steps \|\| sleep } |
+| 28 | any | typed name / parameter | native source | Bool  |
+| 31 | ConnectionSettings | declaration | native source |  |
+| 32 | origin | let | native source | let origin: URL |
+| 33 | patientId | let | native source | let patientId: String |
+| 34 | token | let | native source | let token: String |
+| 35 | origin | typed name / parameter | native source | String, patientId |
+| 35 | token | typed name / parameter | native source | String |
+| 36 | source | let | native source | let source = origin.trimmingCharacters(in: .whitespacesAndNewlines) |
+| 37 | parts | let | native source | let parts = URLComponents(string: source), parts.scheme?.lowercased() == "https", |
+| 37 | string | typed name / parameter | native source | source |
+| 38 | host | let | native source | let host = parts.host, !host.isEmpty, parts.user == nil, parts.password == nil, |
+| 40 | url | let | native source | let url = parts.url else { throw ConnectorError.invalidOrigin } |
+| 41 | id | let | native source | let id = patientId.trimmingCharacters(in: .whitespacesAndNewlines) |
+| 42 | secret | let | native source | let secret = token.trimmingCharacters(in: .whitespacesAndNewlines) |
+| 45 | normalized | var | native source | var normalized = URLComponents(url: url, resolvingAgainstBaseURL: false)! |
+| 45 | url | typed name / parameter | native source | url, resolvingAgainstBaseURL |
+| 49 | patientURL | var | native source | var patientURL: URL { |
+| 49 | patientURL | typed name / parameter | native source | URL  |
+| 50 | parts | var | native source | var parts = URLComponents(url: origin.appendingPathComponent("patient"), resolvingAgainstBaseURL: false)! |
+| 50 | resolvingAgainstBaseURL | typed name / parameter | native source | false |
+| 50 | url | typed name / parameter | native source | origin.appendingPathComponent |
+| 51 | value | typed name / parameter | native source | patientId |
+| 56 | ConnectionIdentity | declaration | native source |  |
+| 57 | connectionId | let | native source | let connectionId: String |
+| 58 | patientId | let | native source | let patientId: String |
+| 59 | platform | let | native source | let platform: String |
+| 60 | partialMetrics | let | native source | let partialMetrics: Bool |
+| 61 | selected | let | native source | let selected: Bool |
+| 62 | serverTime | let | native source | let serverTime: String? |
+| 63 | validate | declaration | native source |  |
+| 65 | date | let | native source | let date = SeoulDays.parseTimestamp(time) else { throw ConnectorError.oldServer } |
+| 65 | time | let | native source | let time = serverTime, let date = SeoulDays.parseTimestamp(time) else { throw ConnectorError.oldServer } |
+| 70 | DayWindow | declaration | native source |  |
+| 71 | date | let | native source | let date: String |
+| 72 | start | let | native source | let start: Date |
+| 73 | end | let | native source | let end: Date |
+| 76 | SeoulDays | declaration | native source |  |
+| 77 | calendar | var | native source | var calendar: Calendar { |
+| 77 | calendar | typed name / parameter | native source | Calendar  |
+| 78 | calendar | var | native source | var calendar = Calendar(identifier: .gregorian) |
+| 82 | key | declaration | native source |  |
+| 83 | from | typed name / parameter | native source | date |
+| 83 | parts | let | native source | let parts = calendar.dateComponents([.year, .month, .day], from: date) |
+| 86 | now | typed name / parameter | native source | Date, count |
+| 86 | recent | declaration | native source |  |
+| 87 | for | typed name / parameter | native source | now |
+| 87 | today | let | native source | let today = calendar.startOfDay(for: now) |
+| 89 | start | let | native source | let start = calendar.date(byAdding: .day, value: -offset, to: today)! |
+| 89 | to | typed name / parameter | native source | today |
+| 90 | date | typed name / parameter | native source | key |
+| 90 | start | typed name / parameter | native source | start, end |
+| 90 | to | typed name / parameter | native source | start |
+| 93 | parseTimestamp | declaration | native source |  |
+| 93 | ue | typed name / parameter | native source | String |
+| 94 | formatter | let | native source | let formatter = ISO8601DateFormatter() |
+| 96 | date | let | native source | let date = formatter.date(from: value) { return date } |
+| 96 | from | typed name / parameter | native source | value |
+| 98 | from | typed name / parameter | native source | value |
+| 100 | timestamp | declaration | native source |  |
+| 101 | formatter | let | native source | let formatter = ISO8601DateFormatter() |
+| 103 | from | typed name / parameter | native source | date |
+| 107 | SleepInterval | declaration | native source |  |
+| 108 | start | let | native source | let start: Date |
+| 109 | end | let | native source | let end: Date |
+| 110 | category | let | native source | let category: Int // HealthKit: asleep unspecified=1, core=3, deep=4, REM=5. |
+| 113 | SleepUnion | declaration | native source |  |
+| 114 | minutes | declaration | native source |  |
+| 115 | ranges | let | native source | let ranges = samples.filter { [1, 3, 4, 5].contains($0.category) } |
+| 118 | current | var | native source | var current = ranges.first else { return nil } |
+| 119 | seconds | var | native source | var seconds: Double = 0 |
+| 119 | seconds | typed name / parameter | native source | Double  |
+| 129 | DayReading | declaration | native source |  |
+| 130 | date | let | native source | let date: String |
+| 131 | steps | var | native source | var steps: Int? |
+| 131 | steps | typed name / parameter | native source | Int? |
+| 132 | sleepMinutes | var | native source | var sleepMinutes: Double? |
+| 132 | sleepMinutes | typed name / parameter | native source | Double? |
+| 133 | updatedAt | var | native source | var updatedAt: String |
+| 133 | updatedAt | typed name / parameter | native source | String |
+| 136 | SyncBatch | declaration | native source |  |
+| 137 | encoded | declaration | native source |  |
+| 138 | encoder | let | native source | let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys] |
+| 141 | batchId | let | native source | let batchId: String |
+| 142 | timeZone | let | native source | let timeZone: String |
+| 143 | days | let | native source | let days: [DayReading] |
+| 144 | batchId | typed name / parameter | native source | String  |
+| 144 | make | declaration | native source |  |
+| 144 | metrics | typed name / parameter | native source | MetricSelection, revision |
+| 146 | allowed | let | native source | let allowed = Set(SeoulDays.recent(now: revision).map(\.date)) |
+| 146 | now | typed name / parameter | native source | revision |
+| 147 | dates | var | native source | var dates = Set&lt;String&gt;() |
+| 148 | days | let | native source | let days = try readings.compactMap { reading -&gt; DayReading? in |
+| 150 | steps | let | native source | let steps = metrics.steps ? reading.steps : nil |
+| 151 | sleep | let | native source | let sleep = metrics.sleep ? reading.sleepMinutes : nil |
+| 152 | steps | let | native source | let steps = steps, !(0...100000).contains(steps) { throw ConnectorError.invalidReading } |
+| 153 | sleep | let | native source | let sleep = sleep, !sleep.isFinite \|\| !(0...1440).contains(sleep) { throw ConnectorError.invalidReading } |
+| 155 | date | typed name / parameter | native source | reading.date, steps |
+| 155 | sleepMinutes | typed name / parameter | native source | sleep, updatedAt |
+| 158 | batchId | typed name / parameter | native source | batchId, timeZone |
+| 158 | days | typed name / parameter | native source | days.sorted  |
+| 161 | hasSameValues | declaration | native source |  |
+| 167 | SyncReceipt | declaration | native source |  |
+| 168 | connectionId | let | native source | let connectionId: String |
+| 169 | patientId | let | native source | let patientId: String |
+| 170 | batchId | let | native source | let batchId: String |
+| 171 | duplicate | let | native source | let duplicate: Bool |
+| 172 | acceptedDays | let | native source | let acceptedDays: Int |
+| 173 | ignoredDays | let | native source | let ignoredDays: Int |
+| 174 | receivedAt | let | native source | let receivedAt: String |
+
+## integrations/ios/Package.swift
+
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 3 | package | let | native source | let package = Package( |
+
+## integrations/ios/Tests/HomeCareCoreTests/SyncTests.swift
+
+Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증 아님).
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 7 | SyncTests | declaration | native source |  |
+| 8 | token | let | native source | let token = "hc_" + String(repeating: "a", count: 43) |
+| 9 | now | var | native source | var now: Date { SeoulDays.parseTimestamp("2026-10-17T01:30:00.000Z")! } |
+| 9 | now | typed name / parameter | native source | Date  |
+| 10 | settings | declaration | native source |  |
+| 10 | token | typed name / parameter | native source | token |
+| 11 | testOriginAndPatientURLExcludeCredentials | declaration | native source |  |
+| 12 | settings | let | native source | let settings = try settings() |
+| 14 | url | let | native source | let url = URLComponents(url: settings.patientURL, resolvingAgainstBaseURL: false)! |
+| 14 | url | typed name / parameter | native source | settings.patientURL, resolvingAgainstBaseURL |
+| 19 | origin | typed name / parameter | native source | origin, patientId |
+| 19 | token | typed name / parameter | native source | token |
+| 21 | token | typed name / parameter | native source | token |
+| 24 | testPreflightRejectsWrongPatientPlatformSelectionAndOldServer | declaration | native source |  |
+| 25 | settings | let | native source | let settings = try settings() |
+| 33 | identity | let | native source | let identity = ConnectionIdentity(connectionId: "c", patientId: patient, platform: platform, partialMetrics: partial, selected: se |
+| 33 | partialMetrics | typed name / parameter | native source | partial, selected |
+| 33 | patientId | typed name / parameter | native source | patient, platform |
+| 33 | serverTime | typed name / parameter | native source | time |
+| 34 | for | typed name / parameter | native source | settings |
+| 36 | identity | let | native source | let identity = ConnectionIdentity(connectionId: "c", patientId: "p1", platform: "apple-health", partialMetrics: true, selected: tr |
+| 36 | partialMetrics | typed name / parameter | native source | true, selected |
+| 37 | for | typed name / parameter | native source | settings |
+| 39 | testSeoulBoundaryAndSevenDays | declaration | native source |  |
+| 41 | days | let | native source | let days = SeoulDays.recent(now: now) |
+| 41 | now | typed name / parameter | native source | now |
+| 47 | testSleepUnionRemovesDuplicateStagesAndExcludesInBedAwake | declaration | native source |  |
+| 48 | day | let | native source | let day = SeoulDays.recent(now: now).last! |
+| 48 | now | typed name / parameter | native source | now |
+| 49 | sample | declaration | native source |  |
+| 50 | category | typed name / parameter | native source | category |
+| 50 | end | typed name / parameter | native source | day.start.addingTimeInterval |
+| 50 | start | typed name / parameter | native source | day.start.addingTimeInterval |
+| 52 | in | typed name / parameter | native source | day |
+| 53 | in | typed name / parameter | native source | day |
+| 55 | testSleepCrossingMidnightIsClippedPerSeoulDate | declaration | native source |  |
+| 56 | days | let | native source | let days = SeoulDays.recent(now: now), today = days.last!, yesterday = days[5] |
+| 56 | now | typed name / parameter | native source | now |
+| 57 | end | typed name / parameter | native source | today.start.addingTimeInterval |
+| 57 | sleep | let | native source | let sleep = SleepInterval(start: today.start.addingTimeInterval(-3600), end: today.start.addingTimeInterval(7200), category: 5) |
+| 57 | start | typed name / parameter | native source | today.start.addingTimeInterval |
+| 58 | in | typed name / parameter | native source | yesterday |
+| 59 | in | typed name / parameter | native source | today |
+| 61 | testSelectedAndEmptyMetricsAreOmittedWithoutNullingStoredValues | declaration | native source |  |
+| 62 | day | let | native source | let day = DayReading(date: "2026-10-17", steps: 0, sleepMinutes: 420, updatedAt: "unused") |
+| 63 | batch | let | native source | let batch = try SyncBatch.make(readings: [day], metrics: MetricSelection(steps: true, sleep: false), revision: now, batchId: "fixt |
+| 63 | metrics | typed name / parameter | native source | MetricSelection |
+| 63 | revision | typed name / parameter | native source | now, batchId |
+| 63 | steps | typed name / parameter | native source | true, sleep |
+| 64 | json | let | native source | let json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(batch)) as! [String: Any] |
+| 64 | with | typed name / parameter | native source | JSONEncoder |
+| 65 | encoded | let | native source | let encoded = (json["days"] as! [[String: Any]])[0] |
+| 69 | metrics | typed name / parameter | native source | MetricSelection |
+| 69 | revision | typed name / parameter | native source | now |
+| 69 | sleep | let | native source | let sleep = try SyncBatch.make(readings: [day], metrics: MetricSelection(steps: false, sleep: true), revision: now) |
+| 69 | steps | typed name / parameter | native source | false, sleep |
+| 72 | metrics | typed name / parameter | native source | MetricSelection |
+| 72 | revision | typed name / parameter | native source | now |
+| 72 | steps | typed name / parameter | native source | false, sleep |
+| 73 | date | typed name / parameter | native source | day.date, updatedAt |
+| 73 | metrics | typed name / parameter | native source | MetricSelection |
+| 73 | revision | typed name / parameter | native source | now |
+| 75 | testPayloadRejectsFutureDuplicateAndOutOfRangeData | declaration | native source |  |
+| 82 | readings | typed name / parameter | native source | readings, metrics |
+| 82 | revision | typed name / parameter | native source | now |
+| 84 | testRetryKeepsBodyOnlyWhenFreshReadHasSameValues | declaration | native source |  |
+| 85 | reading | let | native source | let reading = DayReading(date: "2026-10-17", steps: 10, sleepMinutes: 300, updatedAt: "") |
+| 86 | metrics | typed name / parameter | native source | MetricSelection |
+| 86 | original | let | native source | let original = try SyncBatch.make(readings: [reading], metrics: MetricSelection(), revision: now) |
+| 86 | revision | typed name / parameter | native source | now |
+| 87 | fresh | let | native source | let fresh = try SyncBatch.make(readings: [reading], metrics: MetricSelection(), revision: now.addingTimeInterval(60)) |
+| 87 | metrics | typed name / parameter | native source | MetricSelection |
+| 87 | revision | typed name / parameter | native source | now.addingTimeInterval |
+| 88 | as | typed name / parameter | native source | fresh |
+| 89 | metrics | typed name / parameter | native source | MetricSelection |
+| 89 | revision | typed name / parameter | native source | now |
+| 89 | revoked | let | native source | let revoked = try SyncBatch.make(readings: [reading], metrics: MetricSelection(steps: true, sleep: false), revision: now) |
+| 89 | steps | typed name / parameter | native source | true, sleep |
+| 90 | as | typed name / parameter | native source | revoked |
+| 91 | from | typed name / parameter | native source | JSONEncoder |
+| 91 | restored | let | native source | let restored = try JSONDecoder().decode(SyncBatch.self, from: JSONEncoder().encode(original)) |
+| 97 | StubProtocol | declaration | native source |  |
+| 98 | handler | var | native source | var handler: ((URLRequest) throws -&gt; (Int, Data))? |
+| 99 | func | declaration | native source |  |
+| 100 | func | declaration | native source |  |
+| 101 | startLoading | declaration | native source |  |
+| 104 | didReceive | typed name / parameter | native source | HTTPURLResponse |
+| 104 | statusCode | typed name / parameter | native source | status, httpVersion |
+| 104 | url | typed name / parameter | native source | request.url |
+| 105 | didLoad | typed name / parameter | native source | data |
+| 106 | didFailWithError | typed name / parameter | native source | error |
+| 108 | stopLoading | declaration | native source |  |
+| 110 | APITests | declaration | native source |  |
+| 111 | api | declaration | native source |  |
+| 112 | configuration | let | native source | let configuration = URLSessionConfiguration.ephemeral; configuration.protocolClasses = [StubProtocol.self] |
+| 113 | configuration | typed name / parameter | native source | configuration |
+| 113 | session | typed name / parameter | native source | URLSession |
+| 113 | settings | typed name / parameter | native source | try ConnectionSettings |
+| 115 | testPreflightUsesBearerAndFixedRelativePath | declaration | native source |  |
+| 122 | identity | let | native source | let identity = try await api().preflight() |
+| 125 | testHTTPFailuresNeverExposeServerOrTokenText | declaration | native source |  |
+| 132 | testUploadRejectsMismatchedReceipt | declaration | native source |  |
+| 137 | batch | let | native source | let batch = SyncBatch(batchId: "fixture", timeZone: "Asia/Seoul", days: [DayReading(date: "2026-10-17", steps: 1, updatedAt: "")]) |
 
 ## lib/analysis.mjs
 
@@ -702,103 +1180,104 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 | 2:70 | choice | import | module | ./validation.mjs |
 | 2:78 | dateValue | import | module | ./validation.mjs |
 | 4:7 | platforms | const | module | ['health-connect', 'apple-health'] |
-| 6:10 | atomic | function | module |  |
-| 6:17 | db | parameter | module/atomic | db |
-| 6:21 | operation | parameter | module/atomic | operation |
-| 9:11 | result | const | module/atomic | operation() |
-| 12:12 | error | catch | module/atomic |  |
-| 19:17 | ensureHealthSchema | function | module |  |
-| 19:36 | db | parameter | module/ensureHealthSchema | db |
-| 62:11 | columns | const | module/ensureHealthSchema/anonymous@20 | new Set(db.prepare('PRAGMA table_info(health_daily)').all().map(column =&gt; column.name)) |
-| 62:85 | column | parameter | module/ensureHealthSchema/anonymous@20/anonymous@62 | column |
-| 64:16 | column | const | module/ensureHealthSchema/anonymous@20 | 초기값 없음 |
-| 73:10 | assertPatient | function | module |  |
-| 73:24 | db | parameter | module/assertPatient | db |
-| 73:28 | patientId | parameter | module/assertPatient | patientId |
-| 77:10 | publicConnection | function | module |  |
-| 77:27 | row | parameter | module/publicConnection | row |
-| 91:17 | getHealthConnections | function | module |  |
-| 91:38 | db | parameter | module/getHealthConnections | db |
-| 91:42 | patientId | parameter | module/getHealthConnections | patientId |
-| 93:9 | connections | const | module/getHealthConnections | db.prepare('SELECT * FROM health_connections WHERE patient_id=? ORDER BY created_at DESC,id').all(patientId).map(publicConnection) |
-| 96:44 | connection | parameter | module/getHealthConnections/anonymous@96 | connection |
-| 102:17 | createHealthConnection | function | module |  |
-| 102:40 | db | parameter | module/createHealthConnection | db |
-| 102:44 | patientId | parameter | module/createHealthConnection | patientId |
-| 102:55 | input | parameter | module/createHealthConnection | input |
-| 104:9 | body | const | module/createHealthConnection | objectBody(input) |
-| 106:9 | platform | const | module/createHealthConnection | choice(body.platform, '건강 플랫폼', platforms) |
-| 107:9 | label | const | module/createHealthConnection | body.label === undefined ? (platform === 'health-connect' ? 'Android Health Connect' : 'Apple Health') : textValue(body.label, '연결 |
-| 109:9 | token | const | module/createHealthConnection | 'hc_${randomBytes(32).toString('base64url')}' |
-| 110:9 | tokenHash | const | module/createHealthConnection | createHash('sha256').update(token).digest('hex') |
-| 111:9 | id | const | module/createHealthConnection | randomUUID() |
-| 112:9 | createdAt | const | module/createHealthConnection | new Date().toISOString() |
-| 121:17 | revokeHealthConnection | function | module |  |
-| 121:40 | db | parameter | module/revokeHealthConnection | db |
-| 121:44 | patientId | parameter | module/revokeHealthConnection | patientId |
-| 121:55 | connectionId | parameter | module/revokeHealthConnection | connectionId |
-| 124:11 | row | const | module/revokeHealthConnection/anonymous@123 | db.prepare('SELECT * FROM health_connections WHERE id=? AND patient_id=?').get(connectionId, patientId) |
-| 131:10 | todayKorea | function | module |  |
-| 135:10 | revisionValue | function | module |  |
-| 135:24 | value | parameter | module/revisionValue | value |
-| 135:31 | now | parameter | module/revisionValue | now |
-| 137:9 | match | const | module/revisionValue | typeof value === 'string' &amp;&amp; /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?(Z\|[+-]\d{2}:\d{2})$/.exec(value) |
-| 141:9 | milliseconds | const | module/revisionValue | Date.parse(value) |
-| 143:9 | fraction | const | module/revisionValue | (match[5] ?? '').padEnd(9, '0') |
-| 144:9 | normalized | const | module/revisionValue | '${new Date(milliseconds).toISOString().slice(0, 19)}.${fraction}Z' |
-| 145:9 | nowIso | const | module/revisionValue | new Date(now).toISOString().replace(/Z$/, '000000Z') |
-| 150:10 | batchValue | function | module |  |
-| 150:21 | input | parameter | module/batchValue | input |
-| 151:9 | body | const | module/batchValue | objectBody(input) |
-| 153:9 | batchId | const | module/batchValue | textValue(body.batchId, '배치 ID', { min: 1, max: 128 }) |
-| 156:9 | now | const | module/batchValue | Date.now() |
-| 157:9 | today | const | module/batchValue | todayKorea() |
-| 158:9 | dates | const | module/batchValue | new Set() |
-| 159:9 | days | const | module/batchValue | body.days.map(inputDay =&gt; { const day = objectBody(inputDay); allowedKeys(day, ['date', 'steps', 'sleepMinutes', 'updatedAt']); co |
-| 159:30 | inputDay | parameter | module/batchValue/anonymous@159 | inputDay |
-| 160:11 | day | const | module/batchValue/anonymous@159 | objectBody(inputDay) |
-| 162:11 | date | const | module/batchValue/anonymous@159 | dateValue(day.date) |
-| 168:11 | normalized | const | module/batchValue/anonymous@159 | { date } |
-| 173:12 | a | parameter | module/batchValue/anonymous@173 | a |
-| 173:15 | b | parameter | module/batchValue/anonymous@173 | b |
-| 177:10 | healthConnectionForToken | function | module |  |
-| 177:35 | db | parameter | module/healthConnectionForToken | db |
-| 177:39 | bearerToken | parameter | module/healthConnectionForToken | bearerToken |
-| 179:9 | tokenHash | const | module/healthConnectionForToken | createHash('sha256').update(bearerToken).digest('hex') |
-| 180:9 | connection | const | module/healthConnectionForToken | db.prepare('SELECT * FROM health_connections WHERE token_hash=? AND revoked_at IS NULL').get(tokenHash) |
-| 185:17 | getHealthConnectionIdentity | function | module |  |
-| 185:45 | db | parameter | module/getHealthConnectionIdentity | db |
-| 185:49 | bearerToken | parameter | module/getHealthConnectionIdentity | bearerToken |
-| 186:9 | connection | const | module/getHealthConnectionIdentity | healthConnectionForToken(db, bearerToken) |
-| 190:17 | receiveHealthBatch | function | module |  |
-| 190:36 | db | parameter | module/receiveHealthBatch | db |
-| 190:40 | bearerToken | parameter | module/receiveHealthBatch | bearerToken |
-| 190:53 | input | parameter | module/receiveHealthBatch | input |
-| 192:11 | connection | const | module/receiveHealthBatch/anonymous@191 | healthConnectionForToken(db, bearerToken) |
-| 193:11 | batch | const | module/receiveHealthBatch/anonymous@191 | batchValue(input) |
-| 194:11 | bodyHash | const | module/receiveHealthBatch/anonymous@191 | createHash('sha256').update(JSON.stringify(batch)).digest('hex') |
-| 195:11 | previous | const | module/receiveHealthBatch/anonymous@191 | db.prepare('SELECT * FROM health_batches WHERE connection_id=? AND batch_id=?').get(connection.id, batch.batchId) |
-| 196:11 | identity | const | module/receiveHealthBatch/anonymous@191 | { connectionId: connection.id, patientId: connection.patient_id, batchId: batch.batchId } |
-| 201:11 | receivedAt | const | module/receiveHealthBatch/anonymous@191 | new Date().toISOString() |
-| 202:9 | acceptedDays | let | module/receiveHealthBatch/anonymous@191 | 0 |
-| 203:11 | findDay | const | module/receiveHealthBatch/anonymous@191 | db.prepare('SELECT * FROM health_daily WHERE connection_id=? AND date=?') |
-| 204:11 | saveDay | const | module/receiveHealthBatch/anonymous@191 | db.prepare('INSERT INTO health_daily (connection_id,patient_id,date,steps,sleep_minutes,steps_updated_at,sleep_updated_at,updated_ |
-| 208:16 | day | const | module/receiveHealthBatch/anonymous@191 | 초기값 없음 |
-| 209:13 | existing | const | module/receiveHealthBatch/anonymous@191 | findDay.get(connection.id, day.date) |
-| 210:13 | updateSteps | const | module/receiveHealthBatch/anonymous@191 | Object.hasOwn(day, 'steps') &amp;&amp; (!existing?.steps_updated_at \|\| day.updatedAt &gt; existing.steps_updated_at) |
-| 211:13 | updateSleep | const | module/receiveHealthBatch/anonymous@191 | Object.hasOwn(day, 'sleepMinutes') &amp;&amp; (!existing?.sleep_updated_at \|\| day.updatedAt &gt; existing.sleep_updated_at) |
-| 213:13 | stepsAt | const | module/receiveHealthBatch/anonymous@191 | updateSteps ? day.updatedAt : existing?.steps_updated_at ?? null |
-| 214:13 | sleepAt | const | module/receiveHealthBatch/anonymous@191 | updateSleep ? day.updatedAt : existing?.sleep_updated_at ?? null |
-| 215:13 | updatedAt | const | module/receiveHealthBatch/anonymous@191 | [stepsAt, sleepAt].filter(Boolean).sort().at(-1) |
-| 222:11 | ignoredDays | const | module/receiveHealthBatch/anonymous@191 | batch.days.length - acceptedDays |
-| 230:17 | healthDailyForPatient | function | module |  |
-| 230:39 | db | parameter | module/healthDailyForPatient | db |
-| 230:43 | patientId | parameter | module/healthDailyForPatient | patientId |
-| 230:54 | startDate | parameter | module/healthDailyForPatient | startDate |
-| 230:65 | endDate | parameter | module/healthDailyForPatient | endDate |
-| 232:9 | start | const | module/healthDailyForPatient | dateValue(startDate) |
-| 233:9 | end | const | module/healthDailyForPatient | dateValue(endDate) |
-| 238:54 | row | parameter | module/healthDailyForPatient/anonymous@238 | row |
+| 6:17 | healthCapabilities | function | module |  |
+| 11:10 | atomic | function | module |  |
+| 11:17 | db | parameter | module/atomic | db |
+| 11:21 | operation | parameter | module/atomic | operation |
+| 14:11 | result | const | module/atomic | operation() |
+| 17:12 | error | catch | module/atomic |  |
+| 24:17 | ensureHealthSchema | function | module |  |
+| 24:36 | db | parameter | module/ensureHealthSchema | db |
+| 67:11 | columns | const | module/ensureHealthSchema/anonymous@25 | new Set(db.prepare('PRAGMA table_info(health_daily)').all().map(column =&gt; column.name)) |
+| 67:85 | column | parameter | module/ensureHealthSchema/anonymous@25/anonymous@67 | column |
+| 69:16 | column | const | module/ensureHealthSchema/anonymous@25 | 초기값 없음 |
+| 78:10 | assertPatient | function | module |  |
+| 78:24 | db | parameter | module/assertPatient | db |
+| 78:28 | patientId | parameter | module/assertPatient | patientId |
+| 82:10 | publicConnection | function | module |  |
+| 82:27 | row | parameter | module/publicConnection | row |
+| 96:17 | getHealthConnections | function | module |  |
+| 96:38 | db | parameter | module/getHealthConnections | db |
+| 96:42 | patientId | parameter | module/getHealthConnections | patientId |
+| 98:9 | connections | const | module/getHealthConnections | db.prepare('SELECT * FROM health_connections WHERE patient_id=? ORDER BY created_at DESC,id').all(patientId).map(publicConnection) |
+| 101:44 | connection | parameter | module/getHealthConnections/anonymous@101 | connection |
+| 107:17 | createHealthConnection | function | module |  |
+| 107:40 | db | parameter | module/createHealthConnection | db |
+| 107:44 | patientId | parameter | module/createHealthConnection | patientId |
+| 107:55 | input | parameter | module/createHealthConnection | input |
+| 109:9 | body | const | module/createHealthConnection | objectBody(input) |
+| 111:9 | platform | const | module/createHealthConnection | choice(body.platform, '건강 플랫폼', platforms) |
+| 112:9 | label | const | module/createHealthConnection | body.label === undefined ? (platform === 'health-connect' ? 'Android Health Connect' : 'Apple Health') : textValue(body.label, '연결 |
+| 114:9 | token | const | module/createHealthConnection | 'hc_${randomBytes(32).toString('base64url')}' |
+| 115:9 | tokenHash | const | module/createHealthConnection | createHash('sha256').update(token).digest('hex') |
+| 116:9 | id | const | module/createHealthConnection | randomUUID() |
+| 117:9 | createdAt | const | module/createHealthConnection | new Date().toISOString() |
+| 126:17 | revokeHealthConnection | function | module |  |
+| 126:40 | db | parameter | module/revokeHealthConnection | db |
+| 126:44 | patientId | parameter | module/revokeHealthConnection | patientId |
+| 126:55 | connectionId | parameter | module/revokeHealthConnection | connectionId |
+| 129:11 | row | const | module/revokeHealthConnection/anonymous@128 | db.prepare('SELECT * FROM health_connections WHERE id=? AND patient_id=?').get(connectionId, patientId) |
+| 136:10 | todayKorea | function | module |  |
+| 140:10 | revisionValue | function | module |  |
+| 140:24 | value | parameter | module/revisionValue | value |
+| 140:31 | now | parameter | module/revisionValue | now |
+| 142:9 | match | const | module/revisionValue | typeof value === 'string' &amp;&amp; /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?(Z\|[+-]\d{2}:\d{2})$/.exec(value) |
+| 146:9 | milliseconds | const | module/revisionValue | Date.parse(value) |
+| 148:9 | fraction | const | module/revisionValue | (match[5] ?? '').padEnd(9, '0') |
+| 149:9 | normalized | const | module/revisionValue | '${new Date(milliseconds).toISOString().slice(0, 19)}.${fraction}Z' |
+| 150:9 | nowIso | const | module/revisionValue | new Date(now).toISOString().replace(/Z$/, '000000Z') |
+| 155:10 | batchValue | function | module |  |
+| 155:21 | input | parameter | module/batchValue | input |
+| 156:9 | body | const | module/batchValue | objectBody(input) |
+| 158:9 | batchId | const | module/batchValue | textValue(body.batchId, '배치 ID', { min: 1, max: 128 }) |
+| 161:9 | now | const | module/batchValue | Date.now() |
+| 162:9 | today | const | module/batchValue | todayKorea() |
+| 163:9 | dates | const | module/batchValue | new Set() |
+| 164:9 | days | const | module/batchValue | body.days.map(inputDay =&gt; { const day = objectBody(inputDay); allowedKeys(day, ['date', 'steps', 'sleepMinutes', 'updatedAt']); co |
+| 164:30 | inputDay | parameter | module/batchValue/anonymous@164 | inputDay |
+| 165:11 | day | const | module/batchValue/anonymous@164 | objectBody(inputDay) |
+| 167:11 | date | const | module/batchValue/anonymous@164 | dateValue(day.date) |
+| 173:11 | normalized | const | module/batchValue/anonymous@164 | { date } |
+| 178:12 | a | parameter | module/batchValue/anonymous@178 | a |
+| 178:15 | b | parameter | module/batchValue/anonymous@178 | b |
+| 182:10 | healthConnectionForToken | function | module |  |
+| 182:35 | db | parameter | module/healthConnectionForToken | db |
+| 182:39 | bearerToken | parameter | module/healthConnectionForToken | bearerToken |
+| 184:9 | tokenHash | const | module/healthConnectionForToken | createHash('sha256').update(bearerToken).digest('hex') |
+| 185:9 | connection | const | module/healthConnectionForToken | db.prepare('SELECT * FROM health_connections WHERE token_hash=? AND revoked_at IS NULL').get(tokenHash) |
+| 190:17 | getHealthConnectionIdentity | function | module |  |
+| 190:45 | db | parameter | module/getHealthConnectionIdentity | db |
+| 190:49 | bearerToken | parameter | module/getHealthConnectionIdentity | bearerToken |
+| 191:9 | connection | const | module/getHealthConnectionIdentity | healthConnectionForToken(db, bearerToken) |
+| 195:17 | receiveHealthBatch | function | module |  |
+| 195:36 | db | parameter | module/receiveHealthBatch | db |
+| 195:40 | bearerToken | parameter | module/receiveHealthBatch | bearerToken |
+| 195:53 | input | parameter | module/receiveHealthBatch | input |
+| 197:11 | connection | const | module/receiveHealthBatch/anonymous@196 | healthConnectionForToken(db, bearerToken) |
+| 198:11 | batch | const | module/receiveHealthBatch/anonymous@196 | batchValue(input) |
+| 199:11 | bodyHash | const | module/receiveHealthBatch/anonymous@196 | createHash('sha256').update(JSON.stringify(batch)).digest('hex') |
+| 200:11 | previous | const | module/receiveHealthBatch/anonymous@196 | db.prepare('SELECT * FROM health_batches WHERE connection_id=? AND batch_id=?').get(connection.id, batch.batchId) |
+| 201:11 | identity | const | module/receiveHealthBatch/anonymous@196 | { connectionId: connection.id, patientId: connection.patient_id, batchId: batch.batchId } |
+| 206:11 | receivedAt | const | module/receiveHealthBatch/anonymous@196 | new Date().toISOString() |
+| 207:9 | acceptedDays | let | module/receiveHealthBatch/anonymous@196 | 0 |
+| 208:11 | findDay | const | module/receiveHealthBatch/anonymous@196 | db.prepare('SELECT * FROM health_daily WHERE connection_id=? AND date=?') |
+| 209:11 | saveDay | const | module/receiveHealthBatch/anonymous@196 | db.prepare('INSERT INTO health_daily (connection_id,patient_id,date,steps,sleep_minutes,steps_updated_at,sleep_updated_at,updated_ |
+| 213:16 | day | const | module/receiveHealthBatch/anonymous@196 | 초기값 없음 |
+| 214:13 | existing | const | module/receiveHealthBatch/anonymous@196 | findDay.get(connection.id, day.date) |
+| 215:13 | updateSteps | const | module/receiveHealthBatch/anonymous@196 | Object.hasOwn(day, 'steps') &amp;&amp; (!existing?.steps_updated_at \|\| day.updatedAt &gt; existing.steps_updated_at) |
+| 216:13 | updateSleep | const | module/receiveHealthBatch/anonymous@196 | Object.hasOwn(day, 'sleepMinutes') &amp;&amp; (!existing?.sleep_updated_at \|\| day.updatedAt &gt; existing.sleep_updated_at) |
+| 218:13 | stepsAt | const | module/receiveHealthBatch/anonymous@196 | updateSteps ? day.updatedAt : existing?.steps_updated_at ?? null |
+| 219:13 | sleepAt | const | module/receiveHealthBatch/anonymous@196 | updateSleep ? day.updatedAt : existing?.sleep_updated_at ?? null |
+| 220:13 | updatedAt | const | module/receiveHealthBatch/anonymous@196 | [stepsAt, sleepAt].filter(Boolean).sort().at(-1) |
+| 227:11 | ignoredDays | const | module/receiveHealthBatch/anonymous@196 | batch.days.length - acceptedDays |
+| 235:17 | healthDailyForPatient | function | module |  |
+| 235:39 | db | parameter | module/healthDailyForPatient | db |
+| 235:43 | patientId | parameter | module/healthDailyForPatient | patientId |
+| 235:54 | startDate | parameter | module/healthDailyForPatient | startDate |
+| 235:65 | endDate | parameter | module/healthDailyForPatient | endDate |
+| 237:9 | start | const | module/healthDailyForPatient | dateValue(startDate) |
+| 238:9 | end | const | module/healthDailyForPatient | dateValue(endDate) |
+| 243:54 | row | parameter | module/healthDailyForPatient/anonymous@243 | row |
 
 ## lib/medications.mjs
 
@@ -1014,104 +1493,111 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 | 76:9 | validModel | const | module/visionCapabilities | typeof requestedModel === 'string' &amp;&amp; MODEL_PATTERN.test(requestedModel) |
 | 77:9 | keyPresent | const | module/visionCapabilities | typeof env.HOMECARE_VISION_API_KEY === 'string' &amp;&amp; env.HOMECARE_VISION_API_KEY.trim().length &gt; 0 |
 | 78:9 | configured | const | module/visionCapabilities | keyPresent &amp;&amp; validModel |
-| 79:9 | reason | const | module/visionCapabilities | !enabled ? '외부 사진 분석이 비활성화되어 있습니다. 수동으로 입력해 주세요.' : !configured ? '사진 분석 제공자 설정이 필요합니다. 수동으로 입력해 주세요.' : null |
-| 84:10 | requirePatient | function | module |  |
-| 84:25 | db | parameter | module/requirePatient | db |
-| 84:29 | patientId | parameter | module/requirePatient | patientId |
-| 90:10 | databaseGeneration | function | module |  |
-| 90:29 | db | parameter | module/databaseGeneration | db |
-| 93:9 | metadata | const | module/databaseGeneration | db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='metadata'").get() |
-| 97:10 | imageHash | function | module |  |
-| 97:20 | imageData | parameter | module/imageHash | imageData |
-| 101:10 | analysisFromRow | function | module |  |
-| 101:26 | row | parameter | module/analysisFromRow | row |
-| 109:10 | providerError | function | module |  |
-| 113:10 | exactKeys | function | module |  |
-| 113:20 | value | parameter | module/exactKeys | value |
-| 113:27 | keys | parameter | module/exactKeys | keys |
-| 116:17 | key | parameter | module/exactKeys/anonymous@116 | key |
-| 119:10 | boundedNumber | function | module |  |
-| 119:24 | value | parameter | module/boundedNumber | value |
-| 119:31 | maximum | parameter | module/boundedNumber | maximum |
-| 124:10 | providerText | function | module |  |
-| 124:23 | value | parameter | module/providerText | value |
-| 124:30 | min | parameter | module/providerText | min |
-| 124:35 | max | parameter | module/providerText | max |
-| 125:9 | text | const | module/providerText | textValue(value, '분석 결과', { min, max }) |
-| 130:10 | validateProposal | function | module |  |
-| 130:27 | kind | parameter | module/validateProposal | kind |
-| 130:33 | value | parameter | module/validateProposal | value |
-| 138:32 | food | parameter | module/validateProposal/anonymous@138 | food |
-| 146:42 | medication | parameter | module/validateProposal/anonymous@146 | medication |
-| 158:10 | warningsFor | function | module |  |
-| 158:22 | kind | parameter | module/warningsFor | kind |
-| 158:28 | proposal | parameter | module/warningsFor | proposal |
-| 159:9 | warnings | const | module/warningsFor | kind === 'meal' ? ['사진의 영양값은 추정치입니다. 음식과 실제 섭취 비율을 확인한 뒤 저장해 주세요.'] : ['약 이름과 함량은 사진 글자를 읽은 후보입니다. 의료진이 실제 포장·처방과 대조해야 합니다.', '사진은 |
-| 168:16 | readProviderJson | function | module |  |
-| 168:33 | response | parameter | module/readProviderJson | response |
-| 170:9 | declaredLength | const | module/readProviderJson | Number(response.headers?.get?.('content-length')) |
-| 174:11 | reader | const | module/readProviderJson | response.body.getReader() |
-| 175:11 | chunks | const | module/readProviderJson | [] |
-| 176:9 | size | let | module/readProviderJson | 0 |
-| 179:17 | done | const | module/readProviderJson | await reader.read() |
-| 179:23 | value | const | module/readProviderJson | await reader.read() |
-| 188:9 | text | const | module/readProviderJson | await response.text() |
-| 193:16 | requestProvider | function | module |  |
-| 193:34 | kind | parameter | module/requestProvider | { kind, imageData, env, capabilities, fetchImpl } |
-| 193:40 | imageData | parameter | module/requestProvider | { kind, imageData, env, capabilities, fetchImpl } |
-| 193:51 | env | parameter | module/requestProvider | { kind, imageData, env, capabilities, fetchImpl } |
-| 193:56 | capabilities | parameter | module/requestProvider | { kind, imageData, env, capabilities, fetchImpl } |
-| 193:70 | fetchImpl | parameter | module/requestProvider | { kind, imageData, env, capabilities, fetchImpl } |
-| 194:9 | controller | const | module/requestProvider | new AbortController() |
-| 195:7 | timer | let | module/requestProvider | 초기값 없음 |
-| 196:9 | timedOut | const | module/requestProvider | new Promise((_, reject) =&gt; { timer = setTimeout(() =&gt; { controller.abort(); reject(new HttpError(502, '사진 분석 응답 시간이 초과되었습니다. 잠시 후  |
-| 196:33 | _ | parameter | module/requestProvider/anonymous@196 | _ |
-| 196:36 | reject | parameter | module/requestProvider/anonymous@196 | reject |
-| 203:11 | operation | const | module/requestProvider | (async () =&gt; { const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'error', signal: controller.signal, headers: |
-| 204:13 | response | const | module/requestProvider/anonymous@203 | await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'error', signal: controller.signal, headers: { 'Content-Type': 'application/ |
-| 217:13 | result | const | module/requestProvider/anonymous@203 | await readProviderJson(response) |
-| 219:13 | contents | const | module/requestProvider/anonymous@203 | result.output.filter(item =&gt; item?.type === 'message').flatMap(item =&gt; { if (item.status !== 'completed' \|\| item.role !== 'assista |
-| 219:45 | item | parameter | module/requestProvider/anonymous@203/anonymous@219 | item |
-| 219:87 | item | parameter | module/requestProvider/anonymous@203/anonymous@219 | item |
-| 224:13 | model | const | module/requestProvider/anonymous@203 | result.model ?? capabilities.model |
-| 229:12 | error | catch | module/requestProvider |  |
-| 235:23 | analyzePhoto | function | module |  |
-| 235:38 | db | parameter | module/analyzePhoto | { db, patientId, body, env = process.env, fetchImpl = globalThis.fetch } |
-| 235:42 | patientId | parameter | module/analyzePhoto | { db, patientId, body, env = process.env, fetchImpl = globalThis.fetch } |
-| 235:53 | body | parameter | module/analyzePhoto | { db, patientId, body, env = process.env, fetchImpl = globalThis.fetch } |
-| 235:59 | env | parameter | module/analyzePhoto | { db, patientId, body, env = process.env, fetchImpl = globalThis.fetch } |
-| 235:78 | fetchImpl | parameter | module/analyzePhoto | { db, patientId, body, env = process.env, fetchImpl = globalThis.fetch } |
-| 237:9 | generation | const | module/analyzePhoto | databaseGeneration(db) |
-| 240:9 | kind | const | module/analyzePhoto | choice(body.kind, '사진 분석 종류', ['meal', 'medication']) |
-| 242:9 | hash | const | module/analyzePhoto | imageHash(body.imageData) |
-| 243:9 | capabilities | const | module/analyzePhoto | visionCapabilities(env) |
-| 245:9 | now | const | module/analyzePhoto | Date.now() |
-| 246:9 | existing | const | module/analyzePhoto | db.prepare('SELECT * FROM photo_analyses WHERE patient_id=? AND kind=? AND image_hash=? AND expires_at&gt;? ORDER BY created_at DESC  |
-| 253:7 | state | let | module/analyzePhoto | requestStates.get(db) |
-| 255:15 | id | const | module/analyzePhoto | 초기값 없음 |
-| 255:19 | lastStart | const | module/analyzePhoto | 초기값 없음 |
-| 265:13 | proposal | const | module/analyzePhoto | await requestProvider({ kind, imageData: body.imageData, env, capabilities, fetchImpl }) |
-| 265:23 | model | const | module/analyzePhoto | await requestProvider({ kind, imageData: body.imageData, env, capabilities, fetchImpl }) |
-| 273:13 | createdTime | const | module/analyzePhoto/anonymous@266 | Date.now() |
-| 274:13 | createdAt | const | module/analyzePhoto/anonymous@266 | new Date(createdTime).toISOString() |
-| 275:13 | expiresAt | const | module/analyzePhoto/anonymous@266 | new Date(createdTime + DRAFT_TTL_MS).toISOString() |
-| 276:13 | id | const | module/analyzePhoto/anonymous@266 | 'analysis-${randomUUID()}' |
-| 277:13 | warnings | const | module/analyzePhoto/anonymous@266 | warningsFor(kind, proposal) |
-| 287:17 | resolveMealAnalysis | function | module |  |
-| 287:37 | db | parameter | module/resolveMealAnalysis | db |
-| 287:43 | analysisId | parameter | module/resolveMealAnalysis | { analysisId, patientId, imageData, patientConfirmed } |
-| 287:55 | patientId | parameter | module/resolveMealAnalysis | { analysisId, patientId, imageData, patientConfirmed } |
-| 287:66 | imageData | parameter | module/resolveMealAnalysis | { analysisId, patientId, imageData, patientConfirmed } |
-| 287:77 | patientConfirmed | parameter | module/resolveMealAnalysis | { analysisId, patientId, imageData, patientConfirmed } |
-| 291:9 | row | const | module/resolveMealAnalysis | db.prepare('SELECT * FROM photo_analyses WHERE id=? AND patient_id=?').get(analysisId, patientId) |
-| 297:9 | analysis | const | module/resolveMealAnalysis | analysisFromRow(row) |
-| 298:9 | proposal | const | module/resolveMealAnalysis | validateProposal('meal', analysis.proposal) |
-| 307:17 | markAnalysisApplied | function | module |  |
-| 307:37 | db | parameter | module/markAnalysisApplied | db |
-| 307:41 | analysisId | parameter | module/markAnalysisApplied | analysisId |
-| 307:53 | mealId | parameter | module/markAnalysisApplied | mealId |
-| 308:9 | now | const | module/markAnalysisApplied | new Date().toISOString() |
-| 309:9 | result | const | module/markAnalysisApplied | db.prepare('UPDATE photo_analyses SET applied_at=?,applied_meal_id=? WHERE id=? AND kind='meal' AND applied_at IS NULL AND expires |
+| 79:9 | reasonCode | const | module/visionCapabilities | !enabled ? 'disabled' : !keyPresent ? 'missing_key' : !validModel ? 'invalid_model' : 'ready' |
+| 80:9 | reason | const | module/visionCapabilities | !enabled ? '외부 사진 분석이 비활성화되어 있습니다. 수동으로 입력해 주세요.' : !configured ? '사진 분석 제공자 설정이 필요합니다. 수동으로 입력해 주세요.' : null |
+| 85:23 | checkVisionAccess | function | module |  |
+| 85:43 | env | parameter | module/checkVisionAccess | { env = process.env, fetchImpl = fetch } = {} |
+| 85:62 | fetchImpl | parameter | module/checkVisionAccess | { env = process.env, fetchImpl = fetch } = {} |
+| 86:9 | capabilities | const | module/checkVisionAccess | visionCapabilities(env) |
+| 89:11 | response | const | module/checkVisionAccess | await fetchImpl('https://api.openai.com/v1/models/${encodeURIComponent(capabilities.model)}', { redirect: 'error', signal: AbortSi |
+| 94:11 | result | const | module/checkVisionAccess | await readProviderJson(response) |
+| 99:10 | requirePatient | function | module |  |
+| 99:25 | db | parameter | module/requirePatient | db |
+| 99:29 | patientId | parameter | module/requirePatient | patientId |
+| 105:10 | databaseGeneration | function | module |  |
+| 105:29 | db | parameter | module/databaseGeneration | db |
+| 108:9 | metadata | const | module/databaseGeneration | db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='metadata'").get() |
+| 112:10 | imageHash | function | module |  |
+| 112:20 | imageData | parameter | module/imageHash | imageData |
+| 116:10 | analysisFromRow | function | module |  |
+| 116:26 | row | parameter | module/analysisFromRow | row |
+| 124:10 | providerError | function | module |  |
+| 128:10 | exactKeys | function | module |  |
+| 128:20 | value | parameter | module/exactKeys | value |
+| 128:27 | keys | parameter | module/exactKeys | keys |
+| 131:17 | key | parameter | module/exactKeys/anonymous@131 | key |
+| 134:10 | boundedNumber | function | module |  |
+| 134:24 | value | parameter | module/boundedNumber | value |
+| 134:31 | maximum | parameter | module/boundedNumber | maximum |
+| 139:10 | providerText | function | module |  |
+| 139:23 | value | parameter | module/providerText | value |
+| 139:30 | min | parameter | module/providerText | min |
+| 139:35 | max | parameter | module/providerText | max |
+| 140:9 | text | const | module/providerText | textValue(value, '분석 결과', { min, max }) |
+| 145:10 | validateProposal | function | module |  |
+| 145:27 | kind | parameter | module/validateProposal | kind |
+| 145:33 | value | parameter | module/validateProposal | value |
+| 153:32 | food | parameter | module/validateProposal/anonymous@153 | food |
+| 161:42 | medication | parameter | module/validateProposal/anonymous@161 | medication |
+| 173:10 | warningsFor | function | module |  |
+| 173:22 | kind | parameter | module/warningsFor | kind |
+| 173:28 | proposal | parameter | module/warningsFor | proposal |
+| 174:9 | warnings | const | module/warningsFor | kind === 'meal' ? ['사진의 영양값은 추정치입니다. 음식과 실제 섭취 비율을 확인한 뒤 저장해 주세요.'] : ['약 이름과 함량은 사진 글자를 읽은 후보입니다. 의료진이 실제 포장·처방과 대조해야 합니다.', '사진은 |
+| 183:16 | readProviderJson | function | module |  |
+| 183:33 | response | parameter | module/readProviderJson | response |
+| 187:9 | declaredLength | const | module/readProviderJson | Number(response.headers?.get?.('content-length')) |
+| 191:11 | reader | const | module/readProviderJson | response.body.getReader() |
+| 192:11 | chunks | const | module/readProviderJson | [] |
+| 193:9 | size | let | module/readProviderJson | 0 |
+| 196:17 | done | const | module/readProviderJson | await reader.read() |
+| 196:23 | value | const | module/readProviderJson | await reader.read() |
+| 205:9 | text | const | module/readProviderJson | await response.text() |
+| 210:16 | requestProvider | function | module |  |
+| 210:34 | kind | parameter | module/requestProvider | { kind, imageData, env, capabilities, fetchImpl } |
+| 210:40 | imageData | parameter | module/requestProvider | { kind, imageData, env, capabilities, fetchImpl } |
+| 210:51 | env | parameter | module/requestProvider | { kind, imageData, env, capabilities, fetchImpl } |
+| 210:56 | capabilities | parameter | module/requestProvider | { kind, imageData, env, capabilities, fetchImpl } |
+| 210:70 | fetchImpl | parameter | module/requestProvider | { kind, imageData, env, capabilities, fetchImpl } |
+| 211:9 | controller | const | module/requestProvider | new AbortController() |
+| 212:7 | timer | let | module/requestProvider | 초기값 없음 |
+| 213:9 | timedOut | const | module/requestProvider | new Promise((_, reject) =&gt; { timer = setTimeout(() =&gt; { controller.abort(); reject(new HttpError(502, '사진 분석 응답 시간이 초과되었습니다. 잠시 후  |
+| 213:33 | _ | parameter | module/requestProvider/anonymous@213 | _ |
+| 213:36 | reject | parameter | module/requestProvider/anonymous@213 | reject |
+| 220:11 | operation | const | module/requestProvider | (async () =&gt; { const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'error', signal: controller.signal, headers: |
+| 221:13 | response | const | module/requestProvider/anonymous@220 | await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'error', signal: controller.signal, headers: { 'Content-Type': 'application/ |
+| 234:13 | result | const | module/requestProvider/anonymous@220 | await readProviderJson(response) |
+| 236:13 | contents | const | module/requestProvider/anonymous@220 | result.output.filter(item =&gt; item?.type === 'message').flatMap(item =&gt; { if (item.status !== 'completed' \|\| item.role !== 'assista |
+| 236:45 | item | parameter | module/requestProvider/anonymous@220/anonymous@236 | item |
+| 236:87 | item | parameter | module/requestProvider/anonymous@220/anonymous@236 | item |
+| 241:13 | model | const | module/requestProvider/anonymous@220 | result.model ?? capabilities.model |
+| 246:12 | error | catch | module/requestProvider |  |
+| 252:23 | analyzePhoto | function | module |  |
+| 252:38 | db | parameter | module/analyzePhoto | { db, patientId, body, env = process.env, fetchImpl = globalThis.fetch } |
+| 252:42 | patientId | parameter | module/analyzePhoto | { db, patientId, body, env = process.env, fetchImpl = globalThis.fetch } |
+| 252:53 | body | parameter | module/analyzePhoto | { db, patientId, body, env = process.env, fetchImpl = globalThis.fetch } |
+| 252:59 | env | parameter | module/analyzePhoto | { db, patientId, body, env = process.env, fetchImpl = globalThis.fetch } |
+| 252:78 | fetchImpl | parameter | module/analyzePhoto | { db, patientId, body, env = process.env, fetchImpl = globalThis.fetch } |
+| 254:9 | generation | const | module/analyzePhoto | databaseGeneration(db) |
+| 257:9 | kind | const | module/analyzePhoto | choice(body.kind, '사진 분석 종류', ['meal', 'medication']) |
+| 259:9 | hash | const | module/analyzePhoto | imageHash(body.imageData) |
+| 260:9 | capabilities | const | module/analyzePhoto | visionCapabilities(env) |
+| 262:9 | now | const | module/analyzePhoto | Date.now() |
+| 263:9 | existing | const | module/analyzePhoto | db.prepare('SELECT * FROM photo_analyses WHERE patient_id=? AND kind=? AND image_hash=? AND expires_at&gt;? ORDER BY created_at DESC  |
+| 270:7 | state | let | module/analyzePhoto | requestStates.get(db) |
+| 272:15 | id | const | module/analyzePhoto | 초기값 없음 |
+| 272:19 | lastStart | const | module/analyzePhoto | 초기값 없음 |
+| 282:13 | proposal | const | module/analyzePhoto | await requestProvider({ kind, imageData: body.imageData, env, capabilities, fetchImpl }) |
+| 282:23 | model | const | module/analyzePhoto | await requestProvider({ kind, imageData: body.imageData, env, capabilities, fetchImpl }) |
+| 290:13 | createdTime | const | module/analyzePhoto/anonymous@283 | Date.now() |
+| 291:13 | createdAt | const | module/analyzePhoto/anonymous@283 | new Date(createdTime).toISOString() |
+| 292:13 | expiresAt | const | module/analyzePhoto/anonymous@283 | new Date(createdTime + DRAFT_TTL_MS).toISOString() |
+| 293:13 | id | const | module/analyzePhoto/anonymous@283 | 'analysis-${randomUUID()}' |
+| 294:13 | warnings | const | module/analyzePhoto/anonymous@283 | warningsFor(kind, proposal) |
+| 304:17 | resolveMealAnalysis | function | module |  |
+| 304:37 | db | parameter | module/resolveMealAnalysis | db |
+| 304:43 | analysisId | parameter | module/resolveMealAnalysis | { analysisId, patientId, imageData, patientConfirmed } |
+| 304:55 | patientId | parameter | module/resolveMealAnalysis | { analysisId, patientId, imageData, patientConfirmed } |
+| 304:66 | imageData | parameter | module/resolveMealAnalysis | { analysisId, patientId, imageData, patientConfirmed } |
+| 304:77 | patientConfirmed | parameter | module/resolveMealAnalysis | { analysisId, patientId, imageData, patientConfirmed } |
+| 308:9 | row | const | module/resolveMealAnalysis | db.prepare('SELECT * FROM photo_analyses WHERE id=? AND patient_id=?').get(analysisId, patientId) |
+| 314:9 | analysis | const | module/resolveMealAnalysis | analysisFromRow(row) |
+| 315:9 | proposal | const | module/resolveMealAnalysis | validateProposal('meal', analysis.proposal) |
+| 324:17 | markAnalysisApplied | function | module |  |
+| 324:37 | db | parameter | module/markAnalysisApplied | db |
+| 324:41 | analysisId | parameter | module/markAnalysisApplied | analysisId |
+| 324:53 | mealId | parameter | module/markAnalysisApplied | mealId |
+| 325:9 | now | const | module/markAnalysisApplied | new Date().toISOString() |
+| 326:9 | result | const | module/markAnalysisApplied | db.prepare('UPDATE photo_analyses SET applied_at=?,applied_meal_id=? WHERE id=? AND kind='meal' AND applied_at IS NULL AND expires |
 
 ## public/clinician.js
 
@@ -1198,319 +1684,324 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 | 107:18 | performRefresh | function | module/anonymous@2 |  |
 | 107:34 | quiet | parameter | module/anonymous@2/performRefresh | {quiet = false} = {} |
 | 111:13 | data | const | module/anonymous@2/performRefresh | await api('/api/dashboard') |
-| 113:30 | p | parameter | module/anonymous@2/performRefresh/anonymous@113 | p |
-| 113:101 | a | parameter | module/anonymous@2/performRefresh/anonymous@113 | a |
-| 113:103 | b | parameter | module/anonymous@2/performRefresh/anonymous@113 | b |
-| 115:15 | selected | const | module/anonymous@2/performRefresh | state.selectedId |
-| 115:41 | request | const | module/anonymous@2/performRefresh | state.selectionRequest |
-| 116:15 | summary | const | module/anonymous@2/performRefresh | await api('/api/patients/${encodeURIComponent(selected)}/summary') |
-| 129:13 | error | catch | module/anonymous@2/performRefresh |  |
-| 132:18 | selectPatient | function | module/anonymous@2 |  |
-| 132:32 | id | parameter | module/anonymous@2/selectPatient | id |
-| 132:36 | changeView | parameter | module/anonymous@2/selectPatient | changeView = false |
-| 132:57 | historyMode | parameter | module/anonymous@2/selectPatient | {historyMode='push'} = {} |
-| 133:35 | p | parameter | module/anonymous@2/selectPatient/anonymous@133 | p |
-| 137:11 | request | const | module/anonymous@2/selectPatient | ++state.selectionRequest |
-| 142:13 | summary | const | module/anonymous@2/selectPatient | await api('/api/patients/${encodeURIComponent(id)}/summary') |
-| 148:13 | error | catch | module/anonymous@2/selectPatient |  |
-| 151:12 | spark | function | module/anonymous@2 |  |
-| 151:18 | values | parameter | module/anonymous@2/spark | values |
-| 151:25 | color | parameter | module/anonymous@2/spark | color='#80b7a7' |
-| 151:41 | width | parameter | module/anonymous@2/spark | width=76 |
-| 151:50 | height | parameter | module/anonymous@2/spark | height=25 |
-| 152:11 | numeric | const | module/anonymous@2/spark | values.filter(present).map(Number) |
-| 153:11 | min | const | module/anonymous@2/spark | Math.min(...numeric) |
-| 153:36 | max | const | module/anonymous@2/spark | Math.max(...numeric) |
-| 153:67 | range | const | module/anonymous@2/spark | max-min\|\|1 |
-| 154:11 | coords | const | module/anonymous@2/spark | values.map((v,i)=&gt;present(v)?'${i/(Math.max(values.length-1,1))*width},${height-3-(v-min)/range*(height-7)}':null) |
-| 154:30 | v | parameter | module/anonymous@2/spark/anonymous@154 | v |
-| 154:32 | i | parameter | module/anonymous@2/spark/anonymous@154 | i |
-| 155:9 | d | let | module/anonymous@2/spark | '' |
-| 155:18 | active | let | module/anonymous@2/spark | false |
-| 155:46 | p | parameter | module/anonymous@2/spark/anonymous@155 | p |
-| 158:12 | chart | function | module/anonymous@2 |  |
-| 158:18 | rows | parameter | module/anonymous@2/chart | rows |
-| 158:24 | key | parameter | module/anonymous@2/chart | key |
-| 158:30 | color | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 158:46 | unit | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 158:54 | type | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 158:66 | height | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 158:77 | max | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 158:86 | secondary | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 158:101 | label | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 160:11 | values | const | module/anonymous@2/chart | rows.map(r=&gt;r[key]) |
-| 160:27 | r | parameter | module/anonymous@2/chart/anonymous@160 | r |
-| 160:44 | numeric | const | module/anonymous@2/chart | values.filter(present).map(Number) |
-| 162:11 | w | const | module/anonymous@2/chart | 440 |
-| 162:17 | h | const | module/anonymous@2/chart | height |
-| 162:26 | left | const | module/anonymous@2/chart | 34 |
-| 162:34 | right | const | module/anonymous@2/chart | 12 |
-| 162:43 | top | const | module/anonymous@2/chart | 14 |
-| 162:50 | bottom | const | module/anonymous@2/chart | 25 |
-| 162:60 | plotW | const | module/anonymous@2/chart | w-left-right |
-| 162:79 | plotH | const | module/anonymous@2/chart | h-top-bottom |
-| 163:11 | ceiling | const | module/anonymous@2/chart | max \|\| Math.max(1,...numeric)*1.16 |
-| 164:11 | x | const | module/anonymous@2/chart | i=&gt;left+(rows.length===1?plotW/2:i/(rows.length-1)*plotW) |
-| 164:13 | i | parameter | module/anonymous@2/chart/anonymous@164 | i |
-| 165:11 | y | const | module/anonymous@2/chart | v=&gt;top+plotH-clamp(v,0,ceiling)/ceiling*plotH |
-| 165:13 | v | parameter | module/anonymous@2/chart/anonymous@165 | v |
-| 166:9 | content | let | module/anonymous@2/chart | '' |
-| 167:13 | i | let | module/anonymous@2/chart | 0 |
-| 167:34 | v | const | module/anonymous@2/chart | ceiling/3*i |
-| 167:54 | yy | const | module/anonymous@2/chart | y(v) |
-| 168:11 | interval | const | module/anonymous@2/chart | Math.max(1,Math.floor((rows.length-1)/4)) |
-| 168:76 | r | parameter | module/anonymous@2/chart/anonymous@168 | r |
-| 168:78 | i | parameter | module/anonymous@2/chart/anonymous@168 | i |
-| 170:13 | bw | const | module/anonymous@2/chart | Math.min(17,plotW/rows.length*.62) |
-| 171:23 | v | parameter | module/anonymous@2/chart/anonymous@171 | v |
-| 171:25 | i | parameter | module/anonymous@2/chart/anonymous@171 | i |
-| 173:11 | d | let | module/anonymous@2/chart | '' |
-| 173:16 | segment | let | module/anonymous@2/chart | [] |
-| 173:33 | segments | const | module/anonymous@2/chart | [] |
-| 174:23 | v | parameter | module/anonymous@2/chart/anonymous@174 | v |
-| 174:25 | i | parameter | module/anonymous@2/chart/anonymous@174 | i |
-| 175:24 | seg | parameter | module/anonymous@2/chart/anonymous@175 | seg |
-| 175:42 | p | parameter | module/anonymous@2/chart/anonymous@175/anonymous@175 | p |
-| 175:44 | i | parameter | module/anonymous@2/chart/anonymous@175/anonymous@175 | i |
-| 175:165 | p | parameter | module/anonymous@2/chart/anonymous@175/anonymous@175 | p |
-| 177:23 | v | parameter | module/anonymous@2/chart/anonymous@177 | v |
-| 177:25 | i | parameter | module/anonymous@2/chart/anonymous@177 | i |
-| 181:12 | stats | function | module/anonymous@2 |  |
-| 182:11 | s | const | module/anonymous@2/stats | state.data.stats |
-| 182:36 | ts | const | module/anonymous@2/stats | state.data.trends\|\|[] |
-| 183:11 | cards | const | module/anonymous@2/stats | [['전체 관리 환자',s.patients,'명','users','등록된 가상 환자','연구 참여 데모',ts.map(()=&gt;s.patients)],['확인이 필요한 환자',s.needsReview,'명','alert','기록에 따른 |
-| 183:177 | r | parameter | module/anonymous@2/stats/anonymous@183 | r |
-| 183:309 | r | parameter | module/anonymous@2/stats/anonymous@183 | r |
-| 183:417 | r | parameter | module/anonymous@2/stats/anonymous@183 | r |
-| 184:50 | c | parameter | module/anonymous@2/stats/anonymous@184 | c |
-| 184:52 | i | parameter | module/anonymous@2/stats/anonymous@184 | i |
-| 186:12 | filteredPatients | function | module/anonymous@2 |  |
-| 187:39 | p | parameter | module/anonymous@2/filteredPatients/anonymous@187 | p |
-| 189:12 | patientRows | function | module/anonymous@2 |  |
-| 189:24 | full | parameter | module/anonymous@2/patientRows | full = false |
-| 190:11 | patients | const | module/anonymous@2/patientRows | filteredPatients() |
-| 192:25 | p | parameter | module/anonymous@2/patientRows/anonymous@192 | p |
-| 194:12 | patientList | function | module/anonymous@2 |  |
-| 194:24 | full | parameter | module/anonymous@2/patientList | full = false |
-| 195:531 | key | parameter | module/anonymous@2/patientList/anonymous@195 | [key,label] |
-| 195:535 | label | parameter | module/anonymous@2/patientList/anonymous@195 | [key,label] |
-| 197:12 | briefingCard | function | module/anonymous@2 |  |
-| 198:11 | s | const | module/anonymous@2/briefingCard | state.summary |
-| 199:11 | first | const | module/anonymous@2/briefingCard | s.briefing.items.slice(0,3) |
-| 200:11 | headline | const | module/anonymous@2/briefingCard | s.risk.reasons.length?s.risk.reasons.slice(0,2).join('. ')+'.':'최근 기록의 변화를 확인하고, 방문 시 환자의 생활 상태와 함께 살펴보세요.' |
-| 201:584 | item | parameter | module/anonymous@2/briefingCard/anonymous@201 | item |
-| 203:12 | reportingChart | function | module/anonymous@2 |  |
-| 204:11 | t | const | module/anonymous@2/reportingChart | state.data.trends |
-| 207:12 | alerts | function | module/anonymous@2 |  |
-| 208:11 | alerts | const | module/anonymous@2/alerts | state.data.alerts.slice(0,3) |
-| 209:188 | a | parameter | module/anonymous@2/alerts/anonymous@209 | a |
-| 211:12 | metricPanels | function | module/anonymous@2 |  |
-| 212:11 | s | const | module/anonymous@2/metricPanels | state.summary |
-| 212:27 | m | const | module/anonymous@2/metricPanels | s.metrics |
-| 212:39 | t | const | module/anonymous@2/metricPanels | s.trends.slice(-14) |
-| 213:11 | panels | const | module/anonymous@2/metricPanels | [['steps','steps','평균 활동',num(m.steps.value),'걸음','${m.steps.coverageDays}/7일 활동 보고',healthSourceSummary(m.steps),'#7db6a4'],['sle |
-| 214:60 | key | parameter | module/anonymous@2/metricPanels/anonymous@214 | [key,ic,title,value,unit,caption,source,color] |
-| 214:64 | ic | parameter | module/anonymous@2/metricPanels/anonymous@214 | [key,ic,title,value,unit,caption,source,color] |
-| 214:67 | title | parameter | module/anonymous@2/metricPanels/anonymous@214 | [key,ic,title,value,unit,caption,source,color] |
-| 214:73 | value | parameter | module/anonymous@2/metricPanels/anonymous@214 | [key,ic,title,value,unit,caption,source,color] |
-| 214:79 | unit | parameter | module/anonymous@2/metricPanels/anonymous@214 | [key,ic,title,value,unit,caption,source,color] |
-| 214:84 | caption | parameter | module/anonymous@2/metricPanels/anonymous@214 | [key,ic,title,value,unit,caption,source,color] |
-| 214:92 | source | parameter | module/anonymous@2/metricPanels/anonymous@214 | [key,ic,title,value,unit,caption,source,color] |
-| 214:99 | color | parameter | module/anonymous@2/metricPanels/anonymous@214 | [key,ic,title,value,unit,caption,source,color] |
-| 214:353 | r | parameter | module/anonymous@2/metricPanels/anonymous@214/anonymous@214 | r |
-| 214:467 | r | parameter | module/anonymous@2/metricPanels/anonymous@214/anonymous@214 | r |
-| 216:12 | detailCharts | function | module/anonymous@2 |  |
-| 217:11 | t | const | module/anonymous@2/detailCharts | state.summary.trends.slice(-14) |
-| 218:11 | medication | const | module/anonymous@2/detailCharts | t.map(r=&gt;({...r,medValue:r.medicationStatus==='taken'?100:r.medicationStatus==='partial'?50:r.medicationStatus==='missed'?0:null}) |
-| 218:28 | r | parameter | module/anonymous@2/detailCharts/anonymous@218 | r |
-| 219:11 | panels | const | module/anonymous@2/detailCharts | [['활동 추이','최근 14일',t,'steps',{unit:'걸음',color:'#73ad98'},healthSourceSummary(state.summary.metrics.steps),'미기록일은 연결하지 않음'],['수면 추이 |
-| 220:59 | title | parameter | module/anonymous@2/detailCharts/anonymous@220 | [title,period,rows,key,options,note,right] |
-| 220:65 | period | parameter | module/anonymous@2/detailCharts/anonymous@220 | [title,period,rows,key,options,note,right] |
-| 220:72 | rows | parameter | module/anonymous@2/detailCharts/anonymous@220 | [title,period,rows,key,options,note,right] |
-| 220:77 | key | parameter | module/anonymous@2/detailCharts/anonymous@220 | [title,period,rows,key,options,note,right] |
-| 220:81 | options | parameter | module/anonymous@2/detailCharts/anonymous@220 | [title,period,rows,key,options,note,right] |
-| 220:89 | note | parameter | module/anonymous@2/detailCharts/anonymous@220 | [title,period,rows,key,options,note,right] |
-| 220:94 | right | parameter | module/anonymous@2/detailCharts/anonymous@220 | [title,period,rows,key,options,note,right] |
-| 222:12 | coverage | function | module/anonymous@2 |  |
-| 223:11 | s | const | module/anonymous@2/coverage | state.summary |
-| 223:27 | m | const | module/anonymous@2/coverage | s.metrics |
-| 223:45 | data | const | module/anonymous@2/coverage | [['활동',m.steps.coverageDays],['수면',m.sleepHours.coverageDays],['복약',m.medication.reportedDays],['식사',m.nutrition.recordedDays]] |
-| 224:146 | label | parameter | module/anonymous@2/coverage/anonymous@224 | [label,days] |
-| 224:152 | days | parameter | module/anonymous@2/coverage/anonymous@224 | [label,days] |
-| 224:630 | r | parameter | module/anonymous@2/coverage/anonymous@224 | r |
-| 226:12 | foodIllustration | function | module/anonymous@2 |  |
-| 226:29 | food | parameter | module/anonymous@2/foodIllustration | food |
-| 227:11 | content | const | module/anonymous@2/foodIllustration | {balanced:'&lt;ellipse cx="55" cy="54" rx="14" ry="18" fill="#e9ddc0"/&gt;&lt;circle cx="82" cy="37" r="11" fill="#88a276"/&gt;&lt;circle cx="93" |
-| 230:12 | meals | function | module/anonymous@2 |  |
-| 231:11 | meals | const | module/anonymous@2/meals | state.summary.recentMeals.slice(0,3) |
-| 232:256 | m | parameter | module/anonymous@2/meals/anonymous@232 | m |
-| 234:12 | recordTable | function | module/anonymous@2 |  |
-| 234:24 | full | parameter | module/anonymous@2/recordTable | full = false |
-| 235:11 | records | const | module/anonymous@2/recordTable | state.summary?.recentRecords.slice(0,full?14:5)\|\|[] |
-| 236:296 | r | parameter | module/anonymous@2/recordTable/anonymous@236 | r |
-| 238:12 | recentRecords | function | module/anonymous@2 |  |
-| 239:12 | expandedBriefing | function | module/anonymous@2 |  |
-| 240:11 | s | const | module/anonymous@2/expandedBriefing | state.summary |
-| 241:247 | item | parameter | module/anonymous@2/expandedBriefing/anonymous@241 | item |
-| 241:402 | e | parameter | module/anonymous@2/expandedBriefing/anonymous@241/anonymous@241 | e |
-| 243:12 | patientDetails | function | module/anonymous@2 |  |
-| 243:27 | expanded | parameter | module/anonymous@2/patientDetails | expanded = false |
-| 244:11 | s | const | module/anonymous@2/patientDetails | state.summary |
-| 245:852 | q | parameter | module/anonymous@2/patientDetails/anonymous@245 | q |
-| 247:12 | emptyWorkspace | function | module/anonymous@2 |  |
-| 250:12 | overview | function | module/anonymous@2 |  |
-| 253:12 | patientsView | function | module/anonymous@2 |  |
-| 255:11 | s | const | module/anonymous@2/patientsView | state.summary |
-| 258:12 | recordsView | function | module/anonymous@2 |  |
-| 260:129 | p | parameter | module/anonymous@2/recordsView/anonymous@260 | p |
-| 262:12 | settingsView | function | module/anonymous@2 |  |
-| 265:9 | medicationStatusLabel | const | module/anonymous@2 | status =&gt; ({taken:'복용 보고',missed:'미복용 보고',unknown:'기억 안 남',pending:'미응답'}[status] \|\| '미응답') |
-| 265:33 | status | parameter | module/anonymous@2/anonymous@265 | status |
-| 266:9 | medicationReason | const | module/anonymous@2 | reason =&gt; ({forgot:'깜빡함',side_effect:'불편한 증상',side_effects:'불편한 증상',unavailable:'약이 없음',refused:'복용 원치 않음',other:'기타',not_sure:'잘  |
-| 266:28 | reason | parameter | module/anonymous@2/anonymous@266 | reason |
-| 267:9 | reportTime | const | module/anonymous@2 | timestamp =&gt; timestamp ? new Date(timestamp).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-d |
-| 267:22 | timestamp | parameter | module/anonymous@2/anonymous@267 | timestamp |
-| 268:9 | medDate | const | module/anonymous@2 | () =&gt; state.medicationDate \|\| state.data?.today \|\| state.summary?.today \|\| '' |
-| 269:9 | medicationCurrent | const | module/anonymous@2 | () =&gt; state.medications?.patientId===state.selectedId &amp;&amp; state.medications?.date===medDate() ? state.medications : null |
-| 270:9 | orderActive | const | module/anonymous@2 | order =&gt; order.startDate&lt;=state.data.today &amp;&amp; (!order.endDate \|\| order.endDate&gt;=state.data.today) |
-| 270:23 | order | parameter | module/anonymous@2/anonymous@270 | order |
-| 271:12 | orderPeriodLabel | function | module/anonymous@2 |  |
-| 271:29 | order | parameter | module/anonymous@2/orderPeriodLabel | order |
-| 277:18 | loadMedications | function | module/anonymous@2 |  |
-| 277:35 | renderAfter | parameter | module/anonymous@2/loadMedications | {renderAfter=true}={} |
-| 279:11 | patientId | const | module/anonymous@2/loadMedications | state.selectedId |
-| 279:38 | date | const | module/anonymous@2/loadMedications | medDate() |
-| 279:53 | generation | const | module/anonymous@2/loadMedications | ++state.medicationRequest |
-| 282:13 | base | const | module/anonymous@2/loadMedications | '/api/patients/${encodeURIComponent(patientId)}' |
-| 283:14 | orders | const | module/anonymous@2/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
-| 283:21 | schedule | const | module/anonymous@2/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
-| 283:30 | events | const | module/anonymous@2/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
-| 286:13 | error | catch | module/anonymous@2/loadMedications |  |
-| 296:12 | medicationOrdersCard | function | module/anonymous@2 |  |
-| 296:33 | data | parameter | module/anonymous@2/medicationOrdersCard | data |
-| 297:11 | active | const | module/anonymous@2/medicationOrdersCard | data.orders.filter(orderActive).length |
-| 298:363 | order | parameter | module/anonymous@2/medicationOrdersCard/anonymous@298 | order |
-| 298:896 | time | parameter | module/anonymous@2/medicationOrdersCard/anonymous@298/anonymous@298 | time |
-| 300:12 | medicationScheduleCard | function | module/anonymous@2 |  |
-| 300:35 | data | parameter | module/anonymous@2/medicationScheduleCard | data |
-| 301:11 | schedule | const | module/anonymous@2/medicationScheduleCard | data.schedule |
-| 301:34 | totals | const | module/anonymous@2/medicationScheduleCard | schedule.summary\|\|{} |
-| 301:62 | slots | const | module/anonymous@2/medicationScheduleCard | schedule.slots\|\|[] |
-| 302:357 | key | parameter | module/anonymous@2/medicationScheduleCard/anonymous@302 | [key,label] |
-| 302:361 | label | parameter | module/anonymous@2/medicationScheduleCard/anonymous@302 | [key,label] |
-| 302:442 | s | parameter | module/anonymous@2/medicationScheduleCard/anonymous@302/anonymous@302 | s |
-| 302:576 | slot | parameter | module/anonymous@2/medicationScheduleCard/anonymous@302 | slot |
-| 304:12 | medicationsView | function | module/anonymous@2 |  |
-| 306:11 | data | const | module/anonymous@2/medicationsView | medicationCurrent() |
-| 307:137 | p | parameter | module/anonymous@2/medicationsView/anonymous@307 | p |
-| 309:12 | medicationModalFrame | function | module/anonymous@2 |  |
-| 309:33 | type | parameter | module/anonymous@2/medicationModalFrame | type |
-| 309:38 | title | parameter | module/anonymous@2/medicationModalFrame | title |
-| 309:44 | description | parameter | module/anonymous@2/medicationModalFrame | description |
-| 316:12 | openMedicationOrder | function | module/anonymous@2 |  |
-| 323:18 | loadMedicationCapability | function | module/anonymous@2 |  |
-| 323:43 | generation | parameter | module/anonymous@2/loadMedicationCapability | generation |
-| 325:13 | capabilities | const | module/anonymous@2/loadMedicationCapability | await api('/api/capabilities') |
-| 327:13 | enabled | const | module/anonymous@2/loadMedicationCapability | capabilities.vision?.available===true |
-| 331:13 | error | catch | module/anonymous@2/loadMedicationCapability |  |
-| 335:12 | updatePhotoAnalyzeButton | function | module/anonymous@2 |  |
-| 339:12 | clearMedicationPhoto | function | module/anonymous@2 |  |
-| 347:12 | readMedicationPhoto | function | module/anonymous@2 |  |
-| 347:32 | file | parameter | module/anonymous@2/readMedicationPhoto | file |
-| 353:11 | generation | const | module/anonymous@2/readMedicationPhoto | state.modal.photoGeneration |
-| 353:50 | patientId | const | module/anonymous@2/readMedicationPhoto | state.modal.patientId |
-| 354:11 | reader | const | module/anonymous@2/readMedicationPhoto | new FileReader() |
-| 362:18 | analyzeMedicationPhoto | function | module/anonymous@2 |  |
-| 363:11 | modal | const | module/anonymous@2/analyzeMedicationPhoto | state.modal |
-| 365:11 | generation | const | module/anonymous@2/analyzeMedicationPhoto | modal.photoGeneration |
-| 365:44 | patientId | const | module/anonymous@2/analyzeMedicationPhoto | modal.patientId |
-| 369:13 | result | const | module/anonymous@2/analyzeMedicationPhoto | await api('/api/patients/${encodeURIComponent(patientId)}/photo-analyses',{method:'POST',body:JSON.stringify({kind:'medication',im |
-| 371:13 | analysis | const | module/anonymous@2/analyzeMedicationPhoto | result.analysis |
-| 374:13 | candidates | const | module/anonymous@2/analyzeMedicationPhoto | analysis.proposal?.medications\|\|[] |
-| 375:228 | candidate | parameter | module/anonymous@2/analyzeMedicationPhoto/anonymous@375 | candidate |
-| 375:238 | index | parameter | module/anonymous@2/analyzeMedicationPhoto/anonymous@375 | index |
-| 375:827 | w | parameter | module/anonymous@2/analyzeMedicationPhoto/anonymous@375 | w |
-| 376:13 | error | catch | module/anonymous@2/analyzeMedicationPhoto |  |
-| 383:12 | useMedicationCandidate | function | module/anonymous@2 |  |
-| 383:35 | index | parameter | module/anonymous@2/useMedicationCandidate | index |
-| 384:11 | candidate | const | module/anonymous@2/useMedicationCandidate | state.modal?.photo?.analysis?.proposal?.medications?.[index] |
-| 391:12 | openMedicationEnd | function | module/anonymous@2 |  |
-| 391:30 | id | parameter | module/anonymous@2/openMedicationEnd | id |
-| 392:11 | order | const | module/anonymous@2/openMedicationEnd | medicationCurrent()?.orders.find(item=&gt;item.id===id) |
-| 392:50 | item | parameter | module/anonymous@2/openMedicationEnd/anonymous@392 | item |
-| 395:11 | minimum | const | module/anonymous@2/openMedicationEnd | order.startDate&gt;state.data.today?order.startDate:state.data.today |
-| 399:12 | openMedicationHistory | function | module/anonymous@2 |  |
-| 399:34 | orderId | parameter | module/anonymous@2/openMedicationHistory | orderId |
-| 399:42 | time | parameter | module/anonymous@2/openMedicationHistory | time |
-| 400:11 | data | const | module/anonymous@2/openMedicationHistory | medicationCurrent() |
-| 401:11 | slot | const | module/anonymous@2/openMedicationHistory | data.schedule.slots.find(s=&gt;s.orderId===orderId &amp;&amp; s.time===time) |
-| 401:41 | s | parameter | module/anonymous@2/openMedicationHistory/anonymous@401 | s |
-| 403:11 | audit | const | module/anonymous@2/openMedicationHistory | data.audit.filter(item=&gt;item.orderId===orderId &amp;&amp; item.time===time &amp;&amp; item.date===data.date).sort((a,b)=&gt;Number(b.revision)-Number |
-| 403:35 | item | parameter | module/anonymous@2/openMedicationHistory/anonymous@403 | item |
-| 403:116 | a | parameter | module/anonymous@2/openMedicationHistory/anonymous@403 | a |
-| 403:118 | b | parameter | module/anonymous@2/openMedicationHistory/anonymous@403 | b |
-| 404:510 | entry | parameter | module/anonymous@2/openMedicationHistory/anonymous@404 | entry |
-| 407:18 | submitMedicationModal | function | module/anonymous@2 |  |
-| 407:40 | event | parameter | module/anonymous@2/submitMedicationModal | event |
-| 408:11 | form | const | module/anonymous@2/submitMedicationModal | event.target |
-| 409:34 | modal | const | module/anonymous@2/submitMedicationModal | state.modal |
-| 410:11 | patientId | const | module/anonymous@2/submitMedicationModal | modal.patientId |
-| 410:37 | err | const | module/anonymous@2/submitMedicationModal | $('#modal-error') |
-| 412:11 | submit | const | module/anonymous@2/submitMedicationModal | form.querySelector('[type="submit"]') |
-| 414:13 | fields | const | module/anonymous@2/submitMedicationModal | new FormData(form) |
-| 416:15 | times | const | module/anonymous@2/submitMedicationModal | fields.getAll('times').filter(Boolean) |
-| 418:15 | payload | const | module/anonymous@2/submitMedicationModal | {name:String(fields.get('name')).trim(),strength:String(fields.get('strength')).trim(),dose:String(fields.get('dose')).trim(),rout |
-| 423:13 | error | catch | module/anonymous@2/submitMedicationModal |  |
-| 427:12 | render | function | module/anonymous@2 |  |
-| 427:19 | historyMode | parameter | module/anonymous@2/render | historyMode = 'replace' |
-| 429:12 | eyebrow | const | module/anonymous@2/render | viewTitles[state.view] |
-| 429:20 | title | const | module/anonymous@2/render | viewTitles[state.view] |
-| 429:26 | subtitle | const | module/anonymous@2/render | viewTitles[state.view] |
-| 429:35 | breadcrumb | const | module/anonymous@2/render | viewTitles[state.view] |
-| 431:64 | btn | parameter | module/anonymous@2/render/anonymous@431 | btn |
-| 431:76 | active | const | module/anonymous@2/render/anonymous@431 | btn.dataset.view===state.view |
-| 432:11 | inputFocused | const | module/anonymous@2/render | document.activeElement?.id==='patient-search' |
-| 432:76 | cursor | const | module/anonymous@2/render | inputFocused?document.activeElement.selectionStart:null |
-| 437:11 | patientLink | const | module/anonymous@2/render | $('.patient-site-link') |
-| 440:12 | changeView | function | module/anonymous@2 |  |
-| 440:23 | view | parameter | module/anonymous@2/changeView | view |
-| 441:12 | closeModal | function | module/anonymous@2 |  |
-| 445:12 | openModal | function | module/anonymous@2 |  |
-| 445:22 | type | parameter | module/anonymous@2/openModal | type |
-| 445:28 | mode | parameter | module/anonymous@2/openModal | mode='seed' |
-| 448:11 | close | const | module/anonymous@2/openModal | '&lt;button class="icon-button" data-modal-action="close" aria-label="닫기"&gt;${icon('close')}&lt;/button&gt;' |
-| 453:13 | seed | const | module/anonymous@2/openModal | mode==='seed' |
-| 458:18 | submitModal | function | module/anonymous@2 |  |
-| 458:30 | event | parameter | module/anonymous@2/submitModal | event |
-| 459:11 | form | const | module/anonymous@2/submitModal | event.target |
-| 460:11 | err | const | module/anonymous@2/submitModal | $('#modal-error') |
-| 460:55 | submit | const | module/anonymous@2/submitModal | form.querySelector('[type=submit]') |
-| 462:13 | fields | const | module/anonymous@2/submitModal | new FormData(form) |
-| 464:15 | result | const | module/anonymous@2/submitModal | await api('/api/patients',{method:'POST',body:JSON.stringify({name:String(fields.get('name')).trim(),age:Number(fields.get('age')) |
-| 464:234 | s | parameter | module/anonymous@2/submitModal/anonymous@464 | s |
-| 468:15 | mode | const | module/anonymous@2/submitModal | state.modal.mode |
-| 472:13 | error | catch | module/anonymous@2/submitModal |  |
-| 475:43 | event | parameter | module/anonymous@2/anonymous@475 | event |
-| 475:57 | btn | const | module/anonymous@2/anonymous@475 | event.target.closest('[data-view]') |
-| 478:46 | event | parameter | module/anonymous@2/anonymous@478 | event |
-| 479:11 | el | const | module/anonymous@2/anonymous@478 | event.target.closest('[data-action]') |
-| 480:11 | action | const | module/anonymous@2/anonymous@478 | el.dataset.action |
-| 493:48 | event | parameter | module/anonymous@2/anonymous@493 | event |
-| 493:62 | row | const | module/anonymous@2/anonymous@493 | event.target.closest('.patient-row') |
-| 494:46 | event | parameter | module/anonymous@2/anonymous@494 | event |
-| 497:47 | event | parameter | module/anonymous@2/anonymous@497 | event |
-| 498:49 | event | parameter | module/anonymous@2/anonymous@498 | event |
-| 501:40 | event | parameter | module/anonymous@2/anonymous@501 | event |
-| 502:11 | button | const | module/anonymous@2/anonymous@501 | event.target.closest('[data-modal-action]') |
-| 503:56 | rows | const | module/anonymous@2/anonymous@501 | $('#medication-times') |
-| 503:90 | count | const | module/anonymous@2/anonymous@501 | rows.querySelectorAll('input').length |
-| 508:41 | event | parameter | module/anonymous@2/anonymous@508 | event |
-| 511:65 | index | const | module/anonymous@2/anonymous@508 | event.target.dataset.candidateConfirm |
-| 511:115 | btn | const | module/anonymous@2/anonymous@508 | $('#modal').querySelector('[data-candidate="${index}"]') |
-| 514:39 | event | parameter | module/anonymous@2/anonymous@514 | event |
-| 517:34 | items | const | module/anonymous@2/anonymous@514 | [...$('#modal').querySelectorAll('button:not([disabled]),input:not([disabled]),select,textarea,a[href]')] |
-| 517:152 | first | const | module/anonymous@2/anonymous@514 | items[0] |
-| 517:167 | last | const | module/anonymous@2/anonymous@514 | items.at(-1) |
+| 114:30 | p | parameter | module/anonymous@2/performRefresh/anonymous@114 | p |
+| 114:101 | a | parameter | module/anonymous@2/performRefresh/anonymous@114 | a |
+| 114:103 | b | parameter | module/anonymous@2/performRefresh/anonymous@114 | b |
+| 116:15 | selected | const | module/anonymous@2/performRefresh | state.selectedId |
+| 116:41 | request | const | module/anonymous@2/performRefresh | state.selectionRequest |
+| 117:15 | summary | const | module/anonymous@2/performRefresh | await api('/api/patients/${encodeURIComponent(selected)}/summary') |
+| 130:13 | error | catch | module/anonymous@2/performRefresh |  |
+| 133:18 | selectPatient | function | module/anonymous@2 |  |
+| 133:32 | id | parameter | module/anonymous@2/selectPatient | id |
+| 133:36 | changeView | parameter | module/anonymous@2/selectPatient | changeView = false |
+| 133:57 | historyMode | parameter | module/anonymous@2/selectPatient | {historyMode='push'} = {} |
+| 134:35 | p | parameter | module/anonymous@2/selectPatient/anonymous@134 | p |
+| 138:11 | request | const | module/anonymous@2/selectPatient | ++state.selectionRequest |
+| 143:13 | summary | const | module/anonymous@2/selectPatient | await api('/api/patients/${encodeURIComponent(id)}/summary') |
+| 149:13 | error | catch | module/anonymous@2/selectPatient |  |
+| 152:12 | spark | function | module/anonymous@2 |  |
+| 152:18 | values | parameter | module/anonymous@2/spark | values |
+| 152:25 | color | parameter | module/anonymous@2/spark | color='#80b7a7' |
+| 152:41 | width | parameter | module/anonymous@2/spark | width=76 |
+| 152:50 | height | parameter | module/anonymous@2/spark | height=25 |
+| 153:11 | numeric | const | module/anonymous@2/spark | values.filter(present).map(Number) |
+| 154:11 | min | const | module/anonymous@2/spark | Math.min(...numeric) |
+| 154:36 | max | const | module/anonymous@2/spark | Math.max(...numeric) |
+| 154:67 | range | const | module/anonymous@2/spark | max-min\|\|1 |
+| 155:11 | coords | const | module/anonymous@2/spark | values.map((v,i)=&gt;present(v)?'${i/(Math.max(values.length-1,1))*width},${height-3-(v-min)/range*(height-7)}':null) |
+| 155:30 | v | parameter | module/anonymous@2/spark/anonymous@155 | v |
+| 155:32 | i | parameter | module/anonymous@2/spark/anonymous@155 | i |
+| 156:9 | d | let | module/anonymous@2/spark | '' |
+| 156:18 | active | let | module/anonymous@2/spark | false |
+| 156:46 | p | parameter | module/anonymous@2/spark/anonymous@156 | p |
+| 159:12 | chart | function | module/anonymous@2 |  |
+| 159:18 | rows | parameter | module/anonymous@2/chart | rows |
+| 159:24 | key | parameter | module/anonymous@2/chart | key |
+| 159:30 | color | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 159:46 | unit | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 159:54 | type | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 159:66 | height | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 159:77 | max | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 159:86 | secondary | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 159:101 | label | parameter | module/anonymous@2/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 161:11 | values | const | module/anonymous@2/chart | rows.map(r=&gt;r[key]) |
+| 161:27 | r | parameter | module/anonymous@2/chart/anonymous@161 | r |
+| 161:44 | numeric | const | module/anonymous@2/chart | values.filter(present).map(Number) |
+| 163:11 | w | const | module/anonymous@2/chart | 440 |
+| 163:17 | h | const | module/anonymous@2/chart | height |
+| 163:26 | left | const | module/anonymous@2/chart | 34 |
+| 163:34 | right | const | module/anonymous@2/chart | 12 |
+| 163:43 | top | const | module/anonymous@2/chart | 14 |
+| 163:50 | bottom | const | module/anonymous@2/chart | 25 |
+| 163:60 | plotW | const | module/anonymous@2/chart | w-left-right |
+| 163:79 | plotH | const | module/anonymous@2/chart | h-top-bottom |
+| 164:11 | ceiling | const | module/anonymous@2/chart | max \|\| Math.max(1,...numeric)*1.16 |
+| 165:11 | x | const | module/anonymous@2/chart | i=&gt;left+(rows.length===1?plotW/2:i/(rows.length-1)*plotW) |
+| 165:13 | i | parameter | module/anonymous@2/chart/anonymous@165 | i |
+| 166:11 | y | const | module/anonymous@2/chart | v=&gt;top+plotH-clamp(v,0,ceiling)/ceiling*plotH |
+| 166:13 | v | parameter | module/anonymous@2/chart/anonymous@166 | v |
+| 167:9 | content | let | module/anonymous@2/chart | '' |
+| 168:13 | i | let | module/anonymous@2/chart | 0 |
+| 168:34 | v | const | module/anonymous@2/chart | ceiling/3*i |
+| 168:54 | yy | const | module/anonymous@2/chart | y(v) |
+| 169:11 | interval | const | module/anonymous@2/chart | Math.max(1,Math.floor((rows.length-1)/4)) |
+| 169:76 | r | parameter | module/anonymous@2/chart/anonymous@169 | r |
+| 169:78 | i | parameter | module/anonymous@2/chart/anonymous@169 | i |
+| 171:13 | bw | const | module/anonymous@2/chart | Math.min(17,plotW/rows.length*.62) |
+| 172:23 | v | parameter | module/anonymous@2/chart/anonymous@172 | v |
+| 172:25 | i | parameter | module/anonymous@2/chart/anonymous@172 | i |
+| 174:11 | d | let | module/anonymous@2/chart | '' |
+| 174:16 | segment | let | module/anonymous@2/chart | [] |
+| 174:33 | segments | const | module/anonymous@2/chart | [] |
+| 175:23 | v | parameter | module/anonymous@2/chart/anonymous@175 | v |
+| 175:25 | i | parameter | module/anonymous@2/chart/anonymous@175 | i |
+| 176:24 | seg | parameter | module/anonymous@2/chart/anonymous@176 | seg |
+| 176:42 | p | parameter | module/anonymous@2/chart/anonymous@176/anonymous@176 | p |
+| 176:44 | i | parameter | module/anonymous@2/chart/anonymous@176/anonymous@176 | i |
+| 176:165 | p | parameter | module/anonymous@2/chart/anonymous@176/anonymous@176 | p |
+| 178:23 | v | parameter | module/anonymous@2/chart/anonymous@178 | v |
+| 178:25 | i | parameter | module/anonymous@2/chart/anonymous@178 | i |
+| 182:12 | stats | function | module/anonymous@2 |  |
+| 183:11 | s | const | module/anonymous@2/stats | state.data.stats |
+| 183:36 | ts | const | module/anonymous@2/stats | state.data.trends\|\|[] |
+| 184:11 | cards | const | module/anonymous@2/stats | [['전체 관리 환자',s.patients,'명','users','등록된 가상 환자','연구 참여 데모',ts.map(()=&gt;s.patients)],['확인이 필요한 환자',s.needsReview,'명','alert','기록에 따른 |
+| 184:177 | r | parameter | module/anonymous@2/stats/anonymous@184 | r |
+| 184:309 | r | parameter | module/anonymous@2/stats/anonymous@184 | r |
+| 184:417 | r | parameter | module/anonymous@2/stats/anonymous@184 | r |
+| 185:50 | c | parameter | module/anonymous@2/stats/anonymous@185 | c |
+| 185:52 | i | parameter | module/anonymous@2/stats/anonymous@185 | i |
+| 187:12 | filteredPatients | function | module/anonymous@2 |  |
+| 188:39 | p | parameter | module/anonymous@2/filteredPatients/anonymous@188 | p |
+| 190:12 | patientRows | function | module/anonymous@2 |  |
+| 190:24 | full | parameter | module/anonymous@2/patientRows | full = false |
+| 191:11 | patients | const | module/anonymous@2/patientRows | filteredPatients() |
+| 193:25 | p | parameter | module/anonymous@2/patientRows/anonymous@193 | p |
+| 195:12 | patientList | function | module/anonymous@2 |  |
+| 195:24 | full | parameter | module/anonymous@2/patientList | full = false |
+| 196:531 | key | parameter | module/anonymous@2/patientList/anonymous@196 | [key,label] |
+| 196:535 | label | parameter | module/anonymous@2/patientList/anonymous@196 | [key,label] |
+| 198:12 | briefingCard | function | module/anonymous@2 |  |
+| 199:11 | s | const | module/anonymous@2/briefingCard | state.summary |
+| 200:11 | first | const | module/anonymous@2/briefingCard | s.briefing.items.slice(0,3) |
+| 201:11 | headline | const | module/anonymous@2/briefingCard | s.risk.reasons.length?s.risk.reasons.slice(0,2).join('. ')+'.':'최근 기록의 변화를 확인하고, 방문 시 환자의 생활 상태와 함께 살펴보세요.' |
+| 202:584 | item | parameter | module/anonymous@2/briefingCard/anonymous@202 | item |
+| 204:12 | reportingChart | function | module/anonymous@2 |  |
+| 205:11 | t | const | module/anonymous@2/reportingChart | state.data.trends |
+| 208:12 | alerts | function | module/anonymous@2 |  |
+| 209:11 | alerts | const | module/anonymous@2/alerts | state.data.alerts.slice(0,3) |
+| 210:188 | a | parameter | module/anonymous@2/alerts/anonymous@210 | a |
+| 212:12 | metricPanels | function | module/anonymous@2 |  |
+| 213:11 | s | const | module/anonymous@2/metricPanels | state.summary |
+| 213:27 | m | const | module/anonymous@2/metricPanels | s.metrics |
+| 213:39 | t | const | module/anonymous@2/metricPanels | s.trends.slice(-14) |
+| 214:11 | panels | const | module/anonymous@2/metricPanels | [['steps','steps','평균 활동',num(m.steps.value),'걸음','${m.steps.coverageDays}/7일 활동 보고',healthSourceSummary(m.steps),'#7db6a4'],['sle |
+| 215:60 | key | parameter | module/anonymous@2/metricPanels/anonymous@215 | [key,ic,title,value,unit,caption,source,color] |
+| 215:64 | ic | parameter | module/anonymous@2/metricPanels/anonymous@215 | [key,ic,title,value,unit,caption,source,color] |
+| 215:67 | title | parameter | module/anonymous@2/metricPanels/anonymous@215 | [key,ic,title,value,unit,caption,source,color] |
+| 215:73 | value | parameter | module/anonymous@2/metricPanels/anonymous@215 | [key,ic,title,value,unit,caption,source,color] |
+| 215:79 | unit | parameter | module/anonymous@2/metricPanels/anonymous@215 | [key,ic,title,value,unit,caption,source,color] |
+| 215:84 | caption | parameter | module/anonymous@2/metricPanels/anonymous@215 | [key,ic,title,value,unit,caption,source,color] |
+| 215:92 | source | parameter | module/anonymous@2/metricPanels/anonymous@215 | [key,ic,title,value,unit,caption,source,color] |
+| 215:99 | color | parameter | module/anonymous@2/metricPanels/anonymous@215 | [key,ic,title,value,unit,caption,source,color] |
+| 215:353 | r | parameter | module/anonymous@2/metricPanels/anonymous@215/anonymous@215 | r |
+| 215:467 | r | parameter | module/anonymous@2/metricPanels/anonymous@215/anonymous@215 | r |
+| 217:12 | detailCharts | function | module/anonymous@2 |  |
+| 218:11 | t | const | module/anonymous@2/detailCharts | state.summary.trends.slice(-14) |
+| 219:11 | medication | const | module/anonymous@2/detailCharts | t.map(r=&gt;({...r,medValue:r.medicationStatus==='taken'?100:r.medicationStatus==='partial'?50:r.medicationStatus==='missed'?0:null}) |
+| 219:28 | r | parameter | module/anonymous@2/detailCharts/anonymous@219 | r |
+| 220:11 | panels | const | module/anonymous@2/detailCharts | [['활동 추이','최근 14일',t,'steps',{unit:'걸음',color:'#73ad98'},healthSourceSummary(state.summary.metrics.steps),'미기록일은 연결하지 않음'],['수면 추이 |
+| 221:59 | title | parameter | module/anonymous@2/detailCharts/anonymous@221 | [title,period,rows,key,options,note,right] |
+| 221:65 | period | parameter | module/anonymous@2/detailCharts/anonymous@221 | [title,period,rows,key,options,note,right] |
+| 221:72 | rows | parameter | module/anonymous@2/detailCharts/anonymous@221 | [title,period,rows,key,options,note,right] |
+| 221:77 | key | parameter | module/anonymous@2/detailCharts/anonymous@221 | [title,period,rows,key,options,note,right] |
+| 221:81 | options | parameter | module/anonymous@2/detailCharts/anonymous@221 | [title,period,rows,key,options,note,right] |
+| 221:89 | note | parameter | module/anonymous@2/detailCharts/anonymous@221 | [title,period,rows,key,options,note,right] |
+| 221:94 | right | parameter | module/anonymous@2/detailCharts/anonymous@221 | [title,period,rows,key,options,note,right] |
+| 223:12 | coverage | function | module/anonymous@2 |  |
+| 224:11 | s | const | module/anonymous@2/coverage | state.summary |
+| 224:27 | m | const | module/anonymous@2/coverage | s.metrics |
+| 224:45 | data | const | module/anonymous@2/coverage | [['활동',m.steps.coverageDays],['수면',m.sleepHours.coverageDays],['복약',m.medication.reportedDays],['식사',m.nutrition.recordedDays]] |
+| 225:146 | label | parameter | module/anonymous@2/coverage/anonymous@225 | [label,days] |
+| 225:152 | days | parameter | module/anonymous@2/coverage/anonymous@225 | [label,days] |
+| 225:630 | r | parameter | module/anonymous@2/coverage/anonymous@225 | r |
+| 227:12 | foodIllustration | function | module/anonymous@2 |  |
+| 227:29 | food | parameter | module/anonymous@2/foodIllustration | food |
+| 228:11 | content | const | module/anonymous@2/foodIllustration | {balanced:'&lt;ellipse cx="55" cy="54" rx="14" ry="18" fill="#e9ddc0"/&gt;&lt;circle cx="82" cy="37" r="11" fill="#88a276"/&gt;&lt;circle cx="93" |
+| 231:12 | meals | function | module/anonymous@2 |  |
+| 232:11 | meals | const | module/anonymous@2/meals | state.summary.recentMeals.slice(0,3) |
+| 233:256 | m | parameter | module/anonymous@2/meals/anonymous@233 | m |
+| 235:12 | recordTable | function | module/anonymous@2 |  |
+| 235:24 | full | parameter | module/anonymous@2/recordTable | full = false |
+| 236:11 | records | const | module/anonymous@2/recordTable | state.summary?.recentRecords.slice(0,full?14:5)\|\|[] |
+| 237:296 | r | parameter | module/anonymous@2/recordTable/anonymous@237 | r |
+| 239:12 | recentRecords | function | module/anonymous@2 |  |
+| 240:12 | expandedBriefing | function | module/anonymous@2 |  |
+| 241:11 | s | const | module/anonymous@2/expandedBriefing | state.summary |
+| 242:247 | item | parameter | module/anonymous@2/expandedBriefing/anonymous@242 | item |
+| 242:402 | e | parameter | module/anonymous@2/expandedBriefing/anonymous@242/anonymous@242 | e |
+| 244:12 | patientDetails | function | module/anonymous@2 |  |
+| 244:27 | expanded | parameter | module/anonymous@2/patientDetails | expanded = false |
+| 245:11 | s | const | module/anonymous@2/patientDetails | state.summary |
+| 246:852 | q | parameter | module/anonymous@2/patientDetails/anonymous@246 | q |
+| 248:12 | emptyWorkspace | function | module/anonymous@2 |  |
+| 251:12 | overview | function | module/anonymous@2 |  |
+| 254:12 | patientsView | function | module/anonymous@2 |  |
+| 256:11 | s | const | module/anonymous@2/patientsView | state.summary |
+| 259:12 | recordsView | function | module/anonymous@2 |  |
+| 261:129 | p | parameter | module/anonymous@2/recordsView/anonymous@261 | p |
+| 263:18 | loadIntegrationSettings | function | module/anonymous@2 |  |
+| 263:43 | renderAfter | parameter | module/anonymous@2/loadIntegrationSettings | {renderAfter=true}={} |
+| 270:12 | integrationSettings | function | module/anonymous@2 |  |
+| 271:11 | vision | const | module/anonymous@2/integrationSettings | state.capabilities?.vision |
+| 272:11 | status | const | module/anonymous@2/integrationSettings | state.capabilityError?'설정 상태 조회 실패':!vision?'설정 상태 확인 중':vision.available?'서버 설정 준비됨 · 실제 분석 필요':vision.reasonCode==='missing_key' |
+| 275:12 | settingsView | function | module/anonymous@2 |  |
+| 278:9 | medicationStatusLabel | const | module/anonymous@2 | status =&gt; ({taken:'복용 보고',missed:'미복용 보고',unknown:'기억 안 남',pending:'미응답'}[status] \|\| '미응답') |
+| 278:33 | status | parameter | module/anonymous@2/anonymous@278 | status |
+| 279:9 | medicationReason | const | module/anonymous@2 | reason =&gt; ({forgot:'깜빡함',side_effect:'불편한 증상',side_effects:'불편한 증상',unavailable:'약이 없음',refused:'복용 원치 않음',other:'기타',not_sure:'잘  |
+| 279:28 | reason | parameter | module/anonymous@2/anonymous@279 | reason |
+| 280:9 | reportTime | const | module/anonymous@2 | timestamp =&gt; timestamp ? new Date(timestamp).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-d |
+| 280:22 | timestamp | parameter | module/anonymous@2/anonymous@280 | timestamp |
+| 281:9 | medDate | const | module/anonymous@2 | () =&gt; state.medicationDate \|\| state.data?.today \|\| state.summary?.today \|\| '' |
+| 282:9 | medicationCurrent | const | module/anonymous@2 | () =&gt; state.medications?.patientId===state.selectedId &amp;&amp; state.medications?.date===medDate() ? state.medications : null |
+| 283:9 | orderActive | const | module/anonymous@2 | order =&gt; order.startDate&lt;=state.data.today &amp;&amp; (!order.endDate \|\| order.endDate&gt;=state.data.today) |
+| 283:23 | order | parameter | module/anonymous@2/anonymous@283 | order |
+| 284:12 | orderPeriodLabel | function | module/anonymous@2 |  |
+| 284:29 | order | parameter | module/anonymous@2/orderPeriodLabel | order |
+| 290:18 | loadMedications | function | module/anonymous@2 |  |
+| 290:35 | renderAfter | parameter | module/anonymous@2/loadMedications | {renderAfter=true}={} |
+| 292:11 | patientId | const | module/anonymous@2/loadMedications | state.selectedId |
+| 292:38 | date | const | module/anonymous@2/loadMedications | medDate() |
+| 292:53 | generation | const | module/anonymous@2/loadMedications | ++state.medicationRequest |
+| 295:13 | base | const | module/anonymous@2/loadMedications | '/api/patients/${encodeURIComponent(patientId)}' |
+| 296:14 | orders | const | module/anonymous@2/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
+| 296:21 | schedule | const | module/anonymous@2/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
+| 296:30 | events | const | module/anonymous@2/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
+| 299:13 | error | catch | module/anonymous@2/loadMedications |  |
+| 309:12 | medicationOrdersCard | function | module/anonymous@2 |  |
+| 309:33 | data | parameter | module/anonymous@2/medicationOrdersCard | data |
+| 310:11 | active | const | module/anonymous@2/medicationOrdersCard | data.orders.filter(orderActive).length |
+| 311:363 | order | parameter | module/anonymous@2/medicationOrdersCard/anonymous@311 | order |
+| 311:896 | time | parameter | module/anonymous@2/medicationOrdersCard/anonymous@311/anonymous@311 | time |
+| 313:12 | medicationScheduleCard | function | module/anonymous@2 |  |
+| 313:35 | data | parameter | module/anonymous@2/medicationScheduleCard | data |
+| 314:11 | schedule | const | module/anonymous@2/medicationScheduleCard | data.schedule |
+| 314:34 | totals | const | module/anonymous@2/medicationScheduleCard | schedule.summary\|\|{} |
+| 314:62 | slots | const | module/anonymous@2/medicationScheduleCard | schedule.slots\|\|[] |
+| 315:357 | key | parameter | module/anonymous@2/medicationScheduleCard/anonymous@315 | [key,label] |
+| 315:361 | label | parameter | module/anonymous@2/medicationScheduleCard/anonymous@315 | [key,label] |
+| 315:442 | s | parameter | module/anonymous@2/medicationScheduleCard/anonymous@315/anonymous@315 | s |
+| 315:576 | slot | parameter | module/anonymous@2/medicationScheduleCard/anonymous@315 | slot |
+| 317:12 | medicationsView | function | module/anonymous@2 |  |
+| 319:11 | data | const | module/anonymous@2/medicationsView | medicationCurrent() |
+| 320:137 | p | parameter | module/anonymous@2/medicationsView/anonymous@320 | p |
+| 322:12 | medicationModalFrame | function | module/anonymous@2 |  |
+| 322:33 | type | parameter | module/anonymous@2/medicationModalFrame | type |
+| 322:38 | title | parameter | module/anonymous@2/medicationModalFrame | title |
+| 322:44 | description | parameter | module/anonymous@2/medicationModalFrame | description |
+| 329:12 | openMedicationOrder | function | module/anonymous@2 |  |
+| 336:18 | loadMedicationCapability | function | module/anonymous@2 |  |
+| 336:43 | generation | parameter | module/anonymous@2/loadMedicationCapability | generation |
+| 338:13 | capabilities | const | module/anonymous@2/loadMedicationCapability | await api('/api/capabilities') |
+| 340:13 | enabled | const | module/anonymous@2/loadMedicationCapability | capabilities.vision?.available===true |
+| 344:13 | error | catch | module/anonymous@2/loadMedicationCapability |  |
+| 348:12 | updatePhotoAnalyzeButton | function | module/anonymous@2 |  |
+| 352:12 | clearMedicationPhoto | function | module/anonymous@2 |  |
+| 360:12 | readMedicationPhoto | function | module/anonymous@2 |  |
+| 360:32 | file | parameter | module/anonymous@2/readMedicationPhoto | file |
+| 366:11 | generation | const | module/anonymous@2/readMedicationPhoto | state.modal.photoGeneration |
+| 366:50 | patientId | const | module/anonymous@2/readMedicationPhoto | state.modal.patientId |
+| 367:11 | reader | const | module/anonymous@2/readMedicationPhoto | new FileReader() |
+| 375:18 | analyzeMedicationPhoto | function | module/anonymous@2 |  |
+| 376:11 | modal | const | module/anonymous@2/analyzeMedicationPhoto | state.modal |
+| 378:11 | generation | const | module/anonymous@2/analyzeMedicationPhoto | modal.photoGeneration |
+| 378:44 | patientId | const | module/anonymous@2/analyzeMedicationPhoto | modal.patientId |
+| 382:13 | result | const | module/anonymous@2/analyzeMedicationPhoto | await api('/api/patients/${encodeURIComponent(patientId)}/photo-analyses',{method:'POST',body:JSON.stringify({kind:'medication',im |
+| 384:13 | analysis | const | module/anonymous@2/analyzeMedicationPhoto | result.analysis |
+| 387:13 | candidates | const | module/anonymous@2/analyzeMedicationPhoto | analysis.proposal?.medications\|\|[] |
+| 388:228 | candidate | parameter | module/anonymous@2/analyzeMedicationPhoto/anonymous@388 | candidate |
+| 388:238 | index | parameter | module/anonymous@2/analyzeMedicationPhoto/anonymous@388 | index |
+| 388:827 | w | parameter | module/anonymous@2/analyzeMedicationPhoto/anonymous@388 | w |
+| 389:13 | error | catch | module/anonymous@2/analyzeMedicationPhoto |  |
+| 396:12 | useMedicationCandidate | function | module/anonymous@2 |  |
+| 396:35 | index | parameter | module/anonymous@2/useMedicationCandidate | index |
+| 397:11 | candidate | const | module/anonymous@2/useMedicationCandidate | state.modal?.photo?.analysis?.proposal?.medications?.[index] |
+| 404:12 | openMedicationEnd | function | module/anonymous@2 |  |
+| 404:30 | id | parameter | module/anonymous@2/openMedicationEnd | id |
+| 405:11 | order | const | module/anonymous@2/openMedicationEnd | medicationCurrent()?.orders.find(item=&gt;item.id===id) |
+| 405:50 | item | parameter | module/anonymous@2/openMedicationEnd/anonymous@405 | item |
+| 408:11 | minimum | const | module/anonymous@2/openMedicationEnd | order.startDate&gt;state.data.today?order.startDate:state.data.today |
+| 412:12 | openMedicationHistory | function | module/anonymous@2 |  |
+| 412:34 | orderId | parameter | module/anonymous@2/openMedicationHistory | orderId |
+| 412:42 | time | parameter | module/anonymous@2/openMedicationHistory | time |
+| 413:11 | data | const | module/anonymous@2/openMedicationHistory | medicationCurrent() |
+| 414:11 | slot | const | module/anonymous@2/openMedicationHistory | data.schedule.slots.find(s=&gt;s.orderId===orderId &amp;&amp; s.time===time) |
+| 414:41 | s | parameter | module/anonymous@2/openMedicationHistory/anonymous@414 | s |
+| 416:11 | audit | const | module/anonymous@2/openMedicationHistory | data.audit.filter(item=&gt;item.orderId===orderId &amp;&amp; item.time===time &amp;&amp; item.date===data.date).sort((a,b)=&gt;Number(b.revision)-Number |
+| 416:35 | item | parameter | module/anonymous@2/openMedicationHistory/anonymous@416 | item |
+| 416:116 | a | parameter | module/anonymous@2/openMedicationHistory/anonymous@416 | a |
+| 416:118 | b | parameter | module/anonymous@2/openMedicationHistory/anonymous@416 | b |
+| 417:510 | entry | parameter | module/anonymous@2/openMedicationHistory/anonymous@417 | entry |
+| 420:18 | submitMedicationModal | function | module/anonymous@2 |  |
+| 420:40 | event | parameter | module/anonymous@2/submitMedicationModal | event |
+| 421:11 | form | const | module/anonymous@2/submitMedicationModal | event.target |
+| 422:34 | modal | const | module/anonymous@2/submitMedicationModal | state.modal |
+| 423:11 | patientId | const | module/anonymous@2/submitMedicationModal | modal.patientId |
+| 423:37 | err | const | module/anonymous@2/submitMedicationModal | $('#modal-error') |
+| 425:11 | submit | const | module/anonymous@2/submitMedicationModal | form.querySelector('[type="submit"]') |
+| 427:13 | fields | const | module/anonymous@2/submitMedicationModal | new FormData(form) |
+| 429:15 | times | const | module/anonymous@2/submitMedicationModal | fields.getAll('times').filter(Boolean) |
+| 431:15 | payload | const | module/anonymous@2/submitMedicationModal | {name:String(fields.get('name')).trim(),strength:String(fields.get('strength')).trim(),dose:String(fields.get('dose')).trim(),rout |
+| 436:13 | error | catch | module/anonymous@2/submitMedicationModal |  |
+| 440:12 | render | function | module/anonymous@2 |  |
+| 440:19 | historyMode | parameter | module/anonymous@2/render | historyMode = 'replace' |
+| 442:12 | eyebrow | const | module/anonymous@2/render | viewTitles[state.view] |
+| 442:20 | title | const | module/anonymous@2/render | viewTitles[state.view] |
+| 442:26 | subtitle | const | module/anonymous@2/render | viewTitles[state.view] |
+| 442:35 | breadcrumb | const | module/anonymous@2/render | viewTitles[state.view] |
+| 444:64 | btn | parameter | module/anonymous@2/render/anonymous@444 | btn |
+| 444:76 | active | const | module/anonymous@2/render/anonymous@444 | btn.dataset.view===state.view |
+| 445:11 | inputFocused | const | module/anonymous@2/render | document.activeElement?.id==='patient-search' |
+| 445:76 | cursor | const | module/anonymous@2/render | inputFocused?document.activeElement.selectionStart:null |
+| 450:11 | patientLink | const | module/anonymous@2/render | $('.patient-site-link') |
+| 453:12 | changeView | function | module/anonymous@2 |  |
+| 453:23 | view | parameter | module/anonymous@2/changeView | view |
+| 454:12 | closeModal | function | module/anonymous@2 |  |
+| 458:12 | openModal | function | module/anonymous@2 |  |
+| 458:22 | type | parameter | module/anonymous@2/openModal | type |
+| 458:28 | mode | parameter | module/anonymous@2/openModal | mode='seed' |
+| 461:11 | close | const | module/anonymous@2/openModal | '&lt;button class="icon-button" data-modal-action="close" aria-label="닫기"&gt;${icon('close')}&lt;/button&gt;' |
+| 466:13 | seed | const | module/anonymous@2/openModal | mode==='seed' |
+| 471:18 | submitModal | function | module/anonymous@2 |  |
+| 471:30 | event | parameter | module/anonymous@2/submitModal | event |
+| 472:11 | form | const | module/anonymous@2/submitModal | event.target |
+| 473:11 | err | const | module/anonymous@2/submitModal | $('#modal-error') |
+| 473:55 | submit | const | module/anonymous@2/submitModal | form.querySelector('[type=submit]') |
+| 475:13 | fields | const | module/anonymous@2/submitModal | new FormData(form) |
+| 477:15 | result | const | module/anonymous@2/submitModal | await api('/api/patients',{method:'POST',body:JSON.stringify({name:String(fields.get('name')).trim(),age:Number(fields.get('age')) |
+| 477:234 | s | parameter | module/anonymous@2/submitModal/anonymous@477 | s |
+| 481:15 | mode | const | module/anonymous@2/submitModal | state.modal.mode |
+| 485:13 | error | catch | module/anonymous@2/submitModal |  |
+| 488:43 | event | parameter | module/anonymous@2/anonymous@488 | event |
+| 488:57 | btn | const | module/anonymous@2/anonymous@488 | event.target.closest('[data-view]') |
+| 491:46 | event | parameter | module/anonymous@2/anonymous@491 | event |
+| 492:11 | el | const | module/anonymous@2/anonymous@491 | event.target.closest('[data-action]') |
+| 493:11 | action | const | module/anonymous@2/anonymous@491 | el.dataset.action |
+| 507:48 | event | parameter | module/anonymous@2/anonymous@507 | event |
+| 507:62 | row | const | module/anonymous@2/anonymous@507 | event.target.closest('.patient-row') |
+| 508:46 | event | parameter | module/anonymous@2/anonymous@508 | event |
+| 511:47 | event | parameter | module/anonymous@2/anonymous@511 | event |
+| 512:49 | event | parameter | module/anonymous@2/anonymous@512 | event |
+| 515:40 | event | parameter | module/anonymous@2/anonymous@515 | event |
+| 516:11 | button | const | module/anonymous@2/anonymous@515 | event.target.closest('[data-modal-action]') |
+| 517:56 | rows | const | module/anonymous@2/anonymous@515 | $('#medication-times') |
+| 517:90 | count | const | module/anonymous@2/anonymous@515 | rows.querySelectorAll('input').length |
+| 522:41 | event | parameter | module/anonymous@2/anonymous@522 | event |
+| 525:65 | index | const | module/anonymous@2/anonymous@522 | event.target.dataset.candidateConfirm |
+| 525:115 | btn | const | module/anonymous@2/anonymous@522 | $('#modal').querySelector('[data-candidate="${index}"]') |
+| 528:39 | event | parameter | module/anonymous@2/anonymous@528 | event |
+| 531:34 | items | const | module/anonymous@2/anonymous@528 | [...$('#modal').querySelectorAll('button:not([disabled]),input:not([disabled]),select,textarea,a[href]')] |
+| 531:152 | first | const | module/anonymous@2/anonymous@528 | items[0] |
+| 531:167 | last | const | module/anonymous@2/anonymous@528 | items.at(-1) |
 
 ## public/patient-screens.js
 
@@ -2049,6 +2540,29 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 | 44:49 | property | parameter | module/anonymous@44 | property |
 | 45:12 | id | const | module | 초기값 없음 |
 
+## scripts/check-vision.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 2:10 | readFile | import | module | node:fs/promises |
+| 2:20 | mkdtemp | import | module | node:fs/promises |
+| 2:29 | rm | import | module | node:fs/promises |
+| 3:10 | extname | import | module | node:path |
+| 3:19 | join | import | module | node:path |
+| 4:10 | tmpdir | import | module | node:os |
+| 5:10 | openDatabase | import | module | ../lib/db.mjs |
+| 6:10 | analyzePhoto | import | module | ../lib/vision.mjs |
+| 6:24 | checkVisionAccess | import | module | ../lib/vision.mjs |
+| 6:43 | ensureVisionSchema | import | module | ../lib/vision.mjs |
+| 8:7 | args | const | module | process.argv.slice(2) |
+| 13:9 | access | const | module | await checkVisionAccess() |
+| 19:9 | directory | let | module | 초기값 없음 |
+| 19:20 | db | let | module | 초기값 없음 |
+| 21:13 | path | const | module | args[1] |
+| 21:29 | type | const | module | { '.jpg': 'jpeg', '.jpeg': 'jpeg', '.png': 'png', '.webp': 'webp' }[extname(path).toLowerCase()] |
+| 23:13 | bytes | const | module | await readFile(path) |
+| 29:15 | analysis | const | module | await analyzePhoto({ db, patientId: 'vision-operator-check', body: { kind: 'meal', imageData: 'data:image/${type};base64,${bytes.t |
+
 ## scripts/generate-schema-docs.mjs
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
@@ -2132,34 +2646,34 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 | 57:44 | item | const | module/javascript/visit | 초기값 없음 |
 | 62:21 | a | parameter | module/javascript/anonymous@62 | a |
 | 62:24 | b | parameter | module/javascript/anonymous@62 | b |
-| 65:10 | kotlin | function | module |  |
-| 65:17 | source | parameter | module/kotlin | source |
-| 68:9 | code | const | module/kotlin | source.replace(/\/\*[\s\S]*?\*\/\|\/\/[^\n]*\|"""[\s\S]*?"""\|"(?:\\.\|[^"\\])*"\|'(?:\\.\|[^'\\])*'/g, value =&gt; value.replace(/[^\n]/g, |
-| 68:114 | value | parameter | module/kotlin/anonymous@68 | value |
-| 69:9 | rows | const | module/kotlin | [] |
-| 70:9 | seen | const | module/kotlin | new Set() |
-| 71:9 | add | const | module/kotlin | (name, kind, offset, expression = '') =&gt; { const line = code.slice(0, offset).split('\n').length; const key = '${line}:${name}:${k |
-| 71:16 | name | parameter | module/kotlin/anonymous@71 | name |
-| 71:22 | kind | parameter | module/kotlin/anonymous@71 | kind |
-| 71:28 | offset | parameter | module/kotlin/anonymous@71 | offset |
-| 71:36 | expression | parameter | module/kotlin/anonymous@71 | expression = '' |
-| 72:11 | line | const | module/kotlin/anonymous@71 | code.slice(0, offset).split('\n').length |
-| 73:11 | key | const | module/kotlin/anonymous@71 | '${line}:${name}:${kind}' |
-| 77:14 | match | const | module/kotlin | 초기값 없음 |
-| 78:14 | match | const | module/kotlin | 초기값 없음 |
-| 79:14 | match | const | module/kotlin | 초기값 없음 |
-| 80:14 | match | const | module/kotlin | 초기값 없음 |
-| 81:21 | a | parameter | module/kotlin/anonymous@81 | a |
-| 81:24 | b | parameter | module/kotlin/anonymous@81 | b |
+| 65:10 | nativeIndex | function | module |  |
+| 65:22 | source | parameter | module/nativeIndex | source |
+| 68:9 | code | const | module/nativeIndex | source.replace(/\/\*[\s\S]*?\*\/\|\/\/[^\n]*\|"""[\s\S]*?"""\|"(?:\\.\|[^"\\])*"\|'(?:\\.\|[^'\\])*'/g, value =&gt; value.replace(/[^\n]/g, |
+| 68:114 | value | parameter | module/nativeIndex/anonymous@68 | value |
+| 69:9 | rows | const | module/nativeIndex | [] |
+| 70:9 | seen | const | module/nativeIndex | new Set() |
+| 71:9 | add | const | module/nativeIndex | (name, kind, offset, expression = '') =&gt; { const line = code.slice(0, offset).split('\n').length; const key = '${line}:${name}:${k |
+| 71:16 | name | parameter | module/nativeIndex/anonymous@71 | name |
+| 71:22 | kind | parameter | module/nativeIndex/anonymous@71 | kind |
+| 71:28 | offset | parameter | module/nativeIndex/anonymous@71 | offset |
+| 71:36 | expression | parameter | module/nativeIndex/anonymous@71 | expression = '' |
+| 72:11 | line | const | module/nativeIndex/anonymous@71 | code.slice(0, offset).split('\n').length |
+| 73:11 | key | const | module/nativeIndex/anonymous@71 | '${line}:${name}:${kind}' |
+| 77:14 | match | const | module/nativeIndex | 초기값 없음 |
+| 78:14 | match | const | module/nativeIndex | 초기값 없음 |
+| 79:14 | match | const | module/nativeIndex | 초기값 없음 |
+| 80:14 | match | const | module/nativeIndex | 초기값 없음 |
+| 81:21 | a | parameter | module/nativeIndex/anonymous@81 | a |
+| 81:24 | b | parameter | module/nativeIndex/anonymous@81 | b |
 | 84:7 | sections | const | module | [] |
 | 85:5 | declarations | let | module | 0 |
 | 86:5 | fileCount | let | module | 0 |
 | 87:12 | path | const | module | 초기값 없음 |
 | 88:9 | name | const | module | relative(root, path).replaceAll('\\', '/') |
 | 89:9 | source | const | module | await readFile(path, 'utf8') |
-| 90:9 | isNative | const | module | ['.kt', '.kts', '.java'].includes(extname(path)) |
-| 91:9 | rows | const | module | isNative ? kotlin(source) : javascript(source) |
-| 94:175 | row | parameter | module/anonymous@94 | row |
+| 90:9 | isNative | const | module | ['.kt', '.kts', '.java', '.swift'].includes(extname(path)) |
+| 91:9 | rows | const | module | isNative ? nativeIndex(source) : javascript(source) |
+| 94:181 | row | parameter | module/anonymous@94 | row |
 | 97:7 | document | const | module | '# 코드 변수·매개변수 목록\n\n자동 생성 파일. 직접 편집하지 않는다. 생성: \'npm run docs:variables\', 최신 여부 검사: \'npm run docs:check\'.\n\nJavaScript는 Acorn  |
 | 99:7 | saved | let | module | '' |
 
@@ -2214,12 +2728,13 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 | 11:50 | analyzePhoto | import | module | ./lib/vision.mjs |
 | 11:64 | resolveMealAnalysis | import | module | ./lib/vision.mjs |
 | 11:85 | markAnalysisApplied | import | module | ./lib/vision.mjs |
-| 12:10 | ensureHealthSchema | import | module | ./lib/health-sync.mjs |
-| 12:30 | getHealthConnections | import | module | ./lib/health-sync.mjs |
-| 12:52 | createHealthConnection | import | module | ./lib/health-sync.mjs |
-| 12:76 | revokeHealthConnection | import | module | ./lib/health-sync.mjs |
-| 12:100 | receiveHealthBatch | import | module | ./lib/health-sync.mjs |
-| 12:120 | getHealthConnectionIdentity | import | module | ./lib/health-sync.mjs |
+| 12:10 | healthCapabilities | import | module | ./lib/health-sync.mjs |
+| 12:30 | ensureHealthSchema | import | module | ./lib/health-sync.mjs |
+| 12:50 | getHealthConnections | import | module | ./lib/health-sync.mjs |
+| 12:72 | createHealthConnection | import | module | ./lib/health-sync.mjs |
+| 12:96 | revokeHealthConnection | import | module | ./lib/health-sync.mjs |
+| 12:120 | receiveHealthBatch | import | module | ./lib/health-sync.mjs |
+| 12:140 | getHealthConnectionIdentity | import | module | ./lib/health-sync.mjs |
 | 14:7 | root | const | module | fileURLToPath(new URL('.', import.meta.url)) |
 | 15:7 | publicDir | const | module | join(root, 'public') |
 | 16:9 | db | const | module | openDatabase(process.env.DATA_DIR \|\| join(root, 'data')) |
@@ -2576,47 +3091,47 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 | 225:11 | created | const | module/anonymous@138/anonymous@222 | await request('${path}/health-connections', { method: 'POST', status: 201, body: { platform: 'health-connect', label: '로컬 테스트 연결'  |
 | 230:11 | listed | const | module/anonymous@138/anonymous@222 | await request('${path}/health-connections') |
 | 234:11 | identity | const | module/anonymous@138/anonymous@222 | await request('/api/health-sync/connection', { token }) |
-| 237:11 | revision | const | module/anonymous@138/anonymous@222 | new Date(Date.now() - 600000).toISOString() |
-| 238:11 | body | const | module/anonymous@138/anonymous@222 | { batchId: 'first-fixture-batch', timeZone: 'Asia/Seoul', days: [{ date: today, steps: 9876, sleepMinutes: 390, updatedAt: revisio |
-| 239:11 | first | const | module/anonymous@138/anonymous@222 | await request('/api/health-sync', { method: 'POST', token, body }) |
-| 244:11 | repeated | const | module/anonymous@138/anonymous@222 | await request('/api/health-sync', { method: 'POST', token, body }) |
-| 248:11 | stale | const | module/anonymous@138/anonymous@222 | await request('/api/health-sync', { method: 'POST', token, body: { batchId: 'stale-fixture-batch', timeZone: 'Asia/Seoul', days: [ |
-| 258:11 | path | const | module/anonymous@138/anonymous@257 | '/api/patients/${healthPatient.id}' |
-| 259:9 | summary | let | module/anonymous@138/anonymous@257 | await request('${path}/summary') |
-| 265:38 | day | parameter | module/anonymous@138/anonymous@257/anonymous@265 | day |
-| 266:38 | day | parameter | module/anonymous@138/anonymous@257/anonymous@266 | day |
-| 271:11 | manual | const | module/anonymous@138/anonymous@257 | (await request('${path}/daily?date=${today}')).record |
-| 294:11 | csvText | const | module/anonymous@138/anonymous@257 | await app.text('/api/export.csv') |
-| 296:11 | csv | const | module/anonymous@138/anonymous@257 | parseCsv(csvText) |
-| 299:11 | daily | const | module/anonymous@138/anonymous@257 | csv.rows.find(row =&gt; row.recordType === 'daily' &amp;&amp; row.patientId === healthPatient.id &amp;&amp; row.date === today) |
-| 299:33 | row | parameter | module/anonymous@138/anonymous@257/anonymous@299 | row |
-| 304:29 | row | parameter | module/anonymous@138/anonymous@257/anonymous@304 | row |
-| 308:11 | body | const | module/anonymous@138/anonymous@307 | { batchId: 'zero-and-deletion-fixture', timeZone: 'Asia/Seoul', days: [{ date: today, steps: 0, sleepMinutes: null, updatedAt: new |
-| 309:11 | response | const | module/anonymous@138/anonymous@307 | await request('/api/health-sync', { method: 'POST', token, body }) |
-| 311:11 | path | const | module/anonymous@138/anonymous@307 | '/api/patients/${healthPatient.id}' |
-| 312:11 | summary | const | module/anonymous@138/anonymous@307 | await request('${path}/summary') |
-| 317:11 | revoked | const | module/anonymous@138/anonymous@307 | await request('${path}/health-connections/${connection.id}', { method: 'DELETE' }) |
-| 322:69 | row | parameter | module/anonymous@138/anonymous@307/anonymous@322 | row |
-| 326:11 | patient | const | module/anonymous@138/anonymous@325 | await createPatient('합성 선택 출처 환자') |
-| 327:11 | path | const | module/anonymous@138/anonymous@325 | '/api/patients/${patient.id}' |
-| 328:11 | android | const | module/anonymous@138/anonymous@325 | await request('${path}/health-connections', { method: 'POST', status: 201, body: { platform: 'health-connect' } }) |
-| 329:11 | firstRevision | const | module/anonymous@138/anonymous@325 | new Date(Date.now() - 500000).toISOString() |
-| 330:11 | updateRevision | const | module/anonymous@138/anonymous@325 | new Date(Date.now() - 300000).toISOString() |
-| 331:11 | clearRevision | const | module/anonymous@138/anonymous@325 | new Date(Date.now() - 100000).toISOString() |
-| 332:11 | batch | const | module/anonymous@138/anonymous@325 | (batchId, steps, sleepMinutes, updatedAt = firstRevision) =&gt; ({ batchId, timeZone: 'Asia/Seoul', days: [{ date: today, steps, slee |
-| 332:20 | batchId | parameter | module/anonymous@138/anonymous@325/anonymous@332 | batchId |
-| 332:29 | steps | parameter | module/anonymous@138/anonymous@325/anonymous@332 | steps |
-| 332:36 | sleepMinutes | parameter | module/anonymous@138/anonymous@325/anonymous@332 | sleepMinutes |
-| 332:50 | updatedAt | parameter | module/anonymous@138/anonymous@325/anonymous@332 | updatedAt = firstRevision |
-| 335:11 | apple | const | module/anonymous@138/anonymous@325 | await request('${path}/health-connections', { method: 'POST', status: 201, body: { platform: 'apple-health' } }) |
-| 339:9 | summary | let | module/anonymous@138/anonymous@325 | await request('${path}/summary') |
-| 350:11 | trend | const | module/anonymous@138/anonymous@325 | summary.trends.find(day =&gt; day.date === today) |
-| 350:39 | day | parameter | module/anonymous@138/anonymous@325/anonymous@350 | day |
-| 364:11 | legacy | const | module/anonymous@138/anonymous@362 | await request('/api/patients/legacy-001/summary') |
-| 367:11 | events | const | module/anonymous@138/anonymous@362 | await request('/api/patients/${medicationPatient.id}/medication-events?date=${today}') |
-| 370:11 | orders | const | module/anonymous@138/anonymous@362 | await request('/api/patients/${medicationPatient.id}/medication-orders') |
-| 373:11 | connections | const | module/anonymous@138/anonymous@362 | await request('/api/patients/${healthPatient.id}/health-connections') |
-| 376:11 | db | const | module/anonymous@138/anonymous@362 | new DatabaseSync(join(app.dataDir, 'homecare.sqlite')) |
+| 238:11 | revision | const | module/anonymous@138/anonymous@222 | new Date(Date.now() - 600000).toISOString() |
+| 239:11 | body | const | module/anonymous@138/anonymous@222 | { batchId: 'first-fixture-batch', timeZone: 'Asia/Seoul', days: [{ date: today, steps: 9876, sleepMinutes: 390, updatedAt: revisio |
+| 240:11 | first | const | module/anonymous@138/anonymous@222 | await request('/api/health-sync', { method: 'POST', token, body }) |
+| 245:11 | repeated | const | module/anonymous@138/anonymous@222 | await request('/api/health-sync', { method: 'POST', token, body }) |
+| 249:11 | stale | const | module/anonymous@138/anonymous@222 | await request('/api/health-sync', { method: 'POST', token, body: { batchId: 'stale-fixture-batch', timeZone: 'Asia/Seoul', days: [ |
+| 259:11 | path | const | module/anonymous@138/anonymous@258 | '/api/patients/${healthPatient.id}' |
+| 260:9 | summary | let | module/anonymous@138/anonymous@258 | await request('${path}/summary') |
+| 266:38 | day | parameter | module/anonymous@138/anonymous@258/anonymous@266 | day |
+| 267:38 | day | parameter | module/anonymous@138/anonymous@258/anonymous@267 | day |
+| 272:11 | manual | const | module/anonymous@138/anonymous@258 | (await request('${path}/daily?date=${today}')).record |
+| 295:11 | csvText | const | module/anonymous@138/anonymous@258 | await app.text('/api/export.csv') |
+| 297:11 | csv | const | module/anonymous@138/anonymous@258 | parseCsv(csvText) |
+| 300:11 | daily | const | module/anonymous@138/anonymous@258 | csv.rows.find(row =&gt; row.recordType === 'daily' &amp;&amp; row.patientId === healthPatient.id &amp;&amp; row.date === today) |
+| 300:33 | row | parameter | module/anonymous@138/anonymous@258/anonymous@300 | row |
+| 305:29 | row | parameter | module/anonymous@138/anonymous@258/anonymous@305 | row |
+| 309:11 | body | const | module/anonymous@138/anonymous@308 | { batchId: 'zero-and-deletion-fixture', timeZone: 'Asia/Seoul', days: [{ date: today, steps: 0, sleepMinutes: null, updatedAt: new |
+| 310:11 | response | const | module/anonymous@138/anonymous@308 | await request('/api/health-sync', { method: 'POST', token, body }) |
+| 312:11 | path | const | module/anonymous@138/anonymous@308 | '/api/patients/${healthPatient.id}' |
+| 313:11 | summary | const | module/anonymous@138/anonymous@308 | await request('${path}/summary') |
+| 318:11 | revoked | const | module/anonymous@138/anonymous@308 | await request('${path}/health-connections/${connection.id}', { method: 'DELETE' }) |
+| 323:69 | row | parameter | module/anonymous@138/anonymous@308/anonymous@323 | row |
+| 327:11 | patient | const | module/anonymous@138/anonymous@326 | await createPatient('합성 선택 출처 환자') |
+| 328:11 | path | const | module/anonymous@138/anonymous@326 | '/api/patients/${patient.id}' |
+| 329:11 | android | const | module/anonymous@138/anonymous@326 | await request('${path}/health-connections', { method: 'POST', status: 201, body: { platform: 'health-connect' } }) |
+| 330:11 | firstRevision | const | module/anonymous@138/anonymous@326 | new Date(Date.now() - 500000).toISOString() |
+| 331:11 | updateRevision | const | module/anonymous@138/anonymous@326 | new Date(Date.now() - 300000).toISOString() |
+| 332:11 | clearRevision | const | module/anonymous@138/anonymous@326 | new Date(Date.now() - 100000).toISOString() |
+| 333:11 | batch | const | module/anonymous@138/anonymous@326 | (batchId, steps, sleepMinutes, updatedAt = firstRevision) =&gt; ({ batchId, timeZone: 'Asia/Seoul', days: [{ date: today, steps, slee |
+| 333:20 | batchId | parameter | module/anonymous@138/anonymous@326/anonymous@333 | batchId |
+| 333:29 | steps | parameter | module/anonymous@138/anonymous@326/anonymous@333 | steps |
+| 333:36 | sleepMinutes | parameter | module/anonymous@138/anonymous@326/anonymous@333 | sleepMinutes |
+| 333:50 | updatedAt | parameter | module/anonymous@138/anonymous@326/anonymous@333 | updatedAt = firstRevision |
+| 336:11 | apple | const | module/anonymous@138/anonymous@326 | await request('${path}/health-connections', { method: 'POST', status: 201, body: { platform: 'apple-health' } }) |
+| 340:9 | summary | let | module/anonymous@138/anonymous@326 | await request('${path}/summary') |
+| 351:11 | trend | const | module/anonymous@138/anonymous@326 | summary.trends.find(day =&gt; day.date === today) |
+| 351:39 | day | parameter | module/anonymous@138/anonymous@326/anonymous@351 | day |
+| 365:11 | legacy | const | module/anonymous@138/anonymous@363 | await request('/api/patients/legacy-001/summary') |
+| 368:11 | events | const | module/anonymous@138/anonymous@363 | await request('/api/patients/${medicationPatient.id}/medication-events?date=${today}') |
+| 371:11 | orders | const | module/anonymous@138/anonymous@363 | await request('/api/patients/${medicationPatient.id}/medication-orders') |
+| 374:11 | connections | const | module/anonymous@138/anonymous@363 | await request('/api/patients/${healthPatient.id}/health-connections') |
+| 377:11 | db | const | module/anonymous@138/anonymous@363 | new DatabaseSync(join(app.dataDir, 'homecare.sqlite')) |
 
 ## test/automation-browser.mjs
 
@@ -2797,47 +3312,68 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 | 515:19 | batchId | parameter | module/anonymous@506/anonymous@515 | batchId |
 | 515:28 | day | parameter | module/anonymous@506/anonymous@515 | day |
 | 518:9 | summary | let | module/anonymous@506 | await get('${path}/summary') |
-| 544:9 | analysisRequests | let | module/anonymous@542 | 0 |
-| 545:11 | listener | const | module/anonymous@542 | request =&gt; { if (request.url().endsWith('/photo-analyses')) analysisRequests++; } |
-| 545:22 | request | parameter | module/anonymous@542/anonymous@545 | request |
-| 555:11 | saving | const | module/anonymous@542 | responseFor(mobile, '/api/patients/${patient.id}/meals') |
-| 557:11 | response | const | module/anonymous@542 | await saving |
-| 558:11 | saved | const | module/anonymous@542 | (await response.json()).meal |
-| 568:11 | page | const | module/anonymous@567 | await newPage(true) |
-| 569:11 | proposal | const | module/anonymous@567 | { foodType: 'protein', foodLabel: '가상 제공자 두부 식사', foods: [{ name: '가상 두부' }], calories: 612, proteinGrams: 30.8, confidence: .7 } |
-| 570:9 | analysis | let | module/anonymous@567 | 초기값 없음 |
-| 571:9 | calls | let | module/anonymous@567 | 0 |
-| 572:64 | route | parameter | module/anonymous@567/anonymous@572 | route |
-| 574:13 | body | const | module/anonymous@567/anonymous@572 | route.request().postDataJSON() |
-| 591:11 | saving | const | module/anonymous@567 | responseFor(page, '/api/patients/${patient.id}/meals') |
-| 593:11 | response | const | module/anonymous@567 | await saving |
-| 594:11 | payload | const | module/anonymous@567 | response.request().postDataJSON() |
-| 597:11 | saved | const | module/anonymous@567 | (await response.json()).meal |
-| 608:11 | page | const | module/anonymous@607 | await newPage(true) |
-| 609:11 | pending | const | module/anonymous@607 | [] |
-| 610:64 | route | parameter | module/anonymous@607/anonymous@610 | route |
-| 611:11 | release | let | module/anonymous@607/anonymous@610 | 초기값 없음 |
-| 612:13 | held | const | module/anonymous@607/anonymous@610 | new Promise(resolve =&gt; { release = resolve; }) |
-| 612:32 | resolve | parameter | module/anonymous@607/anonymous@610/anonymous@612 | resolve |
-| 622:11 | changedImage | const | module/anonymous@607 | await page.evaluate(() =&gt; { const canvas = document.createElement('canvas'); canvas.width = canvas.height = 3; const context = can |
-| 622:60 | canvas | const | module/anonymous@607/anonymous@622 | document.createElement('canvas') |
-| 622:143 | context | const | module/anonymous@607/anonymous@622 | canvas.getContext('2d') |
-| 624:32 | image | parameter | module/anonymous@607/anonymous@624 | image |
-| 625:11 | late | const | module/anonymous@607 | page.waitForResponse(response =&gt; response.url().endsWith('/photo-analyses')) |
-| 625:39 | response | parameter | module/anonymous@607/anonymous@625 | response |
-| 629:11 | saving | const | module/anonymous@607 | responseFor(page, '/api/patients/${patient.id}/meals') |
-| 631:11 | savedResponse | const | module/anonymous@607 | await saving |
-| 640:25 | dialog | parameter | module/anonymous@607/anonymous@640 | dialog |
-| 642:11 | closedLate | const | module/anonymous@607 | page.waitForResponse(response =&gt; response.url().endsWith('/photo-analyses')) |
-| 642:45 | response | parameter | module/anonymous@607/anonymous@642 | response |
-| 651:11 | page | const | module/anonymous@650 | await newPage() |
-| 652:9 | calls | let | module/anonymous@650 | 0 |
-| 653:64 | route | parameter | module/anonymous@650/anonymous@653 | route |
-| 655:13 | body | const | module/anonymous@650/anonymous@653 | route.request().postDataJSON() |
-| 656:13 | analysis | const | module/anonymous@650/anonymous@653 | draft(patient.id, 'medication', { medications: [{ name: '가상 OCR 이름', strength: '10 mg', labelText: '&lt;img src=x onerror="window.__o |
-| 675:16 | selector | const | module/anonymous@650 | 초기값 없음 |
-| 683:10 | error | catch | module |  |
-| 689:50 | resolve | parameter | module/anonymous@689 | resolve |
+| 543:11 | page | const | module/anonymous@542 | await newPage(true) |
+| 544:11 | created | const | module/anonymous@542 | await post('/api/patients', { name: '아이폰합성수신', age: 75, sex: 'female' }) |
+| 545:11 | p | const | module/anonymous@542 | (await created.json()).patient |
+| 550:53 | el | parameter | module/anonymous@542/anonymous@550 | el |
+| 551:11 | connected | const | module/anonymous@542 | responseFor(page, '/api/patients/${p.id}/health-connections') |
+| 553:11 | connection | const | module/anonymous@542 | await (await connected).json() |
+| 555:11 | token | const | module/anonymous@542 | connection.token |
+| 556:11 | headers | const | module/anonymous@542 | { Authorization: 'Bearer ${token}', 'Content-Type': 'application/json' } |
+| 557:11 | identity | const | module/anonymous@542 | await (await fetch(base + '/api/health-sync/connection', { headers })).json() |
+| 560:11 | send | const | module/anonymous@542 | async (batchId, day) =&gt; { const response = await fetch(base + '/api/health-sync', { method: 'POST', headers, body: JSON.stringify( |
+| 560:25 | batchId | parameter | module/anonymous@542/anonymous@560 | batchId |
+| 560:34 | day | parameter | module/anonymous@542/anonymous@560 | day |
+| 561:13 | response | const | module/anonymous@542/anonymous@560 | await fetch(base + '/api/health-sync', { method: 'POST', headers, body: JSON.stringify({ batchId, timeZone: 'Asia/Seoul', days: [{ |
+| 566:11 | summary | const | module/anonymous@542 | await get('/api/patients/${p.id}/summary') |
+| 581:11 | page | const | module/anonymous@580 | await newPage() |
+| 582:11 | caps | const | module/anonymous@580 | await get('/api/capabilities') |
+| 583:9 | mode | let | module/anonymous@580 | 'missing' |
+| 583:27 | inferences | let | module/anonymous@580 | 0 |
+| 584:24 | request | parameter | module/anonymous@580/anonymous@584 | request |
+| 585:45 | route | parameter | module/anonymous@580/anonymous@585 | route |
+| 590:11 | length | const | module/anonymous@580 | await page.evaluate(() =&gt; history.length) |
+| 605:9 | analysisRequests | let | module/anonymous@603 | 0 |
+| 606:11 | listener | const | module/anonymous@603 | request =&gt; { if (request.url().endsWith('/photo-analyses')) analysisRequests++; } |
+| 606:22 | request | parameter | module/anonymous@603/anonymous@606 | request |
+| 616:11 | saving | const | module/anonymous@603 | responseFor(mobile, '/api/patients/${patient.id}/meals') |
+| 618:11 | response | const | module/anonymous@603 | await saving |
+| 619:11 | saved | const | module/anonymous@603 | (await response.json()).meal |
+| 629:11 | page | const | module/anonymous@628 | await newPage(true) |
+| 630:11 | proposal | const | module/anonymous@628 | { foodType: 'protein', foodLabel: '가상 제공자 두부 식사', foods: [{ name: '가상 두부' }], calories: 612, proteinGrams: 30.8, confidence: .7 } |
+| 631:9 | analysis | let | module/anonymous@628 | 초기값 없음 |
+| 632:9 | calls | let | module/anonymous@628 | 0 |
+| 633:64 | route | parameter | module/anonymous@628/anonymous@633 | route |
+| 635:13 | body | const | module/anonymous@628/anonymous@633 | route.request().postDataJSON() |
+| 652:11 | saving | const | module/anonymous@628 | responseFor(page, '/api/patients/${patient.id}/meals') |
+| 654:11 | response | const | module/anonymous@628 | await saving |
+| 655:11 | payload | const | module/anonymous@628 | response.request().postDataJSON() |
+| 658:11 | saved | const | module/anonymous@628 | (await response.json()).meal |
+| 669:11 | page | const | module/anonymous@668 | await newPage(true) |
+| 670:11 | pending | const | module/anonymous@668 | [] |
+| 671:64 | route | parameter | module/anonymous@668/anonymous@671 | route |
+| 672:11 | release | let | module/anonymous@668/anonymous@671 | 초기값 없음 |
+| 673:13 | held | const | module/anonymous@668/anonymous@671 | new Promise(resolve =&gt; { release = resolve; }) |
+| 673:32 | resolve | parameter | module/anonymous@668/anonymous@671/anonymous@673 | resolve |
+| 683:11 | changedImage | const | module/anonymous@668 | await page.evaluate(() =&gt; { const canvas = document.createElement('canvas'); canvas.width = canvas.height = 3; const context = can |
+| 683:60 | canvas | const | module/anonymous@668/anonymous@683 | document.createElement('canvas') |
+| 683:143 | context | const | module/anonymous@668/anonymous@683 | canvas.getContext('2d') |
+| 685:32 | image | parameter | module/anonymous@668/anonymous@685 | image |
+| 686:11 | late | const | module/anonymous@668 | page.waitForResponse(response =&gt; response.url().endsWith('/photo-analyses')) |
+| 686:39 | response | parameter | module/anonymous@668/anonymous@686 | response |
+| 690:11 | saving | const | module/anonymous@668 | responseFor(page, '/api/patients/${patient.id}/meals') |
+| 692:11 | savedResponse | const | module/anonymous@668 | await saving |
+| 701:25 | dialog | parameter | module/anonymous@668/anonymous@701 | dialog |
+| 703:11 | closedLate | const | module/anonymous@668 | page.waitForResponse(response =&gt; response.url().endsWith('/photo-analyses')) |
+| 703:45 | response | parameter | module/anonymous@668/anonymous@703 | response |
+| 712:11 | page | const | module/anonymous@711 | await newPage() |
+| 713:9 | calls | let | module/anonymous@711 | 0 |
+| 714:64 | route | parameter | module/anonymous@711/anonymous@714 | route |
+| 716:13 | body | const | module/anonymous@711/anonymous@714 | route.request().postDataJSON() |
+| 717:13 | analysis | const | module/anonymous@711/anonymous@714 | draft(patient.id, 'medication', { medications: [{ name: '가상 OCR 이름', strength: '10 mg', labelText: '&lt;img src=x onerror="window.__o |
+| 736:16 | selector | const | module/anonymous@711 | 초기값 없음 |
+| 744:10 | error | catch | module |  |
+| 750:50 | resolve | parameter | module/anonymous@750 | resolve |
 
 ## test/browser.mjs
 
@@ -2948,87 +3484,88 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 | 91:100 | t | parameter | module/anonymous@91 | t |
 | 92:9 | db | const | module/anonymous@91 | setup(t) |
 | 93:9 | original | const | module/anonymous@91 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
-| 97:7 | state | let | module/anonymous@91 | getHealthConnections(db, 'fixture-patient-a') |
-| 101:9 | replacement | const | module/anonymous@91 | createHealthConnection(db, 'fixture-patient-a', { platform: 'apple-health' }) |
-| 107:39 | item | parameter | module/anonymous@91/anonymous@107 | item |
-| 109:9 | other | const | module/anonymous@91 | createHealthConnection(db, 'fixture-patient-b', { platform: 'health-connect' }) |
-| 111:14 | invalid | const | module/anonymous@91 | 초기값 없음 |
-| 122:85 | t | parameter | module/anonymous@122 | t |
-| 123:9 | db | const | module/anonymous@122 | setup(t) |
-| 124:9 | connection | const | module/anonymous@122 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
-| 125:9 | original | const | module/anonymous@122 | receiveHealthBatch(db, connection.token, batch()) |
-| 126:9 | duplicate | const | module/anonymous@122 | receiveHealthBatch(db, connection.token, batch()) |
-| 135:9 | equivalent | const | module/anonymous@122 | receiveHealthBatch(db, connection.token, { days: [{ updatedAt: '2026-01-03T03:00:00Z', sleepMinutes: 420, steps: 2400, date: '2026 |
-| 139:99 | t | parameter | module/anonymous@139 | t |
-| 140:9 | db | const | module/anonymous@139 | setup(t) |
-| 141:9 | connection | const | module/anonymous@139 | createHealthConnection(db, 'fixture-patient-a', { platform: 'apple-health' }) |
-| 143:9 | old | const | module/anonymous@139 | receiveHealthBatch(db, connection.token, batch({ batchId: 'old', days: [day({ steps: 9000, updatedAt: '2026-01-03T02:59:59Z' })] } |
-| 146:9 | equal | const | module/anonymous@139 | receiveHealthBatch(db, connection.token, batch({ batchId: 'equal', days: [day({ steps: 5000, updatedAt: '2026-01-03T03:00:00Z' })] |
-| 148:9 | updated | const | module/anonymous@139 | receiveHealthBatch(db, connection.token, batch({ batchId: 'zero', days: [day({ steps: 0, sleepMinutes: null, updatedAt: '2026-01-0 |
-| 150:7 | record | let | module/anonymous@139 | healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0] |
-| 160:75 | t | parameter | module/anonymous@160 | t |
-| 161:9 | db | const | module/anonymous@160 | setup(t) |
-| 162:9 | connection | const | module/anonymous@160 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
-| 164:9 | newer | const | module/anonymous@160 | receiveHealthBatch(db, connection.token, batch({ batchId: 'nano-new', days: [day({ steps: 2, updatedAt: '2026-01-03T03:00:00.00000 |
-| 166:9 | older | const | module/anonymous@160 | receiveHealthBatch(db, connection.token, batch({ batchId: 'nano-old', days: [day({ steps: 3, updatedAt: '2026-01-03T12:00:00.00000 |
-| 171:90 | t | parameter | module/anonymous@171 | t |
-| 172:9 | db | const | module/anonymous@171 | setup(t) |
-| 173:9 | android | const | module/anonymous@171 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
-| 175:9 | apple | const | module/anonymous@171 | createHealthConnection(db, 'fixture-patient-a', { platform: 'apple-health' }) |
-| 178:9 | selected | const | module/anonymous@171 | healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31') |
-| 181:9 | state | const | module/anonymous@171 | getHealthConnections(db, 'fixture-patient-a') |
-| 182:41 | item | parameter | module/anonymous@171/anonymous@182 | item |
-| 190:98 | t | parameter | module/anonymous@190 | t |
-| 191:9 | db | const | module/anonymous@190 | setup(t) |
-| 192:9 | connection | const | module/anonymous@190 | createHealthConnection(db, 'fixture-patient-a', { platform: 'apple-health' }) |
-| 201:9 | first | const | module/anonymous@190 | revokeHealthConnection(db, 'fixture-patient-a', connection.connection.id) |
-| 202:9 | second | const | module/anonymous@190 | revokeHealthConnection(db, 'fixture-patient-a', connection.connection.id) |
-| 210:93 | t | parameter | module/anonymous@210 | t |
-| 211:9 | db | const | module/anonymous@210 | setup(t) |
-| 212:9 | connection | const | module/anonymous@210 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
-| 213:9 | invalidDays | const | module/anonymous@210 | [ day({ steps: -1 }), day({ steps: 100001 }), day({ steps: 1.5 }), day({ steps: '20' }), day({ steps: undefined }), day({ sleepMin |
-| 221:14 | invalid | const | module/anonymous@210 | 초기값 없음 |
-| 222:14 | input | const | module/anonymous@210 | 초기값 없음 |
-| 233:89 | t | parameter | module/anonymous@233 | t |
-| 234:9 | db | const | module/anonymous@233 | setup(t) |
-| 235:9 | connection | const | module/anonymous@233 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
-| 236:9 | days | const | module/anonymous@233 | Array.from({ length: 31 }, (_, index) =&gt; day({ date: '2026-01-${String(index + 1).padStart(2, '0')}' })) |
-| 236:44 | _ | parameter | module/anonymous@233/anonymous@236 | _ |
-| 236:47 | index | parameter | module/anonymous@233/anonymous@236 | index |
-| 237:9 | result | const | module/anonymous@233 | receiveHealthBatch(db, connection.token, batch({ days: [...days].reverse() })) |
-| 239:99 | row | parameter | module/anonymous@233/anonymous@239 | row |
-| 245:77 | t | parameter | module/anonymous@245 | t |
-| 246:9 | db | const | module/anonymous@245 | setup(t) |
-| 247:9 | connection | const | module/anonymous@245 | createHealthConnection(db, 'fixture-patient-a', { platform: 'apple-health' }) |
-| 250:14 | table | const | module/anonymous@245 | 초기값 없음 |
-| 255:89 | t | parameter | module/anonymous@255 | t |
-| 256:9 | directory | const | module/anonymous@255 | mkdtempSync(join(tmpdir(), 'homecare-health-fixture-')) |
-| 257:9 | filename | const | module/anonymous@255 | join(directory, 'fixture.sqlite') |
-| 259:9 | first | const | module/anonymous@255 | new DatabaseSync(filename) |
-| 262:9 | connection | const | module/anonymous@255 | createHealthConnection(first, 'fixture-patient-a', { platform: 'health-connect' }) |
-| 265:9 | second | const | module/anonymous@255 | new DatabaseSync(filename) |
-| 275:109 | t | parameter | module/anonymous@275 | t |
-| 276:9 | db | const | module/anonymous@275 | setup(t) |
-| 277:9 | connection | const | module/anonymous@275 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
-| 278:9 | stepsOnly | const | module/anonymous@275 | { date: '2026-01-02', steps: 0, updatedAt: '2026-01-03T03:00:00Z' } |
-| 279:9 | payload | const | module/anonymous@275 | batch({ days: [stepsOnly] }) |
-| 282:7 | record | let | module/anonymous@275 | healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0] |
-| 296:87 | t | parameter | module/anonymous@296 | t |
-| 297:9 | db | const | module/anonymous@296 | setup(t) |
-| 298:9 | connection | const | module/anonymous@296 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
-| 301:9 | mixed | const | module/anonymous@296 | receiveHealthBatch(db, connection.token, batch({ batchId: 'legacy-in-between', days: [day({ steps: 1, sleepMinutes: 360, updatedAt |
-| 303:7 | record | let | module/anonymous@296 | healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0] |
-| 306:9 | stale | const | module/anonymous@296 | receiveHealthBatch(db, connection.token, batch({ batchId: 'stale', days: [day()] })) |
-| 316:108 | t | parameter | module/anonymous@316 | t |
-| 317:9 | db | const | module/anonymous@316 | setup(t) |
-| 318:9 | connection | const | module/anonymous@316 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
-| 320:9 | oldNormalized | const | module/anonymous@316 | { batchId: 'fixture-1', timeZone: 'Asia/Seoul', days: [{ date: '2026-01-02', steps: 2400, sleepMinutes: 420, updatedAt: '2026-01-0 |
-| 324:9 | record | const | module/anonymous@316 | healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0] |
-| 334:115 | t | parameter | module/anonymous@334 | t |
-| 335:9 | db | const | module/anonymous@334 | setup(t) |
-| 336:9 | connection | const | module/anonymous@334 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
-| 337:9 | first | const | module/anonymous@334 | { date: '2026-01-01', steps: 10, updatedAt: '2026-01-03T03:00:00Z' } |
-| 338:14 | invalid | const | module/anonymous@334 | 초기값 없음 |
+| 94:9 | identity | const | module/anonymous@91 | getHealthConnectionIdentity(db, original.token) |
+| 99:7 | state | let | module/anonymous@91 | getHealthConnections(db, 'fixture-patient-a') |
+| 103:9 | replacement | const | module/anonymous@91 | createHealthConnection(db, 'fixture-patient-a', { platform: 'apple-health' }) |
+| 109:39 | item | parameter | module/anonymous@91/anonymous@109 | item |
+| 111:9 | other | const | module/anonymous@91 | createHealthConnection(db, 'fixture-patient-b', { platform: 'health-connect' }) |
+| 113:14 | invalid | const | module/anonymous@91 | 초기값 없음 |
+| 124:85 | t | parameter | module/anonymous@124 | t |
+| 125:9 | db | const | module/anonymous@124 | setup(t) |
+| 126:9 | connection | const | module/anonymous@124 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
+| 127:9 | original | const | module/anonymous@124 | receiveHealthBatch(db, connection.token, batch()) |
+| 128:9 | duplicate | const | module/anonymous@124 | receiveHealthBatch(db, connection.token, batch()) |
+| 137:9 | equivalent | const | module/anonymous@124 | receiveHealthBatch(db, connection.token, { days: [{ updatedAt: '2026-01-03T03:00:00Z', sleepMinutes: 420, steps: 2400, date: '2026 |
+| 141:99 | t | parameter | module/anonymous@141 | t |
+| 142:9 | db | const | module/anonymous@141 | setup(t) |
+| 143:9 | connection | const | module/anonymous@141 | createHealthConnection(db, 'fixture-patient-a', { platform: 'apple-health' }) |
+| 145:9 | old | const | module/anonymous@141 | receiveHealthBatch(db, connection.token, batch({ batchId: 'old', days: [day({ steps: 9000, updatedAt: '2026-01-03T02:59:59Z' })] } |
+| 148:9 | equal | const | module/anonymous@141 | receiveHealthBatch(db, connection.token, batch({ batchId: 'equal', days: [day({ steps: 5000, updatedAt: '2026-01-03T03:00:00Z' })] |
+| 150:9 | updated | const | module/anonymous@141 | receiveHealthBatch(db, connection.token, batch({ batchId: 'zero', days: [day({ steps: 0, sleepMinutes: null, updatedAt: '2026-01-0 |
+| 152:7 | record | let | module/anonymous@141 | healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0] |
+| 162:75 | t | parameter | module/anonymous@162 | t |
+| 163:9 | db | const | module/anonymous@162 | setup(t) |
+| 164:9 | connection | const | module/anonymous@162 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
+| 166:9 | newer | const | module/anonymous@162 | receiveHealthBatch(db, connection.token, batch({ batchId: 'nano-new', days: [day({ steps: 2, updatedAt: '2026-01-03T03:00:00.00000 |
+| 168:9 | older | const | module/anonymous@162 | receiveHealthBatch(db, connection.token, batch({ batchId: 'nano-old', days: [day({ steps: 3, updatedAt: '2026-01-03T12:00:00.00000 |
+| 173:90 | t | parameter | module/anonymous@173 | t |
+| 174:9 | db | const | module/anonymous@173 | setup(t) |
+| 175:9 | android | const | module/anonymous@173 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
+| 177:9 | apple | const | module/anonymous@173 | createHealthConnection(db, 'fixture-patient-a', { platform: 'apple-health' }) |
+| 180:9 | selected | const | module/anonymous@173 | healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31') |
+| 183:9 | state | const | module/anonymous@173 | getHealthConnections(db, 'fixture-patient-a') |
+| 184:41 | item | parameter | module/anonymous@173/anonymous@184 | item |
+| 192:98 | t | parameter | module/anonymous@192 | t |
+| 193:9 | db | const | module/anonymous@192 | setup(t) |
+| 194:9 | connection | const | module/anonymous@192 | createHealthConnection(db, 'fixture-patient-a', { platform: 'apple-health' }) |
+| 203:9 | first | const | module/anonymous@192 | revokeHealthConnection(db, 'fixture-patient-a', connection.connection.id) |
+| 204:9 | second | const | module/anonymous@192 | revokeHealthConnection(db, 'fixture-patient-a', connection.connection.id) |
+| 212:93 | t | parameter | module/anonymous@212 | t |
+| 213:9 | db | const | module/anonymous@212 | setup(t) |
+| 214:9 | connection | const | module/anonymous@212 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
+| 215:9 | invalidDays | const | module/anonymous@212 | [ day({ steps: -1 }), day({ steps: 100001 }), day({ steps: 1.5 }), day({ steps: '20' }), day({ steps: undefined }), day({ sleepMin |
+| 223:14 | invalid | const | module/anonymous@212 | 초기값 없음 |
+| 224:14 | input | const | module/anonymous@212 | 초기값 없음 |
+| 235:89 | t | parameter | module/anonymous@235 | t |
+| 236:9 | db | const | module/anonymous@235 | setup(t) |
+| 237:9 | connection | const | module/anonymous@235 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
+| 238:9 | days | const | module/anonymous@235 | Array.from({ length: 31 }, (_, index) =&gt; day({ date: '2026-01-${String(index + 1).padStart(2, '0')}' })) |
+| 238:44 | _ | parameter | module/anonymous@235/anonymous@238 | _ |
+| 238:47 | index | parameter | module/anonymous@235/anonymous@238 | index |
+| 239:9 | result | const | module/anonymous@235 | receiveHealthBatch(db, connection.token, batch({ days: [...days].reverse() })) |
+| 241:99 | row | parameter | module/anonymous@235/anonymous@241 | row |
+| 247:77 | t | parameter | module/anonymous@247 | t |
+| 248:9 | db | const | module/anonymous@247 | setup(t) |
+| 249:9 | connection | const | module/anonymous@247 | createHealthConnection(db, 'fixture-patient-a', { platform: 'apple-health' }) |
+| 252:14 | table | const | module/anonymous@247 | 초기값 없음 |
+| 257:89 | t | parameter | module/anonymous@257 | t |
+| 258:9 | directory | const | module/anonymous@257 | mkdtempSync(join(tmpdir(), 'homecare-health-fixture-')) |
+| 259:9 | filename | const | module/anonymous@257 | join(directory, 'fixture.sqlite') |
+| 261:9 | first | const | module/anonymous@257 | new DatabaseSync(filename) |
+| 264:9 | connection | const | module/anonymous@257 | createHealthConnection(first, 'fixture-patient-a', { platform: 'health-connect' }) |
+| 267:9 | second | const | module/anonymous@257 | new DatabaseSync(filename) |
+| 277:109 | t | parameter | module/anonymous@277 | t |
+| 278:9 | db | const | module/anonymous@277 | setup(t) |
+| 279:9 | connection | const | module/anonymous@277 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
+| 280:9 | stepsOnly | const | module/anonymous@277 | { date: '2026-01-02', steps: 0, updatedAt: '2026-01-03T03:00:00Z' } |
+| 281:9 | payload | const | module/anonymous@277 | batch({ days: [stepsOnly] }) |
+| 284:7 | record | let | module/anonymous@277 | healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0] |
+| 298:87 | t | parameter | module/anonymous@298 | t |
+| 299:9 | db | const | module/anonymous@298 | setup(t) |
+| 300:9 | connection | const | module/anonymous@298 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
+| 303:9 | mixed | const | module/anonymous@298 | receiveHealthBatch(db, connection.token, batch({ batchId: 'legacy-in-between', days: [day({ steps: 1, sleepMinutes: 360, updatedAt |
+| 305:7 | record | let | module/anonymous@298 | healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0] |
+| 308:9 | stale | const | module/anonymous@298 | receiveHealthBatch(db, connection.token, batch({ batchId: 'stale', days: [day()] })) |
+| 318:108 | t | parameter | module/anonymous@318 | t |
+| 319:9 | db | const | module/anonymous@318 | setup(t) |
+| 320:9 | connection | const | module/anonymous@318 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
+| 322:9 | oldNormalized | const | module/anonymous@318 | { batchId: 'fixture-1', timeZone: 'Asia/Seoul', days: [{ date: '2026-01-02', steps: 2400, sleepMinutes: 420, updatedAt: '2026-01-0 |
+| 326:9 | record | const | module/anonymous@318 | healthDailyForPatient(db, 'fixture-patient-a', '2026-01-01', '2026-01-31')[0] |
+| 336:115 | t | parameter | module/anonymous@336 | t |
+| 337:9 | db | const | module/anonymous@336 | setup(t) |
+| 338:9 | connection | const | module/anonymous@336 | createHealthConnection(db, 'fixture-patient-a', { platform: 'health-connect' }) |
+| 339:9 | first | const | module/anonymous@336 | { date: '2026-01-01', steps: 10, updatedAt: '2026-01-03T03:00:00Z' } |
+| 340:14 | invalid | const | module/anonymous@336 | 초기값 없음 |
 
 ## test/medications.test.mjs
 
@@ -3129,6 +3666,7 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 | 7:44 | markAnalysisApplied | import | module | ../lib/vision.mjs |
 | 7:65 | resolveMealAnalysis | import | module | ../lib/vision.mjs |
 | 7:86 | visionCapabilities | import | module | ../lib/vision.mjs |
+| 7:106 | checkVisionAccess | import | module | ../lib/vision.mjs |
 | 8:10 | openDatabase | import | module | ../lib/db.mjs |
 | 8:24 | seedDatabase | import | module | ../lib/db.mjs |
 | 9:10 | resetDemo | import | module | ../lib/reset.mjs |
@@ -3277,3 +3815,16 @@ Kotlin/Java 소스 선언 참고 목록(정규식 인덱스, 컴파일러 검증
 | 391:41 | resolve | parameter | module/anonymous@383/anonymous@391 | resolve |
 | 392:11 | pending | const | module/anonymous@383 | analyzePhoto({ db, patientId: 'p001', body: { kind: 'meal', imageData: png, consentExternalProcessing: true }, env: enabledEnv, fe |
 | 396:27 | resolve | parameter | module/anonymous@383/anonymous@394/anonymous@396 | resolve |
+| 417:7 | calls | let | module/anonymous@416 | 0 |
+| 418:9 | fetchImpl | const | module/anonymous@416 | async (url, request) =&gt; { calls++; assert.equal(url, 'https://api.openai.com/v1/models/gpt-4.1-mini'); assert.equal(request.body,  |
+| 418:28 | url | parameter | module/anonymous@416/anonymous@418 | url |
+| 418:33 | request | parameter | module/anonymous@416/anonymous@418 | request |
+| 429:9 | ready | const | module/anonymous@416 | await checkVisionAccess({ env: enabledEnv, fetchImpl }) |
+| 431:15 | status | const | module/anonymous@416 | 초기값 없음 |
+| 431:23 | reason | const | module/anonymous@416 | 초기값 없음 |
+| 432:11 | result | const | module/anonymous@416 | await checkVisionAccess({ env: enabledEnv, fetchImpl: async () =&gt; new Response('do not expose provider details', { status }) }) |
+| 439:119 | t | parameter | module/anonymous@439 | t |
+| 440:15 | status | const | module/anonymous@439 | 초기값 없음 |
+| 440:23 | text | const | module/anonymous@439 | 초기값 없음 |
+| 441:11 | db | const | module/anonymous@439 | database(t) |
+| 442:126 | error | parameter | module/anonymous@439/anonymous@442 | error |

@@ -232,7 +232,8 @@ test('automation APIs migrate an original DB and preserve medication and health 
     assert.ok(!JSON.stringify(listed).includes(token), 'GET connections never returns a secret');
     assert.ok(!JSON.stringify(listed).includes('token_hash'), 'GET connections never returns token hashes');
     const identity = await request('/api/health-sync/connection', { token });
-    assert.deepEqual(identity, { connectionId: connection.id, patientId: healthPatient.id, platform: 'health-connect', partialMetrics: true, selected: true });
+    assert.ok(Math.abs(Date.now() - Date.parse(identity.serverTime)) < 2000);
+    assert.deepEqual(identity, { connectionId: connection.id, patientId: healthPatient.id, platform: 'health-connect', partialMetrics: true, selected: true, serverTime: identity.serverTime });
     await request('/api/health-sync/connection', { status: 401 });
     const revision = new Date(Date.now() - 600000).toISOString();
     const body = { batchId: 'first-fixture-batch', timeZone: 'Asia/Seoul', days: [{ date: today, steps: 9876, sleepMinutes: 390, updatedAt: revision }, { date: yesterday, steps: 3000, sleepMinutes: 360, updatedAt: revision }] };

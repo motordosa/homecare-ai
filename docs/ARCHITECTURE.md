@@ -2,6 +2,8 @@
 
 ## 실행 구조
 
+v0.5: iPhone 우선 iOS HealthKit 연결 앱을 integrations/ios에 추가한다. 수집 없는 모바일 웹·기존 Node/SQLite·Android 경로는 유지한다. GPT_ACTIVATION/IOS_CONNECTOR의 계약을 먼저 따른다. 외부 API 키와 Apple 설치 서명은 서로 다른 선행조건이다.
+
 Node.js 24 단일 HTTP 서버 + SQLite + `public/`의 모바일/데스크톱 웹이다. 기존 서버·DB는 유지하고 복약/사진 분석/건강 수신을 독립 모듈로 추가한다. 외부 AI 키는 서버에서만 사용한다. 브라우저에는 공개 가능 여부만 전달한다.
 
 | 구성 | 책임 |

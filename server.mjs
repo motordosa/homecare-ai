@@ -9,7 +9,7 @@ import { resetDemo } from './lib/reset.mjs';
 import { allowedKeys, choice, csvCell, dateValue, decodeImage, HttpError, numberValue, objectBody, textList, textValue } from './lib/validation.mjs';
 import { ensureMedicationSchema, getMedicationOrders, createMedicationOrder, endMedicationOrder, medicationSchedule, saveMedicationEvent, getMedicationEvents } from './lib/medications.mjs';
 import { ensureVisionSchema, visionCapabilities, analyzePhoto, resolveMealAnalysis, markAnalysisApplied } from './lib/vision.mjs';
-import { ensureHealthSchema, getHealthConnections, createHealthConnection, revokeHealthConnection, receiveHealthBatch, getHealthConnectionIdentity } from './lib/health-sync.mjs';
+import { healthCapabilities, ensureHealthSchema, getHealthConnections, createHealthConnection, revokeHealthConnection, receiveHealthBatch, getHealthConnectionIdentity } from './lib/health-sync.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const publicDir = join(root, 'public');
@@ -184,7 +184,7 @@ const server = http.createServer(async (req, res) => {
     if (path === '/api/health' && method === 'GET') return respond(res, 200, health());
     if (path === '/api/capabilities' && method === 'GET') return respond(res, 200, {
       vision: visionCapabilities(process.env),
-      health: { webDirectCollection: false, nativeBridge: { implemented: false, verified: false }, preferredPlatform: 'health-connect', partialMetrics: true },
+      health: healthCapabilities(),
       medications: { perDose: true, clinicianPlans: true },
     });
     if (path === '/api/health-sync/connection' && method === 'GET') {

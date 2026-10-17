@@ -4,7 +4,7 @@
 
 사용자가 제공한 배포 주소: [시작 화면](https://homecare-ai-demo.onrender.com) · [환자 모바일 화면](https://homecare-ai-demo.onrender.com/patient?patientId=p001) · [의료진 데스크톱 화면](https://homecare-ai-demo.onrender.com/clinician?patientId=p001). 무료 서버의 데이터 보존 조건과 점검 방법은 [배포 안내](DEPLOY_RENDER.md)에 있습니다.
 
-새 버전 반영 후 [직접 사용·인수 확인 순서](docs/DEMO_ACCEPTANCE.md)로 메뉴, 약별 복약, 사진 분석과 Android 연결을 차례로 확인할 수 있습니다.
+새 버전 반영 후 [직접 사용·인수 확인 순서](docs/DEMO_ACCEPTANCE.md)로 메뉴, 약별 복약, 사진 분석과 iPhone 우선 건강 연결을 차례로 확인할 수 있습니다.
 
 ## 실행
 
@@ -46,11 +46,12 @@ npm start
 | 식사 사진 AI | 실제 제공자 어댑터·분석 초안·환자 섭취 확인·출처 저장 | 서버 API 키/활성화, 실제 사진 정확도 검증 |
 | 약 사진 보조 | 약봉투/포장 OCR 후보·의료진 대조 확인 | 알약 외형 확정·자동 처방·복용 증명 기능 아님 |
 | 건강 자료 수신 | 일부 권한·항목별 갱신·일별 집계·수정/중복 방지·출처별 표시 | 실제 네이티브 앱·권한·기기 검증 |
+| iPhone·Apple Health | [연결 앱 소스·설치 안내](integrations/ios/README.md), HealthKit 경로 | Apple 팀 서명·설치·권한·실기기 검증 필요 |
 | Android·갤럭시 워치 | [연결 앱과 실제 APK 빌드 결과](integrations/android/README.md), Health Connect 경로 | 설치·삼성 헬스 공유·권한·실기기 검증은 별도 |
 
 기존 개요의 복약 점수는 **일일 자기보고**입니다. 새 약별 일정·회차는 **복약 계획/복약 기록**에서 별도로 확인합니다. 레거시 참고 메모에서 약과 용량을 자동 생성하지 않습니다.
 
-사진 분석은 기본 꺼져 있습니다. 서버에 `HOMECARE_VISION_API_KEY`, `VISION_ENABLED=true`, `VISION_MODEL=gpt-4.1-mini`를 설정해야 합니다. 키를 브라우저나 Git에 넣지 마세요. `/api/capabilities`가 설정 여부를 알려줍니다. 외부 전송 동의 후 사진을 분석하고, 환자의 섭취 확인 또는 의료진 대조를 거친 뒤 저장합니다. API 비용은 무료 Render 호스팅과 별개이며 현재 실제 제공자 정확도 검증을 마쳤다는 뜻이 아닙니다.
+사진 분석은 서버 키와 활성화 설정이 모두 필요합니다. 새 Render Blueprint는 활성화 flag와 모델을 지정하며 기존 서비스에는 Environment에서 직접 설정해야 합니다. 서버에 `HOMECARE_VISION_API_KEY`, `VISION_ENABLED=true`, `VISION_MODEL=gpt-4.1-mini`를 설정해야 합니다. 키를 브라우저나 Git에 넣지 마세요. `/api/capabilities`와 의료진의 데모 설정 화면에서 준비 상태를 확인할 수 있습니다. `npm run ai:check`는 사진 없이 모델 API 접근을 검사하고, `-- --image /path/meal.jpg`를 추가하면 선택 사진의 실제 유료 추론을 검사합니다. [GPT 활성화 안내](docs/GPT_ACTIVATION.md)를 따릅니다. 외부 전송 동의 후 사진을 분석하고, 환자의 섭취 확인 또는 의료진 대조를 거친 뒤 저장합니다. API 비용은 무료 Render 호스팅과 별개이며 현재 실제 제공자 정확도 검증을 마쳤다는 뜻이 아닙니다.
 
 ## 데이터 초기화
 

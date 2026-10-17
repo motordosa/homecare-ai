@@ -472,7 +472,7 @@ try {
     };
     await patientPage(mobile, patient.id, '&view=connections');
     await mobile.locator('#connection-list .empty-state-card').waitFor({ state: 'visible' });
-    assert.ok((await mobile.locator('#view-connections .connection-help').innerText()).includes('직접 읽지 않아요'));
+    assert.ok((await mobile.locator('#view-connections .connection-help.inline-notice').innerText()).includes('Safari만으로는 건강 기록을 읽지 못해요'));
     await mobile.locator('.connection-setup summary').click();
     await mobile.locator('#connection-label').fill('브라우저 연결 검증');
     await mobile.locator('#connection-create').click();
@@ -537,6 +537,67 @@ try {
     await mobile.locator('#daily-steps').fill('');
     await saveDaily(mobile, fixturePatient.id, { date: today, steps: null });
     assert.equal((await get(`${path}/summary`)).todayRecord.steps, 1200);
+  });
+
+  await check('iPhone is the default connector and Apple Health fixtures reach the web without clearing unrelated metrics', async () => {
+    const page = await newPage(true);
+    const created = await post('/api/patients', { name: '아이폰합성수신', age: 75, sex: 'female' });
+    const p = (await created.json()).patient;
+    await patientPage(page, p.id, '&view=connections');
+    assert.equal(await page.locator('#connection-platform').inputValue(), 'apple-health');
+    await page.locator('#iphone-connection-guide summary').click();
+    assert.ok((await page.locator('#iphone-connection-guide').innerText()).includes('Xcode'));
+    await page.locator('#connection-form').evaluate(el => el.closest('details').open = true);
+    const connected = responseFor(page, `/api/patients/${p.id}/health-connections`);
+    await page.locator('#connection-create').click();
+    const connection = await (await connected).json();
+    assert.equal(connection.connection.platform, 'apple-health');
+    const token = connection.token;
+    const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+    const identity = await (await fetch(base + '/api/health-sync/connection', { headers })).json();
+    assert.equal(identity.platform, 'apple-health');
+    assert.ok(Number.isFinite(Date.parse(identity.serverTime)));
+    const send = async (batchId, day) => {
+      const response = await fetch(base + '/api/health-sync', { method: 'POST', headers, body: JSON.stringify({ batchId, timeZone: 'Asia/Seoul', days: [{ date: today, ...day }] }) });
+      assert.equal(response.status, 200); return response.json();
+    };
+    await send('ios-sleep-fixture', { sleepMinutes: 420, updatedAt: new Date(Date.now() - 120000).toISOString() });
+    await send('ios-steps-fixture', { steps: 4321, updatedAt: identity.serverTime });
+    const summary = await get(`/api/patients/${p.id}/summary`);
+    assert.equal(summary.todayRecord.stepsSource, 'apple-health');
+    assert.equal(summary.todayRecord.sleepHours, 7);
+    assert.equal(summary.todayRecord.sleepSource, 'apple-health');
+    await page.reload(); await ready(page); await settledPatient(page);
+    await page.locator('.connection-status.connected').waitFor();
+    assert.ok((await page.locator('#connection-list').innerText()).includes('마지막 수신'));
+    await page.locator('#patient-view-close').click();
+    assert.ok((await page.locator('#today-metrics [data-action=steps]').innerText()).includes('4,321'));
+    assert.ok((await page.locator('#today-metrics [data-action=sleep]').innerText()).includes('Apple'));
+    assert.equal(new URL(page.url()).searchParams.get('patientId'), p.id);
+    await page.close();
+  });
+
+  await check('clinician GPT setup shows missing, ready and unavailable states and never sends a paid analysis request', async () => {
+    const page = await newPage();
+    const caps = await get('/api/capabilities');
+    let mode = 'missing', inferences = 0;
+    page.on('request', request => { if (request.url().endsWith('/photo-analyses')) inferences++; });
+    await page.route('**/api/capabilities', route => mode === 'error'
+      ? route.fulfill({ status: 503, json: { error: 'fixture-unavailable' } })
+      : route.fulfill({ json: { ...caps, vision: { ...caps.vision, enabled: true, configured: mode === 'ready', available: mode === 'ready', reasonCode: mode === 'ready' ? 'ready' : 'missing_key' } } }));
+    await page.goto(`${base}/clinician?view=settings`); await ready(page);
+    assert.ok((await page.locator('#vision-config-status').innerText()).includes('API 키 설정 필요'));
+    const length = await page.evaluate(() => history.length);
+    mode = 'ready'; await page.locator('[data-action=check-integrations]').click();
+    await page.waitForFunction(() => document.querySelector('#vision-config-status')?.textContent.includes('설정 준비됨'));
+    assert.ok((await page.locator('#integration-settings').innerText()).includes('실제 인증'));
+    mode = 'error'; await page.locator('[data-action=check-integrations]').click();
+    await page.waitForFunction(() => document.querySelector('#vision-config-status')?.textContent.includes('조회 실패'));
+    mode = 'ready'; await page.locator('[data-action=check-integrations]').click();
+    await page.waitForFunction(() => document.querySelector('#vision-config-status')?.textContent.includes('설정 준비됨'));
+    assert.equal(inferences, 0);
+    assert.equal(await page.evaluate(() => history.length), length);
+    await page.close();
   });
 
   await check('unconfigured photo AI offers a working manual meal path and makes no analysis request', async () => {

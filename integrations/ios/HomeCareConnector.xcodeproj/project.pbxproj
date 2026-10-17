@@ -1,0 +1,33 @@
+// !$*UTF8*$!
+{ archiveVersion = 1; classes = {}; objectVersion = 56; objects = {
+6D782E512577C3F6D2E2BEA9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Core/SyncPayload.swift"; sourceTree = "<group>"; };
+CC3F9554F91CEA06ED0B5546 = { isa = PBXBuildFile; fileRef = 6D782E512577C3F6D2E2BEA9; };
+9E562565414D8C208008D73D = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Core/ConnectorAPI.swift"; sourceTree = "<group>"; };
+E450BDB7F95BE31F0A4BD50C = { isa = PBXBuildFile; fileRef = 9E562565414D8C208008D73D; };
+CC9B56699ACB57488BD7C154 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "App/HealthReader.swift"; sourceTree = "<group>"; };
+874B6860F2044E7B57F47E76 = { isa = PBXBuildFile; fileRef = CC9B56699ACB57488BD7C154; };
+E467170176617B7D84385A45 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "App/SecureStore.swift"; sourceTree = "<group>"; };
+8AEB6FCFB238BBE3B5D9929E = { isa = PBXBuildFile; fileRef = E467170176617B7D84385A45; };
+6FC91FD1E295856A1A907DBB = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "App/ConnectorModel.swift"; sourceTree = "<group>"; };
+B8B2C1FA03BFA590E2BFADD4 = { isa = PBXBuildFile; fileRef = 6FC91FD1E295856A1A907DBB; };
+2C6C4A2F9F24C847A4EE7508 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "App/ContentView.swift"; sourceTree = "<group>"; };
+DBCE6332A61BC94D7302B0BE = { isa = PBXBuildFile; fileRef = 2C6C4A2F9F24C847A4EE7508; };
+A570193CCC55715A65A6B1D6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "App/HomeCareConnectorApp.swift"; sourceTree = "<group>"; };
+E48FB4F4E1207B784CEAF7E2 = { isa = PBXBuildFile; fileRef = A570193CCC55715A65A6B1D6; };
+215397DFD1E1433C14B1A7EE = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App/Info.plist"; sourceTree = "<group>"; };
+432F120C96A84635AB4E7CC6 = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App/HomeCareConnector.entitlements"; sourceTree = "<group>"; };
+A8792157CB4F27FB949C035F = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HomeCareConnector.app; sourceTree = BUILT_PRODUCTS_DIR; };
+0A3E27B8CA818264D75C8D81 = { isa = PBXGroup; children = (A8792157CB4F27FB949C035F); name = Products; sourceTree = "<group>"; };
+AD936FCBED631FA67E05C3EA = { isa = PBXGroup; children = (6D782E512577C3F6D2E2BEA9,9E562565414D8C208008D73D,CC9B56699ACB57488BD7C154,E467170176617B7D84385A45,6FC91FD1E295856A1A907DBB,2C6C4A2F9F24C847A4EE7508,A570193CCC55715A65A6B1D6,215397DFD1E1433C14B1A7EE,432F120C96A84635AB4E7CC6,0A3E27B8CA818264D75C8D81); sourceTree = "<group>"; };
+878A52FC5FF6A57D50B7B870 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (CC3F9554F91CEA06ED0B5546,E450BDB7F95BE31F0A4BD50C,874B6860F2044E7B57F47E76,8AEB6FCFB238BBE3B5D9929E,B8B2C1FA03BFA590E2BFADD4,DBCE6332A61BC94D7302B0BE,E48FB4F4E1207B784CEAF7E2); runOnlyForDeploymentPostprocessing = 0; };
+41D311A605520FC7B8B9A980 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+E2AA269EB967A8853A258BFA = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+DFC1D21D28438E531F817435 = { isa = XCBuildConfiguration; buildSettings = { CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; IPHONEOS_DEPLOYMENT_TARGET = 16.0; SDKROOT = iphoneos; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG; }; name = Debug; };
+B00CCDD09424E369308D67FA = { isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_ENTITLEMENTS = App/HomeCareConnector.entitlements; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = App/Info.plist; MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = ai.homecare.connector.ios; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; SWIFT_STRICT_CONCURRENCY = targeted; TARGETED_DEVICE_FAMILY = 1; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; }; name = Debug; };
+A1E97C491A309D8FE8E303CF = { isa = XCBuildConfiguration; buildSettings = { CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; IPHONEOS_DEPLOYMENT_TARGET = 16.0; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; SWIFT_OPTIMIZATION_LEVEL = "-O"; }; name = Release; };
+1B104479E55E37CF8A63CBDF = { isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_ENTITLEMENTS = App/HomeCareConnector.entitlements; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = App/Info.plist; MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = ai.homecare.connector.ios; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; SWIFT_STRICT_CONCURRENCY = targeted; TARGETED_DEVICE_FAMILY = 1; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; }; name = Release; };
+C9685CF302D88B7835380DBE = { isa = XCConfigurationList; buildConfigurations = (DFC1D21D28438E531F817435,A1E97C491A309D8FE8E303CF); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+06CB67C35A91E16DBD17B949 = { isa = XCConfigurationList; buildConfigurations = (B00CCDD09424E369308D67FA,1B104479E55E37CF8A63CBDF); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+34A04005BCAF206EEC990BD9 = { isa = PBXNativeTarget; buildConfigurationList = 06CB67C35A91E16DBD17B949; buildPhases = (878A52FC5FF6A57D50B7B870,E2AA269EB967A8853A258BFA,41D311A605520FC7B8B9A980); buildRules = (); dependencies = (); name = HomeCareConnector; productName = HomeCareConnector; productReference = A8792157CB4F27FB949C035F; productType = "com.apple.product-type.application"; };
+244210E48437B6556980A702 = { isa = PBXProject; attributes = { LastUpgradeCheck = 1600; TargetAttributes = { 34A04005BCAF206EEC990BD9 = { CreatedOnToolsVersion = 16.0; SystemCapabilities = { com.apple.HealthKit = { enabled = 1; }; }; }; }; }; buildConfigurationList = C9685CF302D88B7835380DBE; compatibilityVersion = "Xcode 14.0"; developmentRegion = ko; hasScannedForEncodings = 0; knownRegions = (ko,en,Base); mainGroup = AD936FCBED631FA67E05C3EA; productRefGroup = 0A3E27B8CA818264D75C8D81; projectDirPath = ""; projectRoot = ""; targets = (34A04005BCAF206EEC990BD9); };
+}; rootObject = 244210E48437B6556980A702; }

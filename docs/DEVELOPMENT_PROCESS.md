@@ -6,13 +6,13 @@
 2. 설계 변경이 필요하면 CHANGELOG에 결정·이유·대안·영향을 먼저 기록한다. API/DB/화면/분석 의미가 바뀌면 CONTRACTS와 DATA_DICTIONARY를 먼저 갱신한다.
 3. 경로·payload·상태·단위·출처·호환성·실패/취소/중복/재시도 조건을 확정한 뒤 코드 변경을 시작한다. 외부 자격증명이나 실제 기기가 필요하면 구현과 실제 검증 범위를 나눈다.
 
-   화면은 SCREEN_SPEC의 **화면ID→진입→상단/하단→닫기 목적지→입력/조회→오류/미저장/저장 중→코드→인수조건**을 먼저 완성한다. 공통 셸은 단일 registry/공통 함수로 구현하며 화면별 임의 메뉴를 만들지 않는다. docs:check는 registry·HTML·문서 화면ID도 대조한다. 스마트폰 변경은 SMARTPHONE_SYNC_SPEC를 먼저 갱신하고 Android CI에서 `testDebugUnitTest`도 실행한다.
+   화면은 SCREEN_SPEC의 **화면ID→진입→상단/하단→닫기 목적지→입력/조회→오류/미저장/저장 중→코드→인수조건**을 먼저 완성한다. 공통 셸은 단일 registry/공통 함수로 구현하며 화면별 임의 메뉴를 만들지 않는다. docs:check는 registry·HTML·문서 화면ID도 대조한다. 스마트폰 변경은 SMARTPHONE_SYNC_SPEC와 아이폰 우선 IOS_CONNECTOR를 먼저 갱신하고 Android CI에서 `testDebugUnitTest`도 실행한다.
 4. 작은 단위로 구현한다. 같은 파일을 여러 작업자가 동시에 바꾸지 않도록 담당 파일을 정하고 통합자는 공통 라우트/스키마/요약을 조립한다.
 5. 임시 DB에서 관련 API/회귀·브라우저 테스트를 수행한다. 마이그레이션은 기존 v1 DB 보존/재시작/빈 DB/명시적 reset도 검사한다.
 6. 변수 목록을 재생성하고 문서/계약/테스트 연결과 diff를 확인한다. 완료/실패/미실행/자격증명·기기 대기를 분리해 CHANGELOG에 기록한다.
 7. 배포 전 무료 서버의 DB 유실 가능성과 내보내기 한계를 확인한다. 변경이 Git에 저장된 상태와 실제 공개 배포 버전을 구별한다. 공개 검증은 GET 먼저, 필요한 쓰기는 본인이 만든 임시 자료만 정리한다.
 
-저장소 CI는 `npm run docs:check`, `npm test`, 기존 및 자동화 브라우저 검사, 별도 Android job의 `assembleDebug`·`lintDebug`를 수행하도록 구성한다. Android는 JDK17/Gradle8.11.1/SDK36·build-tools35.0.0을 명시한다. 변수 목록이 오래되면 실패한다. CI 정의를 저장한 것과 GitHub에서 실제 실행·통과한 것을 구별한다. 기획·의료적 의미의 일치와 실제 기기 검증은 CI만으로 증명할 수 없으므로 PR 양식의 요구사항/계약/검증/배포 기록으로 함께 검토한다.
+저장소 CI는 `npm run docs:check`, `npm test`, 기존 및 자동화 브라우저 검사, 별도 Android job의 `assembleDebug`·`lintDebug`를 수행하도록 구성한다. Android는 JDK17/Gradle8.11.1/SDK36·build-tools35.0.0을 명시한다. 별도 macOS iOS job에서 production Swift core와 unsigned simulator 앱 빌드를 검사하며 기기 서명·설치·HealthKit 실수신과 구별한다. 변수 목록이 오래되면 실패한다. CI 정의를 저장한 것과 GitHub에서 실제 실행·통과한 것을 구별한다. 기획·의료적 의미의 일치와 실제 기기 검증은 CI만으로 증명할 수 없으므로 PR 양식의 요구사항/계약/검증/배포 기록으로 함께 검토한다.
 
 ## 기획 변경 기록 양식
 

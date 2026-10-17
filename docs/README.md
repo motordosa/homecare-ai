@@ -1,6 +1,6 @@
 # 개발 문서의 기준과 사용 순서
 
-문서 기준: 2026-10-17 KST, 변경 계획 v0.4. 구현 상태의 최종 근거는 CHANGELOG의 검증 결과다.
+문서 기준: 2026-10-17 KST, 변경 계획 v0.5. 구현 상태의 최종 근거는 CHANGELOG의 검증 결과다.
 
 | 문서 | 책임 |
 |---|---|
@@ -13,7 +13,9 @@
 | [DATA_DICTIONARY.md](DATA_DICTIONARY.md) | 핵심 변수·DB·설정의 의미와 소유권 |
 | [DEVELOPMENT_PROCESS.md](DEVELOPMENT_PROCESS.md) | 기획 변경→계약 변경→개발→검증→배포 절차 |
 | [CHANGELOG.md](CHANGELOG.md) | 의사결정, 구현/미구현, 검증/미검증 기록 |
-| [ANDROID_CONNECTOR.md](ANDROID_CONNECTOR.md) | Android·갤럭시 워치 우선 연결 경로와 실기기 완료 기준 |
+| [ANDROID_CONNECTOR.md](ANDROID_CONNECTOR.md) | 기존 Android·갤럭시 워치 연결 경로와 실기기 완료 기준 |
+| [IOS_CONNECTOR.md](IOS_CONNECTOR.md) | 최신 우선순위 iPhone·Apple Health의 화면·수집·보안·서명·검증 계약 |
+| [GPT_ACTIVATION.md](GPT_ACTIVATION.md) | GPT 실제 API 활성화·설정 진단·칼로리 저장·외부 실행 계약 |
 | [DEMO_ACCEPTANCE.md](DEMO_ACCEPTANCE.md) | 배포 후 메뉴·복약·사진·Android를 직접 확인하는 순서 |
 | `generated/VARIABLES.md` | 코드에서 생성하는 파일별 선언·매개변수·위치 목록 |
 | `generated/SCHEMA.md` | 임시 DB에서 생성하는 실제 테이블·컬럼·FK/제약 기준 |

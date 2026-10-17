@@ -14,3 +14,9 @@ integrations/android/local.properties
 *.keystore
 *.apk
 *.aab
+integrations/ios/.build/
+integrations/ios/.swiftpm/
+integrations/ios/DerivedData/
+integrations/ios/**/xcuserdata/
+*.ipa
+*.xcarchive/

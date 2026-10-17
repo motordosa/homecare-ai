@@ -1,4 +1,4 @@
-# 데이터와 API 계약 v0.4
+# 데이터와 API 계약 v0.5
 
 이 문서는 구현 전 합의한 기준이다. 세부 계약을 변경할 때 구현보다 먼저 이 문서와 CHANGELOG를 갱신한다. 기존 v0.2 경로는 삭제하지 않는다. 구현 여부는 CHANGELOG에서 확인한다.
 
@@ -31,6 +31,8 @@
 
 ## 사진 분석
 
+v0.5 활성화/오류 계약은 GPT_ACTIVATION.md가 기준이다. vision capability에 reasonCode를 추가하며 available을 실제 제공자 인증/추론 검증으로 해석하지 않는다. 서버 키·동의·초안·섭취비율 저장 계약은 유지한다.
+
 - `GET /api/capabilities` → 외부 사진분석 설정 여부, 모델/제공자, 건강 웹 직접수집 불가, 네이티브 연결부 구현/검증 상태. API 키 값은 반환하지 않는다.
 - `POST /api/patients/:id/photo-analyses` 입력 `{kind:'meal'|'medication',imageData,consentExternalProcessing:true}`. JPEG/PNG/WebP 최대5MB, magic bytes 검증. 미설정503, 제공자 오류502/시간초과. 사진 속 텍스트를 시스템 지시로 실행하지 않는다.
 - 분석 결과는 `{analysis:{id,patientId,kind,provider,model,createdAt,expiresAt,proposal,warnings}}`. 항상 검토가 필요한 초안이며 제안된 영양은 추정이다.
@@ -43,6 +45,8 @@
 - 분석 확정 해석은 `{analysisId,foodType,foodLabel,calories,proteinGrams,source:'openai-image-estimate-v1',estimation}`을 반환한다. calories/proteinGrams는 섭취비율 적용 전, 서버가 portion을 곱한다. estimation은 provider/model/시각/proposal/warnings/patientConfirmed를 보존한다.
 
 ## 건강 수신 기반
+
+v0.5는 IOS_CONNECTOR.md에 따라 iPhone을 우선한다. preflight에 `serverTime`(서버 ISO8601 현재시각)을 추가한다. health capability에 platforms별 implemented/verified를 추가하되 기존 nativeBridge의 보수적 false는 유지한다. iOS 빈 조회는 키 생략이며 자동 삭제를 보내지 않는다.
 
 v0.4 부분 권한/항목별 revision 확장은 SMARTPHONE_SYNC_SPEC.md가 기준이다. day의 steps/sleepMinutes는 최소 하나 필수이며 생략은 보존, null은 명시적 삭제다. health_daily의 steps_updated_at/sleep_updated_at으로 각 항목의 최신 수정만 적용한다. 이전 전체 스냅샷 및 batch hash 호환은 유지한다. preflight는 partialMetrics:true/selected를 추가하며 새 Android는 이를 먼저 확인한다. schemaVersion3 추가 마이그레이션으로 기존 자료를 보존한다. 아래 v0.3의 두 항목 전체 전송은 계속 유효하다.
 

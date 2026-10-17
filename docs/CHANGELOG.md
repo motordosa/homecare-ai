@@ -1,5 +1,21 @@
 # 의사결정과 검증 이력
 
+## CHG-2026-10-17-11 — GPT 활성화·iPhone 우선 (구현 전)
+
+- 사용자 요청: 음식 사진 GPT API·칼로리 기록을 실제 작동시키고 스마트폰 연결은 iPhone을 우선한다. 이전 Android 우선 결정을 최신 요청으로 변경한다.
+- 기존 OpenAI Responses/초안/섭취비율/저장 경로는 존재하지만 현재 runtime은 키/모델/flag가 없고 비밀 바인딩도 없다. 실제 추론 완료라고 표시할 수 없다. Render 관리 인증·Mac/Xcode도 현재 없다.
+- GPT_ACTIVATION/IOS_CONNECTOR 및 요구ID IMG-04/SYNC-04/QA-04, 화면·API·변수 계약을 코드보다 먼저 저장한다. iOS HealthKit은 읽기 권한 공개 제한 때문에 빈 자료를 생략해 기존 자료를 보존한다.
+- 검증 범위: GPT 설정/오류/저장 자동화, apple-health 서버·웹, Swift production core, 가능한 iOS 빌드. API 키·실제 폰·Apple 서명·Render 배포는 실제 실행 결과와 분리해 보고한다.
+
+### v0.5 로컬 구현·검증
+
+- GPT: 기존 실제 OpenAI Responses 어댑터·사진 초안→섭취비율→SQLite/의료진 영양값 경로를 유지했다. 설정 reasonCode·의료진 GET 진단/재시도·401/403/429 안내와 `npm run ai:check`를 추가했다. 진단은 모델 GET와 명시적 `--image` 추론을 구별한다. Render Blueprint에 활성화/모델/비밀키 입력 요구를 추가했으나 기존 Render 값은 자동 변경되지 않는다.
+- iPhone: SwiftUI/HealthKit 앱, 서울 날짜·걸음 집계·실수면 합집합·선택/빈 자료 생략·환자/플랫폼/선택 출처 preflight·서버 시각 revision·Keychain·동일 배치 재시도/재조회·background observer 및 앱 cold launch 등록·웹 복귀·해제를 구현했다. 빈 HealthKit 결과는 거절과 구별할 수 없어 자동 삭제 미지원이다. 웹 기본 선택/설치/권한 안내와 서버 preferredPlatform은 apple-health다. Android 소스는 보존했다.
+- Node API/모듈 **71개**, 확장 브라우저 **20개**, 기존 브라우저 **7개** 통과. AI 성공은 mock fixture이며 실제 제공자 정확도 검증이 아니다. apple-health 수신도 합성 fixture다.
+- 공식 Swift Docker 이미지(`swift:6.2`, 실제 Swift6.2.4)에서 앱 production Core/ConnectorAPI의 XCTest **11개 통과**. 처음 재전송 검사에서 JSON 키 순서가 달라지는 것을 확인해 실제 전송 인코딩을 sortedKeys로 고정했다. 앱 전체 Swift 구문·Info/entitlements/scheme XML 검사 통과. HealthKit/SwiftUI/Security의 iOS SDK typecheck·simulator 빌드는 macOS CI에서 별도 확인한다. 설치 가능한 서명 IPA를 만들었다는 뜻이 아니다.
+- 문서 계약/변수·스키마 일치 검사 통과: **49파일/3526선언**, **11테이블**. Swift도 보조 선언 인덱스에 포함했다. Xcode simulator 빌드 job을 추가했으며 CI 정의와 실제 결과는 구별한다.
+- 현재 `ai:check`는 키/flag가 없어 configuration 단계에서 실패(의도된 미설정 진단)했다. 실제 GPT 인증·추론은 미검증이다. 공개 GET capabilities는 vision.enabled/configured=false, preferredPlatform=health-connect로 현재 소스의 미배포를 확인했다. 공개 DB에는 쓰지 않았다. USER_ACTION_REPORT를 iPhone/GPT 중심 U01..04로 갱신했다.
+
 ## CHG-2026-10-17-10 — 의료진 뒤로가기 복원 (수정 전)
 
 - 사용자 재현: 건강 기록→데모 설정→브라우저 뒤로가기가 시작 화면으로 이탈. 의료진 render가 매번 replaceState하고 popstate 복원이 없는 것이 원인이다.
