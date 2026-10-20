@@ -1,3 +1,5 @@
+v0.6 추가: [카카오·공지·메시지 활성화 안내](KAKAO_SETUP.md)를 먼저 확인한다. 카카오 인증·소통 기능의 임시 DB 검증과 실제 제공자 활성화는 별개다.
+
 # 데모 사용·인수 확인 순서
 
 공개 주소: https://homecare-ai-demo.onrender.com. 테스트는 가상 환자로 수행한다. 이 안내는 실제 배포/AI/기기 검증을 완료했다는 기록이 아니다. 수행 결과는 CHANGELOG에 대상 커밋·시간·환경과 함께 남긴다.
@@ -6,7 +8,7 @@
 
 1. 보관할 기존 테스트 기록은 먼저 내보낸다. 무료 Render의 재배포는 DB/사진을 잃을 수 있으며 CSV는 전체 복원본이 아니다.
 2. Render 서비스에서 **Manual Deploy → Deploy latest commit**을 실행한다.
-3. `/api/health`에서 `ok:true`, `storage:"sqlite"`, `schemaVersion:3`를 확인한다. `npm run demo:check -- https://homecare-ai-demo.onrender.com`으로 해당 소스와 화면의 일치 여부도 확인한다. schema만으로 전체 배포 일치를 판단하지 않는다.
+3. `/api/health`에서 `ok:true`, `storage:"sqlite"`, `schemaVersion:4`를 확인한다. `npm run demo:check -- https://homecare-ai-demo.onrender.com`으로 해당 소스와 화면의 일치 여부도 확인한다. schema만으로 전체 배포 일치를 판단하지 않는다.
 
 ## 2. 메뉴·약별 복약
 

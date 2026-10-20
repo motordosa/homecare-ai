@@ -30,7 +30,7 @@ assert.ok(guide.includes('id="guide-clinician-link"'));
 assert.equal((html.match(/href="\/clinician/g) ?? []).length, 1, 'role switching belongs only in the guide');
 assert.ok(html.includes('src="/patient.js" type="module"'));
 
-const clinicianIds = { overview: 'C-OVERVIEW', patients: 'C-PATIENTS', medications: 'C-MED', records: 'C-RECORDS', settings: 'C-SETTINGS' };
+const clinicianIds = { overview: 'C-OVERVIEW', patients: 'C-PATIENTS', medications: 'C-MED', records: 'C-RECORDS', notices: 'C-NOTICES', messages: 'C-MESSAGES', settings: 'C-SETTINGS' };
 const clinicianSource = readFileSync(new URL('../public/clinician.js', import.meta.url), 'utf8');
 let clinicianTitles;
 function visit(node) {
@@ -39,7 +39,7 @@ function visit(node) {
   if (node.type === 'VariableDeclarator' && node.id?.name === 'viewTitles') clinicianTitles = node.init;
   Object.values(node).forEach(visit);
 }
-visit(parse(clinicianSource, { ecmaVersion: 'latest', sourceType: 'script' }));
+visit(parse(clinicianSource, { ecmaVersion: 'latest', sourceType: 'module' }));
 assert.equal(clinicianTitles?.type, 'ObjectExpression');
 assert.deepEqual(clinicianTitles.properties.map(property => property.key.name ?? property.key.value).sort(), Object.keys(clinicianIds).sort(), 'new clinician pages also require page specifications');
 for (const id of Object.values(clinicianIds)) assert.ok(specification.includes(`| ${id} /`), `${id} needs a detailed page specification`);

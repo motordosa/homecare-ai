@@ -1,8 +1,10 @@
-# 화면별 제작·동작 명세 v0.5
+# 화면별 제작·동작 명세 v0.6
 
-작성일: 2026-10-17 KST. 요구사항 NAV-04/GOV-02/QA-02. **코드 수정 전에 작성한 제작 기준**이며 완료 증거는 CHANGELOG에 별도로 기록한다. 제품 목적·의료 의미는 PRODUCT_PLAN/CONTRACTS가 기준이다.
+작성일: 2026-10-20 KST. 요구사항 NAV-04/GOV-02/QA-02/AUTH-01..03/COM-01..03. **코드 수정 전에 작성한 제작 기준**이며 완료 증거는 CHANGELOG에 별도로 기록한다. 제품 목적·의료 의미는 PRODUCT_PLAN/CONTRACTS가 기준이다.
 
 ## 1. 공통 화면 구조와 책임
+
+v0.6 변경은 AUTH_COMMUNICATION_SPEC.md의 화면·ACL·자료/상태/인수조건을 먼저 따른다. 공통 header/X는 유지하고 바로 아래 auth strip→P-NOTICES→본문 순서다. 환자 하단6개(홈/내 기록/복약/메시지/건강 연결/안내), 의료진 메뉴7개(대시보드/환자/복약/기록/공지/메시지/설정)로 확장한다. 이전 5개 고정 규약은 이 변경으로 대체한다.
 
 환자는 모바일 웹, 의료진은 데스크톱 웹이다. 각 화면은 아래 ID로 관리한다. 화면별 명세 없이 새 버튼·메뉴·페이지를 추가하지 않는다. 화면 ID, 진입점, 상단/하단 메뉴, 닫기 목적지, API, 입력값, 상태, 코드 위치, 인수 사례를 먼저 정한다.
 
@@ -13,7 +15,7 @@
 | 상단 왼쪽 | HomeCare 로고는 **같은 환자의 홈**으로 이동한다. 시작 화면 `/`이나 의료진으로 이동하지 않는다. | patient.html의 `#patient-home-link`; patient.js의 공통 탐색 처리 |
 | 상단 오른쪽 | 홈에서는 닫기 숨김. 모든 일반 서브 화면에는 같은 크기·모양·위치의 X, 접근성 이름 `홈으로 돌아가기`. 역할 전환 링크를 이 자리에 배치하지 않는다. | `#patient-view-close`, `renderNavigation` |
 | 환자 문맥 | 선택 환자·오늘 날짜를 공통 위치에 표시. 선택 변경 시 이전 환자의 요청·초안·토큰을 무효화한다. | `#patient-select`, `loadPatient` |
-| 하단 | 홈/내 기록/복약/건강 연결/이용 안내 순서 고정. 활성 항목 하나만 `aria-current=page`. 아이콘·문구·터치 영역은 페이지마다 바꾸지 않는다. | `.bottom-nav`, `applyView` |
+| 하단 | 홈/내 기록/복약/메시지/건강 연결/이용 안내 순서 고정. 활성 항목 하나만 `aria-current=page`. 아이콘·문구·터치 영역은 페이지마다 바꾸지 않는다. | `.bottom-nav`, `applyView` |
 | 역할 전환 | 환자 상단/닫기 영역에는 의료진 링크 없음. **이용 안내의 ‘데모 역할 전환’ 구역**에서만 같은 patientId의 의료진 링크 제공. | `#guide-clinician-link` |
 | 저장 중 | 중복 저장·환자 변경·화면 변경·닫기 차단. 버튼을 실제 disabled 상태로 표시한다. 브라우저 뒤로가기도 저장 대상을 바꾸지 않는다. | `state.saving`, 공통 busy 처리 |
 | 반응형 | 320/390/480px, 키보드·긴 이름·확대 시 가로 넘침 없음. 주요 버튼 최소44×44 CSS px. 표시 순서는 DOM·키보드 순서와 일치. | patient.css |
@@ -61,11 +63,21 @@
 
 ## 3. 의료진 화면별 계약
 
-v0.5 IMG-04/SYNC-04: P-MEAL의 GPT 동작·오류는 GPT_ACTIVATION.md, P-CONNECT와 iOS I-CONNECT/I-ACCESS/I-SYNC/I-BACKGROUND/I-WEB/I-DISCONNECT는 IOS_CONNECTOR.md를 먼저 따른다. P-CONNECT는 iPhone 기본 선택·같은 화면의 접기식 설치/권한/동기화 안내를 추가한다. 별도 페이지 이동이나 상단 닫기 변경 없음. C-SETTINGS에는 GPT 설정 상태/모델/준비와 실제 검증의 구별·조회 실패/재시도 구역을 추가한다. 서버 설정 확인은 GET capabilities만 호출하며 키 입력/노출·유료 추론은 하지 않는다. 기존 5개 메뉴·popstate 복원을 유지한다.
+| 화면 ID / 코드 | 목적·진입 | 자료/조작 | 닫기·상태·인수조건 |
+|---|---|---|---|
+| A-LOGIN / `/login`, auth-page.js | 카카오 로그인·데모 안내 | GET auth/session·OAuth 시작 | 오류 원문/비밀 미노출, 안전한 앱 내부 복귀 |
+| A-ACCOUNT / `/account`, auth-page.js | 본인ID·초대 연결·로그아웃 | POST auth/enroll/logout | pending은 다른 자료 불가, 의료진 역할 서버 지정 |
+| P-NOTICES / `#patient-notices` | 환자 모든 일반 화면 최상단 공지 | GET active·POST read(version), details 전문 | 초안/보관 제외, 공지0/조회실패 구별, 메뉴/X 유지 |
+| P-MESSAGES / `#view-messages` | 메시지 하단 메뉴·대화/답장 | GET/POST patient messages·read, clientMessageId | 공통X→홈, dirty/busy·환자 격리·재시도 입력 유지 |
+| C-NOTICES / `notices`, clinician communication module | 공지 관리 메뉴·작성/편집 | 제목/본문/중요/status/version, GET/POST/PATCH | 초안/게시/보관·409·dirty/history 규약 |
+| C-MESSAGES / `messages`, clinician communication module | 환자 선택·개별 대화 | conversations/messages/read, patientId URL | 전송 대상 고정·미저장 확인·값/포커스 갱신 보존 |
+| C-INVITE / 의료진 modal | 선택 환자 초대 발급 | POST patient invitation, 일회 code/expiry | X→진입 화면, 코드 DOM 제거·늦은 응답 무효 |
+
+v0.5 IMG-04/SYNC-04: P-MEAL의 GPT 동작·오류는 GPT_ACTIVATION.md, P-CONNECT와 iOS I-CONNECT/I-ACCESS/I-SYNC/I-BACKGROUND/I-WEB/I-DISCONNECT는 IOS_CONNECTOR.md를 먼저 따른다. P-CONNECT는 iPhone 기본 선택·같은 화면의 접기식 설치/권한/동기화 안내를 추가한다. 별도 페이지 이동이나 상단 닫기 변경 없음. C-SETTINGS에는 GPT 설정 상태/모델/준비와 실제 검증의 구별·조회 실패/재시도 구역을 추가한다. 서버 설정 확인은 GET capabilities만 호출하며 키 입력/노출·유료 추론은 하지 않는다. v0.5 당시 5개 메뉴의 popstate 복원을 유지하며 v0.6은 공지·메시지를 포함한 7개로 확장한다.
 
 C-SETTINGS의 초기화 카드 제목 옆 database SVG는 24×24px, flex 축소 없음으로 제한한다. 아이콘이 카드 너비를 차지하거나 제목을 밀어내지 않으며 GPT 설정 카드와 같은 제목/버튼 체계를 유지한다.
 
-데스크톱 공통 셸은 좌측 5개 메뉴 순서 고정, 상단 페이지 제목/새로고침, 선택 환자 유지다. 일반 페이지 X를 환자 앱처럼 임의 추가하지 않는다. 등록·종료·이력 대화상자만 우상단 X/취소를 사용하고 열었던 페이지로 복귀한다. 다른 역할로 이동하는 링크는 ‘환자 화면’이라고 명시한다.
+데스크톱 공통 셸은 좌측 7개 메뉴 순서 고정, 상단 페이지 제목/새로고침, 선택 환자 유지다. 일반 페이지 X를 환자 앱처럼 임의 추가하지 않는다. 등록·종료·이력 대화상자만 우상단 X/취소를 사용하고 열었던 페이지로 복귀한다. 다른 역할로 이동하는 링크는 ‘환자 화면’이라고 명시한다.
 
 | ID / 구현 | 목적·진입 | 자료/조작 | 닫기·빈 자료·실패 |
 |---|---|---|---|
@@ -85,11 +97,11 @@ C-SETTINGS의 초기화 카드 제목 옆 database SVG는 24×24px, flex 축소 
 
 - 메뉴 클릭과 본문 메뉴 바로가기는 `changeView`에서 실제 목적지가 달라질 때만 `pushState`한다. 환자 선택과 복약 날짜 변경도 각각 하나의 방문 기록이다. 동일 메뉴 재클릭·검색·필터·20초 자동 갱신·수동 새로고침·조회 응답은 새 기록을 추가하지 않는다.
 - `syncUrl(mode)`는 view/patientId/medicationDate만 동기화한다. 최초 진입·잘못된 경로의 정규화는 replace, 사용자 이동은 push로 구별한다. `render`의 기본 동작은 현재 항목 정규화이며 명시적인 사용자 이동만 push를 요청한다.
-- `restoreRoute`는 popstate에서 URL을 읽어 5개 허용 view·환자·복약 날짜를 복원하고 활성 메뉴/제목/본문/환자 화면 링크를 일치시킨다. 복원 자체는 push하지 않는다. 초기 진입 전 시작 화면 방문 기록은 그대로 유지하며 의료진 메뉴 이력이 소진된 뒤에만 시작 화면으로 돌아간다.
+- `restoreRoute`는 popstate에서 URL을 읽어 7개 허용 view·환자·복약 날짜를 복원하고 활성 메뉴/제목/본문/환자 화면 링크를 일치시킨다. 복원 자체는 push하지 않는다. 초기 진입 전 시작 화면 방문 기록은 그대로 유지하며 의료진 메뉴 이력이 소진된 뒤에만 시작 화면으로 돌아간다.
 - 환자 변경을 복원할 때 이전 환자의 요약을 지우고 로딩/실패 상태를 표시한다. selectionRequest/medicationRequest 세대로 이전 비동기 응답을 무효화한다. 환자가 삭제됐으면 현재 목록의 기본 환자(없으면 빈 상태)로 replace한다. 복원 중 실패 시 URL/메뉴를 시작 화면으로 바꾸지 않고 새로고침 재시도를 제공한다.
 - 다른 화면으로 복귀하면 열린 대화상자를 닫고 사진 분석을 무효화한다. popstate는 서버 저장 요청을 새로 발생시키지 않는다. 문서 외부 이동은 일반 브라우저 방문 기록을 따른다. 이 변경이 의료진 입력 대화상자의 미저장 보호를 새로 보장하는 것은 아니다.
 - 화면 이동·복원 후 제목에 포커스를 옮기고 상단으로 이동한다. 자동 갱신은 포커스를 이동하지 않는다.
-- 인수: **시작→의료진→건강 기록→데모 설정→뒤로=건강 기록**, 앞으로=데모 설정. 다섯 메뉴 연속 왕복, 동일 메뉴/새로고침 중복 기록 없음, 환자 변경 왕복, 복약 날짜 왕복·직접 URL 새로고침, 지연 조회 중 왕복 후 늦은 응답 무효화를 실제 브라우저에서 검사한다.
+- 인수: **시작→의료진→건강 기록→데모 설정→뒤로=건강 기록**, 앞으로=데모 설정. 일곱 메뉴 연속 왕복, 동일 메뉴/새로고침 중복 기록 없음, 환자 변경 왕복, 복약 날짜 왕복·직접 URL 새로고침, 지연 조회 중 왕복 후 늦은 응답 무효화를 실제 브라우저에서 검사한다.
 
 ## 4. 코드와 문서가 어긋나지 않게 하는 장치
 

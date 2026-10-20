@@ -1,14 +1,18 @@
 "use strict";
 
+import { bootstrapSession, sessionState, sessionHeaders, sessionExpired, demoPatient } from './session.js';
+import { createPatientCommunications } from './patient-communications.js';
+
 import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
-(() => {
+(async () => {
   const $ = (selector, scope = document) => scope.querySelector(selector);
   const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
   const views = Object.keys(PATIENT_SCREENS);
   const metrics = ["steps", "sleepHours", "proteinGrams"];
   const dailyModes = { all: { fields: ["steps", "sleepHours", "weightKg", "medicationStatus", "appetite", "mood", "note"], hint: "입력하거나 바꾼 항목만 저장해요. 답하지 않은 항목은 미보고로 남아요." }, steps: { fields: ["steps"], hint: "이 날짜의 걸음 수만 저장해요. 수면이나 복약 기록은 바뀌지 않아요." }, sleep: { fields: ["sleepHours"], hint: "이 날짜의 수면 시간만 저장해요. 활동이나 복약 기록은 바뀌지 않아요." } };
   const state = { patients: [], patientId: null, summary: null, view: "home", metric: "steps", section: null, imageData: null, loading: false, saving: null, photoLoading: false, requestId: 0, dateRequestId: 0, photoRequestId: 0, dailyMode: "all", dailyBaseline: {}, capabilities: null, analysis: null, analysisBusy: false, analysisRequestId: 0, medicationDate: null, medicationSchedule: null, todayMedication: null, medicationRequestId: 0, medicationBusy: false, connectionRequestId: 0, connections: null, connectionBusy: false };
+  const communication = createPatientCommunications({api,getView:()=>state.view,isBusy:()=>Boolean(state.saving||state.loading),setBusy:value=>{state.saving=value?'message':null;renderNavigation();},toast});
   const labels = { meal: { breakfast: "아침", lunch: "점심", dinner: "저녁", snack: "간식" }, food: { balanced: "밥과 반찬", porridge: "죽·부드러운 식사", protein: "고기·생선·두부", noodles: "면·빵" }, medication: { taken: "모두 복용", partial: "일부 복용", missed: "미복용", unknown: "기억나지 않음" }, appetite: { good: "좋음", normal: "보통", poor: "적음" }, mood: { good: "좋음", normal: "보통", poor: "가라앉음" } };
   const icons = {
     steps: '<path d="M10 3 7 7l1 5-3 7m3-7 5 2 2 7m-3-12 3 3h5"/><circle cx="14" cy="4" r="2"/>',
@@ -50,7 +54,9 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
   function canLeavePatient() {
     if (state.saving || state.loading) return false;
-    return !($$('dialog[open]').some(dialogDirty) || medicationDirty()) || window.confirm('저장하지 않은 입력이 있어요. 저장하지 않고 나갈까요?');
+    const dirty=$$('dialog[open]').some(dialogDirty)||medicationDirty()||communication.dirty();
+    if(dirty && !window.confirm('저장하지 않은 입력이 있어요. 저장하지 않고 나갈까요?'))return false;
+    if(dirty)communication.discard();return true;
   }
 
   function openRecordDialog(id) {
@@ -82,8 +88,9 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), path.endsWith("/photo-analyses") ? 65000 : 20000);
     try {
-      const response = await fetch(path, { ...options, headers: { "Content-Type": "application/json", ...(options.headers || {}) }, signal: controller.signal });
+      const response = await fetch(path, { ...options, headers: { "Content-Type": "application/json", ...sessionHeaders(), ...(options.headers || {}) }, signal: controller.signal });
       const payload = await response.json().catch(() => ({}));
+      if(response.status===401)sessionExpired();
       if (!response.ok) throw new Error(payload.error || "기록을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.");
       return payload;
     } catch (error) {
@@ -144,12 +151,14 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       $("#app-content").hidden = true;
     }
     try {
+      if(sessionState.mode==='demo')await demoPatient(patientId);
       const [summary, todayMedication] = await Promise.all([
         api(`/api/patients/${encodeURIComponent(patientId)}/summary`),
         api(`/api/patients/${encodeURIComponent(patientId)}/medication-schedule?date=${encodeURIComponent(fallbackToday())}`).catch(() => null),
       ]);
       if (requestId !== state.requestId) return;
       state.patientId = patientId;
+      if(initial||changed)communication.reset(patientId);
       state.summary = summary;
       state.todayMedication = todayMedication;
       $("#patient-select").value = patientId;
@@ -181,6 +190,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#today-label").textContent = dateObject(today()).toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short", timeZone: "Asia/Seoul" });
     const clinicianUrl = `/clinician?patientId=${encodeURIComponent(state.patientId)}`;
     $("#guide-clinician-link").href = clinicianUrl;
+    $("#guide-clinician-link").hidden=sessionState.mode==='kakao' && sessionState.user?.role!=='clinician';
     renderHome(record);
     renderRecords();
   }
@@ -305,6 +315,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
   function applyView({ historyMode = "push", focus = true, refreshMedication = true } = {}) {
     renderNavigation();
+    communication.activate();
     $$(".app-view").forEach(element => { element.hidden = element.id !== `view-${state.view}`; });
     $$(".bottom-nav [data-view]").forEach(button => {
       const active = button.dataset.view === state.view;
@@ -807,7 +818,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#connection-token-dismiss").addEventListener("click", clearConnectionToken);
     window.addEventListener("pagehide", clearConnectionToken);
     window.addEventListener('beforeunload', event => {
-      if (state.saving || $$('dialog[open]').some(dialogDirty) || medicationDirty()) {
+      if (!window.__homecareLeaving && (state.saving || $$('dialog[open]').some(dialogDirty) || medicationDirty() || communication.dirty())) {
         event.preventDefault();
         event.returnValue = '';
       }
@@ -870,6 +881,9 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     } catch (error) { showError(error.message); }
   }
 
+  window.homecareCanLogout=canLeavePatient;
+  try {if(!await bootstrapSession('patient'))return;}catch(issue){showError(issue.message);return;}
+  if(sessionState.mode==='kakao' && sessionState.user?.role==='patient')$('#patient-select').hidden=true;
   routeFromUrl();
   bindEvents();
   initialize();

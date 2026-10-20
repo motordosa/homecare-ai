@@ -1,8 +1,10 @@
-# 데이터와 API 계약 v0.5
+# 데이터와 API 계약 v0.6
 
 이 문서는 구현 전 합의한 기준이다. 세부 계약을 변경할 때 구현보다 먼저 이 문서와 CHANGELOG를 갱신한다. 기존 v0.2 경로는 삭제하지 않는다. 구현 여부는 CHANGELOG에서 확인한다.
 
 ## 공통
+
+v0.6 AUTH/COM의 세부 API·세션·권한·읽음/중복·reset 계약은 AUTH_COMMUNICATION_SPEC.md를 따른다. AUTH_MODE=kakao는 보호 API와 업로드 소유권을 서버에서 검사하며 미설정 시 공개 데모로 fallback하지 않는다. demo 호환은 명시적 합성 체험 모드뿐이다. schema4 추가 마이그레이션.
 
 - JSON 객체, unknown 필드 거부, 유효한 날짜 `YYYY-MM-DD`, 저장 기본 일자 `Asia/Seoul`.
 - 시각은 offset을 포함한 ISO8601. `0`과 `null`(미측정)을 구별한다. 미응답을 정상/미복용으로 추론하지 않는다.

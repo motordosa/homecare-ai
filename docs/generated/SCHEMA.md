@@ -2,7 +2,68 @@
 
 자동 생성: 임시 SQLite에 현재 추가 마이그레이션을 적용한 결과다. 사용자/공개 DB에 접근하지 않으며 행 값·토큰·사진을 저장하지 않는다. 의미와 단위는 [자료 사전](../DATA_DICTIONARY.md)과 [계약](../CONTRACTS.md)을 함께 읽는다.
 
-11 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
+20 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
+
+## auth_accounts
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | TEXT | no |  | 1 |
+| provider | TEXT | yes |  |  |
+| provider_user_id | TEXT | yes |  |  |
+| demo_role | TEXT | no |  |  |
+| patient_id | TEXT | no |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: patient_id → patients.id (DELETE SET NULL)
+
+```sql
+CREATE TABLE auth_accounts (
+    id TEXT PRIMARY KEY, provider TEXT NOT NULL CHECK(provider IN ('kakao','demo')),
+    provider_user_id TEXT NOT NULL, demo_role TEXT CHECK(demo_role IN ('patient','clinician')),
+    patient_id TEXT REFERENCES patients(id) ON DELETE SET NULL,
+    created_at TEXT NOT NULL, UNIQUE(provider,provider_user_id)
+  )
+```
+
+## auth_sessions
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| token_hash | TEXT | no |  | 1 |
+| account_id | TEXT | yes |  |  |
+| csrf_token | TEXT | yes |  |  |
+| expires_at | INTEGER | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: account_id → auth_accounts.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE auth_sessions (
+    token_hash TEXT PRIMARY KEY, account_id TEXT NOT NULL REFERENCES auth_accounts(id) ON DELETE CASCADE,
+    csrf_token TEXT NOT NULL, expires_at INTEGER NOT NULL, created_at TEXT NOT NULL
+  )
+```
+
+## conversation_reads
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| patient_id | TEXT | yes |  | 1 |
+| account_id | TEXT | yes |  | 2 |
+| reader_role | TEXT | yes |  |  |
+| through_id | INTEGER | yes |  |  |
+| read_at | TEXT | yes |  |  |
+
+외래키: account_id → auth_accounts.id (DELETE CASCADE); patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE conversation_reads (
+    patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE, account_id TEXT NOT NULL REFERENCES auth_accounts(id) ON DELETE CASCADE,
+    reader_role TEXT NOT NULL CHECK(reader_role IN ('patient','clinician')), through_id INTEGER NOT NULL, read_at TEXT NOT NULL,
+    PRIMARY KEY(patient_id,account_id)
+  )
+```
 
 ## daily_records
 
@@ -248,6 +309,29 @@ CREATE TABLE medication_orders (
       )
 ```
 
+## messages
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | INTEGER | no |  | 1 |
+| patient_id | TEXT | yes |  |  |
+| sender_account_id | TEXT | yes |  |  |
+| sender_role | TEXT | yes |  |  |
+| body | TEXT | yes |  |  |
+| client_message_id | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: sender_account_id → auth_accounts.id (DELETE NO ACTION); patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    sender_account_id TEXT NOT NULL REFERENCES auth_accounts(id), sender_role TEXT NOT NULL CHECK(sender_role IN ('patient','clinician')),
+    body TEXT NOT NULL, client_message_id TEXT NOT NULL, created_at TEXT NOT NULL,
+    UNIQUE(patient_id,sender_account_id,client_message_id)
+  )
+```
+
 ## metadata
 
 | 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
@@ -257,6 +341,104 @@ CREATE TABLE medication_orders (
 
 ```sql
 CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)
+```
+
+## notice_reads
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| notice_id | INTEGER | yes |  | 1 |
+| account_id | TEXT | yes |  | 2 |
+| last_read_version | INTEGER | yes |  |  |
+| read_at | TEXT | yes |  |  |
+
+외래키: account_id → auth_accounts.id (DELETE CASCADE); notice_id → notices.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE notice_reads (
+    notice_id INTEGER NOT NULL REFERENCES notices(id) ON DELETE CASCADE, account_id TEXT NOT NULL REFERENCES auth_accounts(id) ON DELETE CASCADE,
+    last_read_version INTEGER NOT NULL, read_at TEXT NOT NULL, PRIMARY KEY(notice_id,account_id)
+  )
+```
+
+## notice_revisions
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| notice_id | INTEGER | yes |  | 1 |
+| version | INTEGER | yes |  | 2 |
+| actor_id | TEXT | yes |  |  |
+| snapshot | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: actor_id → auth_accounts.id (DELETE NO ACTION); notice_id → notices.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE notice_revisions (
+    notice_id INTEGER NOT NULL REFERENCES notices(id) ON DELETE CASCADE, version INTEGER NOT NULL,
+    actor_id TEXT NOT NULL REFERENCES auth_accounts(id), snapshot TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(notice_id,version)
+  )
+```
+
+## notices
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | INTEGER | no |  | 1 |
+| title | TEXT | yes |  |  |
+| body | TEXT | yes |  |  |
+| status | TEXT | yes |  |  |
+| pinned | INTEGER | yes | 0 |  |
+| version | INTEGER | yes | 1 |  |
+| created_by | TEXT | yes |  |  |
+| updated_by | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+| updated_at | TEXT | yes |  |  |
+| published_at | TEXT | no |  |  |
+
+외래키: updated_by → auth_accounts.id (DELETE NO ACTION); created_by → auth_accounts.id (DELETE NO ACTION)
+
+```sql
+CREATE TABLE notices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, body TEXT NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('draft','published','archived')), pinned INTEGER NOT NULL DEFAULT 0 CHECK(pinned IN (0,1)),
+    version INTEGER NOT NULL DEFAULT 1, created_by TEXT NOT NULL REFERENCES auth_accounts(id), updated_by TEXT NOT NULL REFERENCES auth_accounts(id),
+    created_at TEXT NOT NULL, updated_at TEXT NOT NULL, published_at TEXT
+  )
+```
+
+## oauth_attempts
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| state_hash | TEXT | no |  | 1 |
+| browser_hash | TEXT | yes |  |  |
+| return_path | TEXT | yes |  |  |
+| expires_at | INTEGER | yes |  |  |
+
+```sql
+CREATE TABLE oauth_attempts (
+    state_hash TEXT PRIMARY KEY, browser_hash TEXT NOT NULL, return_path TEXT NOT NULL, expires_at INTEGER NOT NULL
+  )
+```
+
+## patient_invitations
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| token_hash | TEXT | no |  | 1 |
+| patient_id | TEXT | yes |  |  |
+| created_by | TEXT | yes |  |  |
+| expires_at | INTEGER | yes |  |  |
+| consumed_at | TEXT | no |  |  |
+
+외래키: created_by → auth_accounts.id (DELETE NO ACTION); patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE patient_invitations (
+    token_hash TEXT PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    created_by TEXT NOT NULL REFERENCES auth_accounts(id), expires_at INTEGER NOT NULL, consumed_at TEXT
+  )
 ```
 
 ## patients

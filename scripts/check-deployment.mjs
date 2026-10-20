@@ -44,6 +44,7 @@ let patients = null;
 let dashboard = null;
 let summary = null;
 let patientId = null;
+let authCapabilities = null;
 
 class CheckFailure extends Error {
   constructor(code) { super(code); this.name = 'CheckFailure'; this.code = code; }
@@ -220,6 +221,13 @@ async function browserChecks() {
     });
     await landing.close();
 
+    if(authCapabilities){
+      const login=await mobile.newPage();
+      await check('anonymous login mobile 390px',async()=>{await navigate(login,'/login');await login.locator('#auth-content').waitFor({state:'visible',timeout});await noOverflow(login);await screenshot(login,'login-mobile.png');});
+      await login.close();
+      skip('authenticated patient and clinician screens','GET-only check does not create login sessions; use isolated browser tests and manual authenticated acceptance');
+      return;
+    }
     const patient = await mobile.newPage();
     const patientPath = patientId ? `/patient?patientId=${encodeURIComponent(patientId)}` : '/patient';
     const patientReady = await check('patient mobile 390px', async () => {
@@ -291,14 +299,18 @@ console.log('Only GET requests are allowed. Screenshots stay in ignored test-res
 try {
   const proxy = proxyOptions();
   client = await request.newContext({ ...(proxy ? { proxy } : {}), ignoreHTTPSErrors: false, timeout });
+  await check('authentication configuration GET',async()=>{
+    const response=await client.get(new URL('/api/auth/session',target).href,{timeout,maxRedirects:0});
+    try{if(response.status()===404)return 'legacy deployment';requireCheck(response.status()===200,'auth-session-unavailable');const value=await response.json();requireCheck(['demo','kakao'].includes(value.mode),'invalid-auth-mode');authCapabilities={mode:value.mode,kakaoAvailable:value.kakaoAvailable};report.auth=authCapabilities;}finally{await response.dispose();}
+  });
   const healthReady = await check('health API', async () => {
     const health = await getJson('/api/health');
     requireCheck(health.ok === true && health.status === 'ok', 'health-not-ready');
     requireCheck(health.storage === 'sqlite', 'health-storage-not-sqlite');
-    requireCheck(health.dataMode === 'demo', 'health-not-demo-mode');
-    requireCheck(health.counts && ['patients', 'dailyRecords', 'meals'].every(key => Number.isInteger(health.counts[key]) && health.counts[key] >= 0), 'invalid-health-counts');
+    if(authCapabilities?.mode!=='kakao')requireCheck(health.dataMode === 'demo', 'health-not-demo-mode');
+    if(authCapabilities?.mode!=='kakao')requireCheck(health.counts && ['patients', 'dailyRecords', 'meals'].every(key => Number.isInteger(health.counts[key]) && health.counts[key] >= 0), 'invalid-health-counts');
     report.health = {
-      ok: health.ok, status: health.status, counts: { patients: health.counts.patients, dailyRecords: health.counts.dailyRecords, meals: health.counts.meals },
+      ok: health.ok, status: health.status, ...(health.counts?{counts:{patients:health.counts.patients,dailyRecords:health.counts.dailyRecords,meals:health.counts.meals}}:{}),
       ...(health.dataMode === 'demo' ? { dataMode: 'demo' } : {}), ...(health.storage === 'sqlite' ? { storage: 'sqlite' } : {}),
     };
   });
@@ -306,14 +318,18 @@ try {
     skip('remaining deployment checks', 'health check failed; no further network requests made');
     throw new CheckFailure('health-check-failed');
   }
-  await check('patients API', async () => {
+  if(authCapabilities?.mode==='kakao'){
+    await check('anonymous protection',async()=>{for(const path of ['/api/patients','/api/dashboard','/api/export.csv']){const response=await client.get(new URL(path,target).href,{timeout,maxRedirects:0});try{requireCheck(response.status()===401,'anonymous-protection-missing');}finally{await response.dispose();}}});
+    skip('patients API','Kakao authentication required');
+  } else await check('patients API', async () => {
     const value = await getJson('/api/patients');
     requireCheck(Array.isArray(value.patients) && value.patients.every(row => typeof row.id === 'string'), 'invalid-patients-response');
     patients = value.patients;
     report.patientCount = patients.length;
     patientId = patients[0]?.id || null;
   });
-  await check('dashboard API', async () => {
+  if(authCapabilities?.mode==='kakao')skip('dashboard API','Kakao authentication required');
+  else await check('dashboard API', async () => {
     const value = await getJson('/api/dashboard');
     requireCheck(Array.isArray(value.patients) && value.stats && Number.isInteger(value.stats.patients) && Array.isArray(value.trends) && Array.isArray(value.alerts), 'invalid-dashboard-response');
     dashboard = value;
@@ -327,7 +343,8 @@ try {
     summary = value;
   });
   else skip('patient summary API', patients?.length === 0 ? 'empty DB; no patient summary exists' : 'patient list unavailable');
-  await check('CSV export GET', async () => {
+  if(authCapabilities?.mode==='kakao')skip('CSV export GET','Kakao authentication required');
+  else await check('CSV export GET', async () => {
     const response = await getOnly('/api/export.csv');
     try {
       requireCheck((response.headers()['content-type'] || '').includes('text/csv'), 'unexpected-csv-content-type');

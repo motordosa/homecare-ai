@@ -2,6 +2,8 @@
 
 ## 실행 구조
 
+v0.6: AUTH_COMMUNICATION_SPEC를 먼저 따른다. lib/auth.mjs가 Kakao OAuth/opaque session/role·patient ACL/CSRF/초대 연결을 담당하고 lib/communications.mjs가 공지 revision·대화·읽음을 담당한다. public/session.js는 공통 인증·CSRF, auth-page는 로그인/연결, patient/clinician communication 모듈은 기존 셸을 사용한다. 기존 네이티브 Bearer 인증은 유지한다.
+
 v0.5: iPhone 우선 iOS HealthKit 연결 앱을 integrations/ios에 추가한다. 수집 없는 모바일 웹·기존 Node/SQLite·Android 경로는 유지한다. GPT_ACTIVATION/IOS_CONNECTOR의 계약을 먼저 따른다. 외부 API 키와 Apple 설치 서명은 서로 다른 선행조건이다.
 
 Node.js 24 단일 HTTP 서버 + SQLite + `public/`의 모바일/데스크톱 웹이다. 기존 서버·DB는 유지하고 복약/사진 분석/건강 수신을 독립 모듈로 추가한다. 외부 AI 키는 서버에서만 사용한다. 브라우저에는 공개 가능 여부만 전달한다.
@@ -13,6 +15,10 @@ Node.js 24 단일 HTTP 서버 + SQLite + `public/`의 모바일/데스크톱 웹
 | lib/analysis.mjs | 출처를 유지하는 요약·추이·의료진 브리핑 |
 | lib/medications.mjs | 계획·회차·복약 이벤트/수정 이력 |
 | lib/vision.mjs | 외부 사진 분석·출력 검증·초안 적용 계약 |
+| lib/auth.mjs | Kakao 고정 OAuth·서버 세션·CSRF·역할/환자 ACL·초대 연결 |
+| lib/communications.mjs | 공지 상태/수정이력/버전 읽음·개별 대화/중복/읽음 |
+| public/session.js / auth-page.js | 인증 진입/계정 연결/공통 CSRF·세션 만료 처리 |
+| public/*-communications.js | 기존 셸의 공지·대화 DOM·초안 보존·증분 갱신/늦은 응답 폐기 |
 | lib/health-sync.mjs | 연결 토큰·일별 집계 수신·중복/오래된 수정 방지 |
 | public/patient.* | 목적별 입력, 복약 회차, 사진 초안 확인, 연동 상태 |
 | public/clinician.* | 복약계획 작성·기록 확인, 사진 보조 입력, 데이터 출처 |

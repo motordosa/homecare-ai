@@ -30,7 +30,7 @@ async function start() {
   output = '';
   child = spawn(process.execPath, ['--disable-warning=ExperimentalWarning', 'server.mjs'], {
     cwd: new URL('..', import.meta.url),
-    env: { ...process.env, PORT: String(port), DATA_DIR: dataDir },
+    env: { ...process.env, AUTH_MODE: 'demo', APP_ORIGIN: '', VISION_ENABLED: 'false', HOMECARE_VISION_API_KEY: '', OPENAI_API_KEY: '', PORT: String(port), DATA_DIR: dataDir },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   child.stdout.on('data', chunk => { output += chunk.toString(); });

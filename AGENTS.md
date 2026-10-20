@@ -4,6 +4,8 @@
 
 화면 변경은 반드시 `docs/SCREEN_SPEC.md`의 해당 화면ID와 공통 규약을 먼저 읽고 수정한다. 새 화면/동작은 문서의 진입·상단/하단·닫기·자료/상태·코드 대응·인수조건을 먼저 채운다. `public/patient-screens.js` registry/HTML/문서 일치 검사를 통과해야 한다. 변수 목록 생성만으로 화면 검증을 대체하지 않는다. 스마트폰 변경은 `docs/SMARTPHONE_SYNC_SPEC.md` 및 아이폰 우선 `docs/IOS_CONNECTOR.md`를 먼저 읽으며 외부 실행 요청은 `docs/USER_ACTION_REPORT.md`에 기록한다.
 
+로그인·권한·공지·메시지 변경은 `docs/AUTH_COMMUNICATION_SPEC.md`를 먼저 읽는다. 실사용 모드의 환자 범위·CSRF·의료진 허용목록을 유지하며 공개 DB로 메시지/공지를 시험하지 않는다.
+
 사진 GPT 활성화는 `docs/GPT_ACTIVATION.md`를 먼저 읽는다. 키·flag·모델 존재를 실제 제공자 인증/추론 검증으로 표시하지 않는다. iOS의 빈 HealthKit 결과는 읽기 권한 거절과 구별할 수 없어 자동 null 삭제를 보내지 않는다.
 
 1. 요구사항 ID와 인수조건을 먼저 정한다. 기획·화면 동작·데이터 의미가 달라지면 문서와 계약을 먼저 수정한다.

@@ -20,7 +20,7 @@ await new Promise(resolve => reservation.close(resolve));
 const base = `http://127.0.0.1:${port}`;
 const child = spawn(process.execPath, ['--disable-warning=ExperimentalWarning', 'server.mjs'], {
   cwd: new URL('..', import.meta.url),
-  env: { ...process.env, PORT: String(port), DATA_DIR: temp, VISION_ENABLED: 'false', HOMECARE_VISION_API_KEY: '', OPENAI_API_KEY: '' },
+  env: { ...process.env, AUTH_MODE: 'demo', APP_ORIGIN: '', PORT: String(port), DATA_DIR: temp, VISION_ENABLED: 'false', HOMECARE_VISION_API_KEY: '', OPENAI_API_KEY: '' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 let output = '';
@@ -119,7 +119,7 @@ try {
     await page.goto(base);
     await page.locator('.portal.clinician').click(); await ready(page);
     const id = new URL(page.url()).searchParams.get('patientId');
-    const views = ['overview', 'patients', 'medications', 'records', 'settings'];
+    const views = ['overview', 'patients', 'medications', 'records', 'notices', 'messages', 'settings'];
     for (const view of views.slice(1)) {
       await page.locator(`#main-nav [data-view="${view}"]`).click();
       await clinicianRoute(page, view, id);
@@ -133,9 +133,9 @@ try {
     await page.clock.fastForward(20_001); await autoRefresh;
     await page.waitForFunction(() => !document.querySelector('#refresh-button').disabled);
     assert.equal(await page.evaluate(() => history.length), length);
-    await page.goBack(); await clinicianRoute(page, 'records', id);
-    assert.equal(await page.locator('#page-title').innerText(), '건강 기록');
-    assert.equal(await page.locator('#record-patient').inputValue(), id);
+    await page.goBack(); await clinicianRoute(page, 'messages', id);
+    assert.equal(await page.locator('#page-title').innerText(), '환자 메시지');
+    await page.locator('#clinician-message-body').waitFor();
     await page.goForward(); await clinicianRoute(page, 'settings', id);
     for (const view of [...views.slice(0, -1)].reverse()) {
       await page.goBack(); await clinicianRoute(page, view, id);
@@ -199,7 +199,7 @@ try {
       await patientPage(mobile, patient.id);
       await assertHidden(mobile.locator('#patient-view-close'));
       let closeBounds;
-      for (const view of ['records', 'medication', 'connections', 'guide']) {
+      for (const view of ['records', 'medication', 'messages', 'connections', 'guide']) {
         await mobile.locator(`.bottom-nav [data-view=${view}]`).click();
         await mobile.locator(`#view-${view}`).waitFor({ state: 'visible' });
         const close = mobile.getByRole('button', { name: '홈으로 돌아가기', exact: true });

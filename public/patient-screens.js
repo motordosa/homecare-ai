@@ -3,6 +3,7 @@ export const PATIENT_SCREENS = Object.freeze({
   home: Object.freeze({ id: 'P-HOME', title: '홈', kind: 'page', closeTarget: null, nav: 'home' }),
   records: Object.freeze({ id: 'P-RECORDS', title: '기록 모아보기', kind: 'page', closeTarget: 'home', nav: 'records' }),
   medication: Object.freeze({ id: 'P-MED', title: '복약 기록', kind: 'page', closeTarget: 'home', nav: 'medication' }),
+  messages: Object.freeze({ id: 'P-MESSAGES', title: '의료진 메시지', kind: 'page', closeTarget: 'home', nav: 'messages' }),
   connections: Object.freeze({ id: 'P-CONNECT', title: '건강 기록 연결', kind: 'page', closeTarget: 'home', nav: 'connections' }),
   guide: Object.freeze({ id: 'P-GUIDE', title: '이용 안내', kind: 'page', closeTarget: 'home', nav: 'guide' }),
 });

@@ -15,7 +15,7 @@ const port = reservation.address().port;
 await new Promise(resolve => reservation.close(resolve));
 const base = `http://127.0.0.1:${port}`;
 const child = spawn(process.execPath, ['--disable-warning=ExperimentalWarning', 'server.mjs'], {
-  cwd: new URL('..', import.meta.url), env: { ...process.env, PORT: String(port), DATA_DIR: temp }, stdio: ['ignore', 'pipe', 'pipe'],
+  cwd: new URL('..', import.meta.url), env: { ...process.env, AUTH_MODE: 'demo', APP_ORIGIN: '', VISION_ENABLED: 'false', HOMECARE_VISION_API_KEY: '', OPENAI_API_KEY: '', PORT: String(port), DATA_DIR: temp }, stdio: ['ignore', 'pipe', 'pipe'],
 });
 let output = '';
 child.stdout.on('data', data => { output += data; });

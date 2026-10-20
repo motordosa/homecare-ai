@@ -1,5 +1,7 @@
+import { bootstrapSession, sessionHeaders, sessionExpired } from './session.js';
+import { createClinicianCommunications } from './clinician-communications.js';
 'use strict';
-(() => {
+(async () => {
   const icons = {
     grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
     users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87M15 3.13a4 4 0 0 1 0 7.75"/><circle cx="9" cy="7" r="4"/>',
@@ -54,6 +56,8 @@
     patients:['PATIENT WORKSPACE','환자 관리','기록의 변화와 확인할 내용을 환자별로 자세히 살펴보세요.','환자 관리'],
     medications:['CONFIRMED MEDICATION PLAN','복약 계획과 보고','의료진이 확인한 계획과 약별·회차별 자기보고를 함께 살펴보세요.','복약 계획'],
     records:['EVERYDAY HEALTH RECORDS','건강 기록','일상의 기록을 확인하고 연구용 파일로 내보내세요.','건강 기록'],
+    notices:['CARE ANNOUNCEMENTS','의료진 공지','환자 화면 상단에 표시할 공지를 작성하고 관리하세요.','공지 관리'],
+    messages:['PATIENT MESSAGES','환자 메시지','환자별로 내용을 보내고 답변과 읽음 여부를 확인하세요.','환자 메시지'],
     settings:['DEMO WORKSPACE SETTINGS','데모 설정','테스트 데이터를 관리하고 다음 시연을 준비하세요.','데모 설정'],
   };
   if(!/^\d{4}-\d{2}-\d{2}$/.test(state.medicationDate||''))state.medicationDate=null;
@@ -61,9 +65,13 @@
   if (Object.hasOwn(viewTitles,urlView)) state.view = urlView;
   const $ = selector => document.querySelector(selector);
   document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon); });
+  const communication=createClinicianCommunications({api,getState:()=>state,toast,selectPatient,invite:openInvitation});
+  let historyIndex=Number(history.state?.hcClinicianIndex)||0,restoringHistory=false;
+  history.replaceState({...history.state,hcClinicianIndex:historyIndex},'',location.href);
   async function api(path, options = {}) {
-    const response = await fetch(path, { ...options, headers:{ 'Content-Type':'application/json', ...options.headers } });
+    const response = await fetch(path, { ...options, headers:{ 'Content-Type':'application/json', ...sessionHeaders(), ...options.headers } });
     const result = await response.json().catch(() => ({}));
+    if(response.status===401)sessionExpired();
     if (!response.ok) throw new Error(result.error || result.message || `요청을 처리하지 못했습니다. (${response.status})`);
     return result;
   }
@@ -72,13 +80,17 @@
     if (state.selectedId) url.searchParams.set('patientId',state.selectedId); else url.searchParams.delete('patientId');
     if (state.view === 'overview') url.searchParams.delete('view'); else url.searchParams.set('view',state.view);
     if(state.view==='medications' && medDate())url.searchParams.set('medicationDate',medDate());else url.searchParams.delete('medicationDate');
-    if(url.href!==location.href)history[historyMode==='push'?'pushState':'replaceState'](null,'',url);
+    if(url.href!==location.href){if(historyMode==='push')historyIndex++;history[historyMode==='push'?'pushState':'replaceState']({hcClinicianIndex:historyIndex},'',url);}
   }
   function focusPage() {
     $('#page-title').focus({preventScroll:true});
     window.scrollTo({top:0,behavior:'instant'});
   }
-  function restoreRoute() {
+  function restoreRoute(event) {
+    const target=Number(event.state?.hcClinicianIndex)||0;
+    if(restoringHistory){restoringHistory=false;return;}
+    if(!communication.canLeave()){const delta=historyIndex-target;if(delta){restoringHistory=true;history.go(delta);}return;}
+    historyIndex=target;
     const params=new URLSearchParams(location.search);
     const view=params.get('view'),patientId=params.get('patientId'),date=params.get('medicationDate');
     state.view=Object.hasOwn(viewTitles,view)?view:'overview';
@@ -132,6 +144,7 @@
   }
   async function selectPatient(id, changeView = false, {historyMode='push'} = {}) {
     if(!state.data?.patients.some(p=>p.id===id)) return;
+    if(id!==state.selectedId && !communication.canLeave())return;
     state.selectedId=id;
     state.summary=null;state.medications=null;
     ++state.medicationRequest;
@@ -243,7 +256,7 @@
   }
   function patientDetails(expanded = false) {
     const s=state.summary;if(!s)return '';
-    return `<section id="patient-detail"><div class="section-heading"><div><div class="detail-topline"><h2>${esc(s.patient.name)} 님의 일상 변화</h2>${riskPill(s.risk)}</div><p>최근 7일 요약 · 보고된 날의 평균과 기록의 충분함을 함께 확인하세요.</p></div><div class="section-action-group"><span class="small-label">${shortDate(s.trends.at(-7)?.date)} — ${shortDate(s.today)}</span><button class="text-link" data-action="view" data-view="medications">복약 계획 ${icon('pill')}</button><a class="text-link" href="/patient?patientId=${encodeURIComponent(s.patient.id)}" target="_blank" rel="noopener">환자 화면 ${icon('external')}</a></div></div>${metricPanels()}<div class="detail-analysis-grid">${detailCharts()}${coverage()}</div><div class="meals-records-grid">${meals()}${recentRecords()}</div><div class="notes-questions"><h3>${icon('chat')}다음 방문에서 물어보세요</h3><ul>${s.briefing.questions.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div>${expanded?expandedBriefing():''}</section>`;
+    return `<section id="patient-detail"><div class="section-heading"><div><div class="detail-topline"><h2>${esc(s.patient.name)} 님의 일상 변화</h2>${riskPill(s.risk)}</div><p>최근 7일 요약 · 보고된 날의 평균과 기록의 충분함을 함께 확인하세요.</p></div><div class="section-action-group"><span class="small-label">${shortDate(s.trends.at(-7)?.date)} — ${shortDate(s.today)}</span><button class="text-link" data-action="invitation">환자 연결코드</button><button class="text-link" data-action="view" data-view="messages">메시지</button><button class="text-link" data-action="view" data-view="medications">복약 계획 ${icon('pill')}</button><a class="text-link" href="/patient?patientId=${encodeURIComponent(s.patient.id)}" target="_blank" rel="noopener">환자 화면 ${icon('external')}</a></div></div>${metricPanels()}<div class="detail-analysis-grid">${detailCharts()}${coverage()}</div><div class="meals-records-grid">${meals()}${recentRecords()}</div><div class="notes-questions"><h3>${icon('chat')}다음 방문에서 물어보세요</h3><ul>${s.briefing.questions.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div>${expanded?expandedBriefing():''}</section>`;
   }
   function emptyWorkspace() {
     return `<section class="card empty-state"><div class="empty-icon">${icon('users')}</div><h3>새로운 돌봄을 시작할 준비가 되었어요</h3><p>가상 환자를 추가하고 환자용 사이트에서 기록을 남겨보세요.<br>예시 데이터를 복원하면 모든 화면을 바로 체험할 수 있습니다.</p><button class="button button-primary" data-action="add-patient">${icon('plus')}가상 환자 추가</button><button class="button button-secondary" data-action="reset" data-mode="seed">${icon('refresh')}예시 데이터 복원</button></section>`;
@@ -443,14 +456,24 @@
     $('#page-eyebrow').textContent=eyebrow;$('#page-title').textContent=title;$('#page-subtitle').textContent=subtitle;$('#view-breadcrumb').textContent=breadcrumb;
     document.querySelectorAll('#main-nav [data-view]').forEach(btn=>{const active=btn.dataset.view===state.view;btn.classList.toggle('active',active);if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');});
     const inputFocused=document.activeElement?.id==='patient-search';const cursor=inputFocused?document.activeElement.selectionStart:null;
+    const patientLink=$('.patient-site-link');if(patientLink)patientLink.href=state.selectedId?`/patient?patientId=${encodeURIComponent(state.selectedId)}`:'/patient';
+    if(['notices','messages'].includes(state.view)){communication.mount(state.view);syncUrl(historyMode);return;}
+    communication.deactivate();
     $('#app-content').innerHTML=state.selectedId && !state.summary && state.view!=='settings'
       ? ($('#global-error').hidden ? '<div class="loading-state"><span class="spinner"></span><b>선택 환자의 기록을 확인하고 있어요</b></div>' : '<div class="compact-empty">선택 환자의 기록을 확인할 수 없습니다. 상단 새로고침으로 다시 시도해 주세요.</div>')
       : ({overview,patients:patientsView,records:recordsView,medications:medicationsView,settings:settingsView}[state.view])();
     if(inputFocused&&$('#patient-search')){$('#patient-search').focus();$('#patient-search').setSelectionRange(cursor,cursor);}
-    const patientLink=$('.patient-site-link');if(patientLink)patientLink.href=state.selectedId?`/patient?patientId=${encodeURIComponent(state.selectedId)}`:'/patient';
     syncUrl(historyMode);
   }
-  function changeView(view) { if(!Object.hasOwn(viewTitles,view))return;state.view=view;render('push');if(view==='medications')loadMedications();focusPage(); }
+  function changeView(view) { if(!Object.hasOwn(viewTitles,view)||view===state.view||!communication.canLeave())return;state.view=view;render('push');if(view==='medications')loadMedications();focusPage(); }
+  async function openInvitation(){
+    if(!state.selectedId||communication.busy())return;
+    state.lastFocus=document.activeElement;const marker={type:'invitation'};state.modal=marker;
+    $('#modal-backdrop').hidden=false;document.body.style.overflow='hidden';
+    $('#modal').innerHTML=`<div class="modal-top"><h2 id="modal-title">환자 연결코드</h2><button class="icon-button" data-modal-action="close" aria-label="닫기">${icon('close')}</button></div><p>선택한 환자에게만 안전하게 전달하세요. 24시간 동안 1회 사용할 수 있으며 재발급하면 이전 미사용 코드는 폐기됩니다.</p><p id="invitation-result" role="status">발급 중…</p>`;$('#modal').focus();
+    try{const {invitation:result}=await api(`/api/clinician/patients/${encodeURIComponent(state.selectedId)}/invitations`,{method:'POST',body:'{}'});if(state.modal!==marker)return;$('#invitation-result').textContent=result.code+' · 만료 '+new Date(result.expiresAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});}
+    catch(error){if(state.modal===marker)$('#invitation-result').textContent=error.message;}
+  }
   function closeModal() {
     state.photoAbort?.abort();state.photoAbort=null;state.photoGeneration++;
     $('#modal-backdrop').hidden=true;$('#modal').innerHTML='';$('#modal').classList.remove('medication-modal');state.modal=null;document.body.style.overflow='';if(state.lastFocus?.isConnected)state.lastFocus.focus();
@@ -487,16 +510,17 @@
   }
   $('#main-nav').addEventListener('click',event=>{const btn=event.target.closest('[data-view]');if(btn)changeView(btn.dataset.view);});
   $('#refresh-button').addEventListener('click',()=>refresh());
-  $('#add-patient-button').addEventListener('click',()=>openModal('add'));
+  $('#add-patient-button').addEventListener('click',()=>{if(communication.canLeave())openModal('add');});
   $('#app-content').addEventListener('click',event=>{
     const el=event.target.closest('[data-action]');if(!el)return;
     const action=el.dataset.action;
+    if(action==='invitation')openInvitation();
     if(action==='select-patient')selectPatient(el.dataset.id);
     if(action==='alert-patient')selectPatient(el.dataset.id,true).then(()=>$('#patient-detail')?.scrollIntoView({behavior:'smooth',block:'start'}));
     if(action==='view')changeView(el.dataset.view);
     if(action==='check-integrations')loadIntegrationSettings();
     if(action==='filter'){state.filter=el.dataset.filter;render();}
-    if(action==='add-patient')openModal('add');
+    if(action==='add-patient' && communication.canLeave())openModal('add');
     if(action==='reset')openModal('reset',el.dataset.mode);
     if(action==='add-medication-order')openMedicationOrder();
     if(action==='end-medication-order')openMedicationEnd(el.dataset.id);
@@ -530,6 +554,9 @@
     if(event.key==='Escape'){closeModal();return;}
     if(event.key==='Tab') {const items=[...$('#modal').querySelectorAll('button:not([disabled]),input:not([disabled]),select,textarea,a[href]')];const first=items[0],last=items.at(-1);if(event.shiftKey&&document.activeElement===first){last?.focus();event.preventDefault();}else if(!event.shiftKey&&document.activeElement===last){first?.focus();event.preventDefault();}}
   });
+  window.homecareCanLogout=()=>communication.canLeave();
+  window.addEventListener('beforeunload',event=>{if(!window.__homecareLeaving && (communication.dirty()||communication.busy())){event.preventDefault();event.returnValue='';}});
+  try{if(!await bootstrapSession('clinician'))return;}catch(error){showError(error.message);return;}
   refresh({quiet:true});
   setInterval(()=>{if(!document.hidden)refresh({quiet:true});},20000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh({quiet:true});});

@@ -12,7 +12,7 @@
 6. 변수 목록을 재생성하고 문서/계약/테스트 연결과 diff를 확인한다. 완료/실패/미실행/자격증명·기기 대기를 분리해 CHANGELOG에 기록한다.
 7. 배포 전 무료 서버의 DB 유실 가능성과 내보내기 한계를 확인한다. 변경이 Git에 저장된 상태와 실제 공개 배포 버전을 구별한다. 공개 검증은 GET 먼저, 필요한 쓰기는 본인이 만든 임시 자료만 정리한다.
 
-저장소 CI는 `npm run docs:check`, `npm test`, 기존 및 자동화 브라우저 검사, 별도 Android job의 `assembleDebug`·`lintDebug`를 수행하도록 구성한다. Android는 JDK17/Gradle8.11.1/SDK36·build-tools35.0.0을 명시한다. 별도 macOS iOS job에서 production Swift core와 unsigned simulator 앱 빌드를 검사하며 기기 서명·설치·HealthKit 실수신과 구별한다. 변수 목록이 오래되면 실패한다. CI 정의를 저장한 것과 GitHub에서 실제 실행·통과한 것을 구별한다. 기획·의료적 의미의 일치와 실제 기기 검증은 CI만으로 증명할 수 없으므로 PR 양식의 요구사항/계약/검증/배포 기록으로 함께 검토한다.
+저장소 CI는 `npm run docs:check`, `npm test`, 기존 및 자동화 브라우저 검사, `npm run test:auth`의 임시 DB·모의 Kakao 보안/소통 검사, 별도 Android job의 `assembleDebug`·`lintDebug`를 수행하도록 구성한다. Android는 JDK17/Gradle8.11.1/SDK36·build-tools35.0.0을 명시한다. 별도 macOS iOS job에서 production Swift core와 unsigned simulator 앱 빌드를 검사하며 기기 서명·설치·HealthKit 실수신과 구별한다. 변수 목록이 오래되면 실패한다. CI 정의를 저장한 것과 GitHub에서 실제 실행·통과한 것을 구별한다. 기획·의료적 의미의 일치와 실제 기기 검증은 CI만으로 증명할 수 없으므로 PR 양식의 요구사항/계약/검증/배포 기록으로 함께 검토한다.
 
 ## 기획 변경 기록 양식
 
@@ -27,3 +27,5 @@
 - 사진 미설정/전송 동의 없음/잘못된 이미지/제공자 실패/잘못된 JSON/낮은 확신/다른 환자의 초안/사진 교체/만료/중복 적용을 처리한다.
 - 기기 batch 재전송·오래된 갱신·0/누락·삭제 반영·수동 보완 우선·연결 폐기·환자 간 토큰 오용을 검사한다.
 - 실제 모바일 기기 권한 거절/철회/부분 허용/앱 종료/백그라운드 지연/휴대폰·워치 중복은 실제 기기 별도 검증표로 남긴다.
+
+인증·공지·메시지는 AUTH_COMMUNICATION_SPEC를 먼저 변경하고 KAKAO_SETUP에 외부 활성화 절차를 기록한다. 공개 배포 점검은 GET만 사용하며 실제 인증 흐름/쓰기 동작은 별도 임시 DB 또는 소유자가 승인한 합성 테스트 환경에서 검증한다.

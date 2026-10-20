@@ -84,7 +84,7 @@ async function localFixture(t) {
     output = '';
     child = spawn(process.execPath, ['--disable-warning=ExperimentalWarning', 'server.mjs'], {
       cwd: new URL('..', import.meta.url),
-      env: { ...process.env, PORT: String(port), DATA_DIR: dataDir, VISION_ENABLED: 'false', HOMECARE_VISION_API_KEY: '', OPENAI_API_KEY: '' },
+      env: { ...process.env, AUTH_MODE: 'demo', APP_ORIGIN: '', PORT: String(port), DATA_DIR: dataDir, VISION_ENABLED: 'false', HOMECARE_VISION_API_KEY: '', OPENAI_API_KEY: '' },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     child.stdout.on('data', chunk => { output = (output + chunk.toString()).slice(-8000); });

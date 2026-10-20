@@ -9,6 +9,10 @@ services:
     healthCheckPath: /api/health
     autoDeployTrigger: off
     envVars:
+      - key: AUTH_MODE
+        value: demo
+      - key: APP_ORIGIN
+        value: https://homecare-ai-demo.onrender.com
       - key: NODE_ENV
         value: production
       - key: DATA_DIR

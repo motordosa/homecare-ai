@@ -33,6 +33,12 @@
 | patient screen registry | 화면ID/제목/종류/닫기 목적지 | SCREEN_SPEC와 HTML/하단 메뉴/브라우저 검증에 대응 |
 | historyMode / restoreRoute | 의료진 기록 갱신 방식 / URL 복원 | push는 사용자 이동, replace는 정규화·조회. 복원 시 요청 세대 무효화·환자/날짜 일치 확인 |
 | reasonCode / available | GPT 설정 사유 / 준비 상태 | disabled/missing_key/invalid_model/ready. 실제 인증·추론 성공 증거가 아님 |
+| session token / csrf / oauth state | 세션 비밀 / 변경 요청 검증 / 로그인 결합 | session/state는 DB hash, csrf는 session에 결합. 세션·CSRF의 URL·로그 금지. OAuth state는 인증 URL에서만 사용 |
+| actor.role / patientId | 서버에서 정한 권한/연결 환자 | Kakao 의료진 allowlist 또는 초대 연결만 신뢰. 클라이언트 role 무시 |
+| notice.version / last_read_version | 공지 낙관적 잠금 / 확인 버전 | 수정 시 증가, 이전 버전 읽음으로 새 버전 확인 처리 금지 |
+| clientMessageId / throughId | 전송 멱등 UUID / 대화 읽음 순번 | 같은 본문 재시도만 같은 UUID, 대화 소유권·단조 증가 검사 |
+| AUTH_MODE / APP_ORIGIN | 합성 체험 또는 실제 Kakao / 고정 HTTPS origin | 미설정 production은 잠금, demo는 합성자료 전용 |
+| CLINICIAN_KAKAO_IDS | 관리자 지정 의료진 Kakao 앱 사용자ID 목록 | 서버에서만 승격·회수, 프로필/화면 선택으로 승격 금지 |
 | serverTime | preflight 서버 ISO 시각 | iOS 배치 revision 기준, 폰 미래시각 방지 |
 | MetricSelection / DayReading | iOS 선택 항목 / 서울 날짜 집계 | 선택 안 함·빈 결과는 키 생략, 실제0은 보존. 수면 분·합집합 |
 | ConnectionSettings / PendingUpload | iOS 대상·비밀 / 재시도 JSON | Keychain ThisDeviceOnly, 로그·URL·UserDefaults 제외 |
@@ -70,3 +76,18 @@
 | health_batches | 연결/batch 중복키·본문 hash·수신 결과, 재전송 안전성 |
 
 연결부 Kotlin/Java 변수는 생성 목록의 보조 인덱스와 integrations/android의 실제 소스를 함께 읽는다. Java 핵심 로직 검증은 APK/Kotlin 빌드 성공과 다르다.
+
+## v0.6 인증·소통 DB와 초기화
+
+| 테이블 | 의미·소유권 | 삭제/보존 |
+|---|---|---|
+| auth_accounts | Kakao 앱 ID 또는 합성 역할, 환자 1:1 연결 | 환자 삭제 시 연결만 NULL; 동일 ID 시드와 자동 재연결 금지 |
+| auth_sessions | opaque cookie hash·CSRF·12시간 만료 | 로그아웃/만료 시 폐기, reset은 의료진 세션 유지 |
+| oauth_attempts | 브라우저 nonce hash와 state hash·내부 next | 10분·1회 사용, 제공자 access token 저장 없음 |
+| patient_invitations | 환자/발급자/초대 hash/24시간 만료·사용 시각 | 재발급은 미사용 이전 코드 폐기; 환자 삭제 CASCADE |
+| notices / notice_revisions | 전체 환자 공지와 수정 snapshot·작성자 | draft/published/archived, 테스트 reset 시 삭제 |
+| notice_reads | 계정별 공지 확인 버전 | 수정 시 이전 읽음으로 새 버전 확인 처리하지 않음 |
+| messages | 환자별 발신 계정/역할/평문 본문/전송 UUID | 타 환자 조회 불가, 환자 삭제 CASCADE, CSV 제외 |
+| conversation_reads | 환자·계정별 읽음 highwater/역할 | 명시적 POST만 단조 증가; 환자 삭제 CASCADE |
+
+otherReadThrough는 해당 대화의 반대 역할이 확인한 최대 순번이다. UI는 증분 조회 응답이 비어도 기존 메시지의 읽음 표시를 갱신한다. clientMessageId는 실패 후 같은 내용을 재전송할 때 유지하고 편집 시 교체한다. generation은 환자·화면 전환 후 늦은 응답을 폐기한다. mounted는 의료진 새 화면의 DOM 식별자이며 일반 갱신에서 작성 폼을 재생성하지 않는다. hcClinicianIndex는 취소된 popstate의 이전 방문 기록 위치를 복구한다.

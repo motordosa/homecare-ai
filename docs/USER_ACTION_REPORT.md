@@ -1,3 +1,5 @@
+v0.6 추가: [카카오·공지·메시지 활성화 안내](KAKAO_SETUP.md)를 먼저 확인한다. 카카오 인증·소통 기능의 임시 DB 검증과 실제 제공자 활성화는 별개다.
+
 # GPT·iPhone 사용자 실행 요청 보고서 v0.5
 
 2026-10-17 KST. 최신 요청은 **음식 사진 GPT 분석과 iPhone 우선 건강 연결**이다. 이전 Android 경로는 보존하되 첫 설치·검증 대상은 아이폰으로 변경했다. 구현·검사 결과는 CHANGELOG, 제작 기준은 SCREEN_SPEC/GPT_ACTIVATION/IOS_CONNECTOR에 있다.
@@ -16,7 +18,7 @@
 
 1. https://dashboard.render.com → 기존 `homecare-ai-demo` → Manual Deploy → Deploy latest commit. 배포 브랜치는 main이다. 최신 커밋은 최종 개발 보고에서 확인한다.
 2. 필요한 가상 기록을 먼저 내보낸다. 무료 Render 재배포 시 DB/사진이 사라질 수 있고 CSV는 전체 복원본이 아니다.
-3. https://homecare-ai-demo.onrender.com/api/health 의 ok:true/storage:sqlite/schemaVersion:3, `/api/capabilities`의 health.preferredPlatform:apple-health를 확인한다. schema만으로 새 프런트엔드까지 일치한다고 단정하지 않는다.
+3. https://homecare-ai-demo.onrender.com/api/health 의 ok:true/storage:sqlite/schemaVersion:4, `/api/capabilities`의 health.preferredPlatform:apple-health를 확인한다. schema만으로 새 프런트엔드까지 일치한다고 단정하지 않는다.
 4. 환자 건강 연결의 iPhone 기본 선택·설치 안내, 의료진 데모 설정의 GPT 상태, 건강 기록→설정→뒤로가기를 확인한다.
 
 완료 증거: 배포 커밋·Live·위 API 필드·화면. Render 비밀번호/토큰은 채팅에 보내지 않는다.

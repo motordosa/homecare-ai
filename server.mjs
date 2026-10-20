@@ -11,16 +11,21 @@ import { ensureMedicationSchema, getMedicationOrders, createMedicationOrder, end
 import { ensureVisionSchema, visionCapabilities, analyzePhoto, resolveMealAnalysis, markAnalysisApplied } from './lib/vision.mjs';
 import { healthCapabilities, ensureHealthSchema, getHealthConnections, createHealthConnection, revokeHealthConnection, receiveHealthBatch, getHealthConnectionIdentity } from './lib/health-sync.mjs';
 
+import { createAuthService } from './lib/auth.mjs';
+import { ensureCommunicationSchema, listNotices, createNotice, updateNotice, activeNotices, readNotice, listMessages, sendMessage, readMessages, conversations } from './lib/communications.mjs';
+
 const root = fileURLToPath(new URL('.', import.meta.url));
 const publicDir = join(root, 'public');
 const { db, uploadDir } = openDatabase(process.env.DATA_DIR || join(root, 'data'));
 ensureMedicationSchema(db);
 ensureVisionSchema(db);
 ensureHealthSchema(db);
-db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','3') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
+const auth = createAuthService({db});
+ensureCommunicationSchema(db);
+db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','4') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
 const port = Number(process.env.PORT || 3000);
 const bodyLimit = 7 * 1024 * 1024;
-const schemaVersion = 3;
+const schemaVersion = 4;
 
 function respond(res, status, value, extraHeaders = {}) {
   const body = JSON.stringify(value);
@@ -51,13 +56,19 @@ function requirePatient(id) {
 }
 
 function assertSameOrigin(req) {
-  // Demo has no login. Prevent another website from submitting destructive writes.
+  // OAuth uses a canonical origin; demo writes retain the previous local-host contract.
   const site = req.headers['sec-fetch-site'];
   if (site === 'cross-site') throw new HttpError(403, '다른 사이트에서 보낸 변경 요청은 허용하지 않습니다.');
   const origin = req.headers.origin;
   if (origin) {
     let originHost;
     try { originHost = new URL(origin).host; } catch { throw new HttpError(403, '올바르지 않은 요청 출처입니다.'); }
+    if(auth.capabilities().mode==='kakao') {
+      let expected;
+      try { expected=new URL(process.env.APP_ORIGIN).origin; } catch { throw new HttpError(403, '서버 주소 설정이 필요합니다.'); }
+      if(new URL(origin).origin!==expected)throw new HttpError(403,'다른 사이트에서 보낸 변경 요청은 허용하지 않습니다.');
+      return;
+    }
     const forwardedHost = req.headers['x-forwarded-host']?.split(',')[0]?.trim();
     if (originHost !== req.headers.host && originHost !== forwardedHost) throw new HttpError(403, '다른 사이트에서 보낸 변경 요청은 허용하지 않습니다.');
   }
@@ -155,9 +166,11 @@ function staticFile(req, res, pathname) {
     const filename = pathname.slice('/uploads/'.length);
     if (!/^[0-9a-f-]+\.(jpg|png|webp)$/.test(filename) || basename(filename) !== filename) throw new HttpError(404, '파일을 찾을 수 없습니다.');
     file = join(uploadDir, filename);
-    if (!db.prepare('SELECT id FROM meals WHERE image_filename=?').get(filename)) throw new HttpError(404, '파일을 찾을 수 없습니다.');
+    const owner=db.prepare('SELECT patient_id FROM meals WHERE image_filename=?').get(filename);
+    if(!owner)throw new HttpError(404,'파일을 찾을 수 없습니다.');
+    auth.authorize(req,{patientId:owner.patient_id});
   } else {
-    const aliases = { '/': '/index.html', '/patient': '/patient.html', '/patient/': '/patient.html', '/clinician': '/clinician.html', '/clinician/': '/clinician.html', '/favicon.ico': '/icon.svg' };
+    const aliases = { '/': '/index.html', '/patient': '/patient.html', '/patient/': '/patient.html', '/clinician': '/clinician.html', '/clinician/': '/clinician.html', '/favicon.ico': '/icon.svg', '/login':'/login.html', '/account':'/account.html' };
     const relative = aliases[pathname] || pathname;
     file = resolve(publicDir, `.${relative}`);
     if (!file.startsWith(`${publicDir}/`)) throw new HttpError(404, '페이지를 찾을 수 없습니다.');
@@ -166,7 +179,7 @@ function staticFile(req, res, pathname) {
   if (!existsSync(file) || !statSync(file).isFile()) throw new HttpError(404, '페이지를 찾을 수 없습니다.');
   const extension = extname(file);
   const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.woff2': 'font/woff2' }[extension] || 'application/octet-stream';
-  res.writeHead(200, { 'Content-Type': mime, 'Content-Length': statSync(file).size, 'Cache-Control': 'no-cache' });
+  res.writeHead(200, { 'Content-Type': mime, 'Content-Length': statSync(file).size, 'Cache-Control': pathname.startsWith('/uploads/') ? 'no-store' : 'no-cache' });
   if (req.method === 'HEAD') res.end(); else createReadStream(file).on('error', () => res.destroy()).pipe(res);
 }
 
@@ -181,8 +194,43 @@ const server = http.createServer(async (req, res) => {
     try { path = decodeURIComponent(url.pathname); } catch { throw new HttpError(400, '잘못된 URL입니다.'); }
     const method = req.method;
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) assertSameOrigin(req);
-    if (path === '/api/health' && method === 'GET') return respond(res, 200, health());
+    const redirect=(location,cookies=[])=>{res.writeHead(302,{'Location':location,'Cache-Control':'no-store',...(cookies.length?{'Set-Cookie':cookies}:{})});res.end();};
+    if(path==='/auth/kakao' && method==='GET') {
+      const result=auth.startOAuth(req,url.searchParams.get('next'));return redirect(result.location,[result.cookie]);
+    }
+    if(path==='/auth/kakao/callback' && method==='GET') {
+      try {const result=await auth.finishOAuth(req,url);return redirect(result.location,result.cookies);}
+      catch {return redirect('/login?error=kakao_failed',[auth.clearLoginCookie()]);}
+    }
+    if(path==='/api/auth/session' && method==='GET')return respond(res,200,auth.sessionInfo(req));
+    if(path==='/api/auth/demo' && method==='POST') {
+      const result=auth.demoLogin(req,await readJson(req));return respond(res,200,{ok:true},{'Set-Cookie':result.cookie});
+    }
+    if(path==='/api/auth/logout' && method==='POST')return respond(res,200,{ok:true},{'Set-Cookie':auth.logout(req)});
+    if(path==='/api/auth/enroll' && method==='POST')return respond(res,200,auth.enroll(req,await readJson(req)));
+    const invite=/^\/api\/clinician\/patients\/([^/]+)\/invitations$/.exec(path);
+    if(invite && method==='POST'){allowedKeys(await readJson(req),[]);return respond(res,201,{invitation:auth.issueInvitation(req,invite[1])});}
+    if(path==='/api/clinician/notices') {
+      const actor=auth.authorize(req,{staff:true,communication:true,write:method==='POST'});
+      if(method==='GET')return respond(res,200,listNotices(db,actor));
+      if(method==='POST')return respond(res,201,createNotice(db,actor,await readJson(req)));
+    }
+    const notice=/^\/api\/clinician\/notices\/([1-9]\d*)$/.exec(path);
+    if(notice && method==='PATCH')return respond(res,200,updateNotice(db,auth.authorize(req,{staff:true,communication:true,write:true}),Number(notice[1]),await readJson(req)));
+    if(path==='/api/notices/active' && method==='GET')return respond(res,200,activeNotices(db,auth.authorize(req,{communication:true})));
+    const noticeRead=/^\/api\/notices\/([1-9]\d*)\/read$/.exec(path);
+    if(noticeRead && method==='POST')return respond(res,200,readNotice(db,auth.authorize(req,{communication:true,write:true}),Number(noticeRead[1]),await readJson(req)));
+    if(path==='/api/clinician/conversations' && method==='GET')return respond(res,200,conversations(db,auth.authorize(req,{staff:true,communication:true})));
+    const messages=/^\/api\/patients\/([^/]+)\/messages(\/read)?$/.exec(path);
+    if(messages) {
+      const actor=auth.authorize(req,{patientId:messages[1],communication:true,write:method==='POST'});
+      if(!messages[2] && method==='GET')return respond(res,200,listMessages(db,actor,messages[1],Object.fromEntries(url.searchParams)));
+      if(!messages[2] && method==='POST')return respond(res,201,sendMessage(db,actor,messages[1],await readJson(req)));
+      if(messages[2] && method==='POST')return respond(res,200,readMessages(db,actor,messages[1],await readJson(req)));
+    }
+    if (path === '/api/health' && method === 'GET') return respond(res, 200, auth.capabilities().mode==='kakao'?{ok:true,status:'ok',storage:'sqlite',schemaVersion}:health());
     if (path === '/api/capabilities' && method === 'GET') return respond(res, 200, {
+      auth: auth.capabilities(),
       vision: visionCapabilities(process.env),
       health: healthCapabilities(),
       medications: { perDose: true, clinicianPlans: true },
@@ -198,12 +246,14 @@ const server = http.createServer(async (req, res) => {
       if (!token) throw new HttpError(401, '유효한 연결 토큰이 필요합니다.');
       return respond(res, 200, receiveHealthBatch(db, token, await readJson(req)));
     }
-    if (path === '/api/dashboard' && method === 'GET') return respond(res, 200, dashboard(db));
-    if (path === '/api/patients' && method === 'GET') return respond(res, 200, { patients: getPatients(db), today: todayKorea(), provenance });
-    if (path === '/api/patients' && method === 'POST') return respond(res, 201, { patient: createPatient(await readJson(req)) });
+    if (path === '/api/dashboard' && method === 'GET') {auth.authorize(req,{staff:true});return respond(res,200,dashboard(db));}
+    if (path === '/api/patients' && method === 'GET') {const actor=auth.authorize(req);const patients=getPatients(db);return respond(res,200,{patients:auth.capabilities().mode==='kakao' && actor.role!=='clinician'?patients.filter(p=>p.id===actor.patientId):patients,today:todayKorea(),provenance});}
+    if (path === '/api/patients' && method === 'POST') {auth.authorize(req,{staff:true,write:true});return respond(res,201,{patient:createPatient(await readJson(req))});}
     let match = /^\/api\/patients\/([^/]+)\/(medication-orders|medication-schedule|medication-events|photo-analyses|health-connections)$/.exec(path);
     if (match) {
       const [, id, operation] = match;
+      auth.authorize(req,{patientId:id,write:method==='POST'});
+      if(operation==='medication-orders' && method==='POST')auth.authorize(req,{staff:true,write:true});
       requirePatient(id);
       if (operation === 'medication-orders' && method === 'GET') return respond(res, 200, { orders: getMedicationOrders(db, id) });
       if (operation === 'medication-orders' && method === 'POST') return respond(res, 201, { order: createMedicationOrder(db, id, await readJson(req)) });
@@ -215,15 +265,17 @@ const server = http.createServer(async (req, res) => {
       if (operation === 'health-connections' && method === 'POST') return respond(res, 201, createHealthConnection(db, id, await readJson(req)));
     }
     match = /^\/api\/medication-orders\/([^/]+)$/.exec(path);
-    if (match && method === 'PATCH') return respond(res, 200, { order: endMedicationOrder(db, match[1], await readJson(req)) });
+    if (match && method === 'PATCH') {auth.authorize(req,{staff:true,write:true});return respond(res,200,{order:endMedicationOrder(db,match[1],await readJson(req))});}
     match = /^\/api\/patients\/([^/]+)\/health-connections\/([^/]+)$/.exec(path);
     if (match && method === 'DELETE') {
+      auth.authorize(req,{patientId:match[1],write:true});
       requirePatient(match[1]);
       return respond(res, 200, revokeHealthConnection(db, match[1], match[2]));
     }
     match = /^\/api\/patients\/([^/]+)(?:\/(summary|daily|meals))?$/.exec(path);
     if (match) {
       const [, id, operation] = match;
+      auth.authorize(req,{patientId:id,write:method==='POST'});
       requirePatient(id);
       if (!operation && method === 'GET') return respond(res, 200, { patient: getPatient(db, id) });
       if (operation === 'summary' && method === 'GET') return respond(res, 200, patientSummary(db, id));
@@ -236,13 +288,16 @@ const server = http.createServer(async (req, res) => {
     }
     match = /^\/api\/meals\/([^/]+)$/.exec(path);
     if (match && method === 'DELETE') {
+      auth.authorize(req,{write:true});
       const meal = db.prepare('SELECT * FROM meals WHERE id=?').get(match[1]);
       if (!meal) throw new HttpError(404, '식사 기록을 찾을 수 없습니다.');
+      auth.authorize(req,{patientId:meal.patient_id,write:true});
       db.prepare('DELETE FROM meals WHERE id=?').run(meal.id);
       if (meal.image_filename) { try { unlinkSync(join(uploadDir, meal.image_filename)); } catch (error) { if (error.code !== 'ENOENT') console.error('Upload cleanup failed:', error.code); } }
       return respond(res, 200, { ok: true, deletedId: meal.id });
     }
     if (path === '/api/demo/reset' && method === 'POST') {
+      auth.authorize(req,{staff:true,write:true});
       const body = await readJson(req);
       allowedKeys(body, ['mode', 'confirmation']);
       if (body.confirmation !== 'RESET') throw new HttpError(400, '리셋하려면 confirmation: RESET을 입력해 주세요.');
@@ -250,7 +305,7 @@ const server = http.createServer(async (req, res) => {
       resetDemo(db, uploadDir, mode);
       return respond(res, 200, { ok: true, mode, ...health() });
     }
-    if (path === '/api/export.csv' && method === 'GET') return exportCsv(res);
+    if (path === '/api/export.csv' && method === 'GET') {auth.authorize(req,{staff:true});return exportCsv(res);}
     if (path.startsWith('/api/')) throw new HttpError(404, '지원하지 않는 API입니다.');
     if (!['GET', 'HEAD'].includes(method)) throw new HttpError(405, '지원하지 않는 요청 방식입니다.');
     staticFile(req, res, path);
