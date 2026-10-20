@@ -51,3 +51,7 @@ Node.js 24 단일 HTTP 서버 + SQLite + `public/`의 모바일/데스크톱 웹
 약 사진→글자/후보 초안→의료진이 이름·함량·용법을 대조→확정 복약계획. 환자 자기보고는 확정 계획과 구별하고 과거 이벤트를 변경 이력으로 남긴다.
 
 Health Connect/HealthKit→권한을 가진 네이티브 연결부의 일별 집계→환자에 묶인 비밀 연결 토큰→중복 방지 수신→출처별 스냅샷→출처가 보이는 요약. 웹에는 실제 권한과 마지막 성공 수신 전까지 연결 완료를 표시하지 않는다.
+
+## 복약 사진 A단계
+
+lib/medication-photos.mjs는 기존 vision 초안의 환자·hash·종류·만료 검증과 사진+회차 원자 저장을 담당한다. public/patient-medication-photo.js는 공통 patient dialog 셸에 연결한다. 이미지 BLOB은 같은 DB 트랜잭션과 CASCADE로 보관·삭제하며 인증된 image API로만 제공한다. 상세 계약: MEDICATION_PHOTO_DEMO_SPEC.md.

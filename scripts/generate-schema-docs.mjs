@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { openDatabase } from '../lib/db.mjs';
 import { ensureMedicationSchema } from '../lib/medications.mjs';
 import { ensureVisionSchema } from '../lib/vision.mjs';
+import { ensureMedicationPhotoSchema } from '../lib/medication-photos.mjs';
 import { ensureHealthSchema } from '../lib/health-sync.mjs';
 
 import { ensureAuthSchema } from '../lib/auth.mjs';
@@ -17,6 +18,7 @@ try {
   ({ db } = openDatabase(temp));
   ensureMedicationSchema(db);
   ensureVisionSchema(db);
+  ensureMedicationPhotoSchema(db);
   ensureHealthSchema(db);
   ensureAuthSchema(db);
   ensureCommunicationSchema(db);

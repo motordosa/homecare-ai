@@ -142,3 +142,8 @@ cloudflared tunnel --no-autoupdate --protocol http2 --url http://127.0.0.1:3000
 [활성화 안내](docs/KAKAO_SETUP.md)를 먼저 따릅니다. `/login`에서 시작하고, 의료진은 공지 관리 및 환자 메시지 메뉴를 사용합니다. 환자는 상단 공지와 하단 메시지에서 확인·답장합니다. 메시지는 사이트 안에 저장되며 카카오톡으로 발송하지 않습니다. 실제 카카오 앱 키와 의료진 계정 등록이 필요합니다. 설정이 없는 실제 인증 모드는 잠기며 데모로 자동 전환하지 않습니다.
 
 검증: `npm test`, `npm run test:browser`, `npm run test:automation`, `npm run test:auth`, `npm run docs:check`. 카카오 모의 응답 검증과 실제 제공자·Render 활성화 결과를 구별합니다.
+
+
+### v0.6.1 약봉투 사진 복약 데모
+
+의료진이 등록한 약별 계획이 있으면 환자 복약 → **약봉투 사진으로 기록**에서 기존 GPT로 포장 글자를 읽고 회차·상태를 직접 확인해 사진과 함께 저장한다. 의료진 복약 화면에서 원본/당시 자기보고/OCR 후보를 확인한다. 사진은 복용 증거가 아니며 낱알 외형 식별·국내 약품 API는 후속이다. 기존 사진 AI 키를 사용한다. [제작 규약](docs/MEDICATION_PHOTO_DEMO_SPEC.md), [배포 후 확인 절차](docs/USER_ACTION_REPORT.md#u-05-빠른-약봉투-사진-데모-v061-확인). 로컬 브라우저 검증은 `npm run test:medication-photo`이며 실제 API 과금 없이 임시 DB·mock 제공자를 사용한다.

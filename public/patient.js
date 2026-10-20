@@ -1,6 +1,7 @@
 "use strict";
 
 import { bootstrapSession, sessionState, sessionHeaders, sessionExpired, demoPatient } from './session.js';
+import { createMedicationPhoto } from './patient-medication-photo.js';
 import { createPatientCommunications } from './patient-communications.js';
 
 import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
@@ -23,6 +24,15 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   };
   const svg = (key) => `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[key] || icons.meal}</svg>`;
   const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+  const medicationPhoto = createMedicationPhoto({ api, escape,
+    getContext: () => ({ patientId: state.patientId, date: state.medicationDate, schedule: state.medicationSchedule, name: state.summary?.patient.name || '', vision: state.capabilities?.vision, busy: Boolean(state.saving || state.loading) }),
+    openDialog: openRecordDialog, setBusy: value => { state.saving = value ? 'medication-photo' : null; renderNavigation(); },
+    onSaved: async () => {
+      toast('사진과 복약 자기보고를 저장했어요.');
+      try { await loadMedicationSchedule(); await loadPatient(state.patientId, { preserveMedicationInputs: true }); }
+      catch { formError('#medication-error', '저장은 완료했지만 목록을 다시 불러오지 못했어요. 새로고침해 주세요.'); }
+    },
+  });
   const numeric = (value) => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value));
   const number = (value, digits = 0) => numeric(value) ? Number(value).toLocaleString("ko-KR", { maximumFractionDigits: digits }) : "—";
   const dateObject = (date) => new Date(`${date}T12:00:00+09:00`);
@@ -39,7 +49,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   function formSnapshot(form) {
     return JSON.stringify([...form.elements].filter(element => element.name && !(form.id === 'daily-form' && element.name === 'date') && !['submit', 'button', 'file'].includes(element.type)).map(element =>
       [element.name, element.value, ['radio', 'checkbox'].includes(element.type) ? element.checked : null]
-    ).concat(form.id === 'meal-form' ? [['imageData', state.imageData]] : []));
+    ).concat(form.id === 'meal-form' ? [['imageData', state.imageData]] : form.id === 'medication-photo-form' ? [['medicationPhoto', medicationPhoto.dirtySnapshot()]] : []));
   }
 
   function dialogDirty(dialog) {
@@ -82,6 +92,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $('#patient-home-link').setAttribute('aria-disabled', String(locked));
     $$('.bottom-nav button').forEach(button => { button.disabled = locked; });
     $('#patient-select').disabled = locked;
+    medicationPhoto.refresh();
   }
 
   async function api(path, options = {}) {
@@ -541,6 +552,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     try { state.capabilities = await api("/api/capabilities"); }
     catch (_) { state.capabilities = null; }
     refreshAnalysisControls();
+    medicationPhoto.refresh();
   }
 
   function refreshAnalysisControls() {
@@ -600,6 +612,8 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     const date = state.medicationDate || today();
     state.medicationDate = date;
     state.medicationSchedule = null;
+    medicationPhoto.refresh();
+    medicationPhoto.renderReports([]);
     $("#medication-date").value = date;
     $("#medication-date").max = today();
     $("#medication-loading").hidden = false;
@@ -608,9 +622,10 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#medication-summary").replaceChildren();
     $("#legacy-medication").hidden = true;
     try {
-      const schedule = await api(`/api/patients/${encodeURIComponent(patientId)}/medication-schedule?date=${encodeURIComponent(date)}`);
+      const [schedule, photos] = await Promise.all([api(`/api/patients/${encodeURIComponent(patientId)}/medication-schedule?date=${encodeURIComponent(date)}`), api(`/api/patients/${encodeURIComponent(patientId)}/medication-photo-reports?date=${encodeURIComponent(date)}`)]);
       if (requestId !== state.medicationRequestId || patientId !== state.patientId || date !== state.medicationDate) return;
       state.medicationSchedule = schedule;
+      medicationPhoto.refresh(); medicationPhoto.renderReports(photos.reports);
       renderMedicationSummary(schedule);
       if (date === today()) { state.todayMedication = schedule; renderHome(state.summary.todayRecord); }
       $("#medication-list").innerHTML = (schedule.slots || []).map((slot, index) => {
@@ -752,6 +767,12 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     });
     $("#retry-button").addEventListener("click", () => state.patientId ? loadPatient(state.patientId).catch(() => {}) : initialize());
     $("#open-meal").addEventListener("click", openMeal);
+    $('#open-medication-photo').addEventListener('click', async () => {
+      const dirty = medicationDirty();
+      if (!canLeavePatient()) return;
+      if (dirty) await loadMedicationSchedule();
+      medicationPhoto.open();
+    });
     $("#open-medication").addEventListener("click", () => switchView("medication"));
     $("#open-daily").addEventListener("click", () => openDaily("all"));
     document.addEventListener("click", event => {
@@ -787,6 +808,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
         dialogBaseline.delete(dialog.id);
         if (dialog.id === "daily-dialog") ++state.dateRequestId;
         if (dialog.id === "meal-dialog") clearPhoto();
+        if (dialog.id === "medication-photo-dialog") medicationPhoto.reset();
         const opener = dialogOpeners.get(dialog.id);
         dialogOpeners.delete(dialog.id);
         if (opener?.isConnected && !opener.disabled) opener.focus({ preventScroll: true });

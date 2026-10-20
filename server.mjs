@@ -9,6 +9,7 @@ import { resetDemo } from './lib/reset.mjs';
 import { allowedKeys, choice, csvCell, dateValue, decodeImage, HttpError, numberValue, objectBody, textList, textValue } from './lib/validation.mjs';
 import { ensureMedicationSchema, getMedicationOrders, createMedicationOrder, endMedicationOrder, medicationSchedule, saveMedicationEvent, getMedicationEvents } from './lib/medications.mjs';
 import { ensureVisionSchema, visionCapabilities, analyzePhoto, resolveMealAnalysis, markAnalysisApplied } from './lib/vision.mjs';
+import { ensureMedicationPhotoSchema, saveMedicationPhotoReport, getMedicationPhotoReports, getMedicationPhotoImage } from './lib/medication-photos.mjs';
 import { healthCapabilities, ensureHealthSchema, getHealthConnections, createHealthConnection, revokeHealthConnection, receiveHealthBatch, getHealthConnectionIdentity } from './lib/health-sync.mjs';
 
 import { createAuthService } from './lib/auth.mjs';
@@ -19,13 +20,14 @@ const publicDir = join(root, 'public');
 const { db, uploadDir } = openDatabase(process.env.DATA_DIR || join(root, 'data'));
 ensureMedicationSchema(db);
 ensureVisionSchema(db);
+ensureMedicationPhotoSchema(db);
 ensureHealthSchema(db);
 const auth = createAuthService({db});
 ensureCommunicationSchema(db);
-db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','4') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
+db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','5') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
 const port = Number(process.env.PORT || 3000);
 const bodyLimit = 7 * 1024 * 1024;
-const schemaVersion = 4;
+const schemaVersion = 5;
 
 function respond(res, status, value, extraHeaders = {}) {
   const body = JSON.stringify(value);
@@ -249,7 +251,7 @@ const server = http.createServer(async (req, res) => {
     if (path === '/api/dashboard' && method === 'GET') {auth.authorize(req,{staff:true});return respond(res,200,dashboard(db));}
     if (path === '/api/patients' && method === 'GET') {const actor=auth.authorize(req);const patients=getPatients(db);return respond(res,200,{patients:auth.capabilities().mode==='kakao' && actor.role!=='clinician'?patients.filter(p=>p.id===actor.patientId):patients,today:todayKorea(),provenance});}
     if (path === '/api/patients' && method === 'POST') {auth.authorize(req,{staff:true,write:true});return respond(res,201,{patient:createPatient(await readJson(req))});}
-    let match = /^\/api\/patients\/([^/]+)\/(medication-orders|medication-schedule|medication-events|photo-analyses|health-connections)$/.exec(path);
+    let match = /^\/api\/patients\/([^/]+)\/(medication-orders|medication-schedule|medication-events|medication-photo-reports|photo-analyses|health-connections)$/.exec(path);
     if (match) {
       const [, id, operation] = match;
       auth.authorize(req,{patientId:id,write:method==='POST'});
@@ -258,11 +260,20 @@ const server = http.createServer(async (req, res) => {
       if (operation === 'medication-orders' && method === 'GET') return respond(res, 200, { orders: getMedicationOrders(db, id) });
       if (operation === 'medication-orders' && method === 'POST') return respond(res, 201, { order: createMedicationOrder(db, id, await readJson(req)) });
       if (operation === 'medication-schedule' && method === 'GET') return respond(res, 200, medicationSchedule(db, id, dateValue(url.searchParams.get('date') ?? todayKorea())));
-      if (operation === 'medication-events' && method === 'GET') return respond(res, 200, getMedicationEvents(db, id, dateValue(url.searchParams.get('date') ?? todayKorea())));
+      if (operation === 'medication-events' && method === 'GET') return respond(res, 200, { ...getMedicationEvents(db, id, dateValue(url.searchParams.get('date') ?? todayKorea())), photoReports: getMedicationPhotoReports(db, id, url.searchParams.get('date') ?? todayKorea()).reports });
       if (operation === 'medication-events' && method === 'POST') return respond(res, 200, { event: saveMedicationEvent(db, id, await readJson(req)) });
+      if (operation === 'medication-photo-reports' && method === 'GET') return respond(res, 200, getMedicationPhotoReports(db, id, url.searchParams.get('date') ?? todayKorea()));
+      if (operation === 'medication-photo-reports' && method === 'POST') return respond(res, 201, saveMedicationPhotoReport(db, id, await readJson(req)));
       if (operation === 'photo-analyses' && method === 'POST') return respond(res, 201, await analyzePhoto({ db, patientId: id, body: await readJson(req) }));
       if (operation === 'health-connections' && method === 'GET') return respond(res, 200, getHealthConnections(db, id));
       if (operation === 'health-connections' && method === 'POST') return respond(res, 201, createHealthConnection(db, id, await readJson(req)));
+    }
+    match = /^\/api\/patients\/([^/]+)\/medication-photo-reports\/([^/]+)\/image$/.exec(path);
+    if (match && method === 'GET') {
+      auth.authorize(req,{patientId:match[1]});
+      const image = getMedicationPhotoImage(db, match[1], match[2]);
+      res.writeHead(200, { 'Content-Type': image.mime, 'Content-Length': image.buffer.length, 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' });
+      return res.end(image.buffer);
     }
     match = /^\/api\/medication-orders\/([^/]+)$/.exec(path);
     if (match && method === 'PATCH') {auth.authorize(req,{staff:true,write:true});return respond(res,200,{order:endMedicationOrder(db,match[1],await readJson(req))});}

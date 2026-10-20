@@ -17,3 +17,7 @@ Render 기존 서비스 → Environment에 `HOMECARE_VISION_API_KEY`(OpenAI API 
 - JPEG/PNG/WebP 최대5MB 유지. iPhone에서 HEIC 등 읽을 수 없는 형식은 JPEG/PNG로 선택하도록 안내한다. Safari가 JPEG로 전달한 카메라 사진은 그대로 처리한다.
 
 인수조건: 설정 없음·비활성·모델 오류·401/403/429/5xx 분리, 실제 모델 조회/사진 추론은 자격 증명 있을 때만 수행. mock 서버의 GPT 형식→초안→실제 POST meals→SQLite·요약 kcal/단백질·출처는 자동검사하되 실제 GPT 정확도라고 표시하지 않는다.
+
+## v0.6.1 약봉투 사진 자기보고
+
+환자 복약의 새 사진 입력도 같은 HOMECARE_VISION_API_KEY/VISION_ENABLED/VISION_MODEL을 재사용한다. 추가 국내 약품 API 키 없이 포장 글자 후보만 읽는다. 약·회차·상태는 직접 확인하며 사진+자기보고 저장/조회는 MEDICATION_PHOTO_DEMO_SPEC.md와 USER_ACTION_REPORT.md U-05를 따른다. 기존 의료진 사진 작성 보조와 식사 분석은 유지한다.

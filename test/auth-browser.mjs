@@ -10,7 +10,7 @@ import { chromium } from 'playwright';
 const listener=net.createServer();await new Promise(r=>listener.listen(0,'127.0.0.1',r));const port=listener.address().port;await new Promise(r=>listener.close(r));
 const base=`http://127.0.0.1:${port}`,dir=await mkdtemp(join(tmpdir(),'hc-auth-browser-'));
 let output='',browser;
-const child=spawn(process.execPath,['--disable-warning=ExperimentalWarning','--import','./test/helpers/kakao-provider-fixture.mjs','server.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.env,NODE_ENV:'test',AUTH_MODE:'kakao',APP_ORIGIN:base,KAKAO_CLIENT_ID:'fixture',KAKAO_CLIENT_SECRET:'fixture-secret',CLINICIAN_KAKAO_IDS:'101',PORT:String(port),DATA_DIR:dir},stdio:['ignore','pipe','pipe']});
+const child=spawn(process.execPath,['--disable-warning=ExperimentalWarning','--import','./test/helpers/kakao-provider-fixture.mjs','--import','./test/helpers/medication-vision-fixture.mjs','server.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.env,NODE_ENV:'test',VISION_ENABLED:'true',HOMECARE_VISION_API_KEY:'fixture-only-not-real',AUTH_MODE:'kakao',APP_ORIGIN:base,KAKAO_CLIENT_ID:'fixture',KAKAO_CLIENT_SECRET:'fixture-secret',CLINICIAN_KAKAO_IDS:'101',PORT:String(port),DATA_DIR:dir},stdio:['ignore','pipe','pipe']});
 child.stdout.on('data',s=>output+=s);child.stderr.on('data',s=>output+=s);
 const issues=[];
 async function login(context,id,next='/clinician'){
@@ -44,6 +44,17 @@ try{
  assert.equal((await write(patient,'/api/clinician/patients/p001/invitations',{})).status(),403);
  const png='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6WlEAAAAASUVORK5CYII=';
  const meal=await write(patient,'/api/patients/p001/meals',{mealType:'lunch',foodType:'balanced',portion:1,imageData:png});assert.equal(meal.status(),201);const photo=(await meal.json()).meal.imageUrl;assert.ok(photo);assert.equal((await patient.request.get(base+photo)).status(),200);assert.equal((await other.request.get(base+photo)).status(),403);assert.equal((await anonymous.request.get(base+photo)).status(),401);
+ // New medication photo evidence follows the same own-patient ACL and CSRF contract.
+ const date=(await(await staff.request.get(base+'/api/patients/p001/summary')).json()).today;
+ const orderResponse=await write(staff,'/api/patients/p001/medication-orders',{name:'가상약A',strength:'5mg',dose:'1정',times:['08:00'],startDate:date});assert.equal(orderResponse.status(),201);const order=(await orderResponse.json()).order;
+ const analysisResponse=await write(patient,'/api/patients/p001/photo-analyses',{kind:'medication',imageData:png,consentExternalProcessing:true});assert.equal(analysisResponse.status(),201);const analysis=(await analysisResponse.json()).analysis;
+ const photoBody={clientSubmissionId:crypto.randomUUID(),analysisId:analysis.id,imageData:png,date,patientConfirmed:true,slots:[{orderId:order.id,time:'08:00',status:'taken',expectedRevision:0}]};
+ assert.equal((await write(patient,'/api/patients/p001/medication-photo-reports',photoBody,'POST',false)).status(),403);
+ assert.equal((await write(other,'/api/patients/p001/medication-photo-reports',photoBody)).status(),403);
+ const medicationPhotoResponse=await write(patient,'/api/patients/p001/medication-photo-reports',photoBody);assert.equal(medicationPhotoResponse.status(),201);const medicationPhoto=(await medicationPhotoResponse.json()).report;
+ assert.equal((await patient.request.get(base+medicationPhoto.imageUrl)).status(),200);assert.equal((await staff.request.get(base+medicationPhoto.imageUrl)).status(),200);
+ assert.equal((await other.request.get(base+medicationPhoto.imageUrl)).status(),403);assert.equal((await anonymous.request.get(base+medicationPhoto.imageUrl)).status(),401);
+ assert.equal((await patient.request.get(base+'/api/patients/p002/medication-photo-reports?date='+date)).status(),403);
  console.log('PASS strict OAuth fixture, enrollment, CSRF, chart/role/photo isolation');
  await clinician.locator('#main-nav [data-view=notices]').click();await clinician.locator('#notice-title').fill('검사 안내 <script>window.xss=1</script>');await clinician.locator('#notice-body').fill('내원 전 기록을 확인해 주세요.\n<img src=x onerror="window.xss=1">');
  await clinician.locator('#notice-form [type=submit]').click();await eventually(async()=>!await clinician.locator('#notice-form [type=submit]').isDisabled());

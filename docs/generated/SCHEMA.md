@@ -2,7 +2,7 @@
 
 자동 생성: 임시 SQLite에 현재 추가 마이그레이션을 적용한 결과다. 사용자/공개 DB에 접근하지 않으며 행 값·토큰·사진을 저장하지 않는다. 의미와 단위는 [자료 사전](../DATA_DICTIONARY.md)과 [계약](../CONTRACTS.md)을 함께 읽는다.
 
-20 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
+22 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
 
 ## auth_accounts
 
@@ -307,6 +307,56 @@ CREATE TABLE medication_orders (
         created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
         UNIQUE(id,patient_id), CHECK(end_date IS NULL OR end_date>=start_date)
       )
+```
+
+## medication_photo_report_events
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| report_id | TEXT | yes |  | 1 |
+| patient_id | TEXT | yes |  |  |
+| event_id | TEXT | yes |  | 2 |
+| revision | INTEGER | yes |  |  |
+| event_json | TEXT | yes |  |  |
+
+외래키: event_id → medication_events.id (DELETE CASCADE); patient_id → medication_events.patient_id (DELETE CASCADE); report_id → medication_photo_reports.id (DELETE CASCADE); patient_id → medication_photo_reports.patient_id (DELETE CASCADE)
+
+```sql
+CREATE TABLE medication_photo_report_events (
+    report_id TEXT NOT NULL, patient_id TEXT NOT NULL, event_id TEXT NOT NULL,
+    revision INTEGER NOT NULL, event_json TEXT NOT NULL, PRIMARY KEY(report_id,event_id),
+    FOREIGN KEY(report_id,patient_id) REFERENCES medication_photo_reports(id,patient_id) ON DELETE CASCADE,
+    FOREIGN KEY(event_id,patient_id) REFERENCES medication_events(id,patient_id) ON DELETE CASCADE
+  )
+```
+
+## medication_photo_reports
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | TEXT | no |  | 1 |
+| patient_id | TEXT | yes |  |  |
+| client_submission_id | TEXT | yes |  |  |
+| request_hash | TEXT | yes |  |  |
+| analysis_id | TEXT | yes |  |  |
+| date | TEXT | yes |  |  |
+| image_hash | TEXT | yes |  |  |
+| image_bytes | BLOB | yes |  |  |
+| image_mime | TEXT | yes |  |  |
+| analysis_json | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: analysis_id → photo_analyses.id (DELETE CASCADE); patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE medication_photo_reports (
+    id TEXT PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    client_submission_id TEXT NOT NULL, request_hash TEXT NOT NULL,
+    analysis_id TEXT NOT NULL REFERENCES photo_analyses(id) ON DELETE CASCADE,
+    date TEXT NOT NULL, image_hash TEXT NOT NULL, image_bytes BLOB NOT NULL,
+    image_mime TEXT NOT NULL, analysis_json TEXT NOT NULL, created_at TEXT NOT NULL,
+    UNIQUE(patient_id,client_submission_id), UNIQUE(id,patient_id)
+  )
 ```
 
 ## messages

@@ -91,3 +91,7 @@
 | conversation_reads | 환자·계정별 읽음 highwater/역할 | 명시적 POST만 단조 증가; 환자 삭제 CASCADE |
 
 otherReadThrough는 해당 대화의 반대 역할이 확인한 최대 순번이다. UI는 증분 조회 응답이 비어도 기존 메시지의 읽음 표시를 갱신한다. clientMessageId는 실패 후 같은 내용을 재전송할 때 유지하고 편집 시 교체한다. generation은 환자·화면 전환 후 늦은 응답을 폐기한다. mounted는 의료진 새 화면의 DOM 식별자이며 일반 갱신에서 작성 폼을 재생성하지 않는다. hcClinicianIndex는 취소된 popstate의 이전 방문 기록 위치를 복구한다.
+
+## 사진 첨부 복약 보고 (MED-PHOTO-01)
+
+medication_photo_reports의 OCR snapshot은 openai-package-text-v1 추정이다. medication_photo_report_events의 event_json은 patient-self-report-with-photo 당시 기록으로 ingestion 증거가 아니다. revision은 기존 이벤트 버전, expectedRevision은 저장 충돌 검사값, reviewStatus=unreviewed는 의료진 검토를 하지 않았다는 뜻이다. date는 KST 회차 일자, createdAt/reportedAt는 UTC 보고 시각이며 복용 시각이 아니다. image_bytes는 JPEG/PNG/WebP 원본 최대5MB. 전체 필드/단위/리셋·재전송 규칙은 MEDICATION_PHOTO_DEMO_SPEC.md, 실제 SQL은 generated/SCHEMA.md를 따른다.

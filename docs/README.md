@@ -4,6 +4,7 @@
 
 | 문서 | 책임 |
 |---|---|
+| [MEDICATION_PHOTO_KR_PROPOSAL.md](MEDICATION_PHOTO_KR_PROPOSAL.md) | 국내 의약품 사진·복약 입력 기술 조사/개발 제안(미구현), 자료·API·검증/사용자 준비 |
 | [PRODUCT_PLAN.md](PRODUCT_PLAN.md) | 목적, 요구사항 ID, 개발 순서, 인수조건 |
 | [SCREEN_SPEC.md](SCREEN_SPEC.md) | 환자·의료진 페이지별 상단/하단·닫기·입력·상태·코드 대응 제작 규약 |
 | [SMARTPHONE_SYNC_SPEC.md](SMARTPHONE_SYNC_SPEC.md) | 일부 권한·항목 생략/삭제·revision·Android 코드의 상세 계약 |
@@ -29,3 +30,5 @@ v0.5 공식 확인 근거: [iPhone·GPT 자료](research/iphone-gpt-evidence-202
 이번 검토의 저장소 내 근거: [임상 검토](research/automation-clinical-review-2026-10-16.md), [건강 연동 근거](research/automation-evidence-2026-10-16.md). 공식 자료로 확인한 내용과 실제 서비스/기기에서 아직 확인하지 않은 내용을 구분했다.
 
 개발자는 작업 시작 시 이 색인→해당 요구사항→해당 계약→변수 의미를 확인한다. 코드와 문서가 다르면 조용히 코드에 맞추지 말고 원래 의도를 확인해 의사결정을 기록한다. 계획과 구현 상태는 별도로 관리한다.
+
+- [약봉투 사진 복약 데모 제작 명세](MEDICATION_PHOTO_DEMO_SPEC.md): 승인된 A단계 화면·API·동시성·사진 보관·인수조건.

@@ -72,3 +72,7 @@ v0.4 부분 권한/항목별 revision 확장은 SMARTPHONE_SYNC_SPEC.md가 기�
 metadata.generation은 DB 초기 생성과 명시적 reset마다 바뀌는 UUID다. 기존 DB에 없는 경우만 추가하고, 비동기 분석 시작/완료 사이 generation을 대조한다. 요약의 stable은 '확보된 기록에서 규칙 미해당'일 뿐 건강 안정 진단이 아니다. 활동/수면/복약의 최소 자료 기준 중 부족 영역이 있으면 missingData=true와 자료부족을 표시한다. 복약 자료 충분성은 기존 일일 보고와 명시적인 약별 회차 보고일을 함께 참고하되, 일일 점수와 약별 횟수는 섞어 계산하지 않는다.
 
 복약 최소자료는 taken/partial/missed인 일일 보고일과 taken/missed 회차 보고일의 합집합으로3일을 확인한다(unknown은 알려진 복용 상태가 아님). 미복용 확인 규칙은 일일 또는 회차별 missed 날짜를 중복 없이 합친다. metrics.medication의 기존 점수/일수는 기존 일일 의미를 유지하며 doseReportedDays/doseReportedSlots로 약별 자료 존재를 따로 전달한다. 브리핑은 두 종류를 명시하고 근거를 분리한다.
+
+## MED-PHOTO-01 사진 첨부 복약 보고 (schema5)
+
+MEDICATION_PHOTO_DEMO_SPEC.md의 POST/GET medication-photo-reports 및 image 경로·expectedRevision·일괄 원자성·UUID 재전송 계약을 따른다. OCR 추정/환자 자기보고/의료진 검토 상태를 분리한다. 기존 수동 보고 API는 유지한다.

@@ -9,6 +9,7 @@ export const PATIENT_SCREENS = Object.freeze({
 });
 
 export const PATIENT_INPUT_SCREENS = Object.freeze({
+  medicationPhoto: Object.freeze({ id: 'P-MED-PHOTO', dialog: 'medication-photo-dialog', title: '사진으로 복약 기록', closeTarget: 'opener' }),
   meal: Object.freeze({ id: 'P-MEAL', dialog: 'meal-dialog', title: '무엇을 드셨나요?', closeTarget: 'opener' }),
   all: Object.freeze({ id: 'P-DAILY', dialog: 'daily-dialog', title: '건강 기록 남기기', closeTarget: 'opener' }),
   steps: Object.freeze({ id: 'P-STEPS', dialog: 'daily-dialog', title: '걸음 수 기록하기', closeTarget: 'opener' }),
