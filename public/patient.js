@@ -4,6 +4,8 @@ import { bootstrapSession, sessionState, sessionHeaders, sessionExpired, demoPat
 import { createMedicationPhoto } from './patient-medication-photo.js';
 import { createPatientCommunications } from './patient-communications.js';
 import { preparePatientImage } from './patient-image.js';
+import { createPatientAssist } from './patient-assist.js';
+import { createPatientDictation } from './patient-dictation.js';
 
 import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
@@ -41,7 +43,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   const weekday = (date) => date ? dateObject(date).toLocaleDateString("ko-KR", { weekday: "short", timeZone: "Asia/Seoul" }) : "";
   const fallbackToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
   const today = () => state.summary?.today || fallbackToday();
-  let toastTimer;
+  let toastTimer, assist, dictation, checkedAt=0;
   const dialogBaseline = new Map();
   const dialogOpeners = new Map();
   const medicationBaseline = new Map();
@@ -55,7 +57,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
   function dialogDirty(dialog) {
     const form = $('form', dialog);
-    return dialogBaseline.has(dialog.id) && dialogBaseline.get(dialog.id) !== formSnapshot(form);
+    return Boolean(dictation?.belongsTo(form)&&dictation.dirty()) || (dialogBaseline.has(dialog.id) && dialogBaseline.get(dialog.id) !== formSnapshot(form));
   }
 
   function medicationDirty() {
@@ -65,12 +67,14 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
   function canLeavePatient() {
     if (state.saving || state.loading) return false;
-    const dirty=$$('dialog[open]').some(dialogDirty)||medicationDirty()||communication.dirty();
+    const voiceDirty=dictation?.dirty();dictation?.pause();
+    const dirty=$$('dialog[open]').some(dialogDirty)||medicationDirty()||communication.dirty()||voiceDirty;
     if(dirty && !window.confirm('저장하지 않은 입력이 있어요. 저장하지 않고 나갈까요?'))return false;
-    if(dirty)communication.discard();return true;
+    if(dirty)communication.discard();dictation?.reset();assist?.stop();return true;
   }
 
   function openRecordDialog(id) {
+    assist?.stop(); dictation?.reset();
     const dialog = $(`#${id}`);
     dialogBaseline.set(id, formSnapshot($('form', dialog)));
     dialogOpeners.set(id, document.activeElement);
@@ -78,7 +82,8 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   }
 
   function closeRecordDialog(dialog) {
-    if (state.saving || (dialogDirty(dialog) && !window.confirm('저장하지 않은 입력이 있어요. 저장하지 않고 나갈까요?'))) return;
+    const voiceDirty=dictation?.belongsTo($('form',dialog))&&dictation.dirty();dictation?.pause();
+    if (state.saving || ((voiceDirty||dialogDirty(dialog)) && !window.confirm('저장하지 않은 입력이 있어요. 저장하지 않고 나갈까요?'))) return;
     dialog.close();
   }
 
@@ -87,6 +92,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     if (state.view !== 'home') $(`#view-${state.view} h1`).textContent = screen.title;
     const locked = Boolean(state.saving || state.loading);
     $('#patient-view-close').hidden = !screen.closeTarget;
+    $('#voice-guide-controls').hidden=state.view!=='home';
     $('#patient-view-close').disabled = locked;
     $('#patient-view-close').dataset.screenId = screen.id;
     $('#patient-home-link').href = `/patient?patientId=${encodeURIComponent(state.patientId || '')}`;
@@ -171,6 +177,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#patient-select").disabled = true;
     $("#load-error").hidden = true;
     if (initial || changed) {
+      dictation?.reset(); assist?.changed();
       ++state.medicationRequestId;
       ++state.connectionRequestId;
       ++state.dateRequestId;
@@ -194,6 +201,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       state.patientId = patientId;
       if(initial||changed)communication.reset(patientId);
       state.summary = summary;
+      checkedAt=Date.now();
       state.todayMedication = todayMedication;
       $("#patient-select").value = patientId;
       try { localStorage.setItem("homecarePatientId", patientId); } catch (_) { /* Storage is optional. */ }
@@ -208,6 +216,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       if (requestId === state.requestId) {
         state.loading = false;
         renderNavigation();
+        assist?.update({automatic:initial||changed});
       }
     }
   }
@@ -260,9 +269,10 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       { icon: "medication", label: "복약", value: !schedule ? "일정 확인 필요" : scheduled ? `${reported}/${slots.length}회 보고` : record?.medicationStatus ? labels.medication[record.medicationStatus] : null, unit: "", status: !schedule ? "목록을 다시 불러와 주세요" : scheduled ? `${taken}회 복용 보고 · ${slots.length - reported}회 미보고` : record?.medicationStatus ? "하루 전체 자기보고" : "오늘의 복약을 남겨요", target: "medication" },
       { icon: "nutrition", label: "단백질", value: knownMeals.length ? number(protein, 1) : meals.length ? "양 미상" : null, unit: knownMeals.length ? "g" : "", status: meals.length ? `기록한 식사 추정 합계 · ${meals.length - knownMeals.length}회 양 미상` : "식사를 기록하면 보여요", target: "nutrition" },
     ];
-    $("#today-metrics").innerHTML = cards.map((card) => `<button class="health-card" type="button" data-action="${card.target}" aria-label="${escape(card.label)} ${card.value === null ? "미기록" : escape(card.value + " " + card.unit)}. ${card.target === "nutrition" ? "식사 기록 보기" : card.target === "medication" ? "복약 목록 보기" : "기록하기"}"><span class="metric-heading">${svg(card.icon)}${card.label}</span><span class="metric-value${card.value === null ? " empty" : ""}">${card.value === null ? "아직 기록 전" : escape(card.value)}${card.value !== null && card.unit ? `<small>${card.unit}</small>` : ""}</span><span class="metric-status">${escape(card.status)}</span></button>`).join("");
+    $("#today-metrics").innerHTML = cards.map((card) => `<button class="health-card" type="button" data-action="${card.target}" aria-label="${escape(card.label)} ${card.value === null ? "미기록" : escape(card.value + " " + card.unit)}. ${card.target === "nutrition" ? "식사 기록 보기" : card.target === "medication" ? "복약 목록 보기" : "기록하기"}"><span class="metric-heading">${svg(card.icon)}${card.label}</span><span class="metric-value${card.value === null ? " empty" : ""}">${card.value === null ? "아직 기록 전" : escape(card.value)}${card.value !== null && card.unit ? `<small>${card.unit}</small>` : ""}</span><span class="metric-status">${escape(card.status)}</span><span class="metric-action">${card.target === "nutrition" ? "식사 기록 보기 ›" : card.target === "medication" ? "약 기록 열기 ›" : "입력·수정하기 ›"}</span></button>`).join("");
     $("#health-source-caption").textContent = `활동: ${sourceLabel(record?.stepsSource, record?.steps)} · 수면: ${sourceLabel(record?.sleepSource, record?.sleepHours)}`;
     renderMeals($("#home-meals"), (state.summary.recentMeals || []).slice(0, 2));
+    assist?.update();
   }
 
   function safeImageUrl(value) {
@@ -386,6 +396,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   function openMeal() {
     if (!state.summary || state.loading || state.saving) return;
     $("#meal-form").reset();
+    $("#meal-form [data-voice-applied]")?.remove();
     state.mealSubmissionKey = null; state.mealSubmissionPayload = null;
     $("#meal-dialog-title").textContent = PATIENT_INPUT_SCREENS.meal.title;
     invalidateAnalysis();
@@ -405,6 +416,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   }
 
   function applyDailyRecord(record) {
+    $("#daily-form [data-voice-applied]")?.remove();
     state.dailyBaseline = {};
     state.dailyRevision = record?.revision ?? 0;
     state.dailySubmissionKey = null; state.dailySubmissionPayload = null;
@@ -573,6 +585,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       $('#daily-date').value = dailyLoadedDate;
       return;
     }
+    dictation?.reset();
     const requestId = ++state.dateRequestId;
     const patientId = state.patientId;
     $("#daily-error").hidden = true;
@@ -678,7 +691,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       if (date === today()) { state.todayMedication = schedule; renderHome(state.summary.todayRecord); }
       const slotForms = (schedule.slots || []).map((slot, index) => {
         const labels = { pending: "미보고", taken: "복용 보고", missed: "미복용 보고", unknown: "기억나지 않음" };
-        return `<form id="medication-slot-${index}" class="medication-slot" data-slot-index="${index}"><div class="medication-slot-header"><div><h2>${escape(slot.time)} · ${escape(slot.name)}</h2><p class="medication-meta">${escape([slot.strength, slot.dose, slot.route].filter(Boolean).join(" · "))}</p></div><span class="medication-status ${escape(slot.status)}">${escape(labels[slot.status] || "미보고")}</span></div>${slot.instructions ? `<p class="inline-notice">${escape(slot.instructions)}</p>` : ""}<fieldset><legend>이 회차의 복약 상태</legend><div class="choice-grid three slot-actions">${[["taken", "먹었어요"], ["missed", "못 먹었어요"], ["unknown", "기억 안 나요"]].map(([value, label]) => `<label class="choice"><input type="radio" name="status" value="${value}" ${slot.status === value ? "checked" : ""}><span>${label}</span></label>`).join("")}</div></fieldset><details class="medication-extra" ${slot.reason || slot.note ? "open" : ""}><summary>사유나 이야기도 남기기 (선택)</summary><div class="form-field slot-reason"><label for="slot-reason-${index}">사유 <span class="optional">선택</span></label><input id="slot-reason-${index}" name="reason" type="text" maxlength="500" value="${escape(slot.reason)}" placeholder="예: 잊었어요, 속이 불편했어요"></div><div class="form-field slot-note"><label for="slot-note-${index}">함께 전할 이야기 <span class="optional">선택</span></label><textarea id="slot-note-${index}" name="note" maxlength="2000" rows="2">${escape(slot.note)}</textarea></div></details><p class="form-error" data-slot-error role="alert" hidden></p><button class="button button-primary" type="submit">${slot.revision ? "이 회차 기록 수정하기" : "이 회차 기록 저장하기"}</button>${slot.revision ? `<p class="record-source">보고 ${slot.revision}차 · 수정 전 기록도 보관돼요.</p>` : ""}</form>`;
+        return `<form id="medication-slot-${index}" class="medication-slot" data-slot-index="${index}"><div class="medication-slot-header"><div><h2>${escape(slot.time)} · ${escape(slot.name)}</h2><p class="medication-meta">${escape([slot.strength, slot.dose, slot.route].filter(Boolean).join(" · "))}</p></div><span class="medication-status ${escape(slot.status)}">${escape(labels[slot.status] || "미보고")}</span></div>${slot.instructions ? `<p class="inline-notice">${escape(slot.instructions)}</p>` : ""}<fieldset><legend>이 회차의 복약 상태</legend><div class="choice-grid three slot-actions">${[["taken", "먹었어요"], ["missed", "못 먹었어요"], ["unknown", "기억 안 나요"]].map(([value, label]) => `<label class="choice"><input type="radio" name="status" value="${value}" ${slot.status === value ? "checked" : ""}><span>${label}</span></label>`).join("")}</div></fieldset><button type="button" class="button voice-entry" data-dictation="dose">말로 이 회차 복약 상태 입력하기</button><details class="medication-extra" ${slot.reason || slot.note ? "open" : ""}><summary>사유나 이야기도 남기기 (선택)</summary><div class="form-field slot-reason"><label for="slot-reason-${index}">사유 <span class="optional">선택</span></label><input id="slot-reason-${index}" name="reason" type="text" maxlength="500" value="${escape(slot.reason)}" placeholder="예: 잊었어요, 속이 불편했어요"></div><div class="form-field slot-note"><label for="slot-note-${index}">함께 전할 이야기 <span class="optional">선택</span></label><textarea id="slot-note-${index}" name="note" maxlength="2000" rows="2">${escape(slot.note)}</textarea></div></details><p class="form-error" data-slot-error role="alert" hidden></p><button class="button button-primary" type="submit">${slot.revision ? "이 회차 기록 수정하기" : "이 회차 기록 저장하기"}</button>${slot.revision ? `<p class="record-source">보고 ${slot.revision}차 · 수정 전 기록도 보관돼요.</p>` : ""}</form>`;
       });
       const times = [...new Set((schedule.slots || []).map(slot => slot.time))].sort();
       $('#medication-list').innerHTML = times.map(time => `<section class="medication-time-group"><h2>${escape(time)} 복약</h2>${(schedule.slots || []).flatMap((slot, index) => slot.time === time ? [slotForms[index]] : []).join('')}</section>`).join('');
@@ -876,6 +889,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
         dialogBaseline.delete(dialog.id);
         if (dialog.id === "daily-dialog") ++state.dateRequestId;
         if (dialog.id === "meal-dialog") clearPhoto();
+        dictation?.reset();
         if (dialog.id === "medication-photo-dialog") medicationPhoto.reset();
         const opener = dialogOpeners.get(dialog.id);
         dialogOpeners.delete(dialog.id);
@@ -915,7 +929,8 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#connection-token-dismiss").addEventListener("click", clearConnectionToken);
     window.addEventListener("pagehide", clearConnectionToken);
     window.addEventListener('beforeunload', event => {
-      if (!window.__homecareLeaving && (state.saving || $$('dialog[open]').some(dialogDirty) || medicationDirty() || communication.dirty())) {
+      if (!window.__homecareLeaving && (state.saving || $$('dialog[open]').some(dialogDirty) || medicationDirty() || communication.dirty() || dictation?.dirty())) {
+        dictation?.pause();
         event.preventDefault();
         event.returnValue = '';
       }
@@ -989,9 +1004,43 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     } catch (error) { showError(error.message); }
   }
 
+  function voiceContext(button) {
+    const form=button.closest('form'); if(!form || !state.patientId || state.loading || state.saving)return null;
+    const kind=button.dataset.dictation;
+    const date=kind==='daily'?$('#daily-date').value:kind==='meal'?$('#meal-date').value:kind==='dose'||kind==='legacy'?state.medicationDate:today();
+    const slot=kind==='dose'?state.medicationSchedule?.slots[Number(form.dataset.slotIndex)]:null;
+    const fields=[];
+    const add=(key,label,example)=>{
+      const controls=[...form.querySelectorAll('[name="'+key+'"]')];
+      if(!controls.length||controls.every(el=>el.disabled||el.closest('[hidden]')))return;
+      fields.push({key,label,example,apply(value){
+        if(['radio','checkbox'].includes(controls[0].type))controls.forEach(el=>{el.checked=el.value===String(value===null?'unknown':value);});
+        else controls[0].value=String(value);
+        const target=controls.find(el=>el.checked)||controls[0];
+        target.dispatchEvent(new Event('input',{bubbles:true})); target.dispatchEvent(new Event('change',{bubbles:true}));target.focus();
+      }});
+    };
+    if(kind==='daily'){add('steps','걸음 수','삼천 오백 걸음');add('sleepHours','수면 시간','일곱 시간 삼십 분');add('weightKg','몸무게','육십이 점 오 킬로그램');add('medicationStatus','하루 전체 복약 상태','모두 먹었어요');add('note','함께 전할 이야기','오늘은 산책을 했어요');add('date','기록 날짜','오늘 또는 2026년 10월 23일');}
+    if(kind==='meal'){if(!state.analysis)add('foodType','식사 종류','밥과 반찬');add('portion','먹은 양','절반 먹었어요');add('date','기록 날짜','오늘');}
+    if(kind==='dose')add('status','이 회차 복약 상태','먹었어요 또는 못 먹었어요');
+    if(kind==='legacy')add('medicationStatus','하루 전체 복약 상태','모두 먹었어요');
+    if(kind==='message'){const textarea=$('#patient-message-body');fields.push({key:'messageBody',label:'의료진에게 남길 말',example:'기록 방법을 알려 주세요',apply(value){textarea.value=value;textarea.dispatchEvent(new Event('input',{bubbles:true}));textarea.focus();}});}
+    if(!fields.length)return null;
+    return {key:JSON.stringify([state.patientId,form.id,date,state.dailyMode,slot?.orderId,slot?.time,state.analysis?.id]),today:today(),date,fields,label:`${state.summary.patient.name}님 · ${date}${slot?' · '+slot.time+' · '+slot.name:''}`};
+  }
+  async function refreshAssistance(){
+    if(state.loading||state.saving||state.view!=='home'||document.hidden||$('dialog[open]')||dictation?.dirty()||communication.dirty())return false;
+    const patientId=state.patientId,request=state.requestId;
+    const [summary,schedule]=await Promise.all([api(`/api/patients/${encodeURIComponent(patientId)}/summary`),api(`/api/patients/${encodeURIComponent(patientId)}/medication-schedule?date=${encodeURIComponent(fallbackToday())}`).catch(()=>null)]);
+    if(patientId!==state.patientId||request!==state.requestId||state.view!=='home'||$('dialog[open]')||state.saving||dictation?.dirty())return false;
+    state.summary=summary;state.todayMedication=schedule;checkedAt=Date.now();render();return true;
+  }
+  assist=createPatientAssist({getContext:()=>({summary:state.summary,schedule:state.todayMedication,patientId:state.patientId,view:state.view,checkedAt}),isBusy:automatic=>Boolean(state.loading||state.saving||$('#app-content').hidden||!$('#load-error').hidden||dictation?.recording()||(automatic&&($('dialog[open]')||dictation?.dirty()||medicationDirty()||communication.dirty()))),refresh:refreshAssistance,onAction(action){if(action==='meal')openMeal();if(action==='medication')switchView('medication');if(action==='steps'||action==='sleep')openDaily(action);}});
+  dictation=createPatientDictation({getContext:voiceContext,isBusy:()=>Boolean(state.loading||state.saving),beforeListen:()=>assist.stop(),speak:text=>assist.say(text),stopSpeak:()=>assist.stop()});
+
   window.homecareCanLogout=canLeavePatient;
   try {if(!await bootstrapSession('patient'))return;}catch(issue){showError(issue.message);return;}
-  if(sessionState.mode==='kakao' && sessionState.user?.role==='patient')$('#patient-select').hidden=true;
+  if(sessionState.mode==='kakao' && sessionState.user?.role==='patient'){$('#patient-select').hidden=true;$('#patient-name').hidden=false;}
   routeFromUrl();
   bindEvents();
   initialize();

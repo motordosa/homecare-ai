@@ -1,0 +1,32 @@
+{
+  "saved": {
+    "notice": {
+      "id": 1,
+      "title": "[합성 검증] 공지 기본 저장",
+      "body": "실제 환자 정보가 없는 화면 검증용 공지입니다.",
+      "status": "draft",
+      "pinned": false,
+      "version": 1,
+      "createdAt": "2026-10-24T03:48:33.316Z",
+      "updatedAt": "2026-10-24T03:48:33.316Z",
+      "publishedAt": null,
+      "read": false
+    }
+  },
+  "published": {
+    "notice": {
+      "id": 1,
+      "title": "[합성 검증] 공지 기본 저장",
+      "body": "실제 환자 정보가 없는 화면 검증용 공지입니다.",
+      "status": "published",
+      "pinned": false,
+      "version": 2,
+      "createdAt": "2026-10-24T03:48:33.316Z",
+      "updatedAt": "2026-10-24T03:48:33.530Z",
+      "publishedAt": "2026-10-24T03:48:33.530Z",
+      "read": false
+    }
+  },
+  "errors": [],
+  "environment": "temporary local synthetic database, not public Render"
+}

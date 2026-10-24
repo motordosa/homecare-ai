@@ -275,3 +275,16 @@ test('empty cohorts and reset generations do not fabricate percentages or reuse 
   assert.notDeepEqual(researchPreview(f.db,f.options).participants.map(p=>p.participantId),before);
   assert.throws(()=>getResearchSnapshot(f.db,snapshot.id),e=>e.status===404);
 });
+
+test('snapshot export preserves creation software version for new and legacy immutable runs',t=>{
+  const {db,options}=fixture(t);
+  const snapshot=createResearchSnapshot(db,{...options,clientRequestId:randomUUID()},'researcher');
+  assert.equal(snapshot.manifest.softwareVersion,'homecare-ai-0.8.0');
+  const original=db.prepare('SELECT * FROM research_snapshots WHERE id=?').get(snapshot.id);
+  const data=JSON.parse(original.data_json);delete data.softwareVersion;
+  const legacyId=randomUUID();
+  db.prepare(`INSERT INTO research_snapshots(id,client_request_id,created_by,request_hash,scope_json,recipe_json,data_json,content_hash,created_at,generation)
+    VALUES(?,?,?,?,?,?,?,?,?,?)`).run(legacyId,randomUUID(),original.created_by,original.request_hash,original.scope_json,original.recipe_json,JSON.stringify(data),original.content_hash,original.created_at,original.generation);
+  assert.equal(getResearchSnapshot(db,legacyId).manifest.softwareVersion,'homecare-ai-0.7.0');
+  assert.equal(exportResearchSnapshot(db,legacyId).manifest.softwareVersion,'homecare-ai-0.7.0');
+});

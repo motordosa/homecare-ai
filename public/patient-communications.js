@@ -44,7 +44,7 @@ export function createPatientCommunications({api,getView,isBusy,setBusy,toast}) 
       const opened=new Set([...notices.querySelectorAll('details[open]')].map(el=>el.dataset.noticeId+':'+el.dataset.version));
       const moreOpen = Boolean(notices.querySelector('.notice-more[open]'));
       const renderNotice = n => `<details class="patient-notice" data-notice-id="${n.id}" data-version="${n.version}" ${opened.has(n.id+':'+n.version)?'open':''}><summary>${n.pinned?'<span class="notice-important">중요</span>':''}<span>${esc(n.title)}</span>${n.read?'':'<span class="notice-new">새 공지</span>'}</summary><p>${esc(n.body)}</p><time>${esc(time(n.publishedAt))}</time></details>`;
-      notices.innerHTML=`<div class="notice-banner-heading"><strong>의료진 공지</strong><span>${result.notices.length?'제목을 누르면 내용을 볼 수 있어요':'등록된 공지가 없어요'}</span></div>` +
+      notices.innerHTML=`<div class="notice-banner-heading"><strong>의료진 공지</strong><span>${result.notices.length?'눌러서 보기':'등록된 공지가 없어요'}</span></div>` +
         (result.notices[0] ? renderNotice(result.notices[0]) : '') +
         (result.notices.length > 1 ? `<details class="notice-more" id="patient-notice-more" ${moreOpen?'open':''}><summary>다른 공지 ${result.notices.length - 1}건 보기</summary>${result.notices.slice(1).map(renderNotice).join('')}</details>` : '');
     } catch(issue){if(request===generation){noticeSignature='';notices.innerHTML='<div class="notice-banner-heading"><strong>의료진 공지</strong><span role="alert">공지를 불러오지 못했어요.</span></div><button type="button" class="text-button" id="notice-retry">다시 확인</button>';}}

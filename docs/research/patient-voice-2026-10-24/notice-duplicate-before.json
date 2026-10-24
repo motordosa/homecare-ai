@@ -1,0 +1,10 @@
+{
+  "environment": "local baseline v0.7.0 synthetic DB",
+  "samePayloadRequests": 2,
+  "createdIds": [
+    2,
+    3
+  ],
+  "duplicateCreated": true,
+  "cleanup": "own synthetic notices archived"
+}

@@ -1,0 +1,81 @@
+{
+  "viewport": 390,
+  "overflow": false,
+  "speechSynthesis": true,
+  "speechRecognition": true,
+  "notification": true,
+  "actionInfo": [
+    {
+      "tag": "BUTTON",
+      "cls": "action-card meal-action",
+      "text": "식사 기록\n무엇을 드셨나요?",
+      "background": "rgb(17, 104, 79)",
+      "border": "0px none rgb(255, 255, 255)",
+      "top": 507.9375,
+      "font": "18px"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "action-card medication-action",
+      "text": "복약 기록\n오늘 약 드셨나요?",
+      "background": "rgb(234, 240, 252)",
+      "border": "0px none rgb(94, 110, 155)",
+      "top": 507.9375,
+      "font": "18px"
+    },
+    {
+      "tag": "DIV",
+      "cls": "progress-card",
+      "text": "오늘의 기록\n오늘 남긴 기록이에요\n4종류\n✓\n식사\n기록 완료\n✓\n복약\n기록 완료\n✓\n활동\n기록 완료\n✓\n수면\n기록 완료",
+      "background": "rgb(255, 255, 255)",
+      "border": "1px solid rgb(231, 237, 233)",
+      "top": 666.125,
+      "font": "18px"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "health-card",
+      "text": "걸음 수\n3,693\n걸음\n직접 입력",
+      "background": "rgb(255, 255, 255)",
+      "border": "1px solid rgb(231, 237, 233)",
+      "top": 969.71875,
+      "font": "18px"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "health-card",
+      "text": "수면\n6.9\n시간\n직접 입력",
+      "background": "rgb(255, 255, 255)",
+      "border": "1px solid rgb(231, 237, 233)",
+      "top": 969.71875,
+      "font": "18px"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "health-card",
+      "text": "복약\n모두 복용\n하루 전체 자기보고",
+      "background": "rgb(255, 255, 255)",
+      "border": "1px solid rgb(231, 237, 233)",
+      "top": 1111.65625,
+      "font": "18px"
+    },
+    {
+      "tag": "BUTTON",
+      "cls": "health-card",
+      "text": "단백질\n50\ng\n기록한 식사 추정 합계 · 0회 양 미상",
+      "background": "rgb(255, 255, 255)",
+      "border": "1px solid rgb(231, 237, 233)",
+      "top": 1111.65625,
+      "font": "18px"
+    },
+    {
+      "tag": "SECTION",
+      "cls": "section-card",
+      "text": "하루 복약 자기보고이 날짜에는 등록된 약별 일정이 없어요. 하루 전체의 복약 상태만 남길 수 있어요. 약별 회차 기록과 구분해서 보관해요.\n            이날 약은 어떻게 드셨나요?\n    ",
+      "background": "rgb(255, 255, 255)",
+      "border": "1px solid rgb(227, 235, 229)",
+      "top": 0,
+      "font": "18px"
+    }
+  ]
+}

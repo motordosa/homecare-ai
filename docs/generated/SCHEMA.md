@@ -2,7 +2,7 @@
 
 자동 생성: 임시 SQLite에 현재 추가 마이그레이션을 적용한 결과다. 사용자/공개 DB에 접근하지 않으며 행 값·토큰·사진을 저장하지 않는다. 의미와 단위는 [자료 사전](../DATA_DICTIONARY.md)과 [계약](../CONTRACTS.md)을 함께 읽는다.
 
-39 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
+40 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
 
 ## auth_accounts
 
@@ -664,6 +664,28 @@ CREATE TABLE notice_reads (
 CREATE TABLE notice_revisions (
     notice_id INTEGER NOT NULL REFERENCES notices(id) ON DELETE CASCADE, version INTEGER NOT NULL,
     actor_id TEXT NOT NULL REFERENCES auth_accounts(id), snapshot TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(notice_id,version)
+  )
+```
+
+## notice_submissions
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| actor_id | TEXT | yes |  | 1 |
+| client_request_id | TEXT | yes |  | 2 |
+| request_hash | TEXT | yes |  |  |
+| notice_id | INTEGER | yes |  |  |
+| result_json | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: notice_id → notices.id (DELETE CASCADE); actor_id → auth_accounts.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE notice_submissions (
+    actor_id TEXT NOT NULL REFERENCES auth_accounts(id) ON DELETE CASCADE,
+    client_request_id TEXT NOT NULL, request_hash TEXT NOT NULL,
+    notice_id INTEGER NOT NULL REFERENCES notices(id) ON DELETE CASCADE,
+    result_json TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(actor_id,client_request_id)
   )
 ```
 

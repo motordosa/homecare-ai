@@ -119,3 +119,17 @@ medication_photo_reports의 OCR snapshot은 openai-package-text-v1 추정이다.
 | photo report.reviewStatus | 환자에게 제공하는 공개 검토 상태. 직원 내부 note/actor는 환자 응답 제외 |
 
 모든 새 테이블의 실제 컬럼·FK·유일성과 삭제 동작은 generated/SCHEMA.md에서 생성·검사한다. 사람 의미는 본 문서와 USABILITY_IMPLEMENTATION_PLAN에 유지한다.
+
+## v0.8.0 환자 화면·음성 개선 (2026-10-24, 구현 전)
+
+현재 새 변경의 요구·화면/상태·데이터·지원 범위·변수·검증 기준은 [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md)를 따른다. 기존 v0.7.0 공통 규약을 계승하며 환자 본문20/도움18/누름56 목표, 행동/정보 구분과 인라인 음성 안내·음성 입력·할 일 알림을 추가한다. 기존 의료진/네이티브와 환자 기록 API는 유지하고 공지 영수증 테이블은 schema7로 추가한다. 음성 인식 결과는 확인 후 기존 입력칸에만 반영한다. 녹음·원고 자동 저장·백그라운드 전달을 구현 완료로 표시하지 않는다.
+
+| v0.8.0 변수 | 의미/범위·보관 |
+|---|---|
+| demoToken / X-HomeCare-Demo-Session | 명시적 demo 모드의 탭별 세션, RAM 보관. 서버 hash/만료/CSRF 검사, Kakao 모드 무시 |
+| notice_submissions / clientRequestId | 공지 actor/UUID·요청 해시·결과·공지FK; reset/공지 삭제 시 CASCADE |
+| koreaClock / taskData / checkedAt | KST 날짜/시각·현재 할 일·마지막 서버 확인, 예전 날짜/실패/오래된 자료로 자동알림 금지 |
+| homecarePatientAssist | localStorage 비민감 boolean voiceEnabled/remindersEnabled만 보관. 건강값/원고/계정토큰 저장 금지 |
+| generation / context.key / finalParts | 음성 인식 세대·환자/폼/날짜/필드/약 회차 고정·세션 최종 문장, 탭 RAM만 사용 |
+| parsed / confirmedText | 단위/범위 검사 결과와 읽을 확인문구; 체크 후 입력칸 적용, 자동 DB 저장 없음 |
+| recording / lastFailureAt / fresh | 마이크 사용 상태·최신조회 실패 시각·알림 가능한 최신자료 여부 |

@@ -1,0 +1,16 @@
+
+> homecare-ai-demo@0.8.0 test:menus
+> node test/menu-flows-browser.mjs
+
+PASS patient registration through clinician UI persists and selected patient survives refresh
+PASS same browser clinician and patient tabs can publish with lost-response retry exactly once
+PASS manual meal and measurement clicks reach clinician records and survive reload
+PASS clinician dose plan is reported in patient UI and retained in clinician dose view
+PASS messages flow both ways in shared browser with stable patient scope
+PASS all clinician and patient menus navigate, cancel and refresh without role collision
+6 cross-menu browser flows passed, including same-browser roles and real server writes.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

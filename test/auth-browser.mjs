@@ -111,6 +111,6 @@ try{
  await different.close();await restored.close();
  console.log('PASS expired session draft preservation, wrong-account recovery rejection, same-account reauthentication');
  clinician.once('dialog',d=>d.accept());await clinician.locator('#main-nav [data-view=patients]').click();await clinician.locator('[data-action=invitation]').click();await eventually(async()=>(await clinician.locator('#invitation-result').innerText()).startsWith('hci_'));await clinician.locator('#modal [data-modal-action=close]').click();assert.equal(await clinician.locator('#invitation-result').count(),0);
- await mobile.locator('[data-auth-logout]').click();await mobile.waitForURL('**/login?loggedout=1');assert.equal((await patient.request.get(base+'/api/patients/p001/messages')).status(),401);await mobile.goto(base+'/clinician');await mobile.waitForURL('**/login?next=**');
+ await mobile.locator('.patient-account > summary').click();await mobile.locator('[data-auth-logout]').click();await mobile.waitForURL('**/login?loggedout=1');assert.equal((await patient.request.get(base+'/api/patients/p001/messages')).status(),401);await mobile.goto(base+'/clinician');await mobile.waitForURL('**/login?next=**');
  assert.deepEqual(issues,[]);console.log('PASS invitation modal cleanup, logout revocation and protected direct navigation');
 }finally{if(browser)await browser.close();if(child.exitCode===null)await new Promise(r=>{child.once('exit',r);child.kill('SIGTERM');});await rm(dir,{recursive:true,force:true});}

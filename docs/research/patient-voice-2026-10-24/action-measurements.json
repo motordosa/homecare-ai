@@ -1,0 +1,74 @@
+[
+  {
+    "text": "다시 듣기",
+    "tag": "BUTTON",
+    "width": 100,
+    "height": 56,
+    "background": "rgb(22, 78, 99)",
+    "color": "rgb(255, 255, 255)"
+  },
+  {
+    "text": "식사 기록하기\n무엇을 드셨나요?\n누르세요 ›",
+    "tag": "BUTTON",
+    "width": 136,
+    "height": 236.375,
+    "background": "rgb(155, 60, 16)",
+    "color": "rgb(255, 255, 255)"
+  },
+  {
+    "text": "약 기록하기\n오늘 약 드셨나요?\n누르세요 ›",
+    "tag": "BUTTON",
+    "width": 136,
+    "height": 236.375,
+    "background": "rgb(40, 69, 161)",
+    "color": "rgb(255, 255, 255)"
+  },
+  {
+    "text": "홈",
+    "tag": "BUTTON",
+    "width": 94.65625,
+    "height": 58,
+    "background": "rgb(22, 78, 99)",
+    "color": "rgb(255, 255, 255)"
+  },
+  {
+    "text": "내 기록",
+    "tag": "BUTTON",
+    "width": 94.671875,
+    "height": 58,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(38, 56, 76)"
+  },
+  {
+    "text": "복약",
+    "tag": "BUTTON",
+    "width": 94.65625,
+    "height": 58,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(38, 56, 76)"
+  },
+  {
+    "text": "메시지",
+    "tag": "BUTTON",
+    "width": 94.65625,
+    "height": 58,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(38, 56, 76)"
+  },
+  {
+    "text": "건강 연결",
+    "tag": "BUTTON",
+    "width": 94.671875,
+    "height": 58,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(38, 56, 76)"
+  },
+  {
+    "text": "이용 안내",
+    "tag": "BUTTON",
+    "width": 94.65625,
+    "height": 58,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(38, 56, 76)"
+  }
+]
