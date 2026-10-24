@@ -1,9 +1,11 @@
 # 개발 문서의 기준과 사용 순서
 
-문서 기준: 2026-10-23 KST, v0.7.0. 현재 변경 범위는 [사용자 중심 개선 실행계획](USABILITY_IMPLEMENTATION_PLAN.md), 구현·검증·보류 상태는 [실행 결과 보고서](USABILITY_IMPLEMENTATION_REPORT.md)와 [변경 이력](CHANGELOG.md)을 따른다. 소스 구현, 합성자료 검증, 공개 배포, 실제 사용자·외부 서비스 검증은 서로 다른 완료 상태다.
+문서 기준: 2026-10-24 KST, v0.8.0. 새 환자·음성·공지 변경은 [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md)와 [결과 보고서](PATIENT_VOICE_REPORT.md)가 기준이다. 이전 변경 범위는 [사용자 중심 개선 실행계획](USABILITY_IMPLEMENTATION_PLAN.md), 구현·검증·보류 상태는 [실행 결과 보고서](USABILITY_IMPLEMENTATION_REPORT.md)와 [변경 이력](CHANGELOG.md)을 따른다. 소스 구현, 합성자료 검증, 공개 배포, 실제 사용자·외부 서비스 검증은 서로 다른 완료 상태다.
 
 | 문서 | 책임 |
 |---|---|
+| [PATIENT_VOICE_REPORT.md](PATIENT_VOICE_REPORT.md) | v0.8.0 구현·공개/로컬 재현·메뉴별 클릭·모의 음성·실기기 제약·저장소/배포 상태 |
+| [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md) | v0.8.0 환자 행동/정보 구분·한국어 음성/할 일/입력 확인 실행계획과 제작 계약 |
 | [USABILITY_IMPLEMENTATION_PLAN.md](USABILITY_IMPLEMENTATION_PLAN.md) | v0.7.0 승인 실행 범위·단계·공통 화면·권한·API·자료 이행·검증 관문 |
 | [USABILITY_IMPLEMENTATION_REPORT.md](USABILITY_IMPLEMENTATION_REPORT.md) | 이번 구현 결과·실행한 검증·발견 후 수정·미실행/외부 대기·다음 실행 조건 |
 | [PRODUCT_PLAN.md](PRODUCT_PLAN.md) | 목적, 요구사항 ID, 개발 순서, 인수조건 |

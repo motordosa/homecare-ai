@@ -1,0 +1,12 @@
+
+> homecare-ai-demo@0.8.0 docs:check
+> node scripts/generate-variable-docs.mjs --check && node --disable-warning=ExperimentalWarning scripts/generate-schema-docs.mjs --check && node scripts/check-screen-contract.mjs
+
+Variable documentation matches 90 source files / 7242 declarations.
+Schema documentation matches 40 tables.
+Screen contract matches 6 patient pages, 5 input variants and 10 clinician pages.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

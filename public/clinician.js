@@ -153,13 +153,14 @@ import { createEvidenceWorkspace } from './clinician-evidence.js';
     refreshQueue = operation.catch(() => {});
     return operation;
   }
-  async function performRefresh({quiet = false} = {}) {
+  async function performRefresh({quiet = false, preferredPatientId = null} = {}) {
     if(modalBusy()){if(!quiet)toast('저장 또는 분석이 끝나면 새로고침할 수 있습니다.',true);return;}
     state.refreshBusy=true;
     $('#refresh-button').disabled=true;
     try {
       const data=await api('/api/dashboard'+periodQuery());
       state.data=data;
+      if(preferredPatientId&&data.patients.some(p=>p.id===preferredPatientId))state.selectedId=preferredPatientId;
       await loadIntegrationSettings({renderAfter:false});
       if(!data.patients.some(p=>p.id===state.selectedId)) state.selectedId=[...data.patients].sort((a,b)=>({high:0,watch:1,stable:2,insufficient:3}[a.risk?.level]??3)-({high:0,watch:1,stable:2,insufficient:3}[b.risk?.level]??3))[0]?.id || null;
       if(!can('patient.read'))state.selectedId=null;
@@ -608,7 +609,7 @@ import { createEvidenceWorkspace } from './clinician-evidence.js';
     try {
       if(form.id==='add-patient-form') {
         const result=await api('/api/patients',{method:'POST',body:JSON.stringify({name:String(fields.get('name')).trim(),age:Number(fields.get('age')),sex:fields.get('sex'),conditions:String(fields.get('conditions')).split(',').map(s=>s.trim()).filter(Boolean)})});
-        state.selectedId=result.patient?.id||result.id;state.view='patients';state.filter='all';state.search='';closeModal({force:true});toast('가상 환자가 등록되었습니다. 환자 화면에서 첫 기록을 남겨보세요.');await refresh({quiet:true});
+        state.selectedId=result.patient?.id||result.id;state.summary=null;state.selectionRequest++;state.view='patients';state.filter='all';state.search='';syncUrl('push');const createdPatientId=state.selectedId;closeModal({force:true});toast('가상 환자가 등록되었습니다. 환자 화면에서 첫 기록을 남겨보세요.');await refresh({quiet:true,preferredPatientId:createdPatientId});
       } else {
         if(String(fields.get('confirmation')).trim()!=='초기화')throw new Error('확인 문구를 정확히 입력해 주세요: 초기화');
         const mode=state.modal.mode;

@@ -1,0 +1,38 @@
+{
+  "environment": "https://homecare-ai-demo.onrender.com",
+  "validation": "real public HTTP API; public Chromium blocked by certificate trust; not UI clicks",
+  "time": "2026-10-24T04:13:37.757915+00:00",
+  "steps": [
+    {
+      "action": "default-equivalent draft save",
+      "http": 201,
+      "noticeId": 1,
+      "status": "draft"
+    },
+    {
+      "action": "shared-cookie patient switch then staff publish",
+      "http": 403,
+      "error": "요청 확인 정보가 만료되었습니다. 화면을 새로 열어 주세요."
+    },
+    {
+      "action": "separate staff session explicit publish",
+      "http": 200,
+      "status": "published"
+    },
+    {
+      "action": "patient receive",
+      "http": 200,
+      "ownNoticePresent": true
+    },
+    {
+      "action": "repeated GET after refresh equivalent",
+      "http": 200,
+      "ownNoticePresent": true
+    }
+  ],
+  "cleanup": "own synthetic notice archived",
+  "version": {
+    "appVersion": "0.7.0",
+    "schemaVersion": 6
+  }
+}

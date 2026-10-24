@@ -19,6 +19,8 @@ function fixture(t){
 const status=(code)=>error=>error.status===code;
 test('OAuth uses fixed endpoints, browser-bound single-use state and secure rotating hashed sessions',async t=>{
  const {db,auth,login,calls}=fixture(t);const first=await login('101');assert.equal(auth.actor(first.req).role,'clinician');
+ assert.equal(auth.actor({headers:{'x-homecare-demo-session':first.req.headers.cookie.split('=')[1]}}),null);
+ assert.equal(auth.actor({headers:{...first.req.headers,'x-homecare-demo-session':'untrusted-demo-header'}}).role,'clinician');
  assert.match(first.result.cookies[0],/__Host-hc_session=.*HttpOnly; SameSite=Lax; Max-Age=43200; Secure/);
  assert.equal(db.prepare('SELECT token_hash FROM auth_sessions').get().token_hash.includes(first.req.headers.cookie.split('=')[1]),false);
  assert.ok(!JSON.stringify(db.prepare('SELECT * FROM auth_accounts').all()).includes('fixture-secret'));

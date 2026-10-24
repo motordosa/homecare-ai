@@ -1,6 +1,7 @@
+<!-- Current development version v0.8.0; public version must be checked separately. -->
 # HomeCare AI 데모
 
-환자용 모바일 웹과 의료진용 데스크톱 웹이 하나의 SQLite DB를 공유합니다. 현재 소스 버전은 **v0.7.0**이며 합성자료 데모 또는 별도로 설정한 카카오 인증 모드에서 식사·복약·활동·수면을 기록합니다. 의료진은 허용된 직무·환자 범위에서 기록, 업무, 기술통계와 문헌 근거를 검토합니다. 현재 제작 기준은 [개발 문서 색인](docs/README.md), 이번 변경 범위는 [실행계획](docs/USABILITY_IMPLEMENTATION_PLAN.md), 검증 결과와 남은 작업은 [실행 결과 보고서](docs/USABILITY_IMPLEMENTATION_REPORT.md)에 있습니다. 공개 사이트에 반영된 버전은 별도로 확인해야 합니다.
+환자용 모바일 웹과 의료진용 데스크톱 웹이 하나의 SQLite DB를 공유합니다. 현재 소스 버전은 **v0.8.0**이며 합성자료 데모 또는 별도로 설정한 카카오 인증 모드에서 식사·복약·활동·수면을 기록합니다. 의료진은 허용된 직무·환자 범위에서 기록, 업무, 기술통계와 문헌 근거를 검토합니다. 현재 제작 기준은 [개발 문서 색인](docs/README.md), 이번 변경 범위는 [환자 음성·공지 실행계획](docs/PATIENT_VOICE_SPEC.md), 검증 결과와 남은 작업은 [실행 결과 보고서](docs/PATIENT_VOICE_REPORT.md)에 있습니다. 공개 사이트에 반영된 버전은 별도로 확인해야 합니다.
 
 사용자가 제공한 배포 주소: [시작 화면](https://homecare-ai-demo.onrender.com) · [환자 모바일 화면](https://homecare-ai-demo.onrender.com/patient?patientId=p001) · [의료진 데스크톱 화면](https://homecare-ai-demo.onrender.com/clinician?patientId=p001). 무료 서버의 데이터 보존 조건과 점검 방법은 [배포 안내](DEPLOY_RENDER.md)에 있습니다.
 
@@ -162,3 +163,7 @@ cloudflared tunnel --no-autoupdate --protocol http2 --url http://127.0.0.1:3000
 의료진이 등록한 약별 계획이 있으면 환자 복약 → **약봉투 사진으로 기록**에서 설정된 GPT로 포장 글자를 읽고 회차·상태를 직접 확인해 사진과 함께 저장합니다. 의료진 복약 화면에서 원본/당시 자기보고/OCR 후보를 확인하고, v0.7.0 업무 목록에서 권한에 따라 검토 상태를 관리합니다. 사진은 복용 증거가 아니며 낱알 외형 식별·국내 약품 API는 후속입니다. 기존 사진 AI 키를 사용합니다. [제작 규약](docs/MEDICATION_PHOTO_DEMO_SPEC.md), [배포 후 확인 절차](docs/USER_ACTION_REPORT.md#u-05-빠른-약봉투-사진-데모-v061-확인). 로컬 브라우저 검증은 `npm run test:medication-photo`이며 실제 API 과금 없이 임시 DB·mock 제공자를 사용합니다.
 
 v0.7.0 문헌 기능의 상세 화면·검색·검토 계약은 [EVIDENCE_WORKSPACE_SPEC.md](docs/EVIDENCE_WORKSPACE_SPEC.md)를 따릅니다. 이번 로컬 구현·모의 검증과 공개 Render 반영, 실제 고령자 평가, 문헌·GPT·카카오·건강기기의 실제 연결 결과는 각각 구별해 보고합니다.
+
+### v0.8.0 환자 음성·공지 수정
+
+[PATIENT_VOICE_SPEC](docs/PATIENT_VOICE_SPEC.md)의 실행계획·제작 계약에 따라 환자 행동/정보 구분, 한국어 듣기/음성 입력 확인, 화면열림 알림, 같은 브라우저 데모 역할 충돌과 공지 게시/재시도를 개선한다. [결과 보고서](docs/PATIENT_VOICE_REPORT.md)에서 실제 클릭·모의 음성·실기기·공개 배포 범위를 확인한다. `npm run test:voice`, `npm run test:menus`가 새 임시 DB 브라우저 검사다.

@@ -1,4 +1,4 @@
-# 구성과 화면 동작 v0.7.0
+# 구성과 화면 동작 v0.8.0
 
 ## 실행 구조
 
@@ -64,3 +64,16 @@ lib/medication-photos.mjs는 기존 vision 초안의 환자·hash·종류·만�
 ## v0.7.0 확장 구조
 
 공통 셸을 유지하고 clinician-workflow/research/evidence 모듈을 추가한다. 서버는 기존 라우트와 별도 workflow/research/evidence 도메인 함수를 통합한다. 공통 auth의 capability+환자 범위 검증을 재사용하며 연구자료와 원기록, 문헌 근거와 환자 임상결정을 분리한다. DB schema6 이행/보존 계약과 식사 nullable 영양량은 USABILITY_IMPLEMENTATION_PLAN에 명시했다.
+
+## v0.8.0 환자 화면·음성 개선 (2026-10-24, 구현 전)
+
+현재 새 변경의 요구·화면/상태·데이터·지원 범위·변수·검증 기준은 [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md)를 따른다. 기존 v0.7.0 공통 규약을 계승하며 환자 본문20/도움18/누름56 목표, 행동/정보 구분과 인라인 음성 안내·음성 입력·할 일 알림을 추가한다. 기존 의료진/네이티브와 환자 기록 API는 유지하고 공지 영수증 테이블은 schema7로 추가한다. 음성 인식 결과는 확인 후 기존 입력칸에만 반영한다. 녹음·원고 자동 저장·백그라운드 전달을 구현 완료로 표시하지 않는다.
+
+### v0.8.0 추가 모듈
+
+- patient-tasks.js: KST·오늘 기록·현재 약 일정에서 텍스트/음성/알림의 공통 상태 계산.
+- patient-assist.js: 한국어 발화·재생 제약·중지/끄기·중복 억제·화면열림 갱신/알림·오류/최신성.
+- voice-parser.js: 필드별 한국어 수치/단위/날짜·명확한 상태의 제한 해석. 임상 의미/처방 추론 없음.
+- patient-dictation.js: 브라우저 인식·마이크 상태·원고 수정·검토·확인 후 기존 폼 반영, 세대/대상/세션 경계.
+- patient-assist.css: 기존 기본 레이아웃 위의 행동/정보·큰 글자·헤더 소리 제어 토큰/컴포넌트 규칙.
+- 공지 저장 receipt는 communications 모듈에서 기존 공지/이력과 원자 저장한다. 실제 Kakao 인증 채널은 cookie 기반이고, demo 탭 보조 헤더는 그 모드에서만 유효하다.

@@ -1,0 +1,22 @@
+
+> homecare-ai-demo@0.8.0 test:voice
+> node test/patient-voice-browser.mjs
+
+PASS MOCK Korean greeting uses real pending records and explicit stop/off controls
+PASS MOCK dictation cannot save until reviewed; confirmed number reaches real DB
+PASS MOCK microphone denial, ambiguous units and manual fallback retain original field
+PASS MOCK late recognition after dismissal cannot fill a reopened form
+PASS MOCK date change invalidates a recording and review permits text correction
+PASS MOCK spoken dose state is bound to displayed plan/date and reaches real medication events
+PASS MOCK voice meal choices still require normal explicit save and retain unknown
+PASS MOCK browser notification permission/failure routes and foreground-only scope
+PASS MOCK opted-in reminders run at15 minutes on the open home and stop on another view
+PASS all six mobile views and enlarged text keep action/information distinction without overflow
+PASS MOCK prefixed recognition works and missing Korean voice is reported without fake playback
+PASS unsupported speech recognition offers manual entry and does not show active microphone
+12 patient voice browser scenarios passed; speech/notifications MOCK, actual audio/device unverified.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice
