@@ -1,3 +1,4 @@
+import {existsSync} from 'node:fs';
 // Real local Chromium clicks + real temporary HTTP/SQLite. Speech/Notification are explicit mocks.
 import assert from 'node:assert/strict';import{chromium}from'playwright';import{spawn}from'node:child_process';import{mkdtemp,mkdir,rm,writeFile}from'node:fs/promises';import{tmpdir}from'node:os';import{join}from'node:path';import net from'node:net';import{setTimeout as delay}from'node:timers/promises';
 const dir=await mkdtemp(join(tmpdir(),'homecare-voice-test-'));const socket=net.createServer();await new Promise(r=>socket.listen(0,'127.0.0.1',r));const port=socket.address().port;await new Promise(r=>socket.close(r));const base=`http://127.0.0.1:${port}`;
@@ -17,7 +18,7 @@ async function daily(page){await page.locator('#today-metrics [data-action=steps
 async function hear(page,text){await page.locator('[data-voice-consent]').check();await page.locator('[data-voice-start]').click();await page.evaluate(t=>window.__hear(t),text);await page.locator('[data-voice-parse]').click();}
 try{
  await until(async()=>{try{return(await fetch(base+'/api/health')).ok;}catch{return false;}});
- await mkdir('test-results/patient-voice',{recursive:true});browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium'});
+ await mkdir('test-results/patient-voice',{recursive:true});browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:existsSync('/usr/bin/chromium')?{executablePath:'/usr/bin/chromium'}:{})});
  const ctx=await browser.newContext({viewport:{width:390,height:844}});await ctx.addInitScript(mockSpeech);const p=await ctx.newPage();p.setDefaultTimeout(12000);p.on('pageerror',e=>errors.push(e.message));
  const created=await fetch(base+'/api/patients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'[합성검증] 음성 환자',age:84,sex:'female',conditions:[]})});const patient=(await created.json()).patient;await load(p,patient.id);
  await check('MOCK Korean greeting uses real pending records and explicit stop/off controls',async()=>{

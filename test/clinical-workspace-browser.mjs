@@ -1,3 +1,4 @@
+import {existsSync} from 'node:fs';
 // Actual local Chromium workflow/participation/correction/research smoke; all records are synthetic.
 import {chromium} from 'playwright';
 import {spawn} from 'node:child_process';
@@ -10,7 +11,7 @@ const child=spawn(process.execPath,['--disable-warning=ExperimentalWarning','ser
 try{
 await mkdir('test-results/patient-voice',{recursive:true});
 for(let i=0;i<60;i++){try{if((await fetch(base+'/api/health')).ok)break;}catch{}await delay(100);}
-browser=await chromium.launch({headless:true,executablePath:'/usr/bin/chromium'});const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(10000);
+browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:existsSync('/usr/bin/chromium')?{executablePath:'/usr/bin/chromium'}:{})});const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(10000);
 await page.goto(base+'/clinician?patientId=p001&view=worklist');await page.locator('[data-workflow="new-task"]').waitFor();
 await page.click('[data-workflow="new-task"]');await page.fill('[name=title]','합성자료 연락 확인');await page.fill('[name=assignee]','데모 담당');await page.fill('[name=note]','사진 날짜 확인 연락');await page.click('#workflow-editor [type=submit]');await page.locator('.workflow-item h3').filter({hasText:'합성자료 연락 확인'}).waitFor();console.log('PASS create worklist task');
 await page.click('[data-workflow="edit-task"]');await page.selectOption('[name=status]','in_progress');await page.click('#workflow-editor [type=submit]');await page.getByText('진행 중',{exact:true}).waitFor();console.log('PASS workflow versioned update');

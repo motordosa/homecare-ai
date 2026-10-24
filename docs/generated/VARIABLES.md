@@ -4,7 +4,7 @@
 
 JavaScript는 Acorn AST로 import·변수(구조 분해 포함)·함수/매개변수·class·catch를 추출한다. Kotlin/Java/Swift는 선언/타입 이름의 보조 인덱스이며 컴파일러 AST 전수 분석과 다르다. 객체의 데이터 필드/API 단위/상태 의미는 [자료 사전](../DATA_DICTIONARY.md)과 [계약](../CONTRACTS.md)을 함께 읽는다.
 
-소스 90개, 선언/매개변수 7239개. node_modules·DB·업로드·생성 캡처는 제외한다. 코드에 비밀값을 직접 넣지 않는다.
+소스 90개, 선언/매개변수 7242개. node_modules·DB·업로드·생성 캡처는 제외한다. 코드에 비밀값을 직접 넣지 않는다.
 
 ## integrations/android/app/build.gradle.kts
 
@@ -6081,32 +6081,33 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 2:9 | chromium | import | module | playwright |
-| 3:9 | spawn | import | module | node:child_process |
-| 4:9 | mkdtemp | import | module | node:fs/promises |
-| 4:17 | rm | import | module | node:fs/promises |
-| 4:20 | mkdir | import | module | node:fs/promises |
-| 5:23 | delay | import | module | node:timers/promises |
-| 6:9 | createServer | import | module | node:net |
-| 7:8 | assert | import | module | node:assert/strict |
-| 8:7 | temp | const | module | await mkdtemp('/tmp/clinician-smoke-') |
-| 8:51 | listener | const | module | createServer() |
-| 8:93 | r | parameter | module/anonymous@8 | r |
-| 8:136 | port | const | module | listener.address().port |
-| 8:183 | r | parameter | module/anonymous@8 | r |
-| 8:211 | base | const | module | 'http://127.0.0.1:'+port |
-| 9:7 | child | const | module | spawn(process.execPath,['--disable-warning=ExperimentalWarning','server.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.e |
-| 9:336 | output | let | module | '' |
-| 9:369 | b | parameter | module/anonymous@9 | b |
-| 9:406 | b | parameter | module/anonymous@9 | b |
-| 9:424 | browser | let | module | 초기값 없음 |
-| 12:9 | i | let | module | 0 |
-| 13:89 | page | const | module | await browser.newPage({viewport:{width:1440,height:1000}}) |
-| 13:159 | errors | const | module | [] |
-| 13:189 | e | parameter | module/anonymous@13 | e |
-| 18:111 | option | const | module | await page.locator('[name=date] option').nth(1).getAttribute('value') |
-| 21:8 | e | catch | module |  |
-| 21:141 | r | parameter | module/anonymous@21 | r |
+| 1:9 | existsSync | import | module | node:fs |
+| 3:9 | chromium | import | module | playwright |
+| 4:9 | spawn | import | module | node:child_process |
+| 5:9 | mkdtemp | import | module | node:fs/promises |
+| 5:17 | rm | import | module | node:fs/promises |
+| 5:20 | mkdir | import | module | node:fs/promises |
+| 6:23 | delay | import | module | node:timers/promises |
+| 7:9 | createServer | import | module | node:net |
+| 8:8 | assert | import | module | node:assert/strict |
+| 9:7 | temp | const | module | await mkdtemp('/tmp/clinician-smoke-') |
+| 9:51 | listener | const | module | createServer() |
+| 9:93 | r | parameter | module/anonymous@9 | r |
+| 9:136 | port | const | module | listener.address().port |
+| 9:183 | r | parameter | module/anonymous@9 | r |
+| 9:211 | base | const | module | 'http://127.0.0.1:'+port |
+| 10:7 | child | const | module | spawn(process.execPath,['--disable-warning=ExperimentalWarning','server.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.e |
+| 10:336 | output | let | module | '' |
+| 10:369 | b | parameter | module/anonymous@10 | b |
+| 10:406 | b | parameter | module/anonymous@10 | b |
+| 10:424 | browser | let | module | 초기값 없음 |
+| 13:9 | i | let | module | 0 |
+| 14:200 | page | const | module | await browser.newPage({viewport:{width:1440,height:1000}}) |
+| 14:270 | errors | const | module | [] |
+| 14:300 | e | parameter | module/anonymous@14 | e |
+| 19:111 | option | const | module | await page.locator('[name=date] option').nth(1).getAttribute('value') |
+| 22:8 | e | catch | module |  |
+| 22:141 | r | parameter | module/anonymous@22 | r |
 
 ## test/daily-submission.test.mjs
 
@@ -6732,68 +6733,69 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 2:8 | assert | import | module | node:assert/strict |
-| 2:47 | chromium | import | module | playwright |
-| 2:80 | spawn | import | module | node:child_process |
-| 2:118 | mkdtemp | import | module | node:fs/promises |
-| 2:126 | mkdir | import | module | node:fs/promises |
-| 2:132 | rm | import | module | node:fs/promises |
-| 2:135 | writeFile | import | module | node:fs/promises |
-| 2:175 | tmpdir | import | module | node:os |
-| 2:203 | join | import | module | node:path |
-| 2:231 | net | import | module | node:net |
-| 2:271 | delay | import | module | node:timers/promises |
-| 3:7 | dir | const | module | await mkdtemp(join(tmpdir(),'homecare-menus-')) |
-| 3:65 | listener | const | module | net.createServer() |
-| 3:111 | r | parameter | module/anonymous@3 | r |
-| 3:154 | port | const | module | listener.address().port |
-| 3:201 | r | parameter | module/anonymous@3 | r |
-| 3:229 | base | const | module | 'http://127.0.0.1:${port}' |
-| 4:7 | child | const | module | spawn(process.execPath,['--disable-warning=ExperimentalWarning','server.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.e |
-| 4:337 | output | let | module | '' |
-| 4:347 | browser | let | module | 초기값 없음 |
-| 4:355 | count | let | module | 0 |
-| 4:386 | c | parameter | module/anonymous@4 | c |
-| 4:423 | c | parameter | module/anonymous@4 | c |
-| 4:443 | errors | const | module | [] |
-| 4:453 | checks | const | module | [] |
-| 5:16 | check | function | module |  |
-| 5:22 | name | parameter | module/check | name |
-| 5:27 | fn | parameter | module/check | fn |
-| 6:16 | ready | function | module |  |
-| 6:22 | p | parameter | module/ready | p |
-| 7:16 | staffJson | function | module |  |
-| 7:26 | p | parameter | module/staffJson | p |
-| 7:28 | path | parameter | module/staffJson | path |
-| 7:58 | path | parameter | module/staffJson/anonymous@7 | path |
-| 7:71 | sessionHeaders | const | module/staffJson/anonymous@7 | await import('/session.js') |
-| 7:121 | r | const | module/staffJson/anonymous@7 | await fetch(path,{headers:sessionHeaders()}) |
-| 8:16 | view | function | module |  |
-| 8:21 | p | parameter | module/view | p |
-| 8:23 | name | parameter | module/view | name |
-| 8:111 | n | parameter | module/view/anonymous@8 | n |
-| 9:16 | dosePlan | function | module |  |
-| 9:25 | c | parameter | module/dosePlan | c |
-| 11:10 | i | let | module | 0 |
-| 12:176 | shared | const | module | await browser.newContext({viewport:{width:1440,height:1000}}) |
-| 12:251 | c | const | module | await shared.newPage() |
-| 12:320 | e | parameter | module/anonymous@12 | e |
-| 12:412 | id | let | module | 초기값 없음 |
-| 13:274 | creation | const | module/anonymous@13 | c.waitForResponse(r=&gt;r.request().method()==='POST'&amp;&amp;new URL(r.url()).pathname==='/api/patients') |
-| 13:301 | r | parameter | module/anonymous@13/anonymous@13 | r |
-| 13:445 | createdId | const | module/anonymous@13 | (await(await creation).json()).patient.id |
-| 14:8 | p | const | module | await shared.newPage() |
-| 14:125 | e | parameter | module/anonymous@14 | e |
-| 16:184 | lost | let | module/anonymous@15 | true |
-| 17:50 | route | parameter | module/anonymous@15/anonymous@17 | route |
-| 17:145 | r | const | module/anonymous@15/anonymous@17 | await route.fetch() |
-| 18:349 | n | const | module/anonymous@15 | await staffJson(c,'/api/clinician/notices') |
-| 18:425 | x | parameter | module/anonymous@15/anonymous@18 | x |
-| 20:9 | p2 | const | module/anonymous@15 | await shared.newPage() |
-| 35:13 | name | const | module/anonymous@34 | 초기값 없음 |
-| 36:13 | name | const | module/anonymous@34 | 초기값 없음 |
-| 36:780 | d | parameter | module/anonymous@34/anonymous@36 | d |
-| 40:73 | r | parameter | module/anonymous@40 | r |
+| 1:9 | existsSync | import | module | node:fs |
+| 3:8 | assert | import | module | node:assert/strict |
+| 3:47 | chromium | import | module | playwright |
+| 3:80 | spawn | import | module | node:child_process |
+| 3:118 | mkdtemp | import | module | node:fs/promises |
+| 3:126 | mkdir | import | module | node:fs/promises |
+| 3:132 | rm | import | module | node:fs/promises |
+| 3:135 | writeFile | import | module | node:fs/promises |
+| 3:175 | tmpdir | import | module | node:os |
+| 3:203 | join | import | module | node:path |
+| 3:231 | net | import | module | node:net |
+| 3:271 | delay | import | module | node:timers/promises |
+| 4:7 | dir | const | module | await mkdtemp(join(tmpdir(),'homecare-menus-')) |
+| 4:65 | listener | const | module | net.createServer() |
+| 4:111 | r | parameter | module/anonymous@4 | r |
+| 4:154 | port | const | module | listener.address().port |
+| 4:201 | r | parameter | module/anonymous@4 | r |
+| 4:229 | base | const | module | 'http://127.0.0.1:${port}' |
+| 5:7 | child | const | module | spawn(process.execPath,['--disable-warning=ExperimentalWarning','server.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.e |
+| 5:337 | output | let | module | '' |
+| 5:347 | browser | let | module | 초기값 없음 |
+| 5:355 | count | let | module | 0 |
+| 5:386 | c | parameter | module/anonymous@5 | c |
+| 5:423 | c | parameter | module/anonymous@5 | c |
+| 5:443 | errors | const | module | [] |
+| 5:453 | checks | const | module | [] |
+| 6:16 | check | function | module |  |
+| 6:22 | name | parameter | module/check | name |
+| 6:27 | fn | parameter | module/check | fn |
+| 7:16 | ready | function | module |  |
+| 7:22 | p | parameter | module/ready | p |
+| 8:16 | staffJson | function | module |  |
+| 8:26 | p | parameter | module/staffJson | p |
+| 8:28 | path | parameter | module/staffJson | path |
+| 8:58 | path | parameter | module/staffJson/anonymous@8 | path |
+| 8:71 | sessionHeaders | const | module/staffJson/anonymous@8 | await import('/session.js') |
+| 8:121 | r | const | module/staffJson/anonymous@8 | await fetch(path,{headers:sessionHeaders()}) |
+| 9:16 | view | function | module |  |
+| 9:21 | p | parameter | module/view | p |
+| 9:23 | name | parameter | module/view | name |
+| 9:111 | n | parameter | module/view/anonymous@9 | n |
+| 10:16 | dosePlan | function | module |  |
+| 10:25 | c | parameter | module/dosePlan | c |
+| 12:10 | i | let | module | 0 |
+| 13:260 | shared | const | module | await browser.newContext({viewport:{width:1440,height:1000}}) |
+| 13:335 | c | const | module | await shared.newPage() |
+| 13:404 | e | parameter | module/anonymous@13 | e |
+| 13:496 | id | let | module | 초기값 없음 |
+| 14:274 | creation | const | module/anonymous@14 | c.waitForResponse(r=&gt;r.request().method()==='POST'&amp;&amp;new URL(r.url()).pathname==='/api/patients') |
+| 14:301 | r | parameter | module/anonymous@14/anonymous@14 | r |
+| 14:445 | createdId | const | module/anonymous@14 | (await(await creation).json()).patient.id |
+| 15:8 | p | const | module | await shared.newPage() |
+| 15:125 | e | parameter | module/anonymous@15 | e |
+| 17:184 | lost | let | module/anonymous@16 | true |
+| 18:50 | route | parameter | module/anonymous@16/anonymous@18 | route |
+| 18:145 | r | const | module/anonymous@16/anonymous@18 | await route.fetch() |
+| 19:349 | n | const | module/anonymous@16 | await staffJson(c,'/api/clinician/notices') |
+| 19:425 | x | parameter | module/anonymous@16/anonymous@19 | x |
+| 21:9 | p2 | const | module/anonymous@16 | await shared.newPage() |
+| 36:13 | name | const | module/anonymous@35 | 초기값 없음 |
+| 37:13 | name | const | module/anonymous@35 | 초기값 없음 |
+| 37:780 | d | parameter | module/anonymous@35/anonymous@37 | d |
+| 41:73 | r | parameter | module/anonymous@41 | r |
 
 ## test/notice-retry.test.mjs
 
@@ -6875,93 +6877,94 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 2:8 | assert | import | module | node:assert/strict |
-| 2:48 | chromium | import | module | playwright |
-| 2:81 | spawn | import | module | node:child_process |
-| 2:119 | mkdtemp | import | module | node:fs/promises |
-| 2:127 | mkdir | import | module | node:fs/promises |
-| 2:133 | rm | import | module | node:fs/promises |
-| 2:136 | writeFile | import | module | node:fs/promises |
-| 2:176 | tmpdir | import | module | node:os |
-| 2:204 | join | import | module | node:path |
-| 2:232 | net | import | module | node:net |
-| 2:272 | delay | import | module | node:timers/promises |
-| 3:7 | dir | const | module | await mkdtemp(join(tmpdir(),'homecare-voice-test-')) |
-| 3:70 | socket | const | module | net.createServer() |
-| 3:114 | r | parameter | module/anonymous@3 | r |
-| 3:155 | port | const | module | socket.address().port |
-| 3:200 | r | parameter | module/anonymous@3 | r |
-| 3:226 | base | const | module | 'http://127.0.0.1:${port}' |
-| 4:7 | server | const | module | spawn(process.execPath,['--disable-warning=ExperimentalWarning','server.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.e |
-| 4:338 | output | let | module | '' |
-| 4:348 | browser | let | module | 초기값 없음 |
-| 4:356 | count | let | module | 0 |
-| 4:388 | c | parameter | module/anonymous@4 | c |
-| 4:426 | c | parameter | module/anonymous@4 | c |
-| 4:446 | errors | const | module | [] |
-| 5:16 | until | function | module |  |
-| 5:22 | fn | parameter | module/until | fn |
-| 5:34 | i | let | module/until | 0 |
-| 6:16 | check | function | module |  |
-| 6:22 | name | parameter | module/check | name |
-| 6:27 | fn | parameter | module/check | fn |
-| 7:10 | mockSpeech | function | module |  |
-| 9:52 | text | parameter | module/mockSpeech/anonymous@9 | text |
-| 10:171 | u | parameter | module/mockSpeech/anonymous@10 | u |
-| 12:16 | text | parameter | module/mockSpeech/anonymous@12 | text |
-| 12:29 | r | const | module/mockSpeech/anonymous@12 | [{transcript:text}] |
-| 12:72 | instance | const | module/mockSpeech/anonymous@12 | window.__recognizer |
-| 13:193 | title | parameter | module/mockSpeech/anonymous@13 | title |
-| 13:199 | options | parameter | module/mockSpeech/anonymous@13 | options |
-| 15:16 | load | function | module |  |
-| 15:21 | page | parameter | module/load | page |
-| 15:26 | id | parameter | module/load | id |
-| 16:16 | daily | function | module |  |
-| 16:22 | page | parameter | module/daily | page |
-| 17:16 | hear | function | module |  |
-| 17:21 | page | parameter | module/hear | page |
-| 17:26 | text | parameter | module/hear | text |
-| 17:152 | t | parameter | module/hear/anonymous@17 | t |
-| 21:8 | ctx | const | module | await browser.newContext({viewport:{width:390,height:844}}) |
-| 21:114 | p | const | module | await ctx.newPage() |
-| 21:180 | e | parameter | module/anonymous@21 | e |
-| 22:8 | created | const | module | await fetch(base+'/api/patients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'[합성검증] 음성 환 |
-| 22:193 | patient | const | module | (await created.json()).patient |
-| 26:165 | count | const | module/anonymous@23 | await p.evaluate(()=&gt;window.__spoken.length) |
-| 30:22 | writes | let | module/anonymous@29 | 0 |
-| 30:37 | watch | const | module/anonymous@29 | r=&gt;{if(r.method()==='POST'&amp;&amp;r.url().endsWith('/daily'))writes++;} |
-| 30:43 | r | parameter | module/anonymous@29/anonymous@30 | r |
-| 35:9 | r | const | module/anonymous@29 | await(await fetch(base+'/api/patients/${patient.id}/daily')).json() |
-| 39:176 | d | parameter | module/anonymous@37/anonymous@39 | d |
-| 42:184 | d | parameter | module/anonymous@41/anonymous@42 | d |
-| 43:31 | r | const | module/anonymous@41/anonymous@43 | [{transcript:'99999걸음'}] |
-| 46:178 | r | const | module/anonymous@45/anonymous@46 | [{transcript:'삼천 걸음'}] |
-| 46:285 | health | const | module/anonymous@45 | await(await fetch(base+'/api/health')).json() |
-| 46:344 | yesterday | const | module/anonymous@45 | new Date(Date.parse(health.today+'T12:00:00Z')-86400000).toISOString().slice(0,10) |
-| 46:453 | d | parameter | module/anonymous@45/anonymous@46 | d |
-| 46:657 | r | const | module/anonymous@45/anonymous@46 | [{transcript:'99999걸음'}] |
-| 47:466 | d | parameter | module/anonymous@45/anonymous@47 | d |
-| 50:9 | health | const | module/anonymous@49 | await(await fetch(base+'/api/health')).json() |
-| 50:68 | created | const | module/anonymous@49 | await fetch(base+'/api/patients/${patient.id}/medication-orders',{method:'POST',headers:{'Content-Type':'application/json'},body:J |
-| 55:334 | s | const | module/anonymous@53 | await(await fetch(base+'/api/patients/${patient.id}/summary')).json() |
-| 62:9 | clockDay | const | module/anonymous@61 | (await(await fetch(base+'/api/health')).json()).today |
-| 62:422 | before | const | module/anonymous@61 | await p.evaluate(()=&gt;window.__alerts.length) |
-| 62:702 | old | const | module/anonymous@61 | await p.evaluate(()=&gt;window.__alerts.length) |
-| 65:13 | width | const | module/anonymous@64 | 초기값 없음 |
-| 65:91 | view | const | module/anonymous@64 | 초기값 없음 |
-| 67:9 | values | const | module/anonymous@64 | await p.locator('#open-meal,#open-medication,#voice-guide-start,#voice-guide-stop,.bottom-nav button').evaluateAll(els=&gt;els.filter |
-| 67:131 | els | parameter | module/anonymous@64/anonymous@67 | els |
-| 67:147 | e | parameter | module/anonymous@64/anonymous@67/anonymous@67 | e |
-| 67:181 | e | parameter | module/anonymous@64/anonymous@67/anonymous@67 | e |
-| 68:26 | v | parameter | module/anonymous@64/anonymous@68 | v |
-| 71:9 | fallback | const | module/anonymous@70 | await browser.newContext({viewport:{width:390,height:844}}) |
-| 71:162 | text | parameter | module/anonymous@70/anonymous@71/anonymous@71 | text |
-| 71:519 | t | parameter | module/anonymous@70/anonymous@71/anonymous@71 | t |
-| 71:529 | r | const | module/anonymous@70/anonymous@71/anonymous@71 | [{transcript:t}] |
-| 71:660 | q | const | module/anonymous@70 | await fallback.newPage() |
-| 74:9 | unsupported | const | module/anonymous@73 | await browser.newContext({viewport:{width:390,height:844}}) |
-| 74:269 | q | const | module/anonymous@73 | await unsupported.newPage() |
-| 77:74 | r | parameter | module/anonymous@77 | r |
+| 1:9 | existsSync | import | module | node:fs |
+| 3:8 | assert | import | module | node:assert/strict |
+| 3:48 | chromium | import | module | playwright |
+| 3:81 | spawn | import | module | node:child_process |
+| 3:119 | mkdtemp | import | module | node:fs/promises |
+| 3:127 | mkdir | import | module | node:fs/promises |
+| 3:133 | rm | import | module | node:fs/promises |
+| 3:136 | writeFile | import | module | node:fs/promises |
+| 3:176 | tmpdir | import | module | node:os |
+| 3:204 | join | import | module | node:path |
+| 3:232 | net | import | module | node:net |
+| 3:272 | delay | import | module | node:timers/promises |
+| 4:7 | dir | const | module | await mkdtemp(join(tmpdir(),'homecare-voice-test-')) |
+| 4:70 | socket | const | module | net.createServer() |
+| 4:114 | r | parameter | module/anonymous@4 | r |
+| 4:155 | port | const | module | socket.address().port |
+| 4:200 | r | parameter | module/anonymous@4 | r |
+| 4:226 | base | const | module | 'http://127.0.0.1:${port}' |
+| 5:7 | server | const | module | spawn(process.execPath,['--disable-warning=ExperimentalWarning','server.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.e |
+| 5:338 | output | let | module | '' |
+| 5:348 | browser | let | module | 초기값 없음 |
+| 5:356 | count | let | module | 0 |
+| 5:388 | c | parameter | module/anonymous@5 | c |
+| 5:426 | c | parameter | module/anonymous@5 | c |
+| 5:446 | errors | const | module | [] |
+| 6:16 | until | function | module |  |
+| 6:22 | fn | parameter | module/until | fn |
+| 6:34 | i | let | module/until | 0 |
+| 7:16 | check | function | module |  |
+| 7:22 | name | parameter | module/check | name |
+| 7:27 | fn | parameter | module/check | fn |
+| 8:10 | mockSpeech | function | module |  |
+| 10:52 | text | parameter | module/mockSpeech/anonymous@10 | text |
+| 11:171 | u | parameter | module/mockSpeech/anonymous@11 | u |
+| 13:16 | text | parameter | module/mockSpeech/anonymous@13 | text |
+| 13:29 | r | const | module/mockSpeech/anonymous@13 | [{transcript:text}] |
+| 13:72 | instance | const | module/mockSpeech/anonymous@13 | window.__recognizer |
+| 14:193 | title | parameter | module/mockSpeech/anonymous@14 | title |
+| 14:199 | options | parameter | module/mockSpeech/anonymous@14 | options |
+| 16:16 | load | function | module |  |
+| 16:21 | page | parameter | module/load | page |
+| 16:26 | id | parameter | module/load | id |
+| 17:16 | daily | function | module |  |
+| 17:22 | page | parameter | module/daily | page |
+| 18:16 | hear | function | module |  |
+| 18:21 | page | parameter | module/hear | page |
+| 18:26 | text | parameter | module/hear | text |
+| 18:152 | t | parameter | module/hear/anonymous@18 | t |
+| 22:8 | ctx | const | module | await browser.newContext({viewport:{width:390,height:844}}) |
+| 22:114 | p | const | module | await ctx.newPage() |
+| 22:180 | e | parameter | module/anonymous@22 | e |
+| 23:8 | created | const | module | await fetch(base+'/api/patients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'[합성검증] 음성 환 |
+| 23:193 | patient | const | module | (await created.json()).patient |
+| 27:165 | count | const | module/anonymous@24 | await p.evaluate(()=&gt;window.__spoken.length) |
+| 31:22 | writes | let | module/anonymous@30 | 0 |
+| 31:37 | watch | const | module/anonymous@30 | r=&gt;{if(r.method()==='POST'&amp;&amp;r.url().endsWith('/daily'))writes++;} |
+| 31:43 | r | parameter | module/anonymous@30/anonymous@31 | r |
+| 36:9 | r | const | module/anonymous@30 | await(await fetch(base+'/api/patients/${patient.id}/daily')).json() |
+| 40:176 | d | parameter | module/anonymous@38/anonymous@40 | d |
+| 43:184 | d | parameter | module/anonymous@42/anonymous@43 | d |
+| 44:31 | r | const | module/anonymous@42/anonymous@44 | [{transcript:'99999걸음'}] |
+| 47:178 | r | const | module/anonymous@46/anonymous@47 | [{transcript:'삼천 걸음'}] |
+| 47:285 | health | const | module/anonymous@46 | await(await fetch(base+'/api/health')).json() |
+| 47:344 | yesterday | const | module/anonymous@46 | new Date(Date.parse(health.today+'T12:00:00Z')-86400000).toISOString().slice(0,10) |
+| 47:453 | d | parameter | module/anonymous@46/anonymous@47 | d |
+| 47:657 | r | const | module/anonymous@46/anonymous@47 | [{transcript:'99999걸음'}] |
+| 48:466 | d | parameter | module/anonymous@46/anonymous@48 | d |
+| 51:9 | health | const | module/anonymous@50 | await(await fetch(base+'/api/health')).json() |
+| 51:68 | created | const | module/anonymous@50 | await fetch(base+'/api/patients/${patient.id}/medication-orders',{method:'POST',headers:{'Content-Type':'application/json'},body:J |
+| 56:334 | s | const | module/anonymous@54 | await(await fetch(base+'/api/patients/${patient.id}/summary')).json() |
+| 63:9 | clockDay | const | module/anonymous@62 | (await(await fetch(base+'/api/health')).json()).today |
+| 63:422 | before | const | module/anonymous@62 | await p.evaluate(()=&gt;window.__alerts.length) |
+| 63:702 | old | const | module/anonymous@62 | await p.evaluate(()=&gt;window.__alerts.length) |
+| 66:13 | width | const | module/anonymous@65 | 초기값 없음 |
+| 66:91 | view | const | module/anonymous@65 | 초기값 없음 |
+| 68:9 | values | const | module/anonymous@65 | await p.locator('#open-meal,#open-medication,#voice-guide-start,#voice-guide-stop,.bottom-nav button').evaluateAll(els=&gt;els.filter |
+| 68:131 | els | parameter | module/anonymous@65/anonymous@68 | els |
+| 68:147 | e | parameter | module/anonymous@65/anonymous@68/anonymous@68 | e |
+| 68:181 | e | parameter | module/anonymous@65/anonymous@68/anonymous@68 | e |
+| 69:26 | v | parameter | module/anonymous@65/anonymous@69 | v |
+| 72:9 | fallback | const | module/anonymous@71 | await browser.newContext({viewport:{width:390,height:844}}) |
+| 72:162 | text | parameter | module/anonymous@71/anonymous@72/anonymous@72 | text |
+| 72:519 | t | parameter | module/anonymous@71/anonymous@72/anonymous@72 | t |
+| 72:529 | r | const | module/anonymous@71/anonymous@72/anonymous@72 | [{transcript:t}] |
+| 72:660 | q | const | module/anonymous@71 | await fallback.newPage() |
+| 75:9 | unsupported | const | module/anonymous@74 | await browser.newContext({viewport:{width:390,height:844}}) |
+| 75:269 | q | const | module/anonymous@74 | await unsupported.newPage() |
+| 78:74 | r | parameter | module/anonymous@78 | r |
 
 ## test/research.test.mjs
 
