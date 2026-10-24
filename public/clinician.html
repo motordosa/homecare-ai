@@ -20,6 +20,9 @@
       <button class="nav-item" data-view="patients"><span data-icon="users"></span>환자 관리<span class="nav-count" id="nav-patient-count">—</span></button>
       <button class="nav-item" data-view="medications"><span data-icon="pill"></span>복약 계획</button>
       <button class="nav-item" data-view="records"><span data-icon="file"></span>건강 기록</button>
+      <button class="nav-item" data-view="worklist"><span data-icon="check"></span>업무 목록</button>
+      <button class="nav-item" data-view="research"><span data-icon="trend"></span>연구 분석</button>
+      <button class="nav-item" data-view="evidence"><span data-icon="search"></span>문헌 검토</button>
       <button class="nav-item" data-view="notices"><span data-icon="file"></span>공지 관리</button>
       <button class="nav-item" data-view="messages"><span data-icon="chat"></span>환자 메시지</button>
       <button class="nav-item" data-view="settings"><span data-icon="settings"></span>데모 설정</button>
@@ -34,7 +37,9 @@
       <div class="auth-strip"><span data-auth-label>로그인 확인 중</span><a href="/account">내 계정</a><button type="button" data-auth-logout hidden>로그아웃</button></div>
       <div class="demo-notice" data-demo-only><span data-icon="shield"></span><p><b>데모 워크스페이스</b> · 가상 환자 데이터로 기능을 체험하세요. 실제 환자 개인정보는 입력하지 마세요.</p><span class="notice-label">SAMPLE DATA</span></div>
       <div id="global-error" class="error-banner" role="alert" hidden></div>
+      <div id="operation-result" class="operation-result" role="status" hidden><span id="operation-result-text"></span><button id="dismiss-operation-result" class="text-link" type="button">확인했어요</button></div>
       <section class="page-heading"><div><div class="eyebrow" id="page-eyebrow">CARE AT A GLANCE</div><h1 id="page-title" tabindex="-1">오늘의 돌봄 현황</h1><p id="page-subtitle">환자의 일상을 연결하고, 필요한 돌봄을 먼저 살펴보세요.</p></div><div class="heading-actions"><span id="last-sync" class="last-sync">불러오는 중</span><button id="refresh-button" class="button button-secondary"><span data-icon="refresh"></span><span>새로고침</span></button><button id="add-patient-button" class="button button-primary"><span data-icon="plus"></span>환자 추가</button></div></section>
+      <form id="clinical-period-form" class="clinical-period-toolbar" hidden><label for="clinical-period-preset">조회 기간<select id="clinical-period-preset"><option value="default">최근 7일 요약 · 14일 추이</option><option value="7">최근 7일</option><option value="30">최근 30일</option><option value="90">최근 90일</option><option value="custom">직접 선택</option></select></label><label for="clinical-start-date">시작일<input id="clinical-start-date" name="startDate" type="date" required></label><label for="clinical-end-date">종료일<input id="clinical-end-date" name="endDate" type="date" required></label><button class="button button-secondary" type="submit">기간 적용</button><span id="clinical-period-description">기록이 없는 날은 0으로 채우지 않습니다.</span></form>
       <div id="loading-state" class="loading-state"><span class="spinner"></span><b>환자의 건강 기록을 불러오고 있어요</b><span>일상 데이터와 브리핑을 준비합니다.</span></div>
       <div id="app-content" hidden></div>
       <footer class="workspace-footer"><span><b>HomeCare AI</b> · Better care, connected.</span><span>데모의 요약·확인 우선순위는 임상적으로 검증되지 않았으며, 의료진의 진료 판단을 대신하지 않습니다.</span></footer>

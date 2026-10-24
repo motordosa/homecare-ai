@@ -1,5 +1,18 @@
 # Render 무료 데모 배포
 
+## 최신 v0.7.0 배포 (2026-10-24)
+
+기존 서비스 관리 화면: https://dashboard.render.com/web/srv-db923oss728c73bgipug
+
+1. GitHub `main`에 **v0.7.0 사용자 중심 개선** 커밋이 올라왔는지 확인한다. 작업 공간의 수정만으로 Render가 새 코드를 받을 수는 없다.
+2. 위 기존 서비스에서 **Settings → Build & Deploy → Branch**가 `main`인지 확인한다. 이전 `codex/free-demo-deploy` 브랜치를 사용 중이면 `main`으로 변경한다.
+3. 필요한 기존 테스트 결과를 먼저 내보낸다. 무료 서버의 임시 DB·사진은 재배포 시 사라질 수 있으며 CSV는 전체 복원본이 아니다.
+4. 오른쪽 위 **Manual Deploy → Deploy latest commit**을 선택한다. 새 서비스·DB 생성이나 환경 변수 변경은 이번 사용성 개선에 필요하지 않다.
+5. 상태가 **Live**가 되면 https://homecare-ai-demo.onrender.com/api/health 에서 `appVersion:"0.7.0"`, `schemaVersion:6`, `ok:true`를 확인한다. 실제 배포 커밋도 GitHub의 대상 커밋과 대조한다.
+6. 환자 화면을 새로고침해 큰 메뉴와 공지 요약을 확인하고 의료진 화면에서 업무 목록·연구 분석·문헌 검토 메뉴를 확인한다. 실제 Kakao 모드에서는 계정 권한에 맞는 메뉴만 표시된다.
+
+위 절이 현재 버전의 배포 기준이다. 아래 이전 버전의 schema 값과 검증 기록은 도입 이력이며 v0.7.0 배포 완료의 증거가 아니다. 이번 버전의 로컬 검증 근거는 [구현·검증 보고서](docs/USABILITY_IMPLEMENTATION_REPORT.md)를 따른다.
+
 이 구성은 `plan: free`인 Docker 웹서비스 하나만 생성합니다. 유료 디스크, 유료 데이터베이스, 추가 유료 서비스는 포함하지 않습니다. 환자 사이트·의료진 사이트·SQLite API를 같은 서버에서 실행합니다.
 
 ## 현재 배포 주소

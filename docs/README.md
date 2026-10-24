@@ -1,12 +1,16 @@
 # 개발 문서의 기준과 사용 순서
 
-문서 기준: 2026-10-20 KST, 변경 계획 v0.6. 구현 상태의 최종 근거는 CHANGELOG의 검증 결과다.
+문서 기준: 2026-10-23 KST, v0.7.0. 현재 변경 범위는 [사용자 중심 개선 실행계획](USABILITY_IMPLEMENTATION_PLAN.md), 구현·검증·보류 상태는 [실행 결과 보고서](USABILITY_IMPLEMENTATION_REPORT.md)와 [변경 이력](CHANGELOG.md)을 따른다. 소스 구현, 합성자료 검증, 공개 배포, 실제 사용자·외부 서비스 검증은 서로 다른 완료 상태다.
 
 | 문서 | 책임 |
 |---|---|
-| [MEDICATION_PHOTO_KR_PROPOSAL.md](MEDICATION_PHOTO_KR_PROPOSAL.md) | 국내 의약품 사진·복약 입력 기술 조사/개발 제안(미구현), 자료·API·검증/사용자 준비 |
+| [USABILITY_IMPLEMENTATION_PLAN.md](USABILITY_IMPLEMENTATION_PLAN.md) | v0.7.0 승인 실행 범위·단계·공통 화면·권한·API·자료 이행·검증 관문 |
+| [USABILITY_IMPLEMENTATION_REPORT.md](USABILITY_IMPLEMENTATION_REPORT.md) | 이번 구현 결과·실행한 검증·발견 후 수정·미실행/외부 대기·다음 실행 조건 |
 | [PRODUCT_PLAN.md](PRODUCT_PLAN.md) | 목적, 요구사항 ID, 개발 순서, 인수조건 |
-| [SCREEN_SPEC.md](SCREEN_SPEC.md) | 환자·의료진 페이지별 상단/하단·닫기·입력·상태·코드 대응 제작 규약 |
+| [SCREEN_SPEC.md](SCREEN_SPEC.md) | 현행 환자6경로·역할별 의료진10경로, 큰 글자/조작, 닫기·입력·모달 보호·상태·코드 대응 규약 |
+| [EVIDENCE_WORKSPACE_SPEC.md](EVIDENCE_WORKSPACE_SPEC.md) | Europe PMC 수동 문헌 검색·검색 스냅샷·보관·사람 검토·출처/오류/권한 계약 |
+| [MEDICATION_PHOTO_DEMO_SPEC.md](MEDICATION_PHOTO_DEMO_SPEC.md) | 구현된 약봉투 사진 A단계의 화면·API·동시성·사진 보관·인수조건 |
+| [MEDICATION_PHOTO_KR_PROPOSAL.md](MEDICATION_PHOTO_KR_PROPOSAL.md) | 국내 의약품 사진·복약 입력 조사와 후속 API 제안. A단계 구현 범위는 위 데모 명세, 나머지 제안은 별도 계획 |
 | [SMARTPHONE_SYNC_SPEC.md](SMARTPHONE_SYNC_SPEC.md) | 일부 권한·항목 생략/삭제·revision·Android 코드의 상세 계약 |
 | [USER_ACTION_REPORT.md](USER_ACTION_REPORT.md) | 사용자 계정·기기·API 실행 요청과 단계별 완료 기준·회신 양식 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 구성요소, 화면별 동작, 데이터 흐름·경계 |
@@ -23,12 +27,10 @@
 | `generated/VARIABLES.md` | 코드에서 생성하는 파일별 선언·매개변수·위치 목록 |
 | `generated/SCHEMA.md` | 임시 DB에서 생성하는 실제 테이블·컬럼·FK/제약 기준 |
 
-앞선 전략 근거는 `/workspace/homecare-strategy/HomeCareAI_개발전략.md`와 그 research 자료다. 원문 문서의 제안은 요구 검토 자료이며 사용자 지시와 동일하지 않다. 이번 사용자 지시를 현재 요구사항으로 반영했다.
+현재 개선의 조사·발견사항·우선순위 근거는 [사용자 중심 개선 연구 보고서](research/usability-2026-10-23/README.md)다. 해당 보고서의 ‘보고만 수행’ 상태는 작성 당시 범위이며, 이후 사용자의 수정·검증 지시에 따른 실행 범위는 실행계획에서 관리한다. 연구 제안 전체를 이번 버전에 완료했다고 해석하지 않는다.
 
-v0.5 공식 확인 근거: [iPhone·GPT 자료](research/iphone-gpt-evidence-2026-10-17.md).
+초기 전략 근거는 작성 당시 작업공간의 `/workspace/homecare-strategy/HomeCareAI_개발전략.md`와 그 research 자료이며 저장소 배포물에는 포함되지 않을 수 있다. 첨부 원문 문서의 제안은 요구 검토 자료이며 사용자 지시와 동일하지 않다.
 
-이번 검토의 저장소 내 근거: [임상 검토](research/automation-clinical-review-2026-10-16.md), [건강 연동 근거](research/automation-evidence-2026-10-16.md). 공식 자료로 확인한 내용과 실제 서비스/기기에서 아직 확인하지 않은 내용을 구분했다.
+이전 버전의 저장소 내 근거: [임상 검토](research/automation-clinical-review-2026-10-16.md), [건강 연동 근거](research/automation-evidence-2026-10-16.md), [v0.5 iPhone·GPT 자료](research/iphone-gpt-evidence-2026-10-17.md). 당시 자료 확인과 현재 실제 서비스/기기 연결 검증을 구별한다.
 
-개발자는 작업 시작 시 이 색인→해당 요구사항→해당 계약→변수 의미를 확인한다. 코드와 문서가 다르면 조용히 코드에 맞추지 말고 원래 의도를 확인해 의사결정을 기록한다. 계획과 구현 상태는 별도로 관리한다.
-
-- [약봉투 사진 복약 데모 제작 명세](MEDICATION_PHOTO_DEMO_SPEC.md): 승인된 A단계 화면·API·동시성·사진 보관·인수조건.
+개발자는 작업 시작 시 이 색인→실행계획/해당 요구사항→화면·API 계약→변수 의미→최근 검증 결과 순으로 확인한다. 의도나 동작을 바꾸면 해당 현행 규칙을 먼저 고치고 변경 이력을 남긴다. 기존 규칙과 충돌하는 새 문단만 덧붙이지 않는다. 코드와 문서가 다르면 원래 의도를 확인해 의사결정을 기록하며 계획·구현·검증·배포 상태를 각각 관리한다.

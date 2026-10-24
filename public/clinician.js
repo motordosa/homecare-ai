@@ -1,5 +1,8 @@
-import { bootstrapSession, sessionHeaders, sessionExpired } from './session.js';
+import { bootstrapSession, sessionHeaders, sessionExpired, sessionState, assertSessionActive } from './session.js';
 import { createClinicianCommunications } from './clinician-communications.js';
+import { createClinicalWorklist } from './clinician-workflow.js';
+import { createResearchWorkspace } from './clinician-research.js';
+import { createEvidenceWorkspace } from './clinician-evidence.js';
 'use strict';
 (async () => {
   const icons = {
@@ -38,7 +41,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
   const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 0));
   const shortDate = date => date ? date.slice(5).replace('-', '.') : '기록 없음';
   const sexLabel = sex => ({ female:'여', male:'남', other:'기타' }[sex] || '미입력');
-  const riskLabel = risk => risk?.label || ({ high:'확인 우선',watch:'관찰 필요',stable:'안정적 기록',insufficient:'자료 부족' }[risk?.level] || '자료 부족');
+  const riskLabel = risk => risk?.label || ({ high:'확인 우선',watch:'관찰 필요',stable:'규칙 미해당',insufficient:'자료 부족' }[risk?.level] || '자료 부족');
   const riskClass = risk => ['high','watch','stable','insufficient'].includes(risk?.level) ? risk.level : 'insufficient';
   const riskPill = risk => `<span class="risk-pill ${riskClass(risk)}">${esc(riskLabel(risk))}</span>`;
   const medLabel = status => ({taken:'복용 보고',partial:'일부 복용',missed:'미복용 보고',unknown:'알 수 없음'}[status] || '미기록');
@@ -51,11 +54,18 @@ import { createClinicianCommunications } from './clinician-communications.js';
   const mealSourceLabel = meal => meal.source==='openai-image-estimate-v1' ? `AI 사진 추정${meal.estimation?.patientConfirmed?' · 환자 확인':''}` : meal.source==='demo-food-table-v1'?'음식 선택·비율 예시 추정':'식사 추정 · 출처 확인 필요';
   const mealLabel = meal => ({breakfast:'아침',lunch:'점심',dinner:'저녁',snack:'간식'}[meal] || '식사');
   const state = { view:'overview', data:null, summary:null, selectedId:new URLSearchParams(location.search).get('patientId'), filter:'all', search:'', refreshBusy:false, selectionRequest:0, modal:null, lastFocus:null, medicationDate:new URLSearchParams(location.search).get('medicationDate'), medications:null, medicationRequest:0, medicationLoading:false, medicationError:'', photoGeneration:0, photoAbort:null, capabilities:null, capabilityLoading:false, capabilityError:false };
+  state.startDate=new URLSearchParams(location.search).get('startDate')||'';
+  state.endDate=new URLSearchParams(location.search).get('endDate')||'';
+  state.staffAccess=null;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(state.startDate)||!/^\d{4}-\d{2}-\d{2}$/.test(state.endDate)){state.startDate='';state.endDate='';}
   const viewTitles = {
     overview:['CARE AT A GLANCE','오늘의 돌봄 현황','환자의 일상을 연결하고, 필요한 돌봄을 먼저 살펴보세요.','케어 대시보드'],
     patients:['PATIENT WORKSPACE','환자 관리','기록의 변화와 확인할 내용을 환자별로 자세히 살펴보세요.','환자 관리'],
     medications:['CONFIRMED MEDICATION PLAN','복약 계획과 보고','의료진이 확인한 계획과 약별·회차별 자기보고를 함께 살펴보세요.','복약 계획'],
     records:['EVERYDAY HEALTH RECORDS','건강 기록','일상의 기록을 확인하고 연구용 파일로 내보내세요.','건강 기록'],
+    worklist:['TEAM WORKLIST','오늘 할 일과 검토','연락·자료 확인·검토 요청을 담당자와 처리 상태로 관리하세요.','업무 목록'],
+    research:['RESEARCH WORKSPACE','연구 자료와 기술통계','대상·기간·출처·결측을 확인한 뒤 자료를 동결하고 가명으로 내보내세요.','연구 분석'],
+    evidence:['EVIDENCE WORKSPACE','연구 문헌 검토','검색 조건과 실제 출처를 보존하고 근거를 직접 검토하세요.','문헌 검토'],
     notices:['CARE ANNOUNCEMENTS','의료진 공지','환자 화면 상단에 표시할 공지를 작성하고 관리하세요.','공지 관리'],
     messages:['PATIENT MESSAGES','환자 메시지','환자별로 내용을 보내고 답변과 읽음 여부를 확인하세요.','환자 메시지'],
     settings:['DEMO WORKSPACE SETTINGS','데모 설정','테스트 데이터를 관리하고 다음 시연을 준비하세요.','데모 설정'],
@@ -66,9 +76,32 @@ import { createClinicianCommunications } from './clinician-communications.js';
   const $ = selector => document.querySelector(selector);
   document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon); });
   const communication=createClinicianCommunications({api,getState:()=>state,toast,selectPatient,invite:openInvitation});
+  const workspaces={worklist:createClinicalWorklist({api,getState:()=>state,toast,selectPatient}),research:createResearchWorkspace({api,getState:()=>state,toast}),evidence:createEvidenceWorkspace({api,getState:()=>state,toast})};
+  const currentWorkspace=()=>workspaces[state.view];
+  const can=capability=>Boolean(state.staffAccess?.capabilities?.includes(capability));
+  const viewPermissions={overview:'patient.read',patients:'patient.read',records:'patient.read',medications:'patient.read',worklist:'patient.read',research:'research.read',evidence:'evidence.read',notices:'notice.write',messages:'message.write',settings:'admin.reset'};
+  function authorizedView(view){return can(viewPermissions[view])?view:Object.keys(viewTitles).find(key=>can(viewPermissions[key]))||'settings';}
+  function lockModal(locked){$('#modal').querySelectorAll('input,select,textarea,button').forEach(el=>{if(locked){el.dataset.beforeLock=el.disabled?'1':'0';el.disabled=true;}else if(el.dataset.beforeLock!==undefined){el.disabled=el.dataset.beforeLock==='1';delete el.dataset.beforeLock;}});}
+  const periodQuery=()=>state.startDate&&state.endDate?'?'+new URLSearchParams({startDate:state.startDate,endDate:state.endDate}):'';
+  const periodDays=()=>state.summary?.period?.totalDays||7;
+  const periodLabel=()=>state.startDate&&state.endDate?`${state.startDate} ~ ${state.endDate}`:'최근 7일';
+  const offsetDate=(date,days)=>new Date(Date.parse(`${date}T12:00:00Z`)+days*86400000).toISOString().slice(0,10);
+  const modalValues=()=>JSON.stringify([...$('#modal').querySelectorAll('input,select,textarea')].map(el=>[el.id||el.name,el.type==='checkbox'||el.type==='radio'?el.checked:el.type==='file'?[...el.files].map(f=>[f.name,f.size,f.lastModified]):el.value]));
+  const modalBusy=()=>Boolean(state.modal?.saving||state.modal?.busy);
+  const modalDirty=()=>Boolean(state.modal&&state.modal.baseline!==undefined&&state.modal.baseline!==modalValues());
+  function rememberModal(){if(state.modal)state.modal.baseline=modalValues();}
+  function canCloseModal(){if(modalBusy()){toast('저장 또는 분석이 끝난 뒤 이동해 주세요.',true);return false;}return !modalDirty()||confirm('작성한 내용을 저장하지 않고 나갈까요? 취소하면 계속 작성할 수 있습니다.');}
+  function canLeave(){
+    if(!canCloseModal())return false;
+    if(!communication.canLeave())return false;
+    if(currentWorkspace()&&!currentWorkspace().canLeave())return false;
+    if(state.modal)closeModal({force:true});
+    return true;
+  }
   let historyIndex=Number(history.state?.hcClinicianIndex)||0,restoringHistory=false;
   history.replaceState({...history.state,hcClinicianIndex:historyIndex},'',location.href);
   async function api(path, options = {}) {
+    assertSessionActive();
     const response = await fetch(path, { ...options, headers:{ 'Content-Type':'application/json', ...sessionHeaders(), ...options.headers } });
     const result = await response.json().catch(() => ({}));
     if(response.status===401)sessionExpired();
@@ -80,6 +113,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
     if (state.selectedId) url.searchParams.set('patientId',state.selectedId); else url.searchParams.delete('patientId');
     if (state.view === 'overview') url.searchParams.delete('view'); else url.searchParams.set('view',state.view);
     if(state.view==='medications' && medDate())url.searchParams.set('medicationDate',medDate());else url.searchParams.delete('medicationDate');
+    if(state.startDate&&state.endDate){url.searchParams.set('startDate',state.startDate);url.searchParams.set('endDate',state.endDate);}else{url.searchParams.delete('startDate');url.searchParams.delete('endDate');}
     if(url.href!==location.href){if(historyMode==='push')historyIndex++;history[historyMode==='push'?'pushState':'replaceState']({hcClinicianIndex:historyIndex},'',url);}
   }
   function focusPage() {
@@ -89,27 +123,30 @@ import { createClinicianCommunications } from './clinician-communications.js';
   function restoreRoute(event) {
     const target=Number(event.state?.hcClinicianIndex)||0;
     if(restoringHistory){restoringHistory=false;return;}
-    if(!communication.canLeave()){const delta=historyIndex-target;if(delta){restoringHistory=true;history.go(delta);}return;}
+    if(!canLeave()){const delta=historyIndex-target;if(delta){restoringHistory=true;history.go(delta);}return;}
     historyIndex=target;
     const params=new URLSearchParams(location.search);
     const view=params.get('view'),patientId=params.get('patientId'),date=params.get('medicationDate');
-    state.view=Object.hasOwn(viewTitles,view)?view:'overview';
+    state.view=authorizedView(Object.hasOwn(viewTitles,view)?view:'overview');
     state.medicationDate=/^\d{4}-\d{2}-\d{2}$/.test(date||'')?date:state.data?.today||null;
+    const periodChanged=state.startDate!==(params.get('startDate')||'')||state.endDate!==(params.get('endDate')||'');
+    state.startDate=params.get('startDate')||'';state.endDate=params.get('endDate')||'';
     ++state.selectionRequest;++state.medicationRequest;
     state.medications=null;state.medicationLoading=false;state.medicationError='';
     $('#app-content').removeAttribute('aria-busy');
-    if(state.modal)closeModal();
+    if(state.modal)closeModal({force:true});
     const selected=state.data?.patients.some(p=>p.id===patientId)?patientId:state.data?.patients[0]?.id||null;
-    if(selected!==state.selectedId)state.summary=null;
+    if(selected!==state.selectedId||periodChanged)state.summary=null;
     state.selectedId=selected;
     render();focusPage();
-    if(selected && !state.summary)selectPatient(selected,false,{historyMode:'replace'});
+    if(periodChanged)refresh({quiet:true});
+    else if(selected && !state.summary)selectPatient(selected,false,{historyMode:'replace'});
     else if(state.view==='medications' && selected)loadMedications();
   }
   window.addEventListener('popstate',restoreRoute);
   function showError(message) { $('#global-error').textContent=message; $('#global-error').hidden=!message; }
   let toastTimer;
-  function toast(message, error = false) { const el=$('#toast');el.textContent=message;el.hidden=false;el.classList.toggle('error',error);clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.hidden=true;},4000); }
+  function toast(message, error = false) { const el=$('#toast');el.textContent=message;el.hidden=false;el.classList.toggle('error',error);clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.hidden=true;},4000);const result=$('#operation-result');if(result){result.hidden=false;result.classList.toggle('is-error',error);$('#operation-result-text').textContent=message;} }
   let refreshQueue = Promise.resolve();
   function refresh(options = {}) {
     const operation = refreshQueue.then(() => performRefresh(options));
@@ -117,16 +154,18 @@ import { createClinicianCommunications } from './clinician-communications.js';
     return operation;
   }
   async function performRefresh({quiet = false} = {}) {
+    if(modalBusy()){if(!quiet)toast('저장 또는 분석이 끝나면 새로고침할 수 있습니다.',true);return;}
     state.refreshBusy=true;
     $('#refresh-button').disabled=true;
     try {
-      const data=await api('/api/dashboard');
+      const data=await api('/api/dashboard'+periodQuery());
       state.data=data;
       await loadIntegrationSettings({renderAfter:false});
       if(!data.patients.some(p=>p.id===state.selectedId)) state.selectedId=[...data.patients].sort((a,b)=>({high:0,watch:1,stable:2,insufficient:3}[a.risk?.level]??3)-({high:0,watch:1,stable:2,insufficient:3}[b.risk?.level]??3))[0]?.id || null;
+      if(!can('patient.read'))state.selectedId=null;
       if(state.selectedId) {
         const selected=state.selectedId,request=state.selectionRequest;
-        const summary=await api(`/api/patients/${encodeURIComponent(selected)}/summary`);
+        const summary=await api(`/api/patients/${encodeURIComponent(selected)}/summary${periodQuery()}`);
         if(state.selectedId===selected && request===state.selectionRequest) state.summary=summary;
       } else state.summary=null;
       if(!state.medicationDate)state.medicationDate=data.today;
@@ -134,7 +173,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
       showError('');
       $('#current-date').textContent=new Date(`${data.today}T12:00:00+09:00`).toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short',timeZone:'Asia/Seoul'});
       $('#nav-patient-count').textContent=data.patients.length;
-      $('#last-sync').textContent=`${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Seoul'})} 업데이트`;
+      $('#last-sync').textContent=`화면 조회 ${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Seoul'})} · 관측일은 각 기록에 표시`;
       $('#loading-state').hidden=true;
       $('#app-content').hidden=false;
       render();
@@ -143,8 +182,8 @@ import { createClinicianCommunications } from './clinician-communications.js';
     finally { state.refreshBusy=false;$('#refresh-button').disabled=false; }
   }
   async function selectPatient(id, changeView = false, {historyMode='push'} = {}) {
-    if(!state.data?.patients.some(p=>p.id===id)) return;
-    if(id!==state.selectedId && !communication.canLeave())return;
+    if(!can('patient.read')||!state.data?.patients.some(p=>p.id===id)) return;
+    if(id!==state.selectedId && !canLeave())return;
     state.selectedId=id;
     state.summary=null;state.medications=null;
     ++state.medicationRequest;
@@ -153,7 +192,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
     if(changeView) state.view='patients';
     showError('');render(historyMode);
     try {
-      const summary=await api(`/api/patients/${encodeURIComponent(id)}/summary`);
+      const summary=await api(`/api/patients/${encodeURIComponent(id)}/summary${periodQuery()}`);
       if(request!==state.selectionRequest || state.selectedId!==id) return;
       state.summary=summary;
       if(state.view==='medications')await loadMedications({renderAfter:false});
@@ -190,11 +229,11 @@ import { createClinicianCommunications } from './clinician-communications.js';
       content+=`<path d="${d}" fill="none" stroke="${color}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>`;
       values.forEach((v,i)=>{if(present(v))content+=`<circle cx="${x(i)}" cy="${y(v)}" r="${i===rows.length-1?3:1.7}" fill="${color}" stroke="#fff" stroke-width="1"><title>${esc(rows[i].date)}: ${num(v,1)} ${esc(unit)}</title></circle>`;});
     }
-    return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}. ${numeric.length}일 기록. 최소 ${num(Math.min(...numeric),1)}, 최대 ${num(Math.max(...numeric),1)} ${esc(unit)}">${content}</svg>`;
+    return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}. ${numeric.length}일 기록. 최소 ${num(Math.min(...numeric),1)}, 최대 ${num(Math.max(...numeric),1)} ${esc(unit)}">${content}</svg><details class="chart-data" data-preserve-key="chart-${esc(key)}-${esc(label)}"><summary>${esc(label)} 숫자 표 보기</summary><div class="table-scroll" tabindex="0" aria-label="${esc(label)} 날짜별 수치"><table class="patient-table"><thead><tr><th scope="col">날짜</th><th scope="col">값 (${esc(unit)})</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${esc(row.date)}</td><td>${present(row[key])?num(row[key],2):'미기록'}</td></tr>`).join('')}</tbody></table></div></details>`;
   }
   function stats() {
     const s=state.data.stats;const ts=state.data.trends||[];
-    const cards=[['전체 관리 환자',s.patients,'명','users','등록된 가상 환자','연구 참여 데모',ts.map(()=>s.patients)],['확인이 필요한 환자',s.needsReview,'명','alert','기록에 따른 확인 우선순위','방문 전 살펴보세요',ts.map(r=>Math.max(0,s.patients-r.reportingPatients))],['오늘 기록한 환자',s.reportedToday,'명','check','일일·식사 기록 기준',`전체 ${s.patients}명 중`,ts.map(r=>r.reportingPatients)],['최근 7일 기록률',s.averageCompletion,'%','trend','환자별 기록일 비율의 평균','일일 또는 식사 기록',ts.map(r=>s.patients?r.reportingPatients/s.patients*100:0)]];
+    const cards=[['전체 관리 환자',s.patients,'명','users','현재 접근 가능한 환자','환자 수와 관측 수 구분',ts.map(()=>s.patients)],['확인이 필요한 환자',s.needsReview,'명','alert','별도 7일 확인 규칙','임상 진단 아님',ts.map(r=>Math.max(0,s.patients-r.reportingPatients))],[state.startDate?'기준일 기록한 환자':'오늘 기록한 환자',s.reportedAtReferenceDate??s.reportedToday,'명','check','약별·일일·기기·식사 포함',`${state.data.referenceDate||state.data.today} · 전체 ${s.patients}명 중`,ts.map(r=>r.reportingPatients)],['선택 기간 기록일 비율',s.averageCompletion,'%','trend','환자별 달력 날짜 비율 평균','연구계획 완결률과 다름',ts.map(r=>s.patients?r.reportingPatients/s.patients*100:0)]];
     return `<div class="stats-grid">${cards.map((c,i)=>`<section class="stat-card"><div class="stat-label">${esc(c[0])}</div><span class="stat-icon">${icon(c[3])}</span><div class="stat-number">${num(c[1])}<small>${c[2]}</small></div><div class="stat-caption"><b class="${i===1?'amber-text':''}">${esc(c[4])}</b></div><div class="stat-caption">${esc(c[5])}</div>${i>1?`<div class="stat-spark">${spark(c[6],i===2?'#8bb4d2':'#b3a0d0')}</div>`:''}</section>`).join('')}</div>`;
   }
   function filteredPatients() {
@@ -206,7 +245,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
     return patients.map(p=>`<tr class="patient-row ${p.id===state.selectedId?'selected':''}" data-action="select-patient" data-id="${esc(p.id)}" tabindex="0" aria-label="${esc(p.name)} 환자 상세 보기" aria-selected="${p.id===state.selectedId}"><td><div class="person-cell"><span class="avatar">${esc(p.name.slice(0,1))}</span><div><b>${esc(p.name)}</b><small>${esc(p.id.startsWith('p-')?'신규 데모 환자':p.id.toUpperCase())}</small></div></div></td><td class="patient-age">${num(p.age)}세 · ${sexLabel(p.sex)}</td><td>${riskPill(p.risk)}</td><td class="optional-col"><div class="mini-completion"><i><span style="width:${clamp(val(p.metrics,'completion'),0,100)}%"></span></i>${num(val(p.metrics,'completion'))}%</div></td>${full?`<td class="optional-col">${num(val(p.metrics,'steps'))} <span class="unit-note">걸음</span></td><td class="optional-col">${num(val(p.metrics,'sleepHours'),1)} <span class="unit-note">시간</span></td>`:''}<td>${shortDate(p.lastRecordDate)}${p.lastRecordDate===state.data.today?' <span class="unit-note">오늘</span>':''}</td><td class="row-arrow">${icon('arrow')}</td></tr>`).join('');
   }
   function patientList(full = false) {
-    return `<section class="card ${full?'patient-full-card':''}"><div class="card-header"><div><h2>관리 환자 <span class="card-count">${state.data.patients.length}명</span></h2><p class="subheading">기록에 따른 확인 우선순위와 최근 변화를 살펴보세요.</p></div>${!full?`<button class="text-link" data-action="view" data-view="patients">전체 보기 ${icon('arrow')}</button>`:''}</div><div class="patient-controls"><div class="risk-tabs" aria-label="확인 우선순위 필터">${[['all','전체'],['high','확인 우선'],['watch','관찰 필요'],['stable','안정적 기록'],['insufficient','자료 부족']].map(([key,label])=>`<button class="risk-tab ${state.filter===key?'active':''}" data-action="filter" data-filter="${key}" aria-pressed="${state.filter===key}">${label}</button>`).join('')}</div><label class="search-wrap">${icon('search')}<input id="patient-search" class="search-input" placeholder="환자 이름, 질환 검색" aria-label="환자 이름 또는 질환 검색" value="${esc(state.search)}"></label></div><div class="table-scroll"><table class="patient-table" aria-label="관리 환자 목록"><thead><tr><th>환자</th><th>나이 / 성별</th><th>확인 우선순위</th><th class="optional-col">7일 기록률</th>${full?'<th class="optional-col">평균 활동</th><th class="optional-col">평균 수면</th>':''}<th>최근 기록</th><th aria-label="상세 보기"></th></tr></thead><tbody id="patient-table-body">${patientRows(full)}</tbody></table></div><div class="table-footer"><span id="patient-count-label">전체 ${state.data.patients.length}명 중 ${filteredPatients().length}명 표시</span><span>행을 선택하면 기록을 확인할 수 있어요 ${icon('arrow','control-chevron')}</span></div></section>`;
+    return `<section class="card ${full?'patient-full-card':''}"><div class="card-header"><div><h2>관리 환자 <span class="card-count">${state.data.patients.length}명</span></h2><p class="subheading">기록에 따른 확인 우선순위와 최근 변화를 살펴보세요.</p></div>${!full?`<button class="text-link" data-action="view" data-view="patients">전체 보기 ${icon('arrow')}</button>`:''}</div><div class="patient-controls"><div class="risk-tabs" aria-label="확인 우선순위 필터">${[['all','전체'],['high','확인 우선'],['watch','관찰 필요'],['stable','규칙 미해당'],['insufficient','자료 부족']].map(([key,label])=>`<button class="risk-tab ${state.filter===key?'active':''}" data-action="filter" data-filter="${key}" aria-pressed="${state.filter===key}">${label}</button>`).join('')}</div><label class="search-wrap">${icon('search')}<input id="patient-search" class="search-input" placeholder="환자 이름, 질환 검색" aria-label="환자 이름 또는 질환 검색" value="${esc(state.search)}"></label></div><div class="table-scroll"><table class="patient-table" aria-label="관리 환자 목록"><thead><tr><th>환자</th><th>나이 / 성별</th><th>확인 우선순위</th><th class="optional-col">기간 기록일 비율</th>${full?'<th class="optional-col">평균 활동</th><th class="optional-col">평균 수면</th>':''}<th>마지막 기록일</th><th aria-label="상세 보기"></th></tr></thead><tbody id="patient-table-body">${patientRows(full)}</tbody></table></div><div class="table-footer"><span id="patient-count-label">전체 ${state.data.patients.length}명 중 ${filteredPatients().length}명 표시</span><span>행을 선택하면 기록을 확인할 수 있어요 ${icon('arrow','control-chevron')}</span></div></section>`;
   }
   function briefingCard() {
     const s=state.summary;if(!s)return '';
@@ -216,38 +255,39 @@ import { createClinicianCommunications } from './clinician-communications.js';
   }
   function reportingChart() {
     const t=state.data.trends;
-    return `<section class="card chart-card"><div class="card-header"><div><h2>꾸준히 연결되는 일상</h2><p class="subheading">최근 14일 · 일일 또는 식사 기록이 있는 환자</p></div><div class="chart-legend"><span><i></i>기록 환자</span></div></div><div class="chart-wrap">${chart(t,'reportingPatients',{type:'bar',color:'#7db8a3',unit:'명',max:Math.max(state.data.patients.length,1),height:145,label:'최근 14일 기록 환자 수'})}</div><div class="chart-footer"><span>환자와 돌봄을 이어가는 매일의 기록</span><b>오늘 ${state.data.stats.reportedToday}명 기록</b></div></section>`;
+    return `<section class="card chart-card"><div class="card-header"><div><h2>꾸준히 연결되는 일상</h2><p class="subheading">${esc(state.startDate?periodLabel():'최근 14일')} · 약별·일일·기기·식사 기록이 있는 환자</p></div><div class="chart-legend"><span><i></i>기록 환자</span></div></div><div class="chart-wrap">${chart(t,'reportingPatients',{type:'bar',color:'#7db8a3',unit:'명',max:Math.max(state.data.patients.length,1),height:145,label:(state.startDate?periodLabel():'최근 14일')+' 기록 환자 수'})}</div><div class="chart-footer"><span>환자와 돌봄을 이어가는 매일의 기록</span><b>${esc(state.data.referenceDate||state.data.today)} · ${num(state.data.stats.reportedAtReferenceDate??state.data.stats.reportedToday)}명 기록</b></div></section>`;
   }
   function alerts() {
     const alerts=state.data.alerts.slice(0,3);
-    return `<section class="card alerts-section"><div class="card-header"><h2>살펴볼 기록</h2><span class="small-label">최근 7일</span></div>${alerts.length?`<div class="alert-list">${alerts.map(a=>`<div class="alert-item ${a.level==='high'?'high':''}"><span class="alert-dot">${icon('alert')}</span><div class="alert-body"><strong>${esc(a.patientName)} · ${esc(a.title)}</strong><p>${esc(a.detail)}</p></div><button data-action="alert-patient" data-id="${esc(a.patientId)}" aria-label="${esc(a.patientName)} 상세 보기">${icon('arrow')}</button></div>`).join('')}</div>`:'<div class="compact-empty">현재 확인 규칙에 해당하는 기록이 없습니다.</div>'}</section>`;
+    return `<section class="card alerts-section"><div class="card-header"><h2>살펴볼 기록</h2><span class="small-label">${esc(state.data.referenceDate||state.data.today)}까지 7일</span></div>${alerts.length?`<div class="alert-list">${alerts.map(a=>`<div class="alert-item ${a.level==='high'?'high':''}"><span class="alert-dot">${icon('alert')}</span><div class="alert-body"><strong>${esc(a.patientName)} · ${esc(a.title)}</strong><p>${esc(a.detail)}</p></div><button data-action="alert-patient" data-id="${esc(a.patientId)}" aria-label="${esc(a.patientName)} 상세 보기">${icon('arrow')}</button></div>`).join('')}</div>`:'<div class="compact-empty">현재 확인 규칙에 해당하는 기록이 없습니다.</div>'}</section>`;
   }
   function metricPanels() {
-    const s=state.summary,m=s.metrics,t=s.trends.slice(-14);
-    const panels=[['steps','steps','평균 활동',num(m.steps.value),'걸음',`${m.steps.coverageDays}/7일 활동 보고`,healthSourceSummary(m.steps),'#7db6a4'],['sleepHours','moon','평균 수면',num(m.sleepHours.value,1),'시간',`${m.sleepHours.coverageDays}/7일 수면 보고`,healthSourceSummary(m.sleepHours),'#a2a0c8'],['medication','pill','일일 복약 자기보고 점수',num(m.medication.value),'%',`${m.medication.takenDays}일 복용 · ${m.medication.reportedDays}일 보고`,'복용 1 · 일부 0.5 · 미복용 0','#b3bf92'],['calories','food','기록된 식사 추정량',num(m.nutrition.value),'kcal/일',`단백질 ${num(m.nutrition.proteinGrams,1)} g/일`,'기록일의 추정 합계 평균 · 미기록 식사 제외','#d1af7b']];
+    const s=state.summary,m=s.metrics,t=state.startDate?s.trends:s.trends.slice(-14);
+    const panels=[['steps','steps','평균 활동',num(m.steps.value),'걸음',`${m.steps.coverageDays}/${periodDays()}일 활동 보고`,healthSourceSummary(m.steps),'#7db6a4'],['sleepHours','moon','평균 수면',num(m.sleepHours.value,1),'시간',`${m.sleepHours.coverageDays}/${periodDays()}일 수면 보고`,healthSourceSummary(m.sleepHours),'#a2a0c8'],['medication','pill','일일 복약 자기보고 점수',num(m.medication.value),'%',`${m.medication.takenDays}일 복용 · ${m.medication.reportedDays}일 보고`,'복용 1 · 일부 0.5 · 미복용 0','#b3bf92'],['calories','food','기록된 식사 추정량',m.nutrition.value===null?'산출 불가':num(m.nutrition.value),'kcal',`기록일 평균 · 단백질 ${num(m.nutrition.proteinGrams,1)} g`,'기록일의 추정 합계 평균 · 미기록 식사 제외','#d1af7b']];
     return `<div class="detail-metric-grid">${panels.map(([key,ic,title,value,unit,caption,source,color])=>`<article class="metric-panel"><div class="metric-panel-top">${icon(ic)}${title}</div><h3>${value}<small>${unit}</small></h3><div class="metric-bottom"><span>${esc(caption)}</span></div><div class="metric-trend">${spark(key==='medication'?t.map(r=>r.medicationStatus==='taken'?100:r.medicationStatus==='partial'?50:r.medicationStatus==='missed'?0:null):t.map(r=>r[key]),color)}</div><div class="source-note">${esc(source)}</div></article>`).join('')}</div>`;
   }
   function detailCharts() {
-    const t=state.summary.trends.slice(-14);
+    const t=state.startDate?state.summary.trends:state.summary.trends.slice(-14);
     const medication=t.map(r=>({...r,medValue:r.medicationStatus==='taken'?100:r.medicationStatus==='partial'?50:r.medicationStatus==='missed'?0:null}));
-    const panels=[['활동 추이','최근 14일',t,'steps',{unit:'걸음',color:'#73ad98'},healthSourceSummary(state.summary.metrics.steps),'미기록일은 연결하지 않음'],['수면 추이','최근 14일',t,'sleepHours',{unit:'시간',color:'#a7a1c7'},healthSourceSummary(state.summary.metrics.sleepHours),'수면 질은 별도 평가 필요'],['일일 복약 보고','최근 14일',medication,'medValue',{unit:'점',color:'#a1b88c',type:'bar',max:100},'100 복용 · 50 일부 · 0 미복용','자기보고 기준'],['식사 기록 추이','최근 14일',t,'calories',{unit:'kcal',color:'#d5b47e',type:'bar'},'기록된 식사의 영양 추정 합계','실제 섭취량을 확정하지 않음']];
+    const chartPeriod=state.startDate?periodLabel():'최근 14일';
+    const panels=[['활동 추이',chartPeriod,t,'steps',{unit:'걸음',color:'#73ad98'},healthSourceSummary(state.summary.metrics.steps),'미기록일은 연결하지 않음'],['수면 추이',chartPeriod,t,'sleepHours',{unit:'시간',color:'#a7a1c7'},healthSourceSummary(state.summary.metrics.sleepHours),'수면 질은 별도 평가 필요'],['일일 복약 보고',chartPeriod,medication,'medValue',{unit:'점',color:'#a1b88c',type:'bar',max:100},'100 복용 · 50 일부 · 0 미복용','자기보고 기준'],['식사 기록 추이',chartPeriod,t,'calories',{unit:'kcal',color:'#d5b47e',type:'bar'},'기록된 식사의 영양 추정 합계','실제 섭취량을 확정하지 않음']];
     return `<div class="detail-chart-grid">${panels.map(([title,period,rows,key,options,note,right])=>`<section class="card"><div class="card-header"><h2>${title}</h2><span class="card-count">${period}</span></div><div class="chart-wrap">${chart(rows,key,{...options,height:145,label:title})}</div><div class="chart-footer"><span>${note}</span><span>${right}</span></div></section>`).join('')}</div>`;
   }
   function coverage() {
-    const s=state.summary,m=s.metrics;const data=[['활동',m.steps.coverageDays],['수면',m.sleepHours.coverageDays],['복약',m.medication.reportedDays],['식사',m.nutrition.recordedDays]];
-    return `<section class="card coverage-card"><h3>판단의 시작은, 충분한 기록</h3><p>최근 7일 중 영역별 기록이 있는 날입니다.<br>미기록은 0 또는 정상으로 처리하지 않습니다.</p>${data.map(([label,days])=>`<div class="coverage-row"><span>${label}</span><span class="coverage-bar"><i style="width:${clamp(days/7*100,0,100)}%"></i></span><b>${num(days)}/7일</b></div>`).join('')}<div class="coverage-note">기록률 ${num(m.completion.value)}% · ${m.completion.reportedDays}/7일에 일일 또는 식사 기록<br>체중 ${num(m.weightKg.value,1)} kg ${m.weightKg.date?`· ${shortDate(m.weightKg.date)} 보고`:''}</div><div class="risk-reasons"><h4>확인 우선순위의 근거</h4><ul>${s.risk.reasons.length?s.risk.reasons.map(r=>`<li>${esc(r)}</li>`).join(''):`<li>${s.risk.level==='insufficient'?'판단하기에 기록이 충분하지 않습니다.':'현재 데모 확인 규칙에 해당하는 항목이 없습니다.'}</li>`}</ul><p class="coverage-note">${esc(s.risk.disclaimer)}</p></div></section>`;
+    const s=state.summary,m=s.metrics;const data=[['활동',m.steps.coverageDays],['수면',m.sleepHours.coverageDays],['일일 복약 보고',m.medication.reportedDays],['약별 복약 보고',m.medication.doseReportedDays],['식사',m.nutrition.recordedDays]];
+    return `<section class="card coverage-card"><h3>판단의 시작은, 충분한 기록</h3><p>${esc(periodLabel())} 중 영역별 기록이 있는 날입니다.<br>미기록은 0 또는 정상으로 처리하지 않습니다.</p>${data.map(([label,days])=>`<div class="coverage-row"><span>${label}</span><span class="coverage-bar"><i style="width:${clamp(days/periodDays()*100,0,100)}%"></i></span><b>${num(days)}/${periodDays()}일</b></div>`).join('')}<div class="coverage-note">기록일 비율 ${num(m.completion.value)}% · ${m.completion.reportedDays}/${m.completion.totalDays}일에 약별·일일·기기·식사 기록<br>체중 ${num(m.weightKg.value,1)} kg ${m.weightKg.date?`· ${shortDate(m.weightKg.date)} 보고`:''}</div><div class="risk-reasons"><h4>확인 우선순위의 근거</h4><ul>${s.risk.reasons.length?s.risk.reasons.map(r=>`<li>${esc(r)}</li>`).join(''):`<li>${s.risk.level==='insufficient'?'판단하기에 기록이 충분하지 않습니다.':'현재 데모 확인 규칙에 해당하는 항목이 없습니다.'}</li>`}</ul><p class="coverage-note">${esc(s.risk.disclaimer)}</p></div></section>`;
   }
   function foodIllustration(food) {
     const content={balanced:'<ellipse cx="55" cy="54" rx="14" ry="18" fill="#e9ddc0"/><circle cx="82" cy="37" r="11" fill="#88a276"/><circle cx="93" cy="57" r="10" fill="#c98f6f"/><circle cx="81" cy="77" r="11" fill="#d7ac70"/>',protein:'<path d="M44 58c-11-21 26-31 39-10s-10 43-29 27Z" fill="#b99573"/><path d="m48 50 19 21m-10-27 20 19" stroke="#927357" stroke-width="3" opacity=".4"/><circle cx="88" cy="37" r="9" fill="#91a778"/><circle cx="91" cy="79" r="8" fill="#adb28a"/>',noodles:'<ellipse cx="70" cy="57" rx="29" ry="25" fill="#dfc796"/><path d="M49 52c10-19 35 9 43-9M47 63c16-22 31 10 48-4M54 73c14-17 28 7 34-7" stroke="#b9a06d" stroke-width="3" fill="none"/><circle cx="78" cy="40" r="5" fill="#9dba87"/>',porridge:'<ellipse cx="70" cy="57" rx="30" ry="26" fill="#e2d4b5"/><path d="m56 47 3 2m16-4 2 2m-5 14 3 1m-17 6 4 1m22-16 3 2m-7 17 2 2" stroke="#b5a78a" stroke-width="2.5" stroke-linecap="round"/><path d="m66 50 7-5m-8 22 9-5" stroke="#98ae80" stroke-width="2.5"/>'}[food]||'';
     return `<svg viewBox="0 0 140 110" width="100%" height="100%" role="img" aria-label="음식 유형 예시 일러스트"><rect width="140" height="110" fill="#f0f3ea"/><ellipse cx="72" cy="61" rx="44" ry="41" fill="#d9e1d1" opacity=".4"/><circle cx="70" cy="55" r="39" fill="#fcfcf7"/><circle cx="70" cy="55" r="32" fill="#f3f2e9"/>${content}<path d="M123 23v65m-5-65v15m10-15v15m-10 0q5 7 10 0" stroke="#b4b9a9" stroke-width="2.1" fill="none" stroke-linecap="round"/></svg>`;
   }
   function meals() {
-    const meals=state.summary.recentMeals.slice(0,3);
-    return `<section class="card"><div class="card-header"><div><h2>식탁에서 온 기록</h2><p class="subheading">최근 식사 · AI 사진 또는 음식 선택에 따른 영양 추정</p></div><span class="small-label">최근 ${meals.length}건</span></div>${meals.length?`<div class="meal-list">${meals.map(m=>`<article class="meal-item"><div class="meal-visual">${m.imageUrl && /^\/uploads\/[a-zA-Z0-9._-]+$/.test(m.imageUrl)?`<img src="${esc(m.imageUrl)}" alt="${esc(shortDate(m.date))} ${esc(mealLabel(m.mealType))} 식사 사진" loading="lazy">`:foodIllustration(m.foodType)}<span class="food-label">${m.imageUrl?'등록 사진':'예시 그림'}</span></div><h4>${shortDate(m.date)} ${mealLabel(m.mealType)} · ${esc(m.foodLabel||foodLabel(m.foodType))}</h4><p>${num(m.calories)} kcal · 단백질 ${num(m.proteinGrams,1)} g</p><small>섭취 비율 ${num(m.portion*100)}%</small><small class="meal-source-label">${esc(mealSourceLabel(m))}</small>${m.estimation?`<small>${esc(m.estimation.provider)} / ${esc(m.estimation.model)}</small>`:''}</article>`).join('')}</div>`:'<div class="compact-empty">아직 기록된 식사가 없습니다.</div>'}<div class="source-disclaimer">AI 사진 추정과 음식 선택·비율에 따른 예시 추정을 구별합니다. 환자의 섭취 확인은 자기보고이며 실제 영양량의 임상 검증이 아닙니다.</div></section>`;
+    const meals=state.summary.recentMeals.slice(0,state.view==='records'?24:3);
+    return `<section class="card"><div class="card-header"><div><h2>식탁에서 온 기록</h2><p class="subheading">최근 식사 · AI 사진 또는 음식 선택에 따른 영양 추정</p></div><span class="small-label">최근 ${meals.length}건</span></div>${meals.length?`<div class="meal-list">${meals.map(m=>`<article class="meal-item"><div class="meal-visual">${m.imageUrl && /^\/uploads\/[a-zA-Z0-9._-]+$/.test(m.imageUrl)?`<img src="${esc(m.imageUrl)}" alt="${esc(shortDate(m.date))} ${esc(mealLabel(m.mealType))} 식사 사진" loading="lazy">`:foodIllustration(m.foodType)}<span class="food-label">${m.imageUrl?'등록 사진':'예시 그림'}</span></div><h4>${shortDate(m.date)} ${mealLabel(m.mealType)} · ${esc(m.foodLabel||foodLabel(m.foodType))}</h4><p>${m.calories===null?'영양 산출 불가':num(m.calories)+' kcal'} · 단백질 ${m.proteinGrams===null?'산출 불가':num(m.proteinGrams,1)+' g'}</p><small>섭취 비율 ${m.portion===null?'모름':num(m.portion*100)+'%'}</small><small class="meal-source-label">${esc(mealSourceLabel(m))}</small>${m.estimation?`<small>${esc(m.estimation.provider)} / ${esc(m.estimation.model)}</small>`:''}</article>`).join('')}</div>`:'<div class="compact-empty">아직 기록된 식사가 없습니다.</div>'}<div class="source-disclaimer">AI 사진 추정과 음식 선택·비율에 따른 예시 추정을 구별합니다. 환자의 섭취 확인은 자기보고이며 실제 영양량의 임상 검증이 아닙니다.</div></section>`;
   }
   function recordTable(full = false) {
-    const records=state.summary?.recentRecords.slice(0,full?14:5)||[];
-    return `<div class="table-scroll"><table class="patient-table records-table ${full?'record-full':''}" aria-label="환자 일일 건강 기록"><thead><tr><th>날짜</th><th>활동</th><th>수면</th><th>복약 보고</th>${full?'<th>식욕</th><th>기분</th><th>체중</th>':''}<th>메모</th></tr></thead><tbody>${records.length?records.map(r=>`<tr><td>${shortDate(r.date)}</td><td>${num(r.steps)} <span class="unit-note">걸음</span><small class="record-source">${r.steps===null?'미측정':esc(healthSourceName(r.stepsSource))}</small></td><td>${num(r.sleepHours,1)} <span class="unit-note">h</span><small class="record-source">${r.sleepHours===null?'미측정':esc(healthSourceName(r.sleepSource))}</small></td><td><span class="med-dot ${r.medicationStatus==='missed'?'no':r.medicationStatus==='partial'?'partial':r.medicationStatus==='taken'?'yes':'unknown'}"></span>${medLabel(r.medicationStatus)}</td>${full?`<td>${esc({good:'좋음',normal:'보통',poor:'저하'}[r.appetite]||'미기록')}</td><td>${esc({good:'좋음',normal:'보통',poor:'좋지 않음'}[r.mood]||'미기록')}</td><td>${num(r.weightKg,1)} <span class="unit-note">kg</span></td>`:''}<td class="record-note" title="${esc(r.note)}">${esc(r.note||'—')}</td></tr>`).join(''):`<tr><td colspan="${full?8:5}"><div class="compact-empty">아직 일일 기록이 없습니다. 환자용 사이트에서 첫 기록을 남겨보세요.</div></td></tr>`}</tbody></table></div>`;
+    const records=state.summary?.recentRecords.slice(0,full?366:5)||[];
+    return `<div class="table-scroll"><table class="patient-table records-table ${full?'record-full':''}" aria-label="환자 일일 건강 기록"><thead><tr><th>날짜</th><th>활동</th><th>수면</th><th>복약 보고</th>${full?'<th>식욕</th><th>기분</th><th>체중</th>':''}<th>메모</th></tr></thead><tbody>${records.length?records.map(r=>`<tr><td>${shortDate(r.date)}</td><td>${num(r.steps)} <span class="unit-note">걸음</span><small class="record-source">${r.steps===null?'미측정':esc(healthSourceName(r.stepsSource))}</small></td><td>${num(r.sleepHours,1)} <span class="unit-note">h</span><small class="record-source">${r.sleepHours===null?'미측정':esc(healthSourceName(r.sleepSource))}</small></td><td><span class="med-dot ${r.medicationStatus==='missed'?'no':r.medicationStatus==='partial'?'partial':r.medicationStatus==='taken'?'yes':'unknown'}"></span>${medLabel(r.medicationStatus)}</td>${full?`<td>${esc({good:'좋음',normal:'보통',poor:'저하'}[r.appetite]||'미기록')}</td><td>${esc({good:'좋음',normal:'보통',poor:'좋지 않음'}[r.mood]||'미기록')}</td><td>${num(r.weightKg,1)} <span class="unit-note">kg</span></td>`:''}<td class="record-note">${r.note?`<details data-preserve-key="note-${esc(r.id||r.date)}"><summary>메모 보기</summary><p>${esc(r.note)}</p></details>`:'—'}</td></tr>`).join(''):`<tr><td colspan="${full?8:5}"><div class="compact-empty">아직 일일 기록이 없습니다. 환자용 사이트에서 첫 기록을 남겨보세요.</div></td></tr>`}</tbody></table></div>`;
   }
   function recentRecords() { return `<section class="card"><div class="card-header"><div><h2>최근 건강 기록</h2><p class="subheading">${esc(state.summary.patient.name)} 님 · 항목별 출처 표시</p></div><button class="text-link" data-action="view" data-view="records">전체 보기 ${icon('arrow')}</button></div>${recordTable()}</section>`; }
   function expandedBriefing() {
@@ -256,7 +296,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
   }
   function patientDetails(expanded = false) {
     const s=state.summary;if(!s)return '';
-    return `<section id="patient-detail"><div class="section-heading"><div><div class="detail-topline"><h2>${esc(s.patient.name)} 님의 일상 변화</h2>${riskPill(s.risk)}</div><p>최근 7일 요약 · 보고된 날의 평균과 기록의 충분함을 함께 확인하세요.</p></div><div class="section-action-group"><span class="small-label">${shortDate(s.trends.at(-7)?.date)} — ${shortDate(s.today)}</span><button class="text-link" data-action="invitation">환자 연결코드</button><button class="text-link" data-action="view" data-view="messages">메시지</button><button class="text-link" data-action="view" data-view="medications">복약 계획 ${icon('pill')}</button><a class="text-link" href="/patient?patientId=${encodeURIComponent(s.patient.id)}" target="_blank" rel="noopener">환자 화면 ${icon('external')}</a></div></div>${metricPanels()}<div class="detail-analysis-grid">${detailCharts()}${coverage()}</div><div class="meals-records-grid">${meals()}${recentRecords()}</div><div class="notes-questions"><h3>${icon('chat')}다음 방문에서 물어보세요</h3><ul>${s.briefing.questions.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div>${expanded?expandedBriefing():''}</section>`;
+    return `<section id="patient-detail"><div class="section-heading"><div><div class="detail-topline"><h2>${esc(s.patient.name)} 님의 일상 변화</h2>${riskPill(s.risk)}</div><p>${esc(periodLabel())} 요약 · 기록된 날의 평균과 자료수를 함께 확인하세요. ${esc(s.risk.windowLabel||'확인 규칙은 별도 최근7일 기준입니다.')}</p></div><div class="section-action-group"><span class="small-label">${shortDate(s.period?.startDate||s.trends.at(-7)?.date)} — ${shortDate(s.period?.endDate||s.today)}</span><button class="text-link" data-action="invitation">환자 연결코드</button><button class="text-link" data-action="view" data-view="messages">메시지</button><button class="text-link" data-action="view" data-view="medications">복약 계획 ${icon('pill')}</button><a class="text-link" href="/patient?patientId=${encodeURIComponent(s.patient.id)}" target="_blank" rel="noopener">환자 화면 ${icon('external')}</a></div></div>${metricPanels()}<div class="detail-analysis-grid">${detailCharts()}${coverage()}</div><div class="meals-records-grid">${meals()}${recentRecords()}</div><div class="notes-questions"><h3>${icon('chat')}다음 방문에서 물어보세요</h3><ul>${s.briefing.questions.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div>${expanded?expandedBriefing():''}</section>`;
   }
   function emptyWorkspace() {
     return `<section class="card empty-state"><div class="empty-icon">${icon('users')}</div><h3>새로운 돌봄을 시작할 준비가 되었어요</h3><p>가상 환자를 추가하고 환자용 사이트에서 기록을 남겨보세요.<br>예시 데이터를 복원하면 모든 화면을 바로 체험할 수 있습니다.</p><button class="button button-primary" data-action="add-patient">${icon('plus')}가상 환자 추가</button><button class="button button-secondary" data-action="reset" data-mode="seed">${icon('refresh')}예시 데이터 복원</button></section>`;
@@ -271,7 +311,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
   }
   function recordsView() {
     if(!state.data.patients.length)return emptyWorkspace();
-    return `<div class="records-toolbar"><label for="record-patient">환자 선택<select id="record-patient">${state.data.patients.map(p=>`<option value="${esc(p.id)}" ${p.id===state.selectedId?'selected':''}>${esc(p.name)} · ${p.age}세</option>`).join('')}</select></label><a class="button button-secondary" href="/api/export.csv" download>${icon('download')}전체 기록 CSV 내보내기</a></div><section class="card"><div class="card-header"><div><h2>${esc(state.summary?.patient.name)} 님의 건강 기록</h2><p class="subheading">최근 일일 기록 14건 · 빈칸은 미측정으로 보존됩니다.</p></div><span class="small-label">환자 자기보고</span></div>${recordTable(true)}</section><div class="meals-records-grid">${meals()}${coverage()}</div><div class="provenance-card"><b>기록과 분석의 출처</b><br>활동·수면은 수동 자기보고와 선택된 건강 연결의 수신 자료를 항목별로 구분합니다. 웹이 기기 자료를 직접 읽지는 않습니다. 복약은 자기보고입니다. 영양값은 AI 사진 추정 또는 음식 선택·비율을 적용한 예시 추정이며 출처를 함께 표시합니다. CSV에는 환자·일일·식사 기록이 함께 포함됩니다.</div>`;
+    return `<div class="records-toolbar"><label for="record-patient">환자 선택<select id="record-patient">${state.data.patients.map(p=>`<option value="${esc(p.id)}" ${p.id===state.selectedId?'selected':''}>${esc(p.name)} · ${p.age}세</option>`).join('')}</select></label><button class="button button-secondary" data-action="export-preview">${icon('download')}범위 확인 후 CSV 내보내기</button></div><section class="card"><div class="card-header"><div><h2>${esc(state.summary?.patient.name)} 님의 건강 기록</h2><p class="subheading">${esc(state.startDate?periodLabel():'최근 제공 기록')} · 제공된 일일 기록 ${state.summary?.recentRecords.length||0}건 · 빈칸은 미측정입니다.</p></div><span class="small-label">환자 자기보고</span></div>${recordTable(true)}</section><div class="meals-records-grid">${meals()}${coverage()}</div><div class="provenance-card"><b>기록과 분석의 출처</b><br>활동·수면은 수동 자기보고와 선택된 건강 연결의 수신 자료를 항목별로 구분합니다. 웹이 기기 자료를 직접 읽지는 않습니다. 복약은 자기보고입니다. 영양값은 AI 사진 추정 또는 음식 선택·비율을 적용한 예시 추정이며 출처를 함께 표시합니다. CSV에는 환자·일일·식사 기록이 함께 포함됩니다.</div>`;
   }
   async function loadIntegrationSettings({renderAfter=true}={}) {
     if(state.capabilityLoading)return;
@@ -286,7 +326,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
     return `<section class="card" id="integration-settings"><div class="card-header"><div><h2>GPT 사진 분석·건강 연결</h2><p class="subheading">설정 확인은 유료 분석을 호출하지 않습니다.</p></div></div><div class="settings-body"><div class="settings-row"><div><h3>사진 분석 상태</h3><p id="vision-config-status" role="status">${esc(status)}</p><p>모델: ${esc(vision?.model||'확인되지 않음')} · 준비 상태는 실제 인증·잔액·사진 추론 성공의 증거가 아닙니다.</p></div><button class="button button-secondary" data-action="check-integrations" ${state.capabilityLoading?'disabled':''}>설정 다시 확인</button></div><div class="settings-row"><div><h3>활성화 방법</h3><p>Render Environment에서 HOMECARE_VISION_API_KEY, VISION_ENABLED=true, VISION_MODEL을 설정하세요. 키를 이 화면이나 채팅에 입력하지 마세요.</p><p>사진 초안을 확인하고 실제 섭취비율을 저장하면 칼로리·단백질에 적용됩니다. API 사용료는 별도입니다.</p></div></div><div class="settings-row"><div><h3>아이폰 우선 건강 연결</h3><p>환자 웹의 건강 연결에서 iPhone 코드를 준비하고 별도 HealthKit 연결 앱에 입력합니다. 앱 서명·설치와 실제 권한·수신 검증이 필요합니다. Safari는 Apple 건강을 직접 읽지 않습니다.</p></div></div></div></section>`;
   }
   function settingsView() {
-    return `<div class="settings-grid">${integrationSettings()}<section class="card"><div class="card-header"><div><h2>연결된 데모 환경</h2><p class="subheading">환자와 의료진 화면이 같은 테스트 데이터를 사용합니다.</p></div><span class="settings-tag">연결됨</span></div><div class="settings-body"><div class="settings-row"><div><h3>환자용 모바일 사이트</h3><p>모바일 화면에서 건강·식사 기록을 남기고, 의료진 화면에서 결과를 확인할 수 있습니다.</p></div><a class="button button-secondary" href="/patient${state.selectedId?`?patientId=${encodeURIComponent(state.selectedId)}`:''}" target="_blank" rel="noopener">사이트 열기 ${icon('external')}</a></div><div class="settings-row"><div><h3>테스트 기록 내보내기</h3><p>등록 환자와 일일·식사 기록을 CSV 파일로 내려받습니다. 초기화 전에 필요한 기록을 보관하세요.</p></div><a class="button button-secondary" href="/api/export.csv" download>${icon('download')}CSV 받기</a></div><div class="settings-row"><div><h3>기록 자동 갱신</h3><p>20초마다 새 기록을 확인합니다. 새로고침 버튼으로 즉시 갱신할 수도 있습니다.</p></div><span class="settings-tag">사용 중</span></div></div></section><section class="card danger-card"><div class="card-header"><div><h2>테스트 데이터 초기화</h2><p class="subheading">실행 전 확인 문구를 입력해야 합니다.</p></div>${icon('database')}</div><div class="settings-body"><div class="settings-row"><div><h3>예시 데이터로 다시 시작</h3><p>현재 테스트 기록을 지우고, 가상 환자 6명과 4주 예시 기록을 복원합니다. 업로드 사진도 삭제됩니다.</p></div><button class="button button-secondary" data-action="reset" data-mode="seed">예시 데이터 복원</button></div><div class="settings-row"><div><h3>빈 데이터베이스로 시작</h3><p>환자·건강 기록·식사 기록과 업로드 사진을 모두 삭제합니다. 새 가상 환자를 등록해 테스트할 수 있습니다.</p></div><button class="button button-danger" data-action="reset" data-mode="empty">모든 테스트 데이터 삭제</button></div><p class="settings-detail">초기화 후에는 기록을 되돌릴 수 없습니다. 연구 투입 전에는 로그인·권한·동의·보안·기관 승인을 별도로 갖춰야 합니다.</p></div></section><section class="card"><div class="card-header"><h2>데모 결과를 읽는 방법</h2></div><div class="settings-body settings-detail"><ul><li>확인 우선순위는 기록에 정해진 데모 규칙을 적용한 결과이며, 질병 발생 확률이나 확정 진단이 아닙니다.</li><li>복약은 자기보고이며 실제 복용을 확정하지 않습니다.</li><li>사진 분석이 설정되고 전송에 동의한 경우 AI 검토 초안을 만들며, 사진만으로 처방이나 복용 사실을 확정하지 않습니다.</li><li>영양값은 AI 사진 추정과 수동 음식 선택·비율 예시 추정을 구분하며, 환자가 섭취량을 확인해도 임상적으로 검증된 값은 아닙니다.</li><li>미기록은 0 또는 정상으로 대체하지 않으며, 판단 시 기록 일수를 함께 보아야 합니다.</li></ul></div></section><section class="card"><div class="card-header"><h2>현재 워크스페이스</h2></div><div class="settings-body settings-detail">등록 환자 <b>${state.data.stats.patients}명</b><br>오늘 기록 <b>${state.data.stats.reportedToday}명</b><br>예시 기준일 <b>${esc(state.data.today)}</b><br>시간대 <b>대한민국 (Asia/Seoul)</b><br>최근 초기화 <b>${state.data.resetAt?esc(new Date(state.data.resetAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})):'아직 없음'}</b><br><br>저장된 테스트 기록은 페이지를 새로 열어도 유지됩니다. 이 공개 데모에는 실제 환자 개인정보를 입력하지 마세요.</div></section></div>`;
+    return `<div class="settings-grid">${integrationSettings()}<section class="card"><div class="card-header"><div><h2>연결된 데모 환경</h2><p class="subheading">환자와 의료진 화면이 같은 테스트 데이터를 사용합니다.</p></div><span class="settings-tag">연결됨</span></div><div class="settings-body"><div class="settings-row"><div><h3>환자용 모바일 사이트</h3><p>모바일 화면에서 건강·식사 기록을 남기고, 의료진 화면에서 결과를 확인할 수 있습니다.</p></div><a class="button button-secondary" href="/patient${state.selectedId?`?patientId=${encodeURIComponent(state.selectedId)}`:''}" target="_blank" rel="noopener">사이트 열기 ${icon('external')}</a></div><div class="settings-row"><div><h3>테스트 기록 내보내기</h3><p>등록 환자와 일일·식사 기록을 CSV 파일로 내려받습니다. 초기화 전에 필요한 기록을 보관하세요.</p></div><button class="button button-secondary" data-action="export-preview">${icon('download')}범위 확인 후 CSV 받기</button></div><div class="settings-row"><div><h3>기록 자동 갱신</h3><p>20초마다 새 기록을 확인합니다. 새로고침 버튼으로 즉시 갱신할 수도 있습니다.</p></div><span class="settings-tag">사용 중</span></div></div></section><section class="card danger-card"><div class="card-header"><div><h2>테스트 데이터 초기화</h2><p class="subheading">실행 전 확인 문구를 입력해야 합니다.</p></div>${icon('database')}</div><div class="settings-body"><div class="settings-row"><div><h3>예시 데이터로 다시 시작</h3><p>현재 테스트 기록을 지우고, 가상 환자 6명과 4주 예시 기록을 복원합니다. 업로드 사진도 삭제됩니다.</p></div><button class="button button-secondary" data-action="reset" data-mode="seed">예시 데이터 복원</button></div><div class="settings-row"><div><h3>빈 데이터베이스로 시작</h3><p>환자·건강 기록·식사 기록과 업로드 사진을 모두 삭제합니다. 새 가상 환자를 등록해 테스트할 수 있습니다.</p></div><button class="button button-danger" data-action="reset" data-mode="empty">모든 테스트 데이터 삭제</button></div><p class="settings-detail">초기화 후에는 기록을 되돌릴 수 없습니다. 연구 투입 전에는 로그인·권한·동의·보안·기관 승인을 별도로 갖춰야 합니다.</p></div></section><section class="card"><div class="card-header"><h2>데모 결과를 읽는 방법</h2></div><div class="settings-body settings-detail"><ul><li>확인 우선순위는 기록에 정해진 데모 규칙을 적용한 결과이며, 질병 발생 확률이나 확정 진단이 아닙니다.</li><li>복약은 자기보고이며 실제 복용을 확정하지 않습니다.</li><li>사진 분석이 설정되고 전송에 동의한 경우 AI 검토 초안을 만들며, 사진만으로 처방이나 복용 사실을 확정하지 않습니다.</li><li>영양값은 AI 사진 추정과 수동 음식 선택·비율 예시 추정을 구분하며, 환자가 섭취량을 확인해도 임상적으로 검증된 값은 아닙니다.</li><li>미기록은 0 또는 정상으로 대체하지 않으며, 판단 시 기록 일수를 함께 보아야 합니다.</li></ul></div></section><section class="card"><div class="card-header"><h2>현재 워크스페이스</h2></div><div class="settings-body settings-detail">등록 환자 <b>${state.data.stats.patients}명</b><br>오늘 기록 <b>${state.data.stats.reportedToday}명</b><br>예시 기준일 <b>${esc(state.data.today)}</b><br>시간대 <b>대한민국 (Asia/Seoul)</b><br>최근 초기화 <b>${state.data.resetAt?esc(new Date(state.data.resetAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})):'아직 없음'}</b><br><br>저장된 테스트 기록은 페이지를 새로 열어도 유지됩니다. 이 공개 데모에는 실제 환자 개인정보를 입력하지 마세요.</div></section></div>`;
   }
   const medicationStatusLabel = status => ({taken:'복용 보고',missed:'미복용 보고',unknown:'기억 안 남',pending:'미응답'}[status] || '미응답');
   const medicationReason = reason => ({forgot:'깜빡함',side_effect:'불편한 증상',side_effects:'불편한 증상',unavailable:'약이 없음',refused:'복용 원치 않음',other:'기타',not_sure:'잘 모르겠음'}[reason] || reason || '미입력');
@@ -329,7 +369,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
   }
   function medicationPhotoReportsCard(data) {
     const reports=data.photoReports||[];
-    return `<section class="card medication-photo-reports"><div class="card-header"><div><h2>사진을 첨부한 복약 자기보고</h2><p class="subheading">${esc(data.date)} · 최신 20건까지 · 사진은 복용 사실을 증명하지 않습니다.</p></div></div><div class="settings-body">${reports.length?reports.map(report=>`<details class="medication-photo-report"><summary>${reportTime(report.createdAt)} · ${report.events.length}회차 · 의료진 미검토</summary><p class="source-disclaimer">당시 환자 자기보고입니다. 이후 수정된 현재 상태는 위 회차 목록에서 확인하세요. 사진·OCR만으로 복용량이나 실제 복용을 확정하지 않습니다.</p><img loading="lazy" src="${esc(report.imageUrl)}" alt="환자가 첨부한 약봉투 또는 포장 사진"><h3>당시 보고</h3>${report.events.map(event=>`<p><b>${esc(event.time)} · ${esc(event.name)} ${esc(event.strength)}</b> · ${medicationStatusLabel(event.status)} · 당시 보고 ${event.revision}차<br>사유: ${esc(event.reason||'미입력')} / 메모: ${esc(event.note||'미입력')}</p>`).join('')}<h3>AI가 읽은 포장 글자 후보 · 미확정</h3>${report.analysis.proposal.medications.map(candidate=>`<p><b>${esc(candidate.name)} ${esc(candidate.strength)}</b><br>${esc(candidate.labelText)}</p>`).join('')||'<p>읽힌 약명 없음 · 환자가 직접 계획을 대조함</p>'}<p class="subheading">${esc(report.analysis.provider)} · ${esc(report.analysis.model)} · ${reportTime(report.analysis.createdAt)}</p></details>`).join(''):'<p class="compact-empty">이 날짜에 사진을 첨부한 보고가 없습니다.</p>'}</div></section>`;
+    return `<section class="card medication-photo-reports"><div class="card-header"><div><h2>사진을 첨부한 복약 자기보고</h2><p class="subheading">${esc(data.date)} · 최신 20건까지 · 전체 검토는 업무 목록에서 확인하세요. 사진은 복용 사실을 증명하지 않습니다.</p></div></div><div class="settings-body">${reports.length?reports.map(report=>`<details class="medication-photo-report" data-preserve-key="photo-${esc(report.id)}"><summary>${reportTime(report.createdAt)} · ${report.events.length}회차 · ${esc({reviewed:'사진 검토됨',needs_information:'추가 확인 필요'}[report.reviewStatus]||'의료진 미검토')}</summary><p class="source-disclaimer">당시 환자 자기보고입니다. 이후 수정된 현재 상태는 위 회차 목록에서 확인하세요. 사진·OCR만으로 복용량이나 실제 복용을 확정하지 않습니다.</p><img loading="lazy" src="${esc(report.imageUrl)}" alt="환자가 첨부한 약봉투 또는 포장 사진"><h3>당시 보고</h3>${report.events.map(event=>`<p><b>${esc(event.time)} · ${esc(event.name)} ${esc(event.strength)}</b> · ${medicationStatusLabel(event.status)} · 당시 보고 ${event.revision}차<br>사유: ${esc(event.reason||'미입력')} / 메모: ${esc(event.note||'미입력')}</p>`).join('')}<h3>AI가 읽은 포장 글자 후보 · 미확정</h3>${report.analysis.proposal.medications.map(candidate=>`<p><b>${esc(candidate.name)} ${esc(candidate.strength)}</b><br>${esc(candidate.labelText)}</p>`).join('')||'<p>읽힌 약명 없음 · 환자가 직접 계획을 대조함</p>'}<p class="subheading">${esc(report.analysis.provider)} · ${esc(report.analysis.model)} · ${reportTime(report.analysis.createdAt)}</p></details>`).join(''):'<p class="compact-empty">이 날짜에 사진을 첨부한 보고가 없습니다.</p>'}</div></section>`;
   }
   function medicationsView() {
     if(!state.data.patients.length)return emptyWorkspace();
@@ -347,7 +387,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
     if(!state.selectedId)return;
     medicationModalFrame('medication-order','확정 복약 계획 등록',`${state.summary?.patient.name||'선택 환자'} 님의 약명·함량·1회량·용법·시각을 직접 확인한 뒤 등록해 주세요.`);
     $('#modal').insertAdjacentHTML('beforeend',`<form id="medication-order-form"><details class="medication-photo-helper"><summary>${icon('spark')}약 봉투·포장 사진으로 이름·함량 작성 보조</summary><p class="medication-photo-notice" id="medication-vision-status">사진 분석 설정을 확인하고 있습니다. 아래 항목은 수동으로 작성할 수 있습니다.</p><div class="medication-photo-controls"><input id="medication-photo" type="file" accept="image/jpeg,image/png,image/webp" disabled aria-label="약 봉투 또는 포장 사진"><img id="medication-photo-preview" alt="확인할 약 봉투·포장 사진" hidden><label class="medication-consent"><input id="medication-photo-consent" type="checkbox" disabled>약 사진을 외부 AI 제공자에게 전송하는 데 동의합니다. 실제 개인정보가 보이지 않는 사진을 사용합니다.</label><button type="button" id="analyze-medication-photo" class="button button-secondary" disabled>${icon('spark')}약명·함량 후보 읽기</button><p class="form-error" id="medication-photo-error" role="alert" hidden></p><div id="medication-photo-candidates" aria-live="polite"></div></div></details><div class="form-row"><div class="field"><label for="medication-name">약명 *</label><input id="medication-name" name="name" maxlength="120" required placeholder="확인한 정확한 약명" autocomplete="off"></div><div class="field"><label for="medication-strength">함량 <small>선택 · 확인한 값만</small></label><input id="medication-strength" name="strength" maxlength="100" placeholder="예: 5 mg" autocomplete="off"></div></div><div class="form-row"><div class="field"><label for="medication-dose">1회량 *</label><input id="medication-dose" name="dose" maxlength="100" required placeholder="예: 1정" autocomplete="off"></div><div class="field"><label for="medication-route">투여 방법 <small>선택</small></label><input id="medication-route" name="route" maxlength="80" placeholder="예: 경구" autocomplete="off"></div></div><fieldset class="medication-times-field"><legend>복용 예정 시각 *</legend><div id="medication-times"><div class="medication-time-row"><input type="time" name="times" required aria-label="복용 예정 시각 1"><button type="button" class="text-link" data-modal-action="add-time">${icon('plus')}시각 추가</button></div></div><p>정기적으로 보고할 회차를 정합니다. 사진이나 기존 메모에서 자동 추정하지 않습니다.</p></fieldset><div class="form-row"><div class="field"><label for="medication-start-date">시작일 *</label><input id="medication-start-date" name="startDate" type="date" value="${esc(state.data.today)}" required></div><div class="field"><label for="medication-end-date">종료일 <small>선택 · 해당일 포함</small></label><input id="medication-end-date" name="endDate" type="date" min="${esc(state.data.today)}"></div></div><div class="field"><label for="medication-instructions">주의·복용 안내 <small>선택</small></label><textarea id="medication-instructions" name="instructions" rows="2" maxlength="2000" placeholder="의료진이 확인한 복용 안내"></textarea></div><label class="medication-confirmation"><input id="medication-order-confirmed" type="checkbox" required>확인한 약명·1회량·기간·시각과 선택 입력 항목을 검토했으며 이 계획을 등록합니다.</label><p class="form-error" id="modal-error" role="alert" hidden></p><div class="modal-actions"><button type="button" class="button button-secondary" data-modal-action="close">취소</button><button type="submit" class="button button-primary">복약 계획 확정 등록</button></div></form>`);
-    $('#medication-name').focus();
+    rememberModal();$('#medication-name').focus();
     loadMedicationCapability(state.modal.photoGeneration);
   }
   async function loadMedicationCapability(generation) {
@@ -424,7 +464,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
     state.modal.orderId=id;
     const minimum=order.startDate>state.data.today?order.startDate:state.data.today;
     $('#modal').insertAdjacentHTML('beforeend',`<div class="medication-end-notice">선택한 날짜의 예정 회차까지 유효합니다. 다음 날부터 예정 회차가 없어지며, 기존 복약 보고와 변경 이력은 삭제되지 않습니다. 약명·용량 변경이 필요하면 기존 계획을 종료하고 새 계획을 등록하세요.</div><form id="medication-end-form"><div class="field"><label for="medication-stop-date">마지막 유효일 · 해당일 포함 *</label><input id="medication-stop-date" type="date" name="endDate" min="${minimum}" ${order.endDate?`max="${esc(order.endDate)}"`:''} value="${minimum}" required></div><label class="medication-confirmation"><input id="medication-end-confirmed" type="checkbox" required>종료일과 과거 기록 보존을 확인했습니다.</label><p class="form-error" id="modal-error" role="alert" hidden></p><div class="modal-actions"><button type="button" class="button button-secondary" data-modal-action="close">취소</button><button type="submit" class="button button-primary">종료일 확정</button></div></form>`);
-    $('#medication-stop-date').focus();
+    rememberModal();$('#medication-stop-date').focus();
   }
   function openMedicationHistory(orderId,time) {
     const data=medicationCurrent();if(!data)return;
@@ -439,48 +479,114 @@ import { createClinicianCommunications } from './clinician-communications.js';
     event.preventDefault();const modal=state.modal;if(!modal || modal.saving)return;
     const patientId=modal.patientId,err=$('#modal-error');err.hidden=true;
     if(patientId!==state.selectedId){err.textContent='선택 환자가 변경되었습니다. 창을 닫고 다시 확인해 주세요.';err.hidden=false;return;}
-    const submit=form.querySelector('[type="submit"]');modal.saving=true;submit.disabled=true;
+    const submit=form.querySelector('[type="submit"]');const fields=new FormData(form);modal.saving=true;lockModal(true);
     try {
-      const fields=new FormData(form);
       if(form.id==='medication-order-form') {
         const times=fields.getAll('times').filter(Boolean);
         if(new Set(times).size!==times.length)throw new Error('같은 복용 시각을 중복 등록할 수 없습니다.');
         const payload={name:String(fields.get('name')).trim(),strength:String(fields.get('strength')).trim(),dose:String(fields.get('dose')).trim(),route:String(fields.get('route')).trim(),times:times.sort(),startDate:fields.get('startDate'),endDate:fields.get('endDate')||null,instructions:String(fields.get('instructions')).trim()};
-        await api(`/api/patients/${encodeURIComponent(patientId)}/medication-orders`,{method:'POST',body:JSON.stringify(payload)});
+        const payloadKey=JSON.stringify(payload);if(modal.requestKey!==payloadKey||!modal.requestId){modal.requestKey=payloadKey;modal.requestId=crypto.randomUUID();}
+        await api(`/api/patients/${encodeURIComponent(patientId)}/medication-orders`,{method:'POST',body:JSON.stringify({...payload,clientRequestId:modal.requestId})});
       } else await api(`/api/medication-orders/${encodeURIComponent(modal.orderId)}`,{method:'PATCH',body:JSON.stringify({endDate:fields.get('endDate')})});
-      if(state.modal===modal)closeModal();
-      await refresh({quiet:true});toast(form.id==='medication-order-form'?'확정 복약 계획을 등록했습니다.':'복약 계획의 종료일을 저장했습니다. 과거 보고는 보존됩니다.');
+      if(state.modal===modal)closeModal({force:true});
+      toast(form.id==='medication-order-form'?'확정 복약 계획이 저장되었습니다.':'복약 계획의 종료일이 저장되었습니다. 과거 보고는 보존됩니다.');
+      await refresh({quiet:true});
     } catch(error) { if(state.modal===modal){err.textContent=error.message;err.hidden=false;}else toast(error.message,true); }
-    finally {modal.saving=false;if(submit.isConnected)submit.disabled=false;}
+    finally {modal.saving=false;if(state.modal===modal)lockModal(false);}
   }
 
+  let renderedContext='';
+  function captureReadingState(){
+    const root=$('#app-content'),active=document.activeElement;
+    let focus='';
+    if(root.contains(active)){
+      if(active.id)focus='#'+CSS.escape(active.id);
+      else if(active.closest('[data-preserve-key]')&&active.tagName==='SUMMARY')focus=`[data-preserve-key="${CSS.escape(active.closest('[data-preserve-key]').dataset.preserveKey)}"] > summary`;
+      else if(active.dataset.action)focus='['+Object.entries(active.dataset).filter(([key])=>['action','id','view','filter'].includes(key)).map(([key,value])=>`data-${key}="${CSS.escape(value)}"`).join('][')+']';
+    }
+    return {focus,selection:typeof active?.selectionStart==='number'?[active.selectionStart,active.selectionEnd]:null,open:[...root.querySelectorAll('details[open][data-preserve-key]')].map(el=>el.dataset.preserveKey),scroll:[...root.querySelectorAll('.table-scroll')].map(el=>[el.scrollLeft,el.scrollTop]),x:window.scrollX,y:window.scrollY};
+  }
+  function restoreReadingState(saved){
+    if(!saved)return;
+    for(const key of saved.open){const el=$('#app-content').querySelector(`[data-preserve-key="${CSS.escape(key)}"]`);if(el)el.open=true;}
+    $('#app-content').querySelectorAll('.table-scroll').forEach((el,i)=>{if(saved.scroll[i]){el.scrollLeft=saved.scroll[i][0];el.scrollTop=saved.scroll[i][1];}});
+    const focus=saved.focus?$('#app-content').querySelector(saved.focus):null;
+    if(focus){focus.focus({preventScroll:true});if(saved.selection&&typeof focus.setSelectionRange==='function')try{focus.setSelectionRange(...saved.selection);}catch{/* Date controls do not expose text selection. */}}
+    window.scrollTo({left:saved.x,top:saved.y,behavior:'instant'});
+  }
+  function applyAccess(){
+    for(const button of document.querySelectorAll('#main-nav [data-view]'))button.hidden=!can(viewPermissions[button.dataset.view]);
+    $('#add-patient-button').hidden=!can('clinical.write');
+    for(const el of document.querySelectorAll('[data-action="add-patient"],[data-action="add-medication-order"],[data-action="end-medication-order"],[data-action="invitation"]'))el.hidden=!can('clinical.write');
+    for(const el of document.querySelectorAll('[data-action="reset"]'))el.hidden=!can('admin.reset')||sessionState.mode!=='demo';
+    for(const el of document.querySelectorAll('[data-action="view"][data-view]'))el.hidden=!can(viewPermissions[el.dataset.view]);
+    for(const el of document.querySelectorAll('[data-action="export-preview"]'))el.hidden=!can('research.export');
+    const roles={clinician:'임상 검토',support:'환자 관리 지원',researcher:'연구 분석',administrator:'운영 관리'};
+    const profile=$('.sidebar-profile b');if(profile)profile.textContent=(state.staffAccess?.staffRoles||[]).map(role=>roles[role]||role).join(' · ')||'권한 확인 필요';
+  }
   function render(historyMode = 'replace') {
     if(!state.data)return;
+    state.view=authorizedView(state.view);
+    const context=[state.view,state.selectedId,state.startDate,state.endDate,medDate()].join('|');
+    const saved=context===renderedContext?captureReadingState():null;renderedContext=context;
     const [eyebrow,title,subtitle,breadcrumb]=viewTitles[state.view];
     $('#page-eyebrow').textContent=eyebrow;$('#page-title').textContent=title;$('#page-subtitle').textContent=subtitle;$('#view-breadcrumb').textContent=breadcrumb;
     document.querySelectorAll('#main-nav [data-view]').forEach(btn=>{const active=btn.dataset.view===state.view;btn.classList.toggle('active',active);if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');});
     const inputFocused=document.activeElement?.id==='patient-search';const cursor=inputFocused?document.activeElement.selectionStart:null;
     const patientLink=$('.patient-site-link');if(patientLink)patientLink.href=state.selectedId?`/patient?patientId=${encodeURIComponent(state.selectedId)}`:'/patient';
-    if(['notices','messages'].includes(state.view)){communication.mount(state.view);syncUrl(historyMode);return;}
+    const periodForm=$('#clinical-period-form');periodForm.hidden=!['overview','patients','records','research'].includes(state.view);
+    if(!periodForm.contains(document.activeElement)){
+      $('#clinical-start-date').value=state.startDate||offsetDate(state.data.today,-6);$('#clinical-end-date').value=state.endDate||state.data.today;
+      $('#clinical-start-date').max=state.data.today;$('#clinical-end-date').max=state.data.today;
+      $('#clinical-period-preset').value=state.startDate?'custom':'default';
+    }
+    $('#clinical-period-description').textContent=`${periodLabel()} · 빈칸은 미측정입니다. 확인 규칙은 별도 7일 창을 사용합니다.`;
+    for(const [key,workspace] of Object.entries(workspaces))if(key!==state.view)workspace.deactivate();
+    if(['notices','messages'].includes(state.view)){communication.mount(state.view);applyAccess();syncUrl(historyMode);return;}
     communication.deactivate();
+    if(currentWorkspace()){currentWorkspace().mount();applyAccess();syncUrl(historyMode);return;}
     $('#app-content').innerHTML=state.selectedId && !state.summary && state.view!=='settings'
       ? ($('#global-error').hidden ? '<div class="loading-state"><span class="spinner"></span><b>선택 환자의 기록을 확인하고 있어요</b></div>' : '<div class="compact-empty">선택 환자의 기록을 확인할 수 없습니다. 상단 새로고침으로 다시 시도해 주세요.</div>')
       : ({overview,patients:patientsView,records:recordsView,medications:medicationsView,settings:settingsView}[state.view])();
     if(inputFocused&&$('#patient-search')){$('#patient-search').focus();$('#patient-search').setSelectionRange(cursor,cursor);}
+    restoreReadingState(saved);applyAccess();
     syncUrl(historyMode);
   }
-  function changeView(view) { if(!Object.hasOwn(viewTitles,view)||view===state.view||!communication.canLeave())return;state.view=view;render('push');if(view==='medications')loadMedications();focusPage(); }
+  function changeView(view) { if(!Object.hasOwn(viewTitles,view)||!can(viewPermissions[view])||view===state.view||!canLeave())return;state.view=view;render('push');if(view==='medications')loadMedications();focusPage(); }
   async function openInvitation(){
-    if(!state.selectedId||communication.busy())return;
-    state.lastFocus=document.activeElement;const marker={type:'invitation'};state.modal=marker;
+    if(!state.selectedId||communication.busy()||!can('clinical.write'))return;
+    state.lastFocus=document.activeElement;const marker={type:'invitation',busy:true};state.modal=marker;
     $('#modal-backdrop').hidden=false;document.body.style.overflow='hidden';
     $('#modal').innerHTML=`<div class="modal-top"><h2 id="modal-title">환자 연결코드</h2><button class="icon-button" data-modal-action="close" aria-label="닫기">${icon('close')}</button></div><p>선택한 환자에게만 안전하게 전달하세요. 24시간 동안 1회 사용할 수 있으며 재발급하면 이전 미사용 코드는 폐기됩니다.</p><p id="invitation-result" role="status">발급 중…</p>`;$('#modal').focus();
     try{const {invitation:result}=await api(`/api/clinician/patients/${encodeURIComponent(state.selectedId)}/invitations`,{method:'POST',body:'{}'});if(state.modal!==marker)return;$('#invitation-result').textContent=result.code+' · 만료 '+new Date(result.expiresAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});}
     catch(error){if(state.modal===marker)$('#invitation-result').textContent=error.message;}
+    finally{marker.busy=false;}
   }
-  function closeModal() {
+  function openExport(){
+    if(!can('research.export')||!canLeave())return;
+    medicationModalFrame('export','내보낼 범위를 먼저 확인하세요','일반 CSV에는 이름과 자유서술이 포함됩니다. 가명 연구 자료가 필요하면 연구 분석에서 스냅샷을 만드세요.');
+    $('#modal').insertAdjacentHTML('beforeend',`<form id="export-preview-form"><div class="field"><label for="export-scope">대상 범위</label><select id="export-scope"><option value="selected" ${state.selectedId?'':'disabled'}>현재 환자 · ${esc(state.summary?.patient.name||'선택 없음')} (${esc(state.selectedId||'')})</option><option value="all">현재 권한으로 볼 수 있는 전체 환자</option></select></div><div class="form-row"><div class="field"><label for="export-start">시작일</label><input id="export-start" type="date" value="${esc(state.startDate||offsetDate(state.data.today,-6))}" max="${esc(state.data.today)}" required></div><div class="field"><label for="export-end">종료일</label><input id="export-end" type="date" value="${esc(state.endDate||state.data.today)}" max="${esc(state.data.today)}" required></div></div><button class="button button-secondary" type="submit">범위와 항목 확인</button><div id="export-preview-result" role="status"></div><p class="form-error" id="modal-error" role="alert" hidden></p><div class="modal-actions"><button class="button button-secondary" type="button" data-modal-action="close">닫기</button><a id="export-download" class="button button-primary" hidden download>확인한 범위 CSV 받기</a></div></form>`);
+    if(!state.selectedId)$('#export-scope').value='all';
+    $('#export-scope').focus();
+  }
+  async function previewExport(event){
+    if(event.target.id!=='export-preview-form')return;event.preventDefault();
+    const modal=state.modal;if(!modal||modal.busy)return;
+    const params=new URLSearchParams({startDate:$('#export-start').value,endDate:$('#export-end').value});
+    if($('#export-scope').value==='selected')params.set('patientId',modal.patientId);
+    $('#modal-error').hidden=true;$('#export-download').hidden=true;modal.busy=true;lockModal(true);const key=params.toString();
+    try{
+      const result=await api('/api/export-preview?'+key);if(state.modal!==modal)return;
+      $('#export-preview-result').innerHTML=`<p><b>${num(result.patientCount??result.scope?.patientCount)}명 · ${num(result.rowCount)}행</b></p><p>기간: ${esc(result.startDate||result.scope?.startDate||params.get('startDate'))} ~ ${esc(result.endDate||result.scope?.endDate||params.get('endDate'))}</p><p>포함 열: ${esc((result.columns||result.fields||[]).map(c=>typeof c==='string'?c:c.name).join(', '))}</p><p>이름과 메모가 포함된 관리용 CSV입니다. 복원용 DB 백업은 아닙니다.</p>`;
+      $('#export-download').href='/api/export.csv?'+key;$('#export-download').hidden=false;
+    }catch(error){if(state.modal===modal){$('#modal-error').textContent=error.message;$('#modal-error').hidden=false;}}
+    finally{modal.busy=false;if(state.modal===modal)lockModal(false);}
+  }
+  function closeModal({force=false}={}) {
+    if(!force&&!canCloseModal())return false;
     state.photoAbort?.abort();state.photoAbort=null;state.photoGeneration++;
     $('#modal-backdrop').hidden=true;$('#modal').innerHTML='';$('#modal').classList.remove('medication-modal');state.modal=null;document.body.style.overflow='';if(state.lastFocus?.isConnected)state.lastFocus.focus();
+    return true;
   }
   function openModal(type, mode='seed') {
     state.lastFocus=document.activeElement;state.modal={type,mode};
@@ -488,46 +594,60 @@ import { createClinicianCommunications } from './clinician-communications.js';
     const close=`<button class="icon-button" data-modal-action="close" aria-label="닫기">${icon('close')}</button>`;
     if(type==='add') {
       $('#modal').innerHTML=`<div class="modal-top"><h2 id="modal-title">가상 환자 추가</h2>${close}</div><p class="modal-description">시연에 사용할 가상 정보를 입력하세요.<br>실제 환자의 이름이나 개인정보를 입력하지 마세요.</p><form id="add-patient-form"><div class="field"><label for="new-patient-name">가상 이름 <span aria-hidden="true">*</span></label><input id="new-patient-name" name="name" placeholder="예: 김새봄" required maxlength="40" autocomplete="off"></div><div class="form-row"><div class="field"><label for="new-patient-age">나이 *</label><input id="new-patient-age" name="age" type="number" min="1" max="120" value="75" required></div><div class="field"><label for="new-patient-sex">성별 *</label><select id="new-patient-sex" name="sex"><option value="female">여성</option><option value="male">남성</option><option value="other">기타</option></select></div></div><div class="field"><label for="new-patient-conditions">기저질환 <small>선택</small></label><input id="new-patient-conditions" name="conditions" placeholder="예: 고혈압, 당뇨병" maxlength="500"><small>여러 질환은 쉼표로 구분해 주세요.</small></div><div class="form-error" id="modal-error" role="alert" hidden></div><div class="modal-actions"><button type="button" class="button button-secondary" data-modal-action="close">취소</button><button type="submit" class="button button-primary">${icon('plus')}환자 등록</button></div></form>`;
-      $('#new-patient-name').focus();
+      rememberModal();$('#new-patient-name').focus();
     } else {
       const seed=mode==='seed';
       $('#modal').innerHTML=`<div class="modal-top"><h2 id="modal-title">${seed?'예시 데이터 복원':'모든 테스트 데이터 삭제'}</h2>${close}</div><p class="modal-description">${seed?'새 시연을 위해 처음의 예시 데이터로 돌아갑니다.':'환자와 기록이 없는 빈 데이터베이스로 시작합니다.'}</p><div class="reset-warning">현재 환자, 건강·식사 기록, 업로드한 사진이 모두 삭제됩니다. ${seed?'가상 환자 6명과 예시 기록을 새로 생성합니다.':''}<br><b>이 작업은 되돌릴 수 없습니다.</b></div><form id="reset-form"><div class="field"><label for="reset-confirmation">계속하려면 <b>초기화</b>를 입력하세요.</label><input id="reset-confirmation" name="confirmation" placeholder="초기화" required autocomplete="off"></div><div class="form-error" id="modal-error" role="alert" hidden></div><div class="modal-actions"><button type="button" class="button button-secondary" data-modal-action="close">취소</button><button type="submit" class="button button-danger">${seed?'초기화 후 예시 복원':'모든 데이터 삭제'}</button></div></form>`;
-      $('#reset-confirmation').focus();
+      rememberModal();$('#reset-confirmation').focus();
     }
   }
   async function submitModal(event) {
     const form=event.target;if(!['add-patient-form','reset-form'].includes(form.id))return;event.preventDefault();
-    const err=$('#modal-error');err.hidden=true;const submit=form.querySelector('[type=submit]');submit.disabled=true;
+    const modal=state.modal;if(!modal||modal.saving)return;modal.saving=true;
+    const err=$('#modal-error');err.hidden=true;const fields=new FormData(form);lockModal(true);
     try {
-      const fields=new FormData(form);
       if(form.id==='add-patient-form') {
         const result=await api('/api/patients',{method:'POST',body:JSON.stringify({name:String(fields.get('name')).trim(),age:Number(fields.get('age')),sex:fields.get('sex'),conditions:String(fields.get('conditions')).split(',').map(s=>s.trim()).filter(Boolean)})});
-        state.selectedId=result.patient?.id||result.id;state.view='patients';state.filter='all';state.search='';closeModal();await refresh({quiet:true});toast('가상 환자를 등록했습니다. 환자 화면에서 첫 기록을 남겨보세요.');
+        state.selectedId=result.patient?.id||result.id;state.view='patients';state.filter='all';state.search='';closeModal({force:true});toast('가상 환자가 등록되었습니다. 환자 화면에서 첫 기록을 남겨보세요.');await refresh({quiet:true});
       } else {
         if(String(fields.get('confirmation')).trim()!=='초기화')throw new Error('확인 문구를 정확히 입력해 주세요: 초기화');
         const mode=state.modal.mode;
         await api('/api/demo/reset',{method:'POST',body:JSON.stringify({mode,confirmation:'RESET'})});
-        state.selectedId=null;state.summary=null;state.search='';state.filter='all';state.view='overview';closeModal();await refresh({quiet:true});toast(mode==='seed'?'예시 데이터를 복원했습니다.':'모든 테스트 데이터를 삭제했습니다.');
+        state.selectedId=null;state.summary=null;state.search='';state.filter='all';state.view='overview';closeModal({force:true});toast(mode==='seed'?'예시 데이터를 복원했습니다.':'모든 테스트 데이터를 삭제했습니다.');await refresh({quiet:true});
       }
     } catch(error) { if($('#modal-error')){$('#modal-error').textContent=error.message;$('#modal-error').hidden=false;}else toast(error.message,true); }
-    finally { if(submit.isConnected)submit.disabled=false; }
+    finally { modal.saving=false;if(state.modal===modal)lockModal(false); }
   }
   $('#main-nav').addEventListener('click',event=>{const btn=event.target.closest('[data-view]');if(btn)changeView(btn.dataset.view);});
-  $('#refresh-button').addEventListener('click',()=>refresh());
-  $('#add-patient-button').addEventListener('click',()=>{if(communication.canLeave())openModal('add');});
+  $('#refresh-button').addEventListener('click',()=>{refresh();if(currentWorkspace()&&!currentWorkspace().busy())currentWorkspace().refresh();});
+  $('#dismiss-operation-result').addEventListener('click',()=>{$('#operation-result').hidden=true;});
+  $('#add-patient-button').addEventListener('click',()=>{if(can('clinical.write')&&canLeave())openModal('add');});
+  $('#clinical-period-preset').addEventListener('change',event=>{
+    const count=Number(event.target.value);
+    if(count){$('#clinical-start-date').value=offsetDate(state.data.today,-count+1);$('#clinical-end-date').value=state.data.today;}
+    if(event.target.value==='default'){$('#clinical-start-date').value=offsetDate(state.data.today,-6);$('#clinical-end-date').value=state.data.today;}
+  });
+  $('#clinical-period-form').addEventListener('submit',event=>{
+    event.preventDefault();if(!canLeave())return;
+    const start=$('#clinical-start-date').value,end=$('#clinical-end-date').value,days=(Date.parse(end)-Date.parse(start))/86400000+1;
+    if(!Number.isInteger(days)||days<1||days>366||end>state.data.today){toast('오늘까지의 기간을 1~366일 사이로 선택해 주세요.',true);return;}
+    state.startDate=$('#clinical-period-preset').value==='default'?'':start;state.endDate=state.startDate?end:'';
+    ++state.selectionRequest;state.summary=null;syncUrl('push');render();refresh({quiet:true});
+  });
   $('#app-content').addEventListener('click',event=>{
     const el=event.target.closest('[data-action]');if(!el)return;
     const action=el.dataset.action;
     if(action==='invitation')openInvitation();
+    if(action==='export-preview')openExport();
     if(action==='select-patient')selectPatient(el.dataset.id);
     if(action==='alert-patient')selectPatient(el.dataset.id,true).then(()=>$('#patient-detail')?.scrollIntoView({behavior:'smooth',block:'start'}));
     if(action==='view')changeView(el.dataset.view);
     if(action==='check-integrations')loadIntegrationSettings();
     if(action==='filter'){state.filter=el.dataset.filter;render();}
-    if(action==='add-patient' && communication.canLeave())openModal('add');
-    if(action==='reset')openModal('reset',el.dataset.mode);
-    if(action==='add-medication-order')openMedicationOrder();
-    if(action==='end-medication-order')openMedicationEnd(el.dataset.id);
+    if(action==='add-patient' && can('clinical.write')&&canLeave())openModal('add');
+    if(action==='reset'&&can('admin.reset')&&sessionState.mode==='demo'&&canLeave())openModal('reset',el.dataset.mode);
+    if(action==='add-medication-order'&&can('clinical.write')&&canLeave())openMedicationOrder();
+    if(action==='end-medication-order'&&can('clinical.write')&&canLeave())openMedicationEnd(el.dataset.id);
     if(action==='medication-history')openMedicationHistory(el.dataset.orderId,el.dataset.time);
     if(action==='reload-medications')loadMedications();
     if(action==='open-detail'){event.preventDefault();$('#patient-detail')?.scrollIntoView({behavior:'smooth',block:'start'});}
@@ -536,10 +656,11 @@ import { createClinicianCommunications } from './clinician-communications.js';
   $('#app-content').addEventListener('input',event=>{
     if(event.target.id==='patient-search') {state.search=event.target.value;$('#patient-table-body').innerHTML=patientRows(state.view==='patients');$('#patient-count-label').textContent=`전체 ${state.data.patients.length}명 중 ${filteredPatients().length}명 표시`;}
   });
-  $('#app-content').addEventListener('change',event=>{if(['record-patient','medication-patient'].includes(event.target.id))selectPatient(event.target.value);if(event.target.id==='medication-date' && /^\d{4}-\d{2}-\d{2}$/.test(event.target.value)){state.medicationDate=event.target.value;state.medications=null;render('push');loadMedications();focusPage();}});
+  $('#app-content').addEventListener('change',event=>{if(['record-patient','medication-patient'].includes(event.target.id)){const id=event.target.value;event.target.value=state.selectedId;selectPatient(id);}if(event.target.id==='medication-date'){if(!/^\d{4}-\d{2}-\d{2}$/.test(event.target.value)){event.target.value=medDate();toast('확인할 날짜를 선택해 주세요. 이전 조회 날짜를 유지합니다.',true);return;}if(!canLeave()){event.target.value=medDate();return;}state.medicationDate=event.target.value;state.medications=null;render('push');loadMedications();focusPage();}});
   $('#modal-backdrop').addEventListener('click',event=>{if(event.target===$('#modal-backdrop')||event.target.closest('[data-modal-action="close"]'))closeModal();});
   $('#modal').addEventListener('submit',submitModal);
   $('#modal').addEventListener('submit',submitMedicationModal);
+  $('#modal').addEventListener('submit',previewExport);
   $('#modal').addEventListener('click',event=>{
     const button=event.target.closest('[data-modal-action]');
     if(button?.dataset.modalAction==='add-time'){const rows=$('#medication-times');const count=rows.querySelectorAll('input').length;if(count>=12){toast('하루 예정 시각은 최대 12개까지 등록할 수 있습니다.',true);return;}rows.insertAdjacentHTML('beforeend',`<div class="medication-time-row"><input type="time" name="times" required aria-label="복용 예정 시각 ${count+1}"><button type="button" class="text-link" data-modal-action="remove-time">삭제</button></div>`);rows.lastElementChild.querySelector('input').focus();}
@@ -548,6 +669,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
     if(event.target.closest('#analyze-medication-photo'))analyzeMedicationPhoto();
   });
   $('#modal').addEventListener('change',event=>{
+    if(state.modal?.type==='export'&&['export-scope','export-start','export-end'].includes(event.target.id)){$('#export-download').hidden=true;$('#export-preview-result').textContent='범위가 바뀌었습니다. 다시 확인해 주세요.';}
     if(event.target.id==='medication-photo')readMedicationPhoto(event.target.files?.[0]);
     if(event.target.id==='medication-photo-consent')updatePhotoAnalyzeButton();
     if(event.target.dataset.candidateConfirm!==undefined){const index=event.target.dataset.candidateConfirm;const btn=$('#modal').querySelector(`[data-candidate="${index}"]`);if(btn)btn.disabled=!event.target.checked;}
@@ -555,12 +677,14 @@ import { createClinicianCommunications } from './clinician-communications.js';
   });
   document.addEventListener('keydown',event=>{
     if(!state.modal)return;
-    if(event.key==='Escape'){closeModal();return;}
+    if(event.key==='Escape'){event.preventDefault();closeModal();return;}
     if(event.key==='Tab') {const items=[...$('#modal').querySelectorAll('button:not([disabled]),input:not([disabled]),select,textarea,a[href]')];const first=items[0],last=items.at(-1);if(event.shiftKey&&document.activeElement===first){last?.focus();event.preventDefault();}else if(!event.shiftKey&&document.activeElement===last){first?.focus();event.preventDefault();}}
   });
-  window.homecareCanLogout=()=>communication.canLeave();
-  window.addEventListener('beforeunload',event=>{if(!window.__homecareLeaving && (communication.dirty()||communication.busy())){event.preventDefault();event.returnValue='';}});
+  window.homecareCanLogout=canLeave;
+  window.addEventListener('beforeunload',event=>{if(!window.__homecareLeaving && (modalDirty()||modalBusy()||communication.dirty()||communication.busy()||currentWorkspace()?.dirty()||currentWorkspace()?.busy())){event.preventDefault();event.returnValue='';}});
   try{if(!await bootstrapSession('clinician'))return;}catch(error){showError(error.message);return;}
+  try{state.staffAccess=await api('/api/clinician/access');}catch(error){state.staffAccess={staffRoles:sessionState.user?.staffRoles||[],capabilities:[],assignedPatientIds:[]};showError('업무 권한을 확인하지 못했습니다. 새로 열어 주세요. '+error.message);return;}
+  state.view=authorizedView(state.view);if(!can('patient.read'))state.selectedId=null;
   refresh({quiet:true});
   setInterval(()=>{if(!document.hidden)refresh({quiet:true});},20000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh({quiet:true});});

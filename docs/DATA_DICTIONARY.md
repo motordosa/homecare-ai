@@ -17,7 +17,7 @@
 | imageHash | 분석 사진 SHA256 | 사진 변경 시 이전 초안 적용 차단 |
 | analysisId | 환자·사진에 묶인 AI 초안 | 유효기간/종류/1회 적용 확인 |
 | calories / proteinGrams | kcal / g | 식사 추정값, 임상 검증 수치 아님 |
-| portion | 실제 섭취 비율 | .25/.5/.75/1, 사진만으로 확정 금지 |
+| portion | 실제 섭취 비율 | null=양 모름, 0=안 먹음, .25/.5/.75/1; 무선택은 저장 불가, 사진만으로 확정 금지 |
 | foodType / foodLabel | 호환 분류 / 음식 표시명 | 기본 표와 AI 음식명 구별 |
 | provider / model / source | 분석/자료 출처 | 미설정 상태에 AI 출처를 붙이지 않음 |
 | requestId/dateRequestId/photoRequestId | UI 요청 generation | 늦은 응답의 환자/날짜/사진 혼합 방지 |
@@ -95,3 +95,27 @@ otherReadThrough는 해당 대화의 반대 역할이 확인한 최대 순번이
 ## 사진 첨부 복약 보고 (MED-PHOTO-01)
 
 medication_photo_reports의 OCR snapshot은 openai-package-text-v1 추정이다. medication_photo_report_events의 event_json은 patient-self-report-with-photo 당시 기록으로 ingestion 증거가 아니다. revision은 기존 이벤트 버전, expectedRevision은 저장 충돌 검사값, reviewStatus=unreviewed는 의료진 검토를 하지 않았다는 뜻이다. date는 KST 회차 일자, createdAt/reportedAt는 UTC 보고 시각이며 복용 시각이 아니다. image_bytes는 JPEG/PNG/WebP 원본 최대5MB. 전체 필드/단위/리셋·재전송 규칙은 MEDICATION_PHOTO_DEMO_SPEC.md, 실제 SQL은 generated/SCHEMA.md를 따른다.
+
+## v0.7.0 추가 변수 의미
+
+- meal.portion=null은 양 모름,0은 미섭취; calories/proteinGrams도 양 모름이면null. clientSubmissionId는 환자 범위 재전송 ID.
+- daily.revision/expectedRevision은 변경 충돌 검출. workflow status/version/clientRequestId와 before/after/actor/reason은 임상 원본과 별도 이력.
+- staffRoles/capabilities/assignedPatientIds는 서버 설정에서 계산하며 UI 표시모드와 다르다.
+- startDate/endDate/calendarDays·N/observationCount/knownCount/unknownMealCount는 서로 다른 분모다. dataset/recipe/hash/manifest는 동결 분석 재현용이며 실명·메모를 기본 포함하지 않는다.
+- 문헌 query/provider/searchedAt/articleKey/PMID/DOI/retraction/status/reviewer는 조회 근거와 검토 상태. 미확인은 철회 없음이 아니다.
+
+정확한 자료형·출처·허용값은 USABILITY_IMPLEMENTATION_PLAN을 기준으로 구현 후 생성 스키마/변수 목록과 함께 확인한다.
+
+### 재시도·동결·세션 복구 변수
+
+| 변수/테이블 | 의미와 변경 규칙 |
+|---|---|
+| daily.clientSubmissionId / daily_record_submissions | 환자 범위 UUID·요청 해시·저장 당시 응답; 같은 내용 재시도는 한 번만 기록·감사 |
+| medication_order_requests / clientRequestId | 환자 범위 복약계획 생성 중복 방지. 내용 변경 시 새 키 |
+| expectedInputHash | 연구 미리보기 입력 SHA-256; 저장 직전 자료가 다르면409. 동일 저장 재시도는 동결본 반환 |
+| referenceDate / reportedAtReferenceDate | 의료진 선택 기간 마지막 날·그날 기록한 환자 수; 과거 기간의 reportedToday는 null |
+| appliedStartDate / appliedEndDate | 관리 CSV에 실제 적용된 날짜 경계. 무필터는 1900-01-01부터 오늘까지 |
+| recoveryIdentity | 세션 만료 당시 계정/역할/환자/권한/배정 범위 지문. 일치 재인증 전 보호 요청 중단, DOM 초안 보존 |
+| photo report.reviewStatus | 환자에게 제공하는 공개 검토 상태. 직원 내부 note/actor는 환자 응답 제외 |
+
+모든 새 테이블의 실제 컬럼·FK·유일성과 삭제 동작은 generated/SCHEMA.md에서 생성·검사한다. 사람 의미는 본 문서와 USABILITY_IMPLEMENTATION_PLAN에 유지한다.

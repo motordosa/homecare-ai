@@ -1,0 +1,21 @@
+key	status	httpStatus	url	canonicalUrl	error
+wcag22	unread		https://www.w3.org/TR/WCAG22/		<urlopen error Tunnel connection failed: 403 Forbidden>
+ahrq_toolkit	unread		https://www.ahrq.gov/health-literacy/improve/precautions/index.html		<urlopen error Tunnel connection failed: 403 Forbidden>
+nia_healthinfo	unread		https://www.nia.nih.gov/health/healthy-aging/how-find-reliable-health-information-online		<urlopen error Tunnel connection failed: 403 Forbidden>
+kwcag_nia	unread		https://www.wah.or.kr:444/Participation/guide.asp		<urlopen error Tunnel connection failed: 403 Forbidden>
+cdc_clear	unread		https://www.cdc.gov/ccindex/index.html		<urlopen error Tunnel connection failed: 403 Forbidden>
+healthgov_literacy	unread		https://odphp.health.gov/healthliteracyonline/		<urlopen error Tunnel connection failed: 403 Forbidden>
+pubmed	unread		https://pubmed.ncbi.nlm.nih.gov/?term=older+adults+mobile+health+usability+systematic+review		<urlopen error Tunnel connection failed: 403 Forbidden>
+apple_accessibility	read	200	https://developer.apple.com/design/human-interface-guidelines/accessibility
+apple_hig_accessibility_data	read	200	https://developer.apple.com/tutorials/data/design/human-interface-guidelines/accessibility.json
+android_accessibility_principles	unread		https://developer.android.com/guide/topics/ui/accessibility/principles		<urlopen error Tunnel connection failed: 403 Forbidden>
+microsoft_accessibility	unread		https://learn.microsoft.com/en-us/windows/apps/design/accessibility/accessibility		<urlopen error Tunnel connection failed: 403 Forbidden>
+nng_seniors	unread		https://www.nngroup.com/articles/usability-for-senior-citizens/		<urlopen error Tunnel connection failed: 403 Forbidden>
+apple_typography	read	200	https://developer.apple.com/tutorials/data/design/human-interface-guidelines/typography.json	https://developer.apple.com/design/human-interface-guidelines/typography
+apple_inclusion	read	200	https://developer.apple.com/tutorials/data/design/human-interface-guidelines/inclusion.json	https://developer.apple.com/design/human-interface-guidelines/inclusion
+apple_voiceover	read	200	https://developer.apple.com/tutorials/data/design/human-interface-guidelines/voiceover.json	https://developer.apple.com/design/human-interface-guidelines/voiceover
+apple_entering-data	read	200	https://developer.apple.com/tutorials/data/design/human-interface-guidelines/entering-data.json	https://developer.apple.com/design/human-interface-guidelines/entering-data
+apple_feedback	read	200	https://developer.apple.com/tutorials/data/design/human-interface-guidelines/feedback.json	https://developer.apple.com/design/human-interface-guidelines/feedback
+apple_writing	read	200	https://developer.apple.com/tutorials/data/design/human-interface-guidelines/writing.json	https://developer.apple.com/design/human-interface-guidelines/writing
+apple_progress-indicators	read	200	https://developer.apple.com/tutorials/data/design/human-interface-guidelines/progress-indicators.json	https://developer.apple.com/design/human-interface-guidelines/progress-indicators
+apple_onboarding	read	200	https://developer.apple.com/tutorials/data/design/human-interface-guidelines/onboarding.json	https://developer.apple.com/design/human-interface-guidelines/onboarding

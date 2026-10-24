@@ -4,7 +4,7 @@
 
 JavaScript는 Acorn AST로 import·변수(구조 분해 포함)·함수/매개변수·class·catch를 추출한다. Kotlin/Java/Swift는 선언/타입 이름의 보조 인덱스이며 컴파일러 AST 전수 분석과 다르다. 객체의 데이터 필드/API 단위/상태 의미는 [자료 사전](../DATA_DICTIONARY.md)과 [계약](../CONTRACTS.md)을 함께 읽는다.
 
-소스 63개, 선언/매개변수 4528개. node_modules·DB·업로드·생성 캡처는 제외한다. 코드에 비밀값을 직접 넣지 않는다.
+소스 80개, 선언/매개변수 6692개. node_modules·DB·업로드·생성 캡처는 제외한다. 코드에 비밀값을 직접 넣지 않는다.
 
 ## integrations/android/app/build.gradle.kts
 
@@ -935,173 +935,232 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 1:51 | recordFromRow | import | module | ./db.mjs |
 | 1:66 | todayKorea | import | module | ./db.mjs |
 | 2:10 | healthDailyForPatient | import | module | ./health-sync.mjs |
-| 4:7 | mean | const | module | (values, digits = 1) =&gt; values.length ? Math.round(values.reduce((sum, n) =&gt; sum + n, 0) / values.length * 10 ** digits) / 10 ** d |
-| 4:15 | values | parameter | module/anonymous@4 | values |
-| 4:23 | digits | parameter | module/anonymous@4 | digits = 1 |
-| 4:80 | sum | parameter | module/anonymous@4/anonymous@4 | sum |
-| 4:85 | n | parameter | module/anonymous@4/anonymous@4 | n |
-| 5:7 | sum | const | module | values =&gt; values.reduce((total, n) =&gt; total + n, 0) |
-| 5:13 | values | parameter | module/anonymous@5 | values |
-| 5:38 | total | parameter | module/anonymous@5/anonymous@5 | total |
-| 5:45 | n | parameter | module/anonymous@5/anonymous@5 | n |
-| 6:7 | present | const | module | value =&gt; value !== null &amp;&amp; value !== undefined |
-| 6:17 | value | parameter | module/anonymous@6 | value |
-| 7:14 | provenance | const | module | { mode: 'demo', data: '가상 인물의 합성 기록 및 사용자가 입력한 데모 기록', analysis: 'rule-based-demo-v1', nutrition: 'demo-food-table-v1', notice: '확 |
-| 14:17 | getPatients | function | module |  |
-| 14:29 | db | parameter | module/getPatients | db |
-| 18:17 | getPatient | function | module |  |
-| 18:28 | db | parameter | module/getPatient | db |
-| 18:32 | id | parameter | module/getPatient | id |
-| 22:17 | effectiveRecords | function | module |  |
-| 22:34 | db | parameter | module/effectiveRecords | db |
-| 22:38 | id | parameter | module/effectiveRecords | id |
-| 22:42 | startDate | parameter | module/effectiveRecords | startDate |
-| 22:53 | endDate | parameter | module/effectiveRecords | endDate |
-| 23:9 | manual | const | module/effectiveRecords | db.prepare('SELECT * FROM daily_records WHERE patient_id=? AND date&gt;=? AND date&lt;=? ORDER BY date').all(id, startDate, endDate).map |
-| 24:9 | hasHealth | const | module/effectiveRecords | db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='health_daily'").get() |
-| 25:9 | device | const | module/effectiveRecords | hasHealth ? healthDailyForPatient(db, id, startDate, endDate) : [] |
-| 26:9 | byDate | const | module/effectiveRecords | new Map(manual.map(record =&gt; [record.date, record])) |
-| 26:37 | record | parameter | module/effectiveRecords/anonymous@26 | record |
-| 27:9 | devices | const | module/effectiveRecords | new Map(device.filter(record =&gt; present(record.steps) \|\| present(record.sleepHours)).map(record =&gt; [record.date, record])) |
-| 27:41 | record | parameter | module/effectiveRecords/anonymous@27 | record |
-| 27:108 | record | parameter | module/effectiveRecords/anonymous@27 | record |
-| 28:73 | date | parameter | module/effectiveRecords/anonymous@28 | date |
-| 29:11 | record | const | module/effectiveRecords/anonymous@28 | byDate.get(date) |
-| 30:11 | health | const | module/effectiveRecords/anonymous@28 | devices.get(date) |
-| 31:11 | manualSteps | const | module/effectiveRecords/anonymous@28 | present(record?.steps) |
-| 32:11 | manualSleep | const | module/effectiveRecords/anonymous@28 | present(record?.sleepHours) |
-| 33:11 | steps | const | module/effectiveRecords/anonymous@28 | manualSteps ? record.steps : health?.steps ?? null |
-| 34:11 | sleepHours | const | module/effectiveRecords/anonymous@28 | manualSleep ? record.sleepHours : health?.sleepHours ?? null |
-| 35:11 | usesDevice | const | module/effectiveRecords/anonymous@28 | (!manualSteps &amp;&amp; present(health?.steps)) \|\| (!manualSleep &amp;&amp; present(health?.sleepHours)) |
-| 36:11 | base | const | module/effectiveRecords/anonymous@28 | record \|\| { id: 'device:${health.connectionId}:${date}', patientId: id, date, medicationStatus: null, appetite: null, mood: null,  |
-| 46:17 | patientSummary | function | module |  |
-| 46:32 | db | parameter | module/patientSummary | db |
-| 46:36 | id | parameter | module/patientSummary | id |
-| 47:9 | patient | const | module/patientSummary | getPatient(db, id) |
-| 49:9 | today | const | module/patientSummary | todayKorea() |
-| 50:9 | start | const | module/patientSummary | dateOffset(today, -27) |
-| 51:9 | allRecords | const | module/patientSummary | effectiveRecords(db, id, '1900-01-01', '2200-01-01') |
-| 52:9 | records | const | module/patientSummary | allRecords.filter(record =&gt; record.date &gt;= start &amp;&amp; record.date &lt;= today) |
-| 52:37 | record | parameter | module/patientSummary/anonymous@52 | record |
-| 53:9 | meals | const | module/patientSummary | db.prepare('SELECT * FROM meals WHERE patient_id=? AND date&gt;=? AND date&lt;=? ORDER BY date,created_at').all(id, start, today).map(me |
-| 54:9 | recentStart | const | module/patientSummary | dateOffset(today, -6) |
-| 55:9 | recent | const | module/patientSummary | records.filter(r =&gt; r.date &gt;= recentStart) |
-| 55:33 | r | parameter | module/patientSummary/anonymous@55 | r |
-| 56:9 | recentMeals | const | module/patientSummary | meals.filter(m =&gt; m.date &gt;= recentStart) |
-| 56:36 | m | parameter | module/patientSummary/anonymous@56 | m |
-| 57:9 | stepValues | const | module/patientSummary | recent.filter(r =&gt; present(r.steps)).map(r =&gt; r.steps) |
-| 57:36 | r | parameter | module/patientSummary/anonymous@57 | r |
-| 57:63 | r | parameter | module/patientSummary/anonymous@57 | r |
-| 58:9 | sleepValues | const | module/patientSummary | recent.filter(r =&gt; present(r.sleepHours)).map(r =&gt; r.sleepHours) |
-| 58:37 | r | parameter | module/patientSummary/anonymous@58 | r |
-| 58:69 | r | parameter | module/patientSummary/anonymous@58 | r |
-| 59:9 | medicationRecords | const | module/patientSummary | recent.filter(r =&gt; ['taken', 'partial', 'missed'].includes(r.medicationStatus)) |
-| 59:43 | r | parameter | module/patientSummary/anonymous@59 | r |
-| 60:9 | doseEvents | const | module/patientSummary | db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='medication_events'").get() ? db.prepare('SELECT * FROM medica |
-| 62:9 | knownMedicationDates | const | module/patientSummary | new Set([...medicationRecords.map(record =&gt; record.date), ...doseEvents.filter(event =&gt; ['taken', 'missed'].includes(event.status) |
-| 62:66 | record | parameter | module/patientSummary/anonymous@62 | record |
-| 62:111 | event | parameter | module/patientSummary/anonymous@62 | event |
-| 62:168 | event | parameter | module/patientSummary/anonymous@62 | event |
-| 63:9 | missedMedicationDates | const | module/patientSummary | new Set([...medicationRecords.filter(record =&gt; record.medicationStatus === 'missed').map(record =&gt; record.date), ...doseEvents.fil |
-| 63:70 | record | parameter | module/patientSummary/anonymous@63 | record |
-| 63:122 | record | parameter | module/patientSummary/anonymous@63 | record |
-| 63:167 | event | parameter | module/patientSummary/anonymous@63 | event |
-| 63:207 | event | parameter | module/patientSummary/anonymous@63 | event |
-| 64:9 | medicationValue | const | module/patientSummary | medicationRecords.length ? Math.round(sum(medicationRecords.map(r =&gt; r.medicationStatus === 'taken' ? 1 : r.medicationStatus === ' |
-| 64:91 | r | parameter | module/patientSummary/anonymous@64 | r |
-| 65:9 | mealDays | const | module/patientSummary | [...new Set(recentMeals.map(m =&gt; m.date))] |
-| 65:48 | m | parameter | module/patientSummary/anonymous@65 | m |
-| 66:9 | mealTotals | const | module/patientSummary | mealDays.map(date =&gt; ({ calories: sum(recentMeals.filter(m =&gt; m.date === date).map(m =&gt; m.calories)), proteinGrams: sum(recentMeal |
-| 66:35 | date | parameter | module/patientSummary/anonymous@66 | date |
-| 66:79 | m | parameter | module/patientSummary/anonymous@66/anonymous@66 | m |
-| 66:105 | m | parameter | module/patientSummary/anonymous@66/anonymous@66 | m |
-| 66:161 | m | parameter | module/patientSummary/anonymous@66/anonymous@66 | m |
-| 66:187 | m | parameter | module/patientSummary/anonymous@66/anonymous@66 | m |
-| 67:9 | weights | const | module/patientSummary | records.filter(r =&gt; present(r.weightKg)) |
-| 67:34 | r | parameter | module/patientSummary/anonymous@67 | r |
-| 68:9 | lastWeight | const | module/patientSummary | weights.at(-1) |
-| 69:9 | metrics | const | module/patientSummary | { steps: { value: mean(stepValues, 0), unit: '걸음', target: 5000, coverageDays: stepValues.length, totalDays: 7, meaning: '최근 7일 중  |
-| 72:90 | r | parameter | module/patientSummary/anonymous@72 | r |
-| 72:173 | r | parameter | module/patientSummary/anonymous@72 | r |
-| 72:257 | r | parameter | module/patientSummary/anonymous@72 | r |
-| 73:45 | d | parameter | module/patientSummary/anonymous@73 | d |
-| 73:115 | d | parameter | module/patientSummary/anonymous@73 | d |
-| 75:60 | r | parameter | module/patientSummary/anonymous@75 | r |
-| 75:142 | r | parameter | module/patientSummary/anonymous@75 | r |
-| 77:9 | sourceCounts | const | module/patientSummary | key =&gt; recent.reduce((counts, record) =&gt; { const source = record[key]; if (source) counts[source] = (counts[source] \|\| 0) + 1; ret |
-| 77:24 | key | parameter | module/patientSummary/anonymous@77 | key |
-| 77:46 | counts | parameter | module/patientSummary/anonymous@77/anonymous@77 | counts |
-| 77:54 | record | parameter | module/patientSummary/anonymous@77/anonymous@77 | record |
-| 78:11 | source | const | module/patientSummary/anonymous@77/anonymous@77 | record[key] |
-| 84:64 | event | parameter | module/patientSummary/anonymous@84 | event |
-| 88:9 | reasons | const | module/patientSummary | [] |
-| 92:9 | poorAppetite | const | module/patientSummary | recent.filter(r =&gt; r.appetite === 'poor').length |
-| 92:38 | r | parameter | module/patientSummary/anonymous@92 | r |
-| 94:9 | poorMood | const | module/patientSummary | recent.filter(r =&gt; r.mood === 'poor').length |
-| 94:34 | r | parameter | module/patientSummary/anonymous@94 | r |
-| 96:9 | missingDomains | const | module/patientSummary | [stepValues.length &lt; 3 ? 'activity' : null, sleepValues.length &lt; 3 ? 'sleep' : null, knownMedicationDates.size &lt; 3 ? 'medication'  |
-| 97:9 | insufficient | const | module/patientSummary | metrics.completion.reportedDays &lt; 3 \|\| missingDomains.length &gt; 0 |
-| 98:9 | level | const | module/patientSummary | reasons.length &gt;= 2 ? 'high' : reasons.length === 1 ? 'watch' : insufficient ? 'insufficient' : 'stable' |
-| 99:9 | labels | const | module/patientSummary | { high: '확인 우선', watch: '관찰 필요', stable: '규칙 미해당', insufficient: '자료 부족' } |
-| 100:9 | risk | const | module/patientSummary | { level, label: labels[level], reasons, score: reasons.length, scoreMeaning: '확인 규칙에 해당하는 항목 수. 질병 발생 확률이 아닙니다.', missingData: ins |
-| 101:9 | recordByDate | const | module/patientSummary | new Map(records.map(r =&gt; [r.date, r])) |
-| 101:44 | r | parameter | module/patientSummary/anonymous@101 | r |
-| 102:9 | trends | const | module/patientSummary | Array.from({ length: 28 }, (_, i) =&gt; { const date = dateOffset(today, i - 27); const record = recordByDate.get(date); const dayMea |
-| 102:46 | _ | parameter | module/patientSummary/anonymous@102 | _ |
-| 102:49 | i | parameter | module/patientSummary/anonymous@102 | i |
-| 103:11 | date | const | module/patientSummary/anonymous@102 | dateOffset(today, i - 27) |
-| 104:11 | record | const | module/patientSummary/anonymous@102 | recordByDate.get(date) |
-| 105:11 | dayMeals | const | module/patientSummary/anonymous@102 | meals.filter(m =&gt; m.date === date) |
-| 105:35 | m | parameter | module/patientSummary/anonymous@102/anonymous@105 | m |
-| 106:375 | m | parameter | module/patientSummary/anonymous@102/anonymous@106 | m |
-| 106:461 | m | parameter | module/patientSummary/anonymous@102/anonymous@106 | m |
-| 108:9 | evidenceFor | const | module/patientSummary | field =&gt; recent.filter(r =&gt; present(r[field])).map(r =&gt; ({ date: r.date, source: ({ 'health-connect': 'Health Connect 집계', 'apple- |
-| 108:23 | field | parameter | module/patientSummary/anonymous@108 | field |
-| 108:46 | r | parameter | module/patientSummary/anonymous@108/anonymous@108 | r |
-| 108:74 | r | parameter | module/patientSummary/anonymous@108/anonymous@108 | r |
-| 109:9 | briefingItems | const | module/patientSummary | [ { domain: 'activity', title: '활동과 수면', text: '최근 7일 활동 ${metrics.steps.value === null ? '자료 없음' : '보고일 평균 ${metrics.steps.value. |
-| 111:445 | event | parameter | module/patientSummary/anonymous@111 | event |
-| 112:292 | m | parameter | module/patientSummary/anonymous@112 | m |
-| 113:205 | domain | parameter | module/patientSummary/anonymous@113 | domain |
-| 115:9 | questions | const | module/patientSummary | [] |
-| 122:9 | briefing | const | module/patientSummary | { headline: '${patient.name} 님 · ${risk.label}', items: briefingItems, questions, generatedAt: new Date().toISOString(), method: ' |
-| 123:9 | allRecentRecords | const | module/patientSummary | [...allRecords].reverse().slice(0, 14) |
-| 124:9 | allRecentMeals | const | module/patientSummary | db.prepare('SELECT * FROM meals WHERE patient_id=? ORDER BY date DESC,created_at DESC LIMIT 24').all(id).map(mealFromRow) |
-| 125:9 | todayRecord | const | module/patientSummary | records.find(r =&gt; r.date === today) ?? null |
-| 125:36 | r | parameter | module/patientSummary/anonymous@125 | r |
-| 126:9 | todayMeals | const | module/patientSummary | meals.filter(m =&gt; m.date === today).reverse() |
-| 126:35 | m | parameter | module/patientSummary/anonymous@126 | m |
-| 127:9 | lastMealDate | const | module/patientSummary | db.prepare('SELECT MAX(date) AS date FROM meals WHERE patient_id=?').get(id).date |
-| 128:9 | lastRecordDate | const | module/patientSummary | [allRecords.at(-1)?.date, lastMealDate].filter(Boolean).sort().at(-1) ?? null |
-| 132:17 | dashboard | function | module |  |
-| 132:27 | db | parameter | module/dashboard | db |
-| 133:9 | today | const | module/dashboard | todayKorea() |
-| 134:9 | summaries | const | module/dashboard | getPatients(db).map(p =&gt; patientSummary(db, p.id)) |
-| 134:41 | p | parameter | module/dashboard/anonymous@134 | p |
-| 135:9 | patients | const | module/dashboard | summaries.map(({ patient, metrics, risk, lastRecordDate }) =&gt; ({ ...patient, metrics, risk, lastRecordDate })) |
-| 135:37 | patient | parameter | module/dashboard/anonymous@135 | { patient, metrics, risk, lastRecordDate } |
-| 135:46 | metrics | parameter | module/dashboard/anonymous@135 | { patient, metrics, risk, lastRecordDate } |
-| 135:55 | risk | parameter | module/dashboard/anonymous@135 | { patient, metrics, risk, lastRecordDate } |
-| 135:61 | lastRecordDate | parameter | module/dashboard/anonymous@135 | { patient, metrics, risk, lastRecordDate } |
-| 136:9 | alerts | const | module/dashboard | summaries.flatMap(({ patient, risk }) =&gt; risk.reasons.map(reason =&gt; ({ patientId: patient.id, patientName: patient.name, level: ri |
-| 136:39 | patient | parameter | module/dashboard/anonymous@136 | { patient, risk } |
-| 136:48 | risk | parameter | module/dashboard/anonymous@136 | { patient, risk } |
-| 136:76 | reason | parameter | module/dashboard/anonymous@136/anonymous@136 | reason |
-| 137:9 | trends | const | module/dashboard | Array.from({ length: 14 }, (_, i) =&gt; { const date = dateOffset(today, i - 13); const days = summaries.map(s =&gt; s.trends.find(t =&gt;  |
-| 137:46 | _ | parameter | module/dashboard/anonymous@137 | _ |
-| 137:49 | i | parameter | module/dashboard/anonymous@137 | i |
-| 138:11 | date | const | module/dashboard/anonymous@137 | dateOffset(today, i - 13) |
-| 139:11 | days | const | module/dashboard/anonymous@137 | summaries.map(s =&gt; s.trends.find(t =&gt; t.date === date)).filter(Boolean) |
-| 139:32 | s | parameter | module/dashboard/anonymous@137/anonymous@139 | s |
-| 139:51 | t | parameter | module/dashboard/anonymous@137/anonymous@139/anonymous@139 | t |
-| 140:51 | d | parameter | module/dashboard/anonymous@137/anonymous@140 | d |
-| 140:126 | d | parameter | module/dashboard/anonymous@137/anonymous@140 | d |
-| 140:153 | d | parameter | module/dashboard/anonymous@137/anonymous@140 | d |
-| 140:208 | d | parameter | module/dashboard/anonymous@137/anonymous@140 | d |
-| 140:240 | d | parameter | module/dashboard/anonymous@137/anonymous@140 | d |
-| 144:70 | p | parameter | module/dashboard/anonymous@144 | p |
-| 144:168 | s | parameter | module/dashboard/anonymous@144 | s |
-| 144:256 | p | parameter | module/dashboard/anonymous@144 | p |
+| 3:10 | dateValue | import | module | ./validation.mjs |
+| 3:21 | HttpError | import | module | ./validation.mjs |
+| 5:7 | mean | const | module | (values, digits = 1) =&gt; values.length ? Math.round(values.reduce((sum, n) =&gt; sum + n, 0) / values.length * 10 ** digits) / 10 ** d |
+| 5:15 | values | parameter | module/anonymous@5 | values |
+| 5:23 | digits | parameter | module/anonymous@5 | digits = 1 |
+| 5:80 | sum | parameter | module/anonymous@5/anonymous@5 | sum |
+| 5:85 | n | parameter | module/anonymous@5/anonymous@5 | n |
+| 6:7 | sum | const | module | values =&gt; values.reduce((total, n) =&gt; total + n, 0) |
+| 6:13 | values | parameter | module/anonymous@6 | values |
+| 6:38 | total | parameter | module/anonymous@6/anonymous@6 | total |
+| 6:45 | n | parameter | module/anonymous@6/anonymous@6 | n |
+| 7:7 | present | const | module | value =&gt; value !== null &amp;&amp; value !== undefined |
+| 7:17 | value | parameter | module/anonymous@7 | value |
+| 8:14 | provenance | const | module | { mode: 'demo', data: '가상 인물의 합성 기록 및 사용자가 입력한 데모 기록', analysis: 'rule-based-demo-v1', nutrition: 'demo-food-table-v1', notice: '확 |
+| 15:17 | getPatients | function | module |  |
+| 15:29 | db | parameter | module/getPatients | db |
+| 19:17 | getPatient | function | module |  |
+| 19:28 | db | parameter | module/getPatient | db |
+| 19:32 | id | parameter | module/getPatient | id |
+| 23:17 | effectiveRecords | function | module |  |
+| 23:34 | db | parameter | module/effectiveRecords | db |
+| 23:38 | id | parameter | module/effectiveRecords | id |
+| 23:42 | startDate | parameter | module/effectiveRecords | startDate |
+| 23:53 | endDate | parameter | module/effectiveRecords | endDate |
+| 24:9 | manual | const | module/effectiveRecords | db.prepare('SELECT * FROM daily_records WHERE patient_id=? AND date&gt;=? AND date&lt;=? ORDER BY date').all(id, startDate, endDate).map |
+| 25:9 | hasHealth | const | module/effectiveRecords | db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='health_daily'").get() |
+| 26:9 | device | const | module/effectiveRecords | hasHealth ? healthDailyForPatient(db, id, startDate, endDate) : [] |
+| 27:9 | byDate | const | module/effectiveRecords | new Map(manual.map(record =&gt; [record.date, record])) |
+| 27:37 | record | parameter | module/effectiveRecords/anonymous@27 | record |
+| 28:9 | devices | const | module/effectiveRecords | new Map(device.filter(record =&gt; present(record.steps) \|\| present(record.sleepHours)).map(record =&gt; [record.date, record])) |
+| 28:41 | record | parameter | module/effectiveRecords/anonymous@28 | record |
+| 28:108 | record | parameter | module/effectiveRecords/anonymous@28 | record |
+| 29:73 | date | parameter | module/effectiveRecords/anonymous@29 | date |
+| 30:11 | record | const | module/effectiveRecords/anonymous@29 | byDate.get(date) |
+| 31:11 | health | const | module/effectiveRecords/anonymous@29 | devices.get(date) |
+| 32:11 | manualSteps | const | module/effectiveRecords/anonymous@29 | present(record?.steps) |
+| 33:11 | manualSleep | const | module/effectiveRecords/anonymous@29 | present(record?.sleepHours) |
+| 34:11 | steps | const | module/effectiveRecords/anonymous@29 | manualSteps ? record.steps : health?.steps ?? null |
+| 35:11 | sleepHours | const | module/effectiveRecords/anonymous@29 | manualSleep ? record.sleepHours : health?.sleepHours ?? null |
+| 36:11 | usesDevice | const | module/effectiveRecords/anonymous@29 | (!manualSteps &amp;&amp; present(health?.steps)) \|\| (!manualSleep &amp;&amp; present(health?.sleepHours)) |
+| 37:11 | base | const | module/effectiveRecords/anonymous@29 | record \|\| { id: 'device:${health.connectionId}:${date}', patientId: id, date, medicationStatus: null, appetite: null, mood: null,  |
+| 47:17 | summaryPeriod | function | module |  |
+| 47:31 | options | parameter | module/summaryPeriod | options = {} |
+| 48:9 | today | const | module/summaryPeriod | todayKorea() |
+| 49:9 | custom | const | module/summaryPeriod | options.startDate !== undefined \|\| options.endDate !== undefined |
+| 50:9 | endDate | const | module/summaryPeriod | dateValue(options.endDate ?? today) |
+| 51:9 | startDate | const | module/summaryPeriod | dateValue(options.startDate ?? dateOffset(endDate, -6)) |
+| 52:9 | totalDays | const | module/summaryPeriod | Math.round((Date.parse('${endDate}T12:00:00Z') - Date.parse('${startDate}T12:00:00Z')) / 86400000) + 1 |
+| 57:7 | knownMeal | const | module | meal =&gt; Number.isFinite(meal.calories) &amp;&amp; Number.isFinite(meal.proteinGrams) |
+| 57:19 | meal | parameter | module/anonymous@57 | meal |
+| 58:7 | nutritionTotal | const | module | meals =&gt; { const known = meals.filter(knownMeal); return { calories: known.length ? sum(known.map(m =&gt; m.calories)) : null, protei |
+| 58:24 | meals | parameter | module/anonymous@58 | meals |
+| 59:9 | known | const | module/anonymous@58 | meals.filter(knownMeal) |
+| 60:51 | m | parameter | module/anonymous@58/anonymous@60 | m |
+| 61:59 | m | parameter | module/anonymous@58/anonymous@61 | m |
+| 65:17 | patientSummary | function | module |  |
+| 65:32 | db | parameter | module/patientSummary | db |
+| 65:36 | id | parameter | module/patientSummary | id |
+| 65:40 | options | parameter | module/patientSummary | options = {} |
+| 66:9 | patient | const | module/patientSummary | getPatient(db, id) |
+| 68:9 | today | const | module/patientSummary | todayKorea() |
+| 69:9 | period | const | module/patientSummary | summaryPeriod(options) |
+| 70:22 | recentStart | const | module/patientSummary | period |
+| 70:35 | endDate | const | module/patientSummary | period |
+| 70:44 | totalDays | const | module/patientSummary | period |
+| 70:71 | start | const | module/patientSummary | period |
+| 71:9 | periodLabel | const | module/patientSummary | period.custom ? '${recentStart}~${endDate} (${totalDays}일)' : '최근 7일' |
+| 72:9 | allRecords | const | module/patientSummary | effectiveRecords(db, id, '1900-01-01', endDate) |
+| 73:9 | records | const | module/patientSummary | allRecords.filter(record =&gt; record.date &gt;= start) |
+| 73:37 | record | parameter | module/patientSummary/anonymous@73 | record |
+| 74:9 | meals | const | module/patientSummary | db.prepare('SELECT * FROM meals WHERE patient_id=? AND date&gt;=? AND date&lt;=? ORDER BY date,created_at').all(id, start, endDate).map( |
+| 75:9 | recent | const | module/patientSummary | records.filter(r =&gt; r.date &gt;= recentStart) |
+| 75:33 | r | parameter | module/patientSummary/anonymous@75 | r |
+| 76:9 | recentMeals | const | module/patientSummary | meals.filter(m =&gt; m.date &gt;= recentStart) |
+| 76:36 | m | parameter | module/patientSummary/anonymous@76 | m |
+| 77:9 | stepValues | const | module/patientSummary | recent.filter(r =&gt; present(r.steps)).map(r =&gt; r.steps) |
+| 77:36 | r | parameter | module/patientSummary/anonymous@77 | r |
+| 77:63 | r | parameter | module/patientSummary/anonymous@77 | r |
+| 78:9 | sleepValues | const | module/patientSummary | recent.filter(r =&gt; present(r.sleepHours)).map(r =&gt; r.sleepHours) |
+| 78:37 | r | parameter | module/patientSummary/anonymous@78 | r |
+| 78:69 | r | parameter | module/patientSummary/anonymous@78 | r |
+| 79:9 | medicationRecords | const | module/patientSummary | recent.filter(r =&gt; ['taken', 'partial', 'missed'].includes(r.medicationStatus)) |
+| 79:43 | r | parameter | module/patientSummary/anonymous@79 | r |
+| 80:9 | hasMedication | const | module/patientSummary | Boolean(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='medication_events'").get()) |
+| 81:9 | allDoseEvents | const | module/patientSummary | hasMedication ? db.prepare('SELECT * FROM medication_events WHERE patient_id=? AND date&gt;=? AND date&lt;=? ORDER BY date,time,id').all |
+| 82:9 | doseEvents | const | module/patientSummary | allDoseEvents.filter(event =&gt; event.date &gt;= recentStart) |
+| 82:43 | event | parameter | module/patientSummary/anonymous@82 | event |
+| 83:9 | medicationValue | const | module/patientSummary | medicationRecords.length ? Math.round(sum(medicationRecords.map(r =&gt; r.medicationStatus === 'taken' ? 1 : r.medicationStatus === ' |
+| 83:91 | r | parameter | module/patientSummary/anonymous@83 | r |
+| 84:9 | mealDays | const | module/patientSummary | [...new Set(recentMeals.map(m =&gt; m.date))] |
+| 84:48 | m | parameter | module/patientSummary/anonymous@84 | m |
+| 85:9 | mealTotals | const | module/patientSummary | mealDays.map(date =&gt; nutritionTotal(recentMeals.filter(m =&gt; m.date === date))) |
+| 85:35 | date | parameter | module/patientSummary/anonymous@85 | date |
+| 85:77 | m | parameter | module/patientSummary/anonymous@85/anonymous@85 | m |
+| 86:9 | weights | const | module/patientSummary | records.filter(r =&gt; present(r.weightKg)) |
+| 86:34 | r | parameter | module/patientSummary/anonymous@86 | r |
+| 87:9 | lastWeight | const | module/patientSummary | weights.at(-1) |
+| 88:9 | reportDates | const | module/patientSummary | new Set([...recent.map(r =&gt; r.date), ...mealDays, ...doseEvents.map(event =&gt; event.date)]) |
+| 88:46 | r | parameter | module/patientSummary/anonymous@88 | r |
+| 88:91 | event | parameter | module/patientSummary/anonymous@88 | event |
+| 89:9 | metrics | const | module/patientSummary | { steps: { value: mean(stepValues, 0), unit: '걸음', target: 5000, coverageDays: stepValues.length, totalDays, meaning: '${periodLab |
+| 92:90 | r | parameter | module/patientSummary/anonymous@92 | r |
+| 92:173 | r | parameter | module/patientSummary/anonymous@92 | r |
+| 92:257 | r | parameter | module/patientSummary/anonymous@92 | r |
+| 93:45 | d | parameter | module/patientSummary/anonymous@93 | d |
+| 93:131 | d | parameter | module/patientSummary/anonymous@93 | d |
+| 93:234 | d | parameter | module/patientSummary/anonymous@93 | d |
+| 93:390 | m | parameter | module/patientSummary/anonymous@93 | m |
+| 97:9 | sourceCounts | const | module/patientSummary | key =&gt; recent.reduce((counts, record) =&gt; { const source = record[key]; if (source) counts[source] = (counts[source] \|\| 0) + 1; ret |
+| 97:24 | key | parameter | module/patientSummary/anonymous@97 | key |
+| 97:46 | counts | parameter | module/patientSummary/anonymous@97/anonymous@97 | counts |
+| 97:54 | record | parameter | module/patientSummary/anonymous@97/anonymous@97 | record |
+| 98:11 | source | const | module/patientSummary/anonymous@97/anonymous@97 | record[key] |
+| 104:64 | event | parameter | module/patientSummary/anonymous@104 | event |
+| 109:9 | riskStart | const | module/patientSummary | dateOffset(endDate, -6) |
+| 110:9 | riskRecords | const | module/patientSummary | allRecords.filter(r =&gt; r.date &gt;= riskStart) |
+| 110:41 | r | parameter | module/patientSummary/anonymous@110 | r |
+| 111:9 | riskMedicationRecords | const | module/patientSummary | riskRecords.filter(r =&gt; ['taken', 'partial', 'missed'].includes(r.medicationStatus)) |
+| 111:52 | r | parameter | module/patientSummary/anonymous@111 | r |
+| 112:9 | riskDoses | const | module/patientSummary | hasMedication ? db.prepare('SELECT * FROM medication_events WHERE patient_id=? AND date&gt;=? AND date&lt;=?').all(id, riskStart, endDat |
+| 113:9 | knownMedicationDates | const | module/patientSummary | new Set([...riskMedicationRecords.map(r =&gt; r.date), ...riskDoses.filter(e =&gt; ['taken', 'missed'].includes(e.status)).map(e =&gt; e.da |
+| 113:70 | r | parameter | module/patientSummary/anonymous@113 | r |
+| 113:104 | e | parameter | module/patientSummary/anonymous@113 | e |
+| 113:153 | e | parameter | module/patientSummary/anonymous@113 | e |
+| 114:9 | missedMedicationDates | const | module/patientSummary | new Set([...riskMedicationRecords.filter(r =&gt; r.medicationStatus === 'missed').map(r =&gt; r.date), ...riskDoses.filter(e =&gt; e.status |
+| 114:74 | r | parameter | module/patientSummary/anonymous@114 | r |
+| 114:116 | r | parameter | module/patientSummary/anonymous@114 | r |
+| 114:150 | e | parameter | module/patientSummary/anonymous@114 | e |
+| 114:182 | e | parameter | module/patientSummary/anonymous@114 | e |
+| 115:9 | riskSteps | const | module/patientSummary | riskRecords.filter(r =&gt; present(r.steps)).map(r =&gt; r.steps) |
+| 115:40 | r | parameter | module/patientSummary/anonymous@115 | r |
+| 115:67 | r | parameter | module/patientSummary/anonymous@115 | r |
+| 116:9 | riskSleep | const | module/patientSummary | riskRecords.filter(r =&gt; present(r.sleepHours)).map(r =&gt; r.sleepHours) |
+| 116:40 | r | parameter | module/patientSummary/anonymous@116 | r |
+| 116:72 | r | parameter | module/patientSummary/anonymous@116 | r |
+| 117:9 | riskStepMean | const | module/patientSummary | mean(riskSteps, 0) |
+| 118:9 | riskSleepMean | const | module/patientSummary | mean(riskSleep) |
+| 119:9 | reasons | const | module/patientSummary | [] |
+| 120:9 | riskLabel | const | module/patientSummary | endDate === today ? '최근 7일' : '${riskStart}~${endDate} 7일' |
+| 124:9 | poorAppetite | const | module/patientSummary | riskRecords.filter(r =&gt; r.appetite === 'poor').length |
+| 124:43 | r | parameter | module/patientSummary/anonymous@124 | r |
+| 126:9 | poorMood | const | module/patientSummary | riskRecords.filter(r =&gt; r.mood === 'poor').length |
+| 126:39 | r | parameter | module/patientSummary/anonymous@126 | r |
+| 128:9 | missingDomains | const | module/patientSummary | [riskSteps.length &lt; 3 ? 'activity' : null, riskSleep.length &lt; 3 ? 'sleep' : null, knownMedicationDates.size &lt; 3 ? 'medication' : n |
+| 129:9 | riskMealDates | const | module/patientSummary | db.prepare('SELECT DISTINCT date FROM meals WHERE patient_id=? AND date&gt;=? AND date&lt;=?').all(id, riskStart, endDate).map(r =&gt; r.da |
+| 129:146 | r | parameter | module/patientSummary/anonymous@129 | r |
+| 130:9 | riskReportDays | const | module/patientSummary | new Set([...riskRecords.map(r =&gt; r.date), ...riskMealDates, ...riskDoses.map(r =&gt; r.date)]).size |
+| 130:54 | r | parameter | module/patientSummary/anonymous@130 | r |
+| 130:103 | r | parameter | module/patientSummary/anonymous@130 | r |
+| 131:9 | insufficient | const | module/patientSummary | riskReportDays &lt; 3 \|\| missingDomains.length &gt; 0 |
+| 132:9 | level | const | module/patientSummary | reasons.length &gt;= 2 ? 'high' : reasons.length === 1 ? 'watch' : insufficient ? 'insufficient' : 'stable' |
+| 133:9 | labels | const | module/patientSummary | { high: '확인 우선', watch: '관찰 필요', stable: '규칙 미해당', insufficient: '자료 부족' } |
+| 134:9 | risk | const | module/patientSummary | { level, label: labels[level], reasons, score: reasons.length, scoreMeaning: '확인 규칙에 해당하는 항목 수. 질병 발생 확률이 아닙니다.', missingData: ins |
+| 135:9 | recordByDate | const | module/patientSummary | new Map(records.map(r =&gt; [r.date, r])) |
+| 135:44 | r | parameter | module/patientSummary/anonymous@135 | r |
+| 136:9 | trendDays | const | module/patientSummary | Math.round((Date.parse('${endDate}T12:00:00Z') - Date.parse('${start}T12:00:00Z')) / 86400000) + 1 |
+| 137:9 | trends | const | module/patientSummary | Array.from({ length: trendDays }, (_, i) =&gt; { const date = dateOffset(start, i); const record = recordByDate.get(date); const dayM |
+| 137:53 | _ | parameter | module/patientSummary/anonymous@137 | _ |
+| 137:56 | i | parameter | module/patientSummary/anonymous@137 | i |
+| 138:11 | date | const | module/patientSummary/anonymous@137 | dateOffset(start, i) |
+| 139:11 | record | const | module/patientSummary/anonymous@137 | recordByDate.get(date) |
+| 140:11 | dayMeals | const | module/patientSummary/anonymous@137 | meals.filter(m =&gt; m.date === date) |
+| 140:35 | m | parameter | module/patientSummary/anonymous@137/anonymous@140 | m |
+| 141:11 | nutrition | const | module/patientSummary/anonymous@137 | nutritionTotal(dayMeals) |
+| 142:11 | dayDoses | const | module/patientSummary/anonymous@137 | allDoseEvents.filter(e =&gt; e.date === date) |
+| 142:43 | e | parameter | module/patientSummary/anonymous@137/anonymous@142 | e |
+| 145:9 | evidenceFor | const | module/patientSummary | field =&gt; recent.filter(r =&gt; present(r[field])).map(r =&gt; ({ date: r.date, source: ({ 'health-connect': 'Health Connect 집계', 'apple- |
+| 145:23 | field | parameter | module/patientSummary/anonymous@145 | field |
+| 145:46 | r | parameter | module/patientSummary/anonymous@145/anonymous@145 | r |
+| 145:74 | r | parameter | module/patientSummary/anonymous@145/anonymous@145 | r |
+| 146:9 | briefingItems | const | module/patientSummary | [ { domain: 'activity', title: '활동과 수면', text: '${periodLabel} 활동 ${metrics.steps.value === null ? '자료 없음' : '보고일 평균 ${metrics.ste |
+| 148:454 | event | parameter | module/patientSummary/anonymous@148 | event |
+| 149:378 | m | parameter | module/patientSummary/anonymous@149 | m |
+| 150:241 | domain | parameter | module/patientSummary/anonymous@150 | domain |
+| 152:9 | questions | const | module/patientSummary | [] |
+| 159:9 | briefing | const | module/patientSummary | { headline: '${patient.name} 님 · ${risk.label}', items: briefingItems, questions, generatedAt: new Date().toISOString(), method: ' |
+| 160:9 | allRecentRecords | const | module/patientSummary | [...(period.custom ? recent : allRecords)].reverse().slice(0, period.custom ? 366 : 14) |
+| 161:9 | mealHistory | const | module/patientSummary | period.custom ? [...recentMeals].reverse() : db.prepare('SELECT * FROM meals WHERE patient_id=? AND date&lt;=? ORDER BY date DESC,cre |
+| 162:9 | allRecentMeals | const | module/patientSummary | mealHistory.slice(0, period.custom ? 5000 : 24) |
+| 163:9 | todayRecord | const | module/patientSummary | records.find(r =&gt; r.date === today) ?? null |
+| 163:36 | r | parameter | module/patientSummary/anonymous@163 | r |
+| 164:9 | todayMeals | const | module/patientSummary | meals.filter(m =&gt; m.date === today).reverse() |
+| 164:35 | m | parameter | module/patientSummary/anonymous@164 | m |
+| 165:9 | lastMealDate | const | module/patientSummary | db.prepare('SELECT MAX(date) AS date FROM meals WHERE patient_id=? AND date&lt;=?').get(id, endDate).date |
+| 166:9 | lastDoseDate | const | module/patientSummary | hasMedication ? db.prepare('SELECT MAX(date) AS date FROM medication_events WHERE patient_id=? AND date&lt;=?').get(id, endDate).date |
+| 167:9 | lastRecordDate | const | module/patientSummary | [allRecords.at(-1)?.date, lastMealDate, lastDoseDate].filter(Boolean).sort().at(-1) ?? null |
+| 168:9 | lastRecordDateMeaning | const | module/patientSummary | '${endDate}까지 저장된 가장 최근 기록일입니다. 선택 기간 이전 기록도 포함합니다.' |
+| 169:306 | e | parameter | module/patientSummary/anonymous@169 | e |
+| 172:17 | dashboard | function | module |  |
+| 172:27 | db | parameter | module/dashboard | db |
+| 172:31 | options | parameter | module/dashboard | options = {} |
+| 172:45 | allowedPatientIds | parameter | module/dashboard | allowedPatientIds = null |
+| 173:9 | today | const | module/dashboard | todayKorea() |
+| 174:9 | period | const | module/dashboard | summaryPeriod(options) |
+| 175:9 | selectedIds | const | module/dashboard | options.patientIds ? new Set(options.patientIds) : null |
+| 176:9 | allowedIds | const | module/dashboard | allowedPatientIds === null ? null : new Set(allowedPatientIds) |
+| 177:9 | summaries | const | module/dashboard | getPatients(db).filter(p =&gt; (!selectedIds \|\| selectedIds.has(p.id)) &amp;&amp; (!allowedIds \|\| allowedIds.has(p.id))).map(p =&gt; patientSumm |
+| 177:44 | p | parameter | module/dashboard/anonymous@177 | p |
+| 177:135 | p | parameter | module/dashboard/anonymous@177 | p |
+| 178:9 | patients | const | module/dashboard | summaries.map(({ patient, metrics, risk, lastRecordDate, lastRecordDateMeaning }) =&gt; ({ ...patient, metrics, risk, lastRecordDate, |
+| 178:37 | patient | parameter | module/dashboard/anonymous@178 | { patient, metrics, risk, lastRecordDate, lastRecordDateMeaning } |
+| 178:46 | metrics | parameter | module/dashboard/anonymous@178 | { patient, metrics, risk, lastRecordDate, lastRecordDateMeaning } |
+| 178:55 | risk | parameter | module/dashboard/anonymous@178 | { patient, metrics, risk, lastRecordDate, lastRecordDateMeaning } |
+| 178:61 | lastRecordDate | parameter | module/dashboard/anonymous@178 | { patient, metrics, risk, lastRecordDate, lastRecordDateMeaning } |
+| 178:77 | lastRecordDateMeaning | parameter | module/dashboard/anonymous@178 | { patient, metrics, risk, lastRecordDate, lastRecordDateMeaning } |
+| 179:9 | alerts | const | module/dashboard | summaries.flatMap(({ patient, risk }) =&gt; risk.reasons.map(reason =&gt; ({ patientId: patient.id, patientName: patient.name, level: ri |
+| 179:39 | patient | parameter | module/dashboard/anonymous@179 | { patient, risk } |
+| 179:48 | risk | parameter | module/dashboard/anonymous@179 | { patient, risk } |
+| 179:76 | reason | parameter | module/dashboard/anonymous@179/anonymous@179 | reason |
+| 180:9 | length | const | module/dashboard | period.custom ? period.totalDays : 14 |
+| 181:9 | trends | const | module/dashboard | Array.from({ length }, (_, i) =&gt; { const date = dateOffset(period.endDate, i - length + 1); const days = summaries.map(s =&gt; s.tren |
+| 181:42 | _ | parameter | module/dashboard/anonymous@181 | _ |
+| 181:45 | i | parameter | module/dashboard/anonymous@181 | i |
+| 182:11 | date | const | module/dashboard/anonymous@181 | dateOffset(period.endDate, i - length + 1) |
+| 183:11 | days | const | module/dashboard/anonymous@181 | summaries.map(s =&gt; s.trends.find(t =&gt; t.date === date)).filter(Boolean) |
+| 183:32 | s | parameter | module/dashboard/anonymous@181/anonymous@183 | s |
+| 183:51 | t | parameter | module/dashboard/anonymous@181/anonymous@183/anonymous@183 | t |
+| 184:51 | d | parameter | module/dashboard/anonymous@181/anonymous@184 | d |
+| 184:145 | d | parameter | module/dashboard/anonymous@181/anonymous@184 | d |
+| 184:172 | d | parameter | module/dashboard/anonymous@181/anonymous@184 | d |
+| 184:227 | d | parameter | module/dashboard/anonymous@181/anonymous@184 | d |
+| 184:259 | d | parameter | module/dashboard/anonymous@181/anonymous@184 | d |
+| 186:9 | referenceDate | const | module/dashboard | period.endDate |
+| 187:9 | reportedAtReferenceDate | const | module/dashboard | trends.at(-1)?.reportingPatients ?? 0 |
+| 190:70 | p | parameter | module/dashboard/anonymous@190 | p |
+| 190:271 | p | parameter | module/dashboard/anonymous@190 | p |
 
 ## lib/auth.mjs
 
@@ -1116,137 +1175,147 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 2:33 | allowedKeys | import | module | ./validation.mjs |
 | 2:46 | choice | import | module | ./validation.mjs |
 | 2:54 | textValue | import | module | ./validation.mjs |
-| 4:7 | hash | const | module | value =&gt; createHash('sha256').update(value).digest('hex') |
-| 4:14 | value | parameter | module/anonymous@4 | value |
-| 5:7 | secret | const | module | () =&gt; randomBytes(32).toString('base64url') |
-| 6:7 | equal | const | module | (a, b) =&gt; typeof a === 'string' &amp;&amp; typeof b === 'string' &amp;&amp; Buffer.byteLength(a) === Buffer.byteLength(b) &amp;&amp; timingSafeEqual(Buffe |
-| 6:16 | a | parameter | module/anonymous@6 | a |
-| 6:19 | b | parameter | module/anonymous@6 | b |
-| 7:7 | SESSION_MS | const | module | 12 * 60 * 60 * 1000 |
-| 8:7 | LOGIN_MS | const | module | 10 * 60 * 1000 |
-| 10:17 | ensureAuthSchema | function | module |  |
-| 10:34 | db | parameter | module/ensureAuthSchema | db |
-| 31:10 | configuration | function | module |  |
-| 31:24 | env | parameter | module/configuration | env |
-| 32:9 | mode | const | module/configuration | env.AUTH_MODE ?? (env.NODE_ENV === 'production' ? 'kakao' : 'demo') |
-| 33:7 | origin | let | module/configuration | null |
-| 35:11 | url | const | module/configuration | new URL(env.APP_ORIGIN \|\| '') |
-| 39:9 | clientId | const | module/configuration | (env.KAKAO_CLIENT_ID \|\| '').trim() |
-| 40:9 | clientSecret | const | module/configuration | (env.KAKAO_CLIENT_SECRET \|\| '').trim() |
-| 41:9 | configured | const | module/configuration | Boolean(origin &amp;&amp; /^[A-Za-z0-9_-]{1,100}$/.test(clientId) &amp;&amp; clientSecret.length &gt; 0 &amp;&amp; clientSecret.length &lt;= 500) |
-| 42:9 | validMode | const | module/configuration | ['demo','kakao'].includes(mode) |
-| 45:70 | x | parameter | module/configuration/anonymous@45 | x |
-| 45:92 | x | parameter | module/configuration/anonymous@45 | x |
-| 48:10 | cookies | function | module |  |
-| 48:18 | req | parameter | module/cookies | req |
-| 49:9 | result | const | module/cookies | {} |
-| 50:14 | part | const | module/cookies | 초기값 없음 |
-| 51:11 | index | const | module/cookies | part.indexOf('=') |
-| 52:11 | key | const | module/cookies | part.slice(0, index).trim() |
-| 58:17 | safeReturnPath | function | module |  |
-| 58:32 | value | parameter | module/safeReturnPath | value |
-| 61:11 | url | const | module/safeReturnPath | new URL(value, 'https://homecare.invalid') |
-| 63:11 | allowed | const | module/safeReturnPath | new Set(['view','patientId','metric','section','medicationDate']) |
-| 64:16 | key | const | module/safeReturnPath | 초기값 없음 |
-| 69:17 | createAuthService | function | module |  |
-| 69:37 | db | parameter | module/createAuthService | { db, env = process.env, fetchImpl = fetch, now = Date.now } |
-| 69:41 | env | parameter | module/createAuthService | { db, env = process.env, fetchImpl = fetch, now = Date.now } |
-| 69:60 | fetchImpl | parameter | module/createAuthService | { db, env = process.env, fetchImpl = fetch, now = Date.now } |
-| 69:79 | now | parameter | module/createAuthService | { db, env = process.env, fetchImpl = fetch, now = Date.now } |
-| 71:9 | sessionName | const | module/createAuthService | () =&gt; configuration(env).secure ? '__Host-hc_session' : 'hc_session' |
-| 72:9 | loginName | const | module/createAuthService | () =&gt; configuration(env).secure ? '__Host-hc_login' : 'hc_login' |
-| 73:9 | cookie | const | module/createAuthService | (name, value, age) =&gt; '${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${age}${configuration(env).secure ? '; Secure' :  |
-| 73:19 | name | parameter | module/createAuthService/anonymous@73 | name |
-| 73:25 | value | parameter | module/createAuthService/anonymous@73 | value |
-| 73:32 | age | parameter | module/createAuthService/anonymous@73 | age |
-| 74:9 | transaction | const | module/createAuthService | operation =&gt; { db.exec('SAVEPOINT auth_operation'); try { const result = operation(); db.exec('RELEASE auth_operation'); return re |
-| 74:23 | operation | parameter | module/createAuthService/anonymous@74 | operation |
-| 76:17 | result | const | module/createAuthService/anonymous@74 | operation() |
-| 77:12 | error | catch | module/createAuthService/anonymous@74 |  |
-| 79:12 | capabilities | function | module/createAuthService |  |
-| 80:11 | cfg | const | module/createAuthService/capabilities | configuration(env) |
-| 84:12 | actor | function | module/createAuthService |  |
-| 84:18 | req | parameter | module/createAuthService/actor | req |
-| 85:11 | token | const | module/createAuthService/actor | cookies(req)[sessionName()] |
-| 87:11 | cfg | const | module/createAuthService/actor | configuration(env) |
-| 89:11 | row | const | module/createAuthService/actor | db.prepare('SELECT a.*,s.token_hash,s.csrf_token,s.expires_at FROM auth_sessions s JOIN auth_accounts a ON a.id=s.account_id WHERE |
-| 91:11 | role | const | module/createAuthService/actor | row.provider === 'demo' ? row.demo_role : cfg.staffIds.has(row.provider_user_id) ? 'clinician' : row.patient_id ? 'patient' : 'pen |
-| 95:12 | publicActor | function | module/createAuthService |  |
-| 95:24 | value | parameter | module/createAuthService/publicActor | value |
-| 99:12 | sessionInfo | function | module/createAuthService |  |
-| 99:24 | req | parameter | module/createAuthService/sessionInfo | req |
-| 100:11 | value | const | module/createAuthService/sessionInfo | actor(req) |
-| 103:12 | requireActor | function | module/createAuthService |  |
-| 103:25 | req | parameter | module/createAuthService/requireActor | req |
-| 103:32 | write | parameter | module/createAuthService/requireActor | { write = false, allowPending = false } = {} |
-| 103:47 | allowPending | parameter | module/createAuthService/requireActor | { write = false, allowPending = false } = {} |
-| 104:11 | value | const | module/createAuthService/requireActor | actor(req) |
-| 110:12 | authorize | function | module/createAuthService |  |
-| 110:22 | req | parameter | module/createAuthService/authorize | req |
-| 110:29 | staff | parameter | module/createAuthService/authorize | { staff = false, patientId = null, write = false, communication = false } = {} |
-| 110:44 | patientId | parameter | module/createAuthService/authorize | { staff = false, patientId = null, write = false, communication = false } = {} |
-| 110:62 | write | parameter | module/createAuthService/authorize | { staff = false, patientId = null, write = false, communication = false } = {} |
-| 110:77 | communication | parameter | module/createAuthService/authorize | { staff = false, patientId = null, write = false, communication = false } = {} |
-| 112:11 | value | const | module/createAuthService/authorize | requireActor(req, { write }) |
-| 117:12 | newSession | function | module/createAuthService |  |
-| 117:23 | req | parameter | module/createAuthService/newSession | req |
-| 117:28 | accountId | parameter | module/createAuthService/newSession | accountId |
-| 118:11 | old | const | module/createAuthService/newSession | actor(req) |
-| 120:11 | token | const | module/createAuthService/newSession | secret() |
-| 120:29 | csrf | const | module/createAuthService/newSession | secret() |
-| 125:12 | demoLogin | function | module/createAuthService |  |
-| 125:22 | req | parameter | module/createAuthService/demoLogin | req |
-| 125:27 | input | parameter | module/createAuthService/demoLogin | input |
-| 128:11 | body | const | module/createAuthService/demoLogin | objectBody(input) |
-| 129:11 | role | const | module/createAuthService/demoLogin | choice(body.role, '데모 역할', ['patient','clinician']) |
-| 130:9 | patientId | let | module/createAuthService/demoLogin | null |
-| 132:13 | selected | const | module/createAuthService/demoLogin | body.patientId ? db.prepare('SELECT id FROM patients WHERE id=?').get(body.patientId) : db.prepare('SELECT id FROM patients ORDER  |
-| 136:11 | identity | const | module/createAuthService/demoLogin | role === 'clinician' ? 'clinician' : 'patient:${patientId ?? 'empty'}' |
-| 137:9 | account | let | module/createAuthService/demoLogin | db.prepare("SELECT id FROM auth_accounts WHERE provider='demo' AND provider_user_id=?").get(identity) |
-| 144:12 | startOAuth | function | module/createAuthService |  |
-| 144:23 | req | parameter | module/createAuthService/startOAuth | req |
-| 144:28 | next | parameter | module/createAuthService/startOAuth | next |
-| 145:11 | cfg | const | module/createAuthService/startOAuth | configuration(env) |
-| 148:11 | state | const | module/createAuthService/startOAuth | secret() |
-| 148:29 | browser | const | module/createAuthService/startOAuth | secret() |
-| 151:11 | url | const | module/createAuthService/startOAuth | new URL('https://kauth.kakao.com/oauth/authorize') |
-| 155:18 | providerRequest | function | module/createAuthService |  |
-| 155:34 | url | parameter | module/createAuthService/providerRequest | url |
-| 155:39 | options | parameter | module/createAuthService/providerRequest | options |
-| 157:13 | response | const | module/createAuthService/providerRequest | await fetchImpl(url, { ...options, redirect: 'error', signal: AbortSignal.timeout(15000) }) |
-| 159:13 | text | const | module/createAuthService/providerRequest | await response.text() |
-| 163:18 | finishOAuth | function | module/createAuthService |  |
-| 163:30 | req | parameter | module/createAuthService/finishOAuth | req |
-| 163:35 | url | parameter | module/createAuthService/finishOAuth | url |
-| 164:11 | cfg | const | module/createAuthService/finishOAuth | configuration(env) |
-| 166:11 | state | const | module/createAuthService/finishOAuth | url.searchParams.get('state') |
-| 166:50 | browser | const | module/createAuthService/finishOAuth | cookies(req)[loginName()] |
-| 168:11 | attempt | const | module/createAuthService/finishOAuth | transaction(() =&gt; { const row = db.prepare('SELECT * FROM oauth_attempts WHERE state_hash=?').get(hash(state)); if (!row \|\| row.ex |
-| 169:13 | row | const | module/createAuthService/finishOAuth/anonymous@168 | db.prepare('SELECT * FROM oauth_attempts WHERE state_hash=?').get(hash(state)) |
-| 173:11 | code | const | module/createAuthService/finishOAuth | url.searchParams.get('code') |
-| 175:11 | token | const | module/createAuthService/finishOAuth | await providerRequest('https://kauth.kakao.com/oauth/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form- |
-| 178:11 | profile | const | module/createAuthService/finishOAuth | await providerRequest('https://kapi.kakao.com/v2/user/me', { headers: { Authorization: 'Bearer ${token.access_token}' } }) |
-| 179:11 | id | const | module/createAuthService/finishOAuth | typeof profile.id === 'number' &amp;&amp; Number.isSafeInteger(profile.id) &amp;&amp; profile.id &gt; 0 ? String(profile.id) : typeof profile.id ===  |
-| 181:9 | account | let | module/createAuthService/finishOAuth | db.prepare("SELECT * FROM auth_accounts WHERE provider='kakao' AND provider_user_id=?").get(id) |
-| 186:11 | session | const | module/createAuthService/finishOAuth | newSession(req, account.id) |
-| 187:11 | role | const | module/createAuthService/finishOAuth | cfg.staffIds.has(id) ? 'clinician' : account.patient_id ? 'patient' : 'pending' |
-| 188:11 | location | const | module/createAuthService/finishOAuth | role === 'pending' ? '/account' : role === 'patient' ? '/patient' : attempt.return_path.startsWith('/clinician') \|\| attempt.return |
-| 191:12 | logout | function | module/createAuthService |  |
-| 191:19 | req | parameter | module/createAuthService/logout | req |
-| 192:11 | value | const | module/createAuthService/logout | requireActor(req, { write: true, allowPending: true }) |
-| 196:12 | issueInvitation | function | module/createAuthService |  |
-| 196:28 | req | parameter | module/createAuthService/issueInvitation | req |
-| 196:33 | patientId | parameter | module/createAuthService/issueInvitation | patientId |
-| 197:11 | value | const | module/createAuthService/issueInvitation | authorize(req, { staff: true, communication: true, write: true }) |
-| 199:11 | code | const | module/createAuthService/issueInvitation | 'hci_${secret()}' |
-| 199:37 | expiresAt | const | module/createAuthService/issueInvitation | now() + 24 * 60 * 60 * 1000 |
-| 206:12 | enroll | function | module/createAuthService |  |
-| 206:19 | req | parameter | module/createAuthService/enroll | req |
-| 206:24 | input | parameter | module/createAuthService/enroll | input |
-| 207:11 | value | const | module/createAuthService/enroll | requireActor(req, { write: true, allowPending: true }) |
-| 208:11 | body | const | module/createAuthService/enroll | objectBody(input) |
-| 209:11 | code | const | module/createAuthService/enroll | textValue(body.code, '초대코드', { min: 1, max: 100 }) |
-| 212:13 | invitation | const | module/createAuthService/enroll/anonymous@211 | db.prepare('SELECT * FROM patient_invitations WHERE token_hash=?').get(hash(code)) |
+| 3:10 | staffAccessFor | import | module | ./staff-access.mjs |
+| 3:26 | assertStaffCapability | import | module | ./staff-access.mjs |
+| 5:7 | hash | const | module | value =&gt; createHash('sha256').update(value).digest('hex') |
+| 5:14 | value | parameter | module/anonymous@5 | value |
+| 6:7 | secret | const | module | () =&gt; randomBytes(32).toString('base64url') |
+| 7:7 | equal | const | module | (a, b) =&gt; typeof a === 'string' &amp;&amp; typeof b === 'string' &amp;&amp; Buffer.byteLength(a) === Buffer.byteLength(b) &amp;&amp; timingSafeEqual(Buffe |
+| 7:16 | a | parameter | module/anonymous@7 | a |
+| 7:19 | b | parameter | module/anonymous@7 | b |
+| 8:7 | SESSION_MS | const | module | 12 * 60 * 60 * 1000 |
+| 9:7 | LOGIN_MS | const | module | 10 * 60 * 1000 |
+| 11:17 | ensureAuthSchema | function | module |  |
+| 11:34 | db | parameter | module/ensureAuthSchema | db |
+| 32:10 | configuration | function | module |  |
+| 32:24 | env | parameter | module/configuration | env |
+| 33:9 | mode | const | module/configuration | env.AUTH_MODE ?? (env.NODE_ENV === 'production' ? 'kakao' : 'demo') |
+| 34:7 | origin | let | module/configuration | null |
+| 36:11 | url | const | module/configuration | new URL(env.APP_ORIGIN \|\| '') |
+| 40:9 | clientId | const | module/configuration | (env.KAKAO_CLIENT_ID \|\| '').trim() |
+| 41:9 | clientSecret | const | module/configuration | (env.KAKAO_CLIENT_SECRET \|\| '').trim() |
+| 42:9 | configured | const | module/configuration | Boolean(origin &amp;&amp; /^[A-Za-z0-9_-]{1,100}$/.test(clientId) &amp;&amp; clientSecret.length &gt; 0 &amp;&amp; clientSecret.length &lt;= 500) |
+| 43:9 | validMode | const | module/configuration | ['demo','kakao'].includes(mode) |
+| 46:70 | x | parameter | module/configuration/anonymous@46 | x |
+| 46:92 | x | parameter | module/configuration/anonymous@46 | x |
+| 49:10 | cookies | function | module |  |
+| 49:18 | req | parameter | module/cookies | req |
+| 50:9 | result | const | module/cookies | {} |
+| 51:14 | part | const | module/cookies | 초기값 없음 |
+| 52:11 | index | const | module/cookies | part.indexOf('=') |
+| 53:11 | key | const | module/cookies | part.slice(0, index).trim() |
+| 59:17 | safeReturnPath | function | module |  |
+| 59:32 | value | parameter | module/safeReturnPath | value |
+| 62:11 | url | const | module/safeReturnPath | new URL(value, 'https://homecare.invalid') |
+| 64:11 | allowed | const | module/safeReturnPath | new Set(['view','patientId','metric','section','medicationDate']) |
+| 65:16 | key | const | module/safeReturnPath | 초기값 없음 |
+| 70:17 | createAuthService | function | module |  |
+| 70:37 | db | parameter | module/createAuthService | { db, env = process.env, fetchImpl = fetch, now = Date.now } |
+| 70:41 | env | parameter | module/createAuthService | { db, env = process.env, fetchImpl = fetch, now = Date.now } |
+| 70:60 | fetchImpl | parameter | module/createAuthService | { db, env = process.env, fetchImpl = fetch, now = Date.now } |
+| 70:79 | now | parameter | module/createAuthService | { db, env = process.env, fetchImpl = fetch, now = Date.now } |
+| 72:9 | sessionName | const | module/createAuthService | () =&gt; configuration(env).secure ? '__Host-hc_session' : 'hc_session' |
+| 73:9 | loginName | const | module/createAuthService | () =&gt; configuration(env).secure ? '__Host-hc_login' : 'hc_login' |
+| 74:9 | cookie | const | module/createAuthService | (name, value, age) =&gt; '${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${age}${configuration(env).secure ? '; Secure' :  |
+| 74:19 | name | parameter | module/createAuthService/anonymous@74 | name |
+| 74:25 | value | parameter | module/createAuthService/anonymous@74 | value |
+| 74:32 | age | parameter | module/createAuthService/anonymous@74 | age |
+| 75:9 | transaction | const | module/createAuthService | operation =&gt; { db.exec('SAVEPOINT auth_operation'); try { const result = operation(); db.exec('RELEASE auth_operation'); return re |
+| 75:23 | operation | parameter | module/createAuthService/anonymous@75 | operation |
+| 77:17 | result | const | module/createAuthService/anonymous@75 | operation() |
+| 78:12 | error | catch | module/createAuthService/anonymous@75 |  |
+| 80:12 | capabilities | function | module/createAuthService |  |
+| 81:11 | cfg | const | module/createAuthService/capabilities | configuration(env) |
+| 82:11 | candidates | const | module/createAuthService/capabilities | new Set(cfg.staffIds) |
+| 84:13 | policy | const | module/createAuthService/capabilities | JSON.parse(env.STAFF_ACCESS_JSON \|\| '{}') |
+| 86:36 | id | parameter | module/createAuthService/capabilities/anonymous@86 | id |
+| 86:73 | id | parameter | module/createAuthService/capabilities/anonymous@86 | id |
+| 89:11 | staffConfigured | const | module/createAuthService/capabilities | [...candidates].some(providerId =&gt; staffAccessFor({ provider: 'kakao', providerId }, env).staffRoles.length &gt; 0) |
+| 89:50 | providerId | parameter | module/createAuthService/capabilities/anonymous@89 | providerId |
+| 93:12 | actor | function | module/createAuthService |  |
+| 93:18 | req | parameter | module/createAuthService/actor | req |
+| 94:11 | token | const | module/createAuthService/actor | cookies(req)[sessionName()] |
+| 96:11 | cfg | const | module/createAuthService/actor | configuration(env) |
+| 98:11 | row | const | module/createAuthService/actor | db.prepare('SELECT a.*,s.token_hash,s.csrf_token,s.expires_at FROM auth_sessions s JOIN auth_accounts a ON a.id=s.account_id WHERE |
+| 100:11 | access | const | module/createAuthService/actor | staffAccessFor({ provider: row.provider, providerId: row.provider_user_id, role: row.demo_role }, env) |
+| 101:11 | role | const | module/createAuthService/actor | row.provider === 'demo' ? row.demo_role : access.staffRoles.length ? 'clinician' : row.patient_id ? 'patient' : 'pending' |
+| 105:12 | publicActor | function | module/createAuthService |  |
+| 105:24 | value | parameter | module/createAuthService/publicActor | value |
+| 110:12 | sessionInfo | function | module/createAuthService |  |
+| 110:24 | req | parameter | module/createAuthService/sessionInfo | req |
+| 111:11 | value | const | module/createAuthService/sessionInfo | actor(req) |
+| 114:12 | requireActor | function | module/createAuthService |  |
+| 114:25 | req | parameter | module/createAuthService/requireActor | req |
+| 114:32 | write | parameter | module/createAuthService/requireActor | { write = false, allowPending = false } = {} |
+| 114:47 | allowPending | parameter | module/createAuthService/requireActor | { write = false, allowPending = false } = {} |
+| 115:11 | value | const | module/createAuthService/requireActor | actor(req) |
+| 121:12 | authorize | function | module/createAuthService |  |
+| 121:22 | req | parameter | module/createAuthService/authorize | req |
+| 121:29 | staff | parameter | module/createAuthService/authorize | { staff = false, patientId = null, write = false, communication = false, capability = null } = {} |
+| 121:44 | patientId | parameter | module/createAuthService/authorize | { staff = false, patientId = null, write = false, communication = false, capability = null } = {} |
+| 121:62 | write | parameter | module/createAuthService/authorize | { staff = false, patientId = null, write = false, communication = false, capability = null } = {} |
+| 121:77 | communication | parameter | module/createAuthService/authorize | { staff = false, patientId = null, write = false, communication = false, capability = null } = {} |
+| 121:100 | capability | parameter | module/createAuthService/authorize | { staff = false, patientId = null, write = false, communication = false, capability = null } = {} |
+| 123:11 | value | const | module/createAuthService/authorize | requireActor(req, { write }) |
+| 129:12 | newSession | function | module/createAuthService |  |
+| 129:23 | req | parameter | module/createAuthService/newSession | req |
+| 129:28 | accountId | parameter | module/createAuthService/newSession | accountId |
+| 130:11 | old | const | module/createAuthService/newSession | actor(req) |
+| 132:11 | token | const | module/createAuthService/newSession | secret() |
+| 132:29 | csrf | const | module/createAuthService/newSession | secret() |
+| 137:12 | demoLogin | function | module/createAuthService |  |
+| 137:22 | req | parameter | module/createAuthService/demoLogin | req |
+| 137:27 | input | parameter | module/createAuthService/demoLogin | input |
+| 140:11 | body | const | module/createAuthService/demoLogin | objectBody(input) |
+| 141:11 | role | const | module/createAuthService/demoLogin | choice(body.role, '데모 역할', ['patient','clinician']) |
+| 142:9 | patientId | let | module/createAuthService/demoLogin | null |
+| 144:13 | selected | const | module/createAuthService/demoLogin | body.patientId ? db.prepare('SELECT id FROM patients WHERE id=?').get(body.patientId) : db.prepare('SELECT id FROM patients ORDER  |
+| 148:11 | identity | const | module/createAuthService/demoLogin | role === 'clinician' ? 'clinician' : 'patient:${patientId ?? 'empty'}' |
+| 149:9 | account | let | module/createAuthService/demoLogin | db.prepare("SELECT id FROM auth_accounts WHERE provider='demo' AND provider_user_id=?").get(identity) |
+| 156:12 | startOAuth | function | module/createAuthService |  |
+| 156:23 | req | parameter | module/createAuthService/startOAuth | req |
+| 156:28 | next | parameter | module/createAuthService/startOAuth | next |
+| 157:11 | cfg | const | module/createAuthService/startOAuth | configuration(env) |
+| 160:11 | state | const | module/createAuthService/startOAuth | secret() |
+| 160:29 | browser | const | module/createAuthService/startOAuth | secret() |
+| 163:11 | url | const | module/createAuthService/startOAuth | new URL('https://kauth.kakao.com/oauth/authorize') |
+| 167:18 | providerRequest | function | module/createAuthService |  |
+| 167:34 | url | parameter | module/createAuthService/providerRequest | url |
+| 167:39 | options | parameter | module/createAuthService/providerRequest | options |
+| 169:13 | response | const | module/createAuthService/providerRequest | await fetchImpl(url, { ...options, redirect: 'error', signal: AbortSignal.timeout(15000) }) |
+| 171:13 | text | const | module/createAuthService/providerRequest | await response.text() |
+| 175:18 | finishOAuth | function | module/createAuthService |  |
+| 175:30 | req | parameter | module/createAuthService/finishOAuth | req |
+| 175:35 | url | parameter | module/createAuthService/finishOAuth | url |
+| 176:11 | cfg | const | module/createAuthService/finishOAuth | configuration(env) |
+| 178:11 | state | const | module/createAuthService/finishOAuth | url.searchParams.get('state') |
+| 178:50 | browser | const | module/createAuthService/finishOAuth | cookies(req)[loginName()] |
+| 180:11 | attempt | const | module/createAuthService/finishOAuth | transaction(() =&gt; { const row = db.prepare('SELECT * FROM oauth_attempts WHERE state_hash=?').get(hash(state)); if (!row \|\| row.ex |
+| 181:13 | row | const | module/createAuthService/finishOAuth/anonymous@180 | db.prepare('SELECT * FROM oauth_attempts WHERE state_hash=?').get(hash(state)) |
+| 185:11 | code | const | module/createAuthService/finishOAuth | url.searchParams.get('code') |
+| 187:11 | token | const | module/createAuthService/finishOAuth | await providerRequest('https://kauth.kakao.com/oauth/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form- |
+| 190:11 | profile | const | module/createAuthService/finishOAuth | await providerRequest('https://kapi.kakao.com/v2/user/me', { headers: { Authorization: 'Bearer ${token.access_token}' } }) |
+| 191:11 | id | const | module/createAuthService/finishOAuth | typeof profile.id === 'number' &amp;&amp; Number.isSafeInteger(profile.id) &amp;&amp; profile.id &gt; 0 ? String(profile.id) : typeof profile.id ===  |
+| 193:9 | account | let | module/createAuthService/finishOAuth | db.prepare("SELECT * FROM auth_accounts WHERE provider='kakao' AND provider_user_id=?").get(id) |
+| 198:11 | session | const | module/createAuthService/finishOAuth | newSession(req, account.id) |
+| 199:11 | role | const | module/createAuthService/finishOAuth | staffAccessFor({ provider: 'kakao', providerId: id }, env).staffRoles.length ? 'clinician' : account.patient_id ? 'patient' : 'pen |
+| 200:11 | location | const | module/createAuthService/finishOAuth | role === 'pending' ? '/account' : role === 'patient' ? '/patient' : attempt.return_path.startsWith('/clinician') \|\| attempt.return |
+| 203:12 | logout | function | module/createAuthService |  |
+| 203:19 | req | parameter | module/createAuthService/logout | req |
+| 204:11 | value | const | module/createAuthService/logout | requireActor(req, { write: true, allowPending: true }) |
+| 208:12 | issueInvitation | function | module/createAuthService |  |
+| 208:28 | req | parameter | module/createAuthService/issueInvitation | req |
+| 208:33 | patientId | parameter | module/createAuthService/issueInvitation | patientId |
+| 209:11 | value | const | module/createAuthService/issueInvitation | authorize(req, { staff: true, communication: true, write: true, patientId, capability: 'clinical.write' }) |
+| 211:11 | code | const | module/createAuthService/issueInvitation | 'hci_${secret()}' |
+| 211:37 | expiresAt | const | module/createAuthService/issueInvitation | now() + 24 * 60 * 60 * 1000 |
+| 218:12 | enroll | function | module/createAuthService |  |
+| 218:19 | req | parameter | module/createAuthService/enroll | req |
+| 218:24 | input | parameter | module/createAuthService/enroll | input |
+| 219:11 | value | const | module/createAuthService/enroll | requireActor(req, { write: true, allowPending: true }) |
+| 220:11 | body | const | module/createAuthService/enroll | objectBody(input) |
+| 221:11 | code | const | module/createAuthService/enroll | textValue(body.code, '초대코드', { min: 1, max: 100 }) |
+| 224:13 | invitation | const | module/createAuthService/enroll/anonymous@223 | db.prepare('SELECT * FROM patient_invitations WHERE token_hash=?').get(hash(code)) |
 
 ## lib/communications.mjs
 
@@ -1387,34 +1456,218 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 100:34 | mode | parameter | module/seedDatabase | mode = 'seed' |
 | 101:9 | today | const | module/seedDatabase | todayKorea() |
 | 102:9 | createdAt | const | module/seedDatabase | new Date().toISOString() |
-| 107:13 | patients | const | module/seedDatabase/anonymous@103 | [ ['p001', '김하늘', 78, 'female', ['고혈압', '골관절염'], ['혈압약 1일 1회'], '딸 · 주 3회 방문', 0], ['p002', '박새봄', 82, 'female', ['당뇨병', '노쇠'], [' |
-| 115:13 | insertPatient | const | module/seedDatabase/anonymous@103 | db.prepare('INSERT INTO patients (id,name,age,sex,conditions,medications,caregiver,created_at,demo) VALUES (?,?,?,?,?,?,?,?,1)') |
-| 116:13 | insertRecord | const | module/seedDatabase/anonymous@103 | db.prepare('INSERT INTO daily_records (id,patient_id,date,steps,sleep_hours,medication_status,appetite,mood,note,weight_kg,created |
-| 117:13 | insertMeal | const | module/seedDatabase/anonymous@103 | db.prepare('INSERT INTO meals (id,patient_id,date,meal_type,food_type,portion,calories,protein_grams,image_filename,source,created |
-| 118:19 | id | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
-| 118:23 | name | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
-| 118:29 | age | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
-| 118:34 | sex | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
-| 118:39 | conditions | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
-| 118:51 | medications | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
-| 118:64 | caregiver | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
-| 118:75 | index | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
-| 120:18 | offset | let | module/seedDatabase/anonymous@103 | -27 |
-| 121:17 | day | const | module/seedDatabase/anonymous@103 | offset + 27 |
-| 122:17 | date | const | module/seedDatabase/anonymous@103 | dateOffset(today, offset) |
-| 125:17 | deteriorating | const | module/seedDatabase/anonymous@103 | (index === 1 \|\| index === 3) &amp;&amp; offset &gt;= -6 |
-| 126:17 | steps | const | module/seedDatabase/anonymous@103 | Math.max(180, Math.round((index === 2 ? 5500 : index === 4 ? 4200 : 2800) + Math.sin(day * 1.7 + index) * 950 - (deteriorating ? 1 |
-| 127:17 | sleepHours | const | module/seedDatabase/anonymous@103 | Math.round((6.6 + Math.sin(day * .8 + index) * .8 - (deteriorating ? 1.7 : 0)) * 10) / 10 |
-| 128:17 | medicationStatus | const | module/seedDatabase/anonymous@103 | deteriorating &amp;&amp; day % 3 !== 0 ? 'missed' : (day + index) % 13 === 0 ? 'partial' : 'taken' |
-| 129:17 | appetite | const | module/seedDatabase/anonymous@103 | deteriorating ? 'poor' : day % 8 === 0 ? 'normal' : 'good' |
-| 130:17 | mood | const | module/seedDatabase/anonymous@103 | deteriorating &amp;&amp; day % 2 === 0 ? 'poor' : 'normal' |
-| 131:17 | note | const | module/seedDatabase/anonymous@103 | deteriorating &amp;&amp; day % 3 === 0 ? '입맛이 적고 집에서 쉬는 시간이 많았습니다. (합성 기록)' : offset === 0 ? '오늘도 기록을 남겼습니다. (합성 기록)' : '' |
-| 132:17 | weight | const | module/seedDatabase/anonymous@103 | day % 4 === 0 ? Math.round((sex === 'male' ? 65 : 53) * 10 + Math.sin(day + index) * 4 - (deteriorating ? 8 : 0)) / 10 : null |
-| 134:20 | mealIndex | let | module/seedDatabase/anonymous@103 | 0 |
-| 136:19 | mealType | const | module/seedDatabase/anonymous@103 | ['breakfast', 'lunch', 'dinner'][mealIndex] |
-| 137:19 | foodType | const | module/seedDatabase/anonymous@103 | deteriorating ? 'porridge' : ['balanced', 'protein', 'noodles'][(day + mealIndex + index) % 3] |
-| 138:19 | portion | const | module/seedDatabase/anonymous@103 | deteriorating ? .5 : (day + mealIndex) % 5 === 0 ? .75 : 1 |
-| 139:19 | food | const | module/seedDatabase/anonymous@103 | foodTable[foodType] |
+| 106:16 | table | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
+| 112:13 | patients | const | module/seedDatabase/anonymous@103 | [ ['p001', '김하늘', 78, 'female', ['고혈압', '골관절염'], ['혈압약 1일 1회'], '딸 · 주 3회 방문', 0], ['p002', '박새봄', 82, 'female', ['당뇨병', '노쇠'], [' |
+| 120:13 | insertPatient | const | module/seedDatabase/anonymous@103 | db.prepare('INSERT INTO patients (id,name,age,sex,conditions,medications,caregiver,created_at,demo) VALUES (?,?,?,?,?,?,?,?,1)') |
+| 121:13 | insertRecord | const | module/seedDatabase/anonymous@103 | db.prepare('INSERT INTO daily_records (id,patient_id,date,steps,sleep_hours,medication_status,appetite,mood,note,weight_kg,created |
+| 122:13 | insertMeal | const | module/seedDatabase/anonymous@103 | db.prepare('INSERT INTO meals (id,patient_id,date,meal_type,food_type,portion,calories,protein_grams,image_filename,source,created |
+| 123:19 | id | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
+| 123:23 | name | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
+| 123:29 | age | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
+| 123:34 | sex | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
+| 123:39 | conditions | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
+| 123:51 | medications | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
+| 123:64 | caregiver | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
+| 123:75 | index | const | module/seedDatabase/anonymous@103 | 초기값 없음 |
+| 125:18 | offset | let | module/seedDatabase/anonymous@103 | -27 |
+| 126:17 | day | const | module/seedDatabase/anonymous@103 | offset + 27 |
+| 127:17 | date | const | module/seedDatabase/anonymous@103 | dateOffset(today, offset) |
+| 130:17 | deteriorating | const | module/seedDatabase/anonymous@103 | (index === 1 \|\| index === 3) &amp;&amp; offset &gt;= -6 |
+| 131:17 | steps | const | module/seedDatabase/anonymous@103 | Math.max(180, Math.round((index === 2 ? 5500 : index === 4 ? 4200 : 2800) + Math.sin(day * 1.7 + index) * 950 - (deteriorating ? 1 |
+| 132:17 | sleepHours | const | module/seedDatabase/anonymous@103 | Math.round((6.6 + Math.sin(day * .8 + index) * .8 - (deteriorating ? 1.7 : 0)) * 10) / 10 |
+| 133:17 | medicationStatus | const | module/seedDatabase/anonymous@103 | deteriorating &amp;&amp; day % 3 !== 0 ? 'missed' : (day + index) % 13 === 0 ? 'partial' : 'taken' |
+| 134:17 | appetite | const | module/seedDatabase/anonymous@103 | deteriorating ? 'poor' : day % 8 === 0 ? 'normal' : 'good' |
+| 135:17 | mood | const | module/seedDatabase/anonymous@103 | deteriorating &amp;&amp; day % 2 === 0 ? 'poor' : 'normal' |
+| 136:17 | note | const | module/seedDatabase/anonymous@103 | deteriorating &amp;&amp; day % 3 === 0 ? '입맛이 적고 집에서 쉬는 시간이 많았습니다. (합성 기록)' : offset === 0 ? '오늘도 기록을 남겼습니다. (합성 기록)' : '' |
+| 137:17 | weight | const | module/seedDatabase/anonymous@103 | day % 4 === 0 ? Math.round((sex === 'male' ? 65 : 53) * 10 + Math.sin(day + index) * 4 - (deteriorating ? 8 : 0)) / 10 : null |
+| 139:20 | mealIndex | let | module/seedDatabase/anonymous@103 | 0 |
+| 141:19 | mealType | const | module/seedDatabase/anonymous@103 | ['breakfast', 'lunch', 'dinner'][mealIndex] |
+| 142:19 | foodType | const | module/seedDatabase/anonymous@103 | deteriorating ? 'porridge' : ['balanced', 'protein', 'noodles'][(day + mealIndex + index) % 3] |
+| 143:19 | portion | const | module/seedDatabase/anonymous@103 | deteriorating ? .5 : (day + mealIndex) % 5 === 0 ? .75 : 1 |
+| 144:19 | food | const | module/seedDatabase/anonymous@103 | foodTable[foodType] |
+
+## lib/evidence.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:10 | createHash | import | module | node:crypto |
+| 1:22 | randomUUID | import | module | node:crypto |
+| 2:10 | HttpError | import | module | ./validation.mjs |
+| 2:21 | allowedKeys | import | module | ./validation.mjs |
+| 2:34 | choice | import | module | ./validation.mjs |
+| 2:42 | numberValue | import | module | ./validation.mjs |
+| 2:55 | objectBody | import | module | ./validation.mjs |
+| 2:67 | textValue | import | module | ./validation.mjs |
+| 4:7 | PROVIDER | const | module | 'Europe PMC' |
+| 5:7 | SEARCH_ENDPOINT | const | module | 'https://www.ebi.ac.uk/europepmc/webservices/rest/search' |
+| 6:7 | PAGE_SIZE | const | module | 20 |
+| 7:7 | MAX_RESPONSE_BYTES | const | module | 1024 * 1024 |
+| 8:7 | CACHE_MS | const | module | 10 * 60 * 1000 |
+| 9:7 | digest | const | module | value =&gt; createHash('sha256').update(value).digest('hex') |
+| 9:16 | value | parameter | module/anonymous@9 | value |
+| 10:7 | permissions | const | module | actor =&gt; ({ canReview: actor?.capabilities?.includes('evidence.review') === true }) |
+| 10:21 | actor | parameter | module/anonymous@10 | actor |
+| 12:17 | ensureEvidenceSchema | function | module |  |
+| 12:38 | db | parameter | module/ensureEvidenceSchema | db |
+| 36:10 | requirePermission | function | module |  |
+| 36:28 | actor | parameter | module/requirePermission | actor |
+| 36:35 | capability | parameter | module/requirePermission | capability = 'evidence.read' |
+| 42:7 | clean | const | module | (value, max = 1000) =&gt; typeof value === 'string' ? value.replace(/\u0000/g, '').trim().slice(0, max) : '' |
+| 42:16 | value | parameter | module/anonymous@42 | value |
+| 42:23 | max | parameter | module/anonymous@42 | max = 1000 |
+| 43:7 | identifier | const | module | value =&gt; typeof value === 'string' &amp;&amp; /^[A-Za-z0-9_-]{1,80}$/.test(value) ? value : null |
+| 43:20 | value | parameter | module/anonymous@43 | value |
+| 44:7 | numericId | const | module | value =&gt; typeof value === 'string' &amp;&amp; /^\d{1,20}$/.test(value) ? value : null |
+| 44:19 | value | parameter | module/anonymous@44 | value |
+| 45:7 | doiValue | const | module | value =&gt; typeof value === 'string' &amp;&amp; /^10\.\d{4,9}\/[^\s&lt;&gt;"'\u0000]{1,200}$/i.test(value.trim()) ? value.trim().toLowerCase() : n |
+| 45:18 | value | parameter | module/anonymous@45 | value |
+| 47:10 | normalizeArticle | function | module |  |
+| 47:27 | row | parameter | module/normalizeArticle | row |
+| 47:32 | searchedAt | parameter | module/normalizeArticle | searchedAt |
+| 49:9 | source | const | module/normalizeArticle | identifier(row.source) |
+| 49:42 | sourceId | const | module/normalizeArticle | identifier(row.id) |
+| 50:9 | title | const | module/normalizeArticle | clean(row.title, 1500) |
+| 52:9 | pmid | const | module/normalizeArticle | numericId(row.pmid) \|\| (source === 'MED' ? numericId(sourceId) : null) |
+| 53:9 | doi | const | module/normalizeArticle | doiValue(row.doi) |
+| 54:9 | publicationTypes | const | module/normalizeArticle | (Array.isArray(row.pubTypeList?.pubType) ? row.pubTypeList.pubType : []).filter(x =&gt; typeof x === 'string').slice(0, 20).map(x =&gt;  |
+| 54:108 | x | parameter | module/normalizeArticle/anonymous@54 | x |
+| 54:153 | x | parameter | module/normalizeArticle/anonymous@54 | x |
+| 55:9 | retracted | const | module/normalizeArticle | row.isRetracted === true \|\| row.isRetracted === 'Y' \|\| publicationTypes.some(type =&gt; type.toLowerCase() === 'retracted publication |
+| 55:98 | type | parameter | module/normalizeArticle/anonymous@55 | type |
+| 57:9 | retractionStatus | const | module/normalizeArticle | retracted ? 'retracted' : 'unknown' |
+| 58:9 | abstractText | const | module/normalizeArticle | clean(row.abstractText, 8000) |
+| 59:9 | yearText | const | module/normalizeArticle | String(row.pubYear \|\| row.journalInfo?.yearOfPublication \|\| '') |
+| 74:10 | searchInput | function | module |  |
+| 74:22 | input | parameter | module/searchInput | input |
+| 75:9 | body | const | module/searchInput | objectBody(input) |
+| 77:9 | query | const | module/searchInput | textValue(body.query, '연구 주제 또는 검색식', { min: 2, max: 500 }) |
+| 84:9 | yearFrom | const | module/searchInput | body.yearFrom === undefined \|\| body.yearFrom === null ? null : numberValue(body.yearFrom, '시작 연도', 1800, 2200, true) |
+| 85:9 | yearTo | const | module/searchInput | body.yearTo === undefined \|\| body.yearTo === null ? null : numberValue(body.yearTo, '종료 연도', 1800, 2200, true) |
+| 87:9 | cursorMark | const | module/searchInput | body.cursorMark === undefined ? '*' : textValue(body.cursorMark, '다음 검색 위치', { min: 1, max: 512 }) |
+| 89:9 | executedQuery | const | module/searchInput | yearFrom !== null \|\| yearTo !== null ? '(${query}) AND FIRST_PDATE:[${yearFrom ?? 1800}-01-01 TO ${yearTo ?? 2200}-12-31]' : query |
+| 93:16 | boundedJson | function | module |  |
+| 93:28 | response | parameter | module/boundedJson | response |
+| 95:7 | size | let | module/boundedJson | 0 |
+| 96:9 | chunks | const | module/boundedJson | [] |
+| 98:11 | reader | const | module/boundedJson | response.body.getReader() |
+| 101:17 | done | const | module/boundedJson | await reader.read() |
+| 101:23 | value | const | module/boundedJson | await reader.read() |
+| 112:11 | value | const | module/boundedJson | await response.text() |
+| 120:10 | bookmarkRow | function | module |  |
+| 120:22 | row | parameter | module/bookmarkRow | row |
+| 127:17 | createEvidenceService | function | module |  |
+| 127:41 | db | parameter | module/createEvidenceService | { db, fetchImpl = fetch, now = Date.now, timeoutMs = 12000 } |
+| 127:45 | fetchImpl | parameter | module/createEvidenceService | { db, fetchImpl = fetch, now = Date.now, timeoutMs = 12000 } |
+| 127:64 | now | parameter | module/createEvidenceService | { db, fetchImpl = fetch, now = Date.now, timeoutMs = 12000 } |
+| 127:80 | timeoutMs | parameter | module/createEvidenceService | { db, fetchImpl = fetch, now = Date.now, timeoutMs = 12000 } |
+| 129:9 | atomic | const | module/createEvidenceService | operation =&gt; { db.exec('SAVEPOINT evidence_operation'); try { const result = operation(); db.exec('RELEASE evidence_operation'); r |
+| 129:18 | operation | parameter | module/createEvidenceService/anonymous@129 | operation |
+| 131:17 | result | const | module/createEvidenceService/anonymous@129 | operation() |
+| 132:12 | error | catch | module/createEvidenceService/anonymous@129 |  |
+| 134:9 | getSearch | const | module/createEvidenceService | (actor, id) =&gt; { requirePermission(actor); const row = db.prepare('SELECT result_json FROM evidence_searches WHERE id=?').get(text |
+| 134:22 | actor | parameter | module/createEvidenceService/anonymous@134 | actor |
+| 134:29 | id | parameter | module/createEvidenceService/anonymous@134 | id |
+| 136:11 | row | const | module/createEvidenceService/anonymous@134 | db.prepare('SELECT result_json FROM evidence_searches WHERE id=?').get(textValue(id, '검색 ID', { min: 1, max: 80 })) |
+| 140:9 | snapshotReview | const | module/createEvidenceService | (id, actor) =&gt; { const bookmark = bookmarkRow(db.prepare('SELECT * FROM evidence_bookmarks WHERE id=?').get(id)); db.prepare('INSE |
+| 140:27 | id | parameter | module/createEvidenceService/anonymous@140 | id |
+| 140:31 | actor | parameter | module/createEvidenceService/anonymous@140 | actor |
+| 141:11 | bookmark | const | module/createEvidenceService/anonymous@140 | bookmarkRow(db.prepare('SELECT * FROM evidence_bookmarks WHERE id=?').get(id)) |
+| 146:18 | search | function | module/createEvidenceService |  |
+| 146:25 | actor | parameter | module/createEvidenceService/search | actor |
+| 146:32 | input | parameter | module/createEvidenceService/search | input |
+| 148:11 | parameters | const | module/createEvidenceService/search | searchInput(input) |
+| 149:11 | signature | const | module/createEvidenceService/search | digest(JSON.stringify({ version: 1, provider: PROVIDER, ...parameters })) |
+| 150:11 | cached | const | module/createEvidenceService/search | db.prepare('SELECT result_json FROM evidence_searches WHERE query_signature=? AND searched_at&gt;=? ORDER BY searched_at DESC,id DESC |
+| 153:11 | url | const | module/createEvidenceService/search | new URL(SEARCH_ENDPOINT) |
+| 155:11 | controller | const | module/createEvidenceService/search | new AbortController() |
+| 156:9 | timer | let | module/createEvidenceService/search | 초기값 없음 |
+| 157:11 | timeout | const | module/createEvidenceService/search | new Promise((_, reject) =&gt; { timer = setTimeout(() =&gt; { controller.abort(); reject(new HttpError(504, '문헌 검색 응답이 늦습니다. 입력한 검색어를 유지 |
+| 157:34 | _ | parameter | module/createEvidenceService/search/anonymous@157 | _ |
+| 157:37 | reject | parameter | module/createEvidenceService/search/anonymous@157 | reject |
+| 158:9 | body | let | module/createEvidenceService/search | 초기값 없음 |
+| 161:15 | response | const | module/createEvidenceService/search/anonymous@160 | await fetchImpl(url.href, { method: 'GET', headers: { Accept: 'application/json' }, redirect: 'error', signal: controller.signal } |
+| 166:14 | error | catch | module/createEvidenceService/search |  |
+| 173:11 | searchedAt | const | module/createEvidenceService/search | new Date(now()).toISOString() |
+| 174:11 | unique | const | module/createEvidenceService/search | new Map() |
+| 175:16 | item | const | module/createEvidenceService/search | 초기값 없음 |
+| 176:13 | article | const | module/createEvidenceService/search | normalizeArticle(item, searchedAt) |
+| 179:11 | results | const | module/createEvidenceService/search | [...unique.values()] |
+| 181:11 | next | const | module/createEvidenceService/search | typeof body.nextCursorMark === 'string' &amp;&amp; body.nextCursorMark.length &lt;= 512 &amp;&amp; !/[\u0000-\u001f\u007f]/.test(body.nextCursorMark) |
+| 182:11 | result | const | module/createEvidenceService/search | { id: randomUUID(), provider: PROVIDER, query: parameters.query, executedQuery: parameters.executedQuery, parameters: { yearFrom:  |
+| 190:12 | list | function | module/createEvidenceService |  |
+| 190:17 | actor | parameter | module/createEvidenceService/list | actor |
+| 192:11 | searches | const | module/createEvidenceService/list | db.prepare('SELECT id,query,parameters_json,provider,searched_at,result_json FROM evidence_searches ORDER BY searched_at DESC,id D |
+| 192:177 | row | parameter | module/createEvidenceService/list/anonymous@192 | row |
+| 193:13 | result | const | module/createEvidenceService/list/anonymous@192 | JSON.parse(row.result_json) |
+| 196:11 | bookmarks | const | module/createEvidenceService/list | db.prepare('SELECT * FROM evidence_bookmarks ORDER BY updated_at DESC,id DESC LIMIT 100').all().map(bookmarkRow) |
+| 199:12 | createBookmark | function | module/createEvidenceService |  |
+| 199:27 | actor | parameter | module/createEvidenceService/createBookmark | actor |
+| 199:34 | input | parameter | module/createEvidenceService/createBookmark | input |
+| 201:11 | body | const | module/createEvidenceService/createBookmark | objectBody(input) |
+| 202:11 | articleKey | const | module/createEvidenceService/createBookmark | textValue(body.articleKey, '문헌 식별자', { min: 1, max: 250 }) |
+| 203:11 | searchResult | const | module/createEvidenceService/createBookmark | getSearch(actor, body.searchId) |
+| 204:11 | article | const | module/createEvidenceService/createBookmark | searchResult.results.find(item =&gt; item.articleKey === articleKey) |
+| 204:47 | item | parameter | module/createEvidenceService/createBookmark/anonymous@204 | item |
+| 207:13 | existing | const | module/createEvidenceService/createBookmark/anonymous@206 | db.prepare('SELECT * FROM evidence_bookmarks WHERE article_key=?').get(articleKey) |
+| 209:13 | id | const | module/createEvidenceService/createBookmark/anonymous@206 | randomUUID() |
+| 209:32 | timestamp | const | module/createEvidenceService/createBookmark/anonymous@206 | new Date(now()).toISOString() |
+| 215:12 | updateBookmark | function | module/createEvidenceService |  |
+| 215:27 | actor | parameter | module/createEvidenceService/updateBookmark | actor |
+| 215:34 | id | parameter | module/createEvidenceService/updateBookmark | id |
+| 215:38 | input | parameter | module/createEvidenceService/updateBookmark | input |
+| 218:11 | body | const | module/createEvidenceService/updateBookmark | objectBody(input) |
+| 220:11 | version | const | module/createEvidenceService/updateBookmark | numberValue(body.version, '검토 버전', 1, Number.MAX_SAFE_INTEGER, true) |
+| 221:11 | status | const | module/createEvidenceService/updateBookmark | choice(body.status, '검토 상태', ['saved', 'included', 'excluded', 'reviewed']) |
+| 222:11 | note | const | module/createEvidenceService/updateBookmark | textValue(body.note ?? '', '검토 메모', { max: 2000 }) |
+| 223:11 | evidenceText | const | module/createEvidenceService/updateBookmark | textValue(body.evidenceText ?? '', '근거 구절', { max: 4000 }) |
+| 224:11 | locator | const | module/createEvidenceService/updateBookmark | textValue(body.locator ?? '', '근거 위치', { max: 500 }) |
+| 225:11 | reviewBasis | const | module/createEvidenceService/updateBookmark | choice(body.reviewBasis ?? 'metadata', '검토한 자료 범위', ['metadata', 'abstract', 'external-fulltext']) |
+| 227:13 | old | const | module/createEvidenceService/updateBookmark/anonymous@226 | db.prepare('SELECT * FROM evidence_bookmarks WHERE id=?').get(id) |
+| 234:13 | unchanged | const | module/createEvidenceService/updateBookmark/anonymous@226 | old.review_status === status &amp;&amp; old.note === note &amp;&amp; old.evidence_text === evidenceText &amp;&amp; old.locator === locator &amp;&amp; old.review_b |
+
+## lib/export.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:10 | getPatients | import | module | ./analysis.mjs |
+| 1:23 | effectiveRecords | import | module | ./analysis.mjs |
+| 2:10 | mealFromRow | import | module | ./db.mjs |
+| 2:23 | todayKorea | import | module | ./db.mjs |
+| 3:10 | allowedKeys | import | module | ./validation.mjs |
+| 3:23 | csvCell | import | module | ./validation.mjs |
+| 3:32 | dateValue | import | module | ./validation.mjs |
+| 3:43 | HttpError | import | module | ./validation.mjs |
+| 5:14 | exportColumns | const | module | ['recordType','id','patientId','patientName','date','steps','sleepHours','medicationStatus','appetite','mood','note','weightKg','m |
+| 7:17 | buildRecordExport | function | module |  |
+| 7:35 | db | parameter | module/buildRecordExport | db |
+| 7:39 | query | parameter | module/buildRecordExport | query = {} |
+| 7:51 | allowedPatientIds | parameter | module/buildRecordExport | allowedPatientIds = null |
+| 9:9 | startDate | const | module/buildRecordExport | query.startDate ? dateValue(query.startDate) : null |
+| 10:9 | endDate | const | module/buildRecordExport | query.endDate ? dateValue(query.endDate) : null |
+| 13:9 | patients | const | module/buildRecordExport | getPatients(db).filter(p =&gt; allowedPatientIds === null \|\| allowedPatientIds.includes(p.id)) |
+| 13:43 | p | parameter | module/buildRecordExport/anonymous@13 | p |
+| 14:41 | p | parameter | module/buildRecordExport/anonymous@14 | p |
+| 15:9 | selected | const | module/buildRecordExport | patients.filter(p=&gt;!query.patientId \|\| p.id===query.patientId) |
+| 15:36 | p | parameter | module/buildRecordExport/anonymous@15 | p |
+| 16:9 | start | const | module/buildRecordExport | startDate \|\| '1900-01-01' |
+| 17:9 | end | const | module/buildRecordExport | endDate \|\| todayKorea() |
+| 18:9 | rows | const | module/buildRecordExport | [] |
+| 19:14 | patient | const | module/buildRecordExport | 초기값 없음 |
+| 20:11 | common | const | module/buildRecordExport | {patientId:patient.id,patientName:patient.name} |
+| 21:64 | r | parameter | module/buildRecordExport/anonymous@21 | r |
+| 23:29 | m | parameter | module/buildRecordExport/anonymous@23 | m |
+| 25:12 | r | parameter | module/buildRecordExport/anonymous@25 | r |
+| 27:12 | r | parameter | module/buildRecordExport/anonymous@27 | r |
+| 29:12 | r | parameter | module/buildRecordExport/anonymous@29 | r |
+| 31:9 | byRecordType | const | module/buildRecordExport | rows.reduce((counts,row)=&gt;(counts[row.recordType]=(counts[row.recordType]\|\|0)+1,counts),{}) |
+| 31:37 | counts | parameter | module/buildRecordExport/anonymous@31 | counts |
+| 31:44 | row | parameter | module/buildRecordExport/anonymous@31 | row |
+| 32:9 | scope | const | module/buildRecordExport | {patientId:query.patientId\|\|null,patientIds:selected.map(p=&gt;p.id),startDate,endDate,appliedStartDate:start,appliedEndDate:end,incl |
+| 32:74 | p | parameter | module/buildRecordExport/anonymous@32 | p |
+| 33:9 | preview | const | module/buildRecordExport | {scope,patientCount:selected.length,rowCount:rows.length,columns:exportColumns,byRecordType, filename:'homecare-records-${todayKor |
+| 36:9 | csv | const | module/buildRecordExport | '\ufeff'+[exportColumns.map(csvCell).join(','),...rows.map(row=&gt;exportColumns.map(column=&gt;csvCell(row[column])).join(','))].join(' |
+| 36:72 | row | parameter | module/buildRecordExport/anonymous@36 | row |
+| 36:95 | column | parameter | module/buildRecordExport/anonymous@36/anonymous@36 | column |
 
 ## lib/health-sync.mjs
 
@@ -1530,6 +1783,67 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 238:9 | end | const | module/healthDailyForPatient | dateValue(endDate) |
 | 243:54 | row | parameter | module/healthDailyForPatient/anonymous@243 | row |
 
+## lib/meals.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:10 | createHash | import | module | node:crypto |
+| 1:22 | randomUUID | import | module | node:crypto |
+| 2:10 | writeFileSync | import | module | node:fs |
+| 2:25 | unlinkSync | import | module | node:fs |
+| 3:10 | join | import | module | node:path |
+| 4:10 | foodTable | import | module | ./db.mjs |
+| 4:21 | mealFromRow | import | module | ./db.mjs |
+| 4:34 | todayKorea | import | module | ./db.mjs |
+| 4:46 | transaction | import | module | ./db.mjs |
+| 5:10 | ensureVisionSchema | import | module | ./vision.mjs |
+| 5:30 | resolveMealAnalysis | import | module | ./vision.mjs |
+| 5:51 | markAnalysisApplied | import | module | ./vision.mjs |
+| 6:10 | allowedKeys | import | module | ./validation.mjs |
+| 6:23 | choice | import | module | ./validation.mjs |
+| 6:31 | dateValue | import | module | ./validation.mjs |
+| 6:42 | decodeImage | import | module | ./validation.mjs |
+| 6:55 | HttpError | import | module | ./validation.mjs |
+| 6:66 | objectBody | import | module | ./validation.mjs |
+| 8:7 | mealColumns | const | module | ['id','patient_id','date','meal_type','food_type','portion','calories','protein_grams','image_filename','source','created_at','ana |
+| 9:7 | uuidPattern | const | module | /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i |
+| 13:17 | ensureMealSchema | function | module |  |
+| 13:34 | db | parameter | module/ensureMealSchema | db |
+| 15:9 | columns | const | module/ensureMealSchema | db.prepare('PRAGMA table_info(meals)').all() |
+| 16:20 | column | parameter | module/ensureMealSchema/anonymous@16 | column |
+| 17:22 | column | parameter | module/ensureMealSchema/anonymous@17 | column |
+| 18:11 | tables | const | module/ensureMealSchema | db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all() |
+| 19:17 | name | const | module/ensureMealSchema | 초기값 없음 |
+| 21:71 | key | parameter | module/ensureMealSchema/anonymous@21 | key |
+| 25:11 | indexes | const | module/ensureMealSchema | db.prepare("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='meals' AND sql IS NOT NULL").all() |
+| 26:22 | index | parameter | module/ensureMealSchema/anonymous@26 | index |
+| 36:13 | names | const | module/ensureMealSchema/anonymous@28 | mealColumns.join(',') |
+| 38:13 | difference | const | module/ensureMealSchema/anonymous@28 | db.prepare('SELECT ${names} FROM meals EXCEPT SELECT ${names} FROM meals_v6').all() |
+| 39:13 | originalCount | const | module/ensureMealSchema/anonymous@28 | db.prepare('SELECT COUNT(*) AS n FROM meals').get().n |
+| 53:17 | saveMeal | function | module |  |
+| 53:26 | db | parameter | module/saveMeal | db |
+| 53:30 | uploadDir | parameter | module/saveMeal | uploadDir |
+| 53:41 | patientId | parameter | module/saveMeal | patientId |
+| 53:52 | input | parameter | module/saveMeal | input |
+| 55:9 | body | const | module/saveMeal | objectBody(input) |
+| 57:9 | date | const | module/saveMeal | dateValue(body.date ?? todayKorea()) |
+| 59:9 | mealType | const | module/saveMeal | choice(body.mealType, '식사 종류', ['breakfast','lunch','dinner','snack']) |
+| 61:9 | portion | const | module/saveMeal | body.portion === null ? null : choice(body.portion, '섭취 비율', [0,.25,.5,.75,1]) |
+| 62:9 | requestId | const | module/saveMeal | body.clientSubmissionId |
+| 64:9 | normalized | const | module/saveMeal | { date, mealType, portion, foodType: body.foodType ?? null, imageData: body.imageData ?? null, analysisId: body.analysisId ?? null |
+| 66:9 | requestHash | const | module/saveMeal | createHash('sha256').update(JSON.stringify(normalized)).digest('hex') |
+| 68:11 | previous | const | module/saveMeal | db.prepare('SELECT * FROM meal_submissions WHERE patient_id=? AND request_id=?').get(patientId, requestId) |
+| 71:13 | meal | const | module/saveMeal | previous.meal_id &amp;&amp; db.prepare('SELECT * FROM meals WHERE id=? AND patient_id=?').get(previous.meal_id, patientId) |
+| 76:9 | analysis | const | module/saveMeal | body.analysisId === undefined ? null : resolveMealAnalysis(db, { analysisId: body.analysisId, patientId, imageData: body.imageData |
+| 80:9 | foodType | const | module/saveMeal | analysis?.foodType ?? choice(body.foodType, '음식 유형', Object.keys(foodTable)) |
+| 81:9 | food | const | module/saveMeal | analysis \|\| foodTable[foodType] |
+| 82:7 | filename | let | module/saveMeal | null |
+| 84:11 | decoded | const | module/saveMeal | decodeImage(body.imageData) |
+| 88:9 | mealId | const | module/saveMeal | randomUUID() |
+| 89:9 | createdAt | const | module/saveMeal | new Date().toISOString() |
+| 103:12 | error | catch | module/saveMeal |  |
+| 104:75 | cleanupError | catch | module/saveMeal |  |
+
 ## lib/medication-photos.mjs
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
@@ -1609,7 +1923,8 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 1:10 | randomUUID | import | module | node:crypto |
+| 1:10 | createHash | import | module | node:crypto |
+| 1:22 | randomUUID | import | module | node:crypto |
 | 2:10 | todayKorea | import | module | ./db.mjs |
 | 2:22 | transaction | import | module | ./db.mjs |
 | 3:10 | allowedKeys | import | module | ./validation.mjs |
@@ -1620,99 +1935,332 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 3:65 | textValue | import | module | ./validation.mjs |
 | 7:17 | ensureMedicationSchema | function | module |  |
 | 7:40 | db | parameter | module/ensureMedicationSchema | db |
-| 48:10 | requirePatient | function | module |  |
-| 48:25 | db | parameter | module/requirePatient | db |
-| 48:29 | patientId | parameter | module/requirePatient | patientId |
-| 52:10 | requireOrder | function | module |  |
-| 52:23 | db | parameter | module/requireOrder | db |
-| 52:27 | orderId | parameter | module/requireOrder | orderId |
-| 52:36 | patientId | parameter | module/requireOrder | patientId |
-| 53:9 | row | const | module/requireOrder | typeof orderId === 'string' ? db.prepare('SELECT * FROM medication_orders WHERE id=?').get(orderId) : null |
-| 58:10 | timeValue | function | module |  |
-| 58:20 | value | parameter | module/timeValue | value |
-| 63:10 | timesValue | function | module |  |
-| 63:21 | value | parameter | module/timesValue | value |
-| 65:9 | times | const | module/timesValue | value.map(timeValue) |
-| 70:10 | orderFromRow | function | module |  |
-| 70:23 | row | parameter | module/orderFromRow | row |
-| 80:10 | eventFromRow | function | module |  |
-| 80:23 | row | parameter | module/eventFromRow | row |
-| 88:10 | eventSnapshot | function | module |  |
-| 88:24 | event | parameter | module/eventSnapshot | event |
-| 92:17 | getMedicationOrders | function | module |  |
-| 92:37 | db | parameter | module/getMedicationOrders | db |
-| 92:41 | patientId | parameter | module/getMedicationOrders | patientId |
-| 97:17 | createMedicationOrder | function | module |  |
-| 97:39 | db | parameter | module/createMedicationOrder | db |
-| 97:43 | patientId | parameter | module/createMedicationOrder | patientId |
-| 97:54 | input | parameter | module/createMedicationOrder | input |
-| 99:9 | body | const | module/createMedicationOrder | objectBody(input) |
-| 101:9 | name | const | module/createMedicationOrder | textValue(body.name, '약명', { min: 1, max: 120 }) |
-| 102:9 | strength | const | module/createMedicationOrder | body.strength === undefined ? '' : textValue(body.strength, '함량', { max: 100 }) |
-| 103:9 | dose | const | module/createMedicationOrder | textValue(body.dose, '1회량', { min: 1, max: 100 }) |
-| 104:9 | route | const | module/createMedicationOrder | body.route === undefined ? '' : textValue(body.route, '투여 경로', { max: 80 }) |
-| 105:9 | times | const | module/createMedicationOrder | timesValue(body.times) |
-| 106:9 | startDate | const | module/createMedicationOrder | dateValue(body.startDate) |
-| 107:9 | endDate | const | module/createMedicationOrder | body.endDate === null \|\| body.endDate === undefined ? null : dateValue(body.endDate) |
-| 109:9 | instructions | const | module/createMedicationOrder | body.instructions === undefined ? '' : textValue(body.instructions, '주의문', { max: 2000 }) |
-| 110:9 | id | const | module/createMedicationOrder | randomUUID() |
-| 111:9 | now | const | module/createMedicationOrder | new Date().toISOString() |
-| 118:17 | endMedicationOrder | function | module |  |
-| 118:36 | db | parameter | module/endMedicationOrder | db |
-| 118:40 | orderId | parameter | module/endMedicationOrder | orderId |
-| 118:49 | input | parameter | module/endMedicationOrder | input |
-| 119:9 | body | const | module/endMedicationOrder | objectBody(input) |
-| 121:9 | endDate | const | module/endMedicationOrder | dateValue(body.endDate) |
-| 123:11 | order | const | module/endMedicationOrder/anonymous@122 | requireOrder(db, orderId) |
-| 126:11 | latest | const | module/endMedicationOrder/anonymous@122 | db.prepare('SELECT MAX(date) AS date FROM medication_events WHERE order_id=?').get(orderId).date |
-| 133:17 | medicationSchedule | function | module |  |
-| 133:36 | db | parameter | module/medicationSchedule | db |
-| 133:40 | patientId | parameter | module/medicationSchedule | patientId |
-| 133:51 | requestedDate | parameter | module/medicationSchedule | requestedDate |
-| 135:9 | date | const | module/medicationSchedule | dateValue(requestedDate ?? todayKorea()) |
-| 138:9 | orders | const | module/medicationSchedule | db.prepare('SELECT * FROM medication_orders WHERE patient_id=? AND start_date&lt;=? AND (end_date IS NULL OR end_date&gt;=?) ORDER BY na |
-| 139:9 | events | const | module/medicationSchedule | db.prepare('SELECT * FROM medication_events WHERE patient_id=? AND date=?').all(patientId, date).map(eventFromRow) |
-| 140:9 | bySlot | const | module/medicationSchedule | new Map(events.map(event =&gt; [JSON.stringify([event.orderId, event.time]), event])) |
-| 140:37 | event | parameter | module/medicationSchedule/anonymous@140 | event |
-| 141:9 | slots | const | module/medicationSchedule | orders.flatMap(order =&gt; order.times.map(time =&gt; { const event = bySlot.get(JSON.stringify([order.id, time])); return { orderId: or |
-| 141:32 | order | parameter | module/medicationSchedule/anonymous@141 | order |
-| 141:57 | time | parameter | module/medicationSchedule/anonymous@141/anonymous@141 | time |
-| 142:11 | event | const | module/medicationSchedule/anonymous@141/anonymous@141 | bySlot.get(JSON.stringify([order.id, time])) |
-| 150:13 | a | parameter | module/medicationSchedule/anonymous@150 | a |
-| 150:16 | b | parameter | module/medicationSchedule/anonymous@150 | b |
-| 151:9 | summary | const | module/medicationSchedule | { total: slots.length, taken: 0, missed: 0, unknown: 0, pending: 0, reported: 0 } |
-| 152:14 | slot | const | module/medicationSchedule | 초기값 없음 |
-| 157:10 | medicationEventTransaction | function | module |  |
-| 157:37 | db | parameter | module/medicationEventTransaction | db |
-| 157:41 | action | parameter | module/medicationEventTransaction | action |
-| 159:15 | result | const | module/medicationEventTransaction | action() |
-| 160:10 | error | catch | module/medicationEventTransaction |  |
-| 163:17 | saveMedicationEvent | function | module |  |
-| 163:37 | db | parameter | module/saveMedicationEvent | db |
-| 163:41 | patientId | parameter | module/saveMedicationEvent | patientId |
-| 163:52 | input | parameter | module/saveMedicationEvent | input |
-| 165:9 | body | const | module/saveMedicationEvent | objectBody(input) |
-| 167:9 | orderId | const | module/saveMedicationEvent | textValue(body.orderId, '복약계획 ID', { min: 1, max: 100 }) |
-| 168:9 | date | const | module/saveMedicationEvent | dateValue(body.date ?? todayKorea()) |
-| 170:9 | time | const | module/saveMedicationEvent | timeValue(body.time) |
-| 171:9 | status | const | module/saveMedicationEvent | choice(body.status, '복약 상태', ['taken', 'missed', 'unknown']) |
-| 172:9 | reason | const | module/saveMedicationEvent | body.reason === undefined ? '' : textValue(body.reason, '사유', { max: 1000 }) |
-| 173:9 | note | const | module/saveMedicationEvent | body.note === undefined ? '' : textValue(body.note, '메모', { max: 2000 }) |
-| 175:11 | order | const | module/saveMedicationEvent/anonymous@174 | requireOrder(db, orderId, patientId) |
-| 177:11 | oldRow | const | module/saveMedicationEvent/anonymous@174 | db.prepare('SELECT * FROM medication_events WHERE order_id=? AND date=? AND time=?').get(orderId, date, time) |
-| 178:11 | old | const | module/saveMedicationEvent/anonymous@174 | oldRow ? eventFromRow(oldRow) : null |
-| 180:11 | now | const | module/saveMedicationEvent/anonymous@174 | new Date().toISOString() |
-| 181:11 | id | const | module/saveMedicationEvent/anonymous@174 | old?.id ?? randomUUID() |
-| 182:11 | revision | const | module/saveMedicationEvent/anonymous@174 | (old?.revision ?? 0) + 1 |
-| 187:11 | event | const | module/saveMedicationEvent/anonymous@174 | eventFromRow(db.prepare('SELECT * FROM medication_events WHERE id=?').get(id)) |
-| 195:17 | getMedicationEvents | function | module |  |
-| 195:37 | db | parameter | module/getMedicationEvents | db |
-| 195:41 | patientId | parameter | module/getMedicationEvents | patientId |
-| 195:52 | requestedDate | parameter | module/getMedicationEvents | requestedDate |
-| 197:9 | date | const | module/getMedicationEvents | dateValue(requestedDate ?? todayKorea()) |
-| 198:9 | events | const | module/getMedicationEvents | db.prepare('SELECT * FROM medication_events WHERE patient_id=? AND date=? ORDER BY time,order_id').all(patientId, date).map(eventF |
-| 199:9 | audit | const | module/getMedicationEvents | db.prepare('SELECT * FROM medication_event_audit WHERE patient_id=? AND date=? ORDER BY time,order_id,revision').all(patientId, da |
-| 199:155 | row | parameter | module/getMedicationEvents/anonymous@199 | row |
+| 54:10 | requirePatient | function | module |  |
+| 54:25 | db | parameter | module/requirePatient | db |
+| 54:29 | patientId | parameter | module/requirePatient | patientId |
+| 58:10 | requireOrder | function | module |  |
+| 58:23 | db | parameter | module/requireOrder | db |
+| 58:27 | orderId | parameter | module/requireOrder | orderId |
+| 58:36 | patientId | parameter | module/requireOrder | patientId |
+| 59:9 | row | const | module/requireOrder | typeof orderId === 'string' ? db.prepare('SELECT * FROM medication_orders WHERE id=?').get(orderId) : null |
+| 64:10 | timeValue | function | module |  |
+| 64:20 | value | parameter | module/timeValue | value |
+| 69:10 | timesValue | function | module |  |
+| 69:21 | value | parameter | module/timesValue | value |
+| 71:9 | times | const | module/timesValue | value.map(timeValue) |
+| 76:10 | orderFromRow | function | module |  |
+| 76:23 | row | parameter | module/orderFromRow | row |
+| 86:10 | eventFromRow | function | module |  |
+| 86:23 | row | parameter | module/eventFromRow | row |
+| 94:10 | eventSnapshot | function | module |  |
+| 94:24 | event | parameter | module/eventSnapshot | event |
+| 98:17 | getMedicationOrders | function | module |  |
+| 98:37 | db | parameter | module/getMedicationOrders | db |
+| 98:41 | patientId | parameter | module/getMedicationOrders | patientId |
+| 103:17 | createMedicationOrder | function | module |  |
+| 103:39 | db | parameter | module/createMedicationOrder | db |
+| 103:43 | patientId | parameter | module/createMedicationOrder | patientId |
+| 103:54 | input | parameter | module/createMedicationOrder | input |
+| 105:9 | body | const | module/createMedicationOrder | objectBody(input) |
+| 107:9 | name | const | module/createMedicationOrder | textValue(body.name, '약명', { min: 1, max: 120 }) |
+| 108:9 | strength | const | module/createMedicationOrder | body.strength === undefined ? '' : textValue(body.strength, '함량', { max: 100 }) |
+| 109:9 | dose | const | module/createMedicationOrder | textValue(body.dose, '1회량', { min: 1, max: 100 }) |
+| 110:9 | route | const | module/createMedicationOrder | body.route === undefined ? '' : textValue(body.route, '투여 경로', { max: 80 }) |
+| 111:9 | times | const | module/createMedicationOrder | timesValue(body.times) |
+| 112:9 | startDate | const | module/createMedicationOrder | dateValue(body.startDate) |
+| 113:9 | endDate | const | module/createMedicationOrder | body.endDate === null \|\| body.endDate === undefined ? null : dateValue(body.endDate) |
+| 115:9 | instructions | const | module/createMedicationOrder | body.instructions === undefined ? '' : textValue(body.instructions, '주의문', { max: 2000 }) |
+| 116:9 | requestId | const | module/createMedicationOrder | body.clientRequestId |
+| 118:9 | requestHash | const | module/createMedicationOrder | createHash('sha256').update(JSON.stringify({name,strength,dose,route,times,startDate,endDate,instructions})).digest('hex') |
+| 121:13 | prior | const | module/createMedicationOrder/anonymous@119 | db.prepare('SELECT * FROM medication_order_requests WHERE patient_id=? AND request_id=?').get(patientId,requestId) |
+| 127:11 | id | const | module/createMedicationOrder/anonymous@119 | randomUUID() |
+| 128:11 | now | const | module/createMedicationOrder/anonymous@119 | new Date().toISOString() |
+| 137:17 | endMedicationOrder | function | module |  |
+| 137:36 | db | parameter | module/endMedicationOrder | db |
+| 137:40 | orderId | parameter | module/endMedicationOrder | orderId |
+| 137:49 | input | parameter | module/endMedicationOrder | input |
+| 138:9 | body | const | module/endMedicationOrder | objectBody(input) |
+| 140:9 | endDate | const | module/endMedicationOrder | dateValue(body.endDate) |
+| 142:11 | order | const | module/endMedicationOrder/anonymous@141 | requireOrder(db, orderId) |
+| 145:11 | latest | const | module/endMedicationOrder/anonymous@141 | db.prepare('SELECT MAX(date) AS date FROM medication_events WHERE order_id=?').get(orderId).date |
+| 152:17 | medicationSchedule | function | module |  |
+| 152:36 | db | parameter | module/medicationSchedule | db |
+| 152:40 | patientId | parameter | module/medicationSchedule | patientId |
+| 152:51 | requestedDate | parameter | module/medicationSchedule | requestedDate |
+| 154:9 | date | const | module/medicationSchedule | dateValue(requestedDate ?? todayKorea()) |
+| 157:9 | orders | const | module/medicationSchedule | db.prepare('SELECT * FROM medication_orders WHERE patient_id=? AND start_date&lt;=? AND (end_date IS NULL OR end_date&gt;=?) ORDER BY na |
+| 158:9 | events | const | module/medicationSchedule | db.prepare('SELECT * FROM medication_events WHERE patient_id=? AND date=?').all(patientId, date).map(eventFromRow) |
+| 159:9 | bySlot | const | module/medicationSchedule | new Map(events.map(event =&gt; [JSON.stringify([event.orderId, event.time]), event])) |
+| 159:37 | event | parameter | module/medicationSchedule/anonymous@159 | event |
+| 160:9 | slots | const | module/medicationSchedule | orders.flatMap(order =&gt; order.times.map(time =&gt; { const event = bySlot.get(JSON.stringify([order.id, time])); return { orderId: or |
+| 160:32 | order | parameter | module/medicationSchedule/anonymous@160 | order |
+| 160:57 | time | parameter | module/medicationSchedule/anonymous@160/anonymous@160 | time |
+| 161:11 | event | const | module/medicationSchedule/anonymous@160/anonymous@160 | bySlot.get(JSON.stringify([order.id, time])) |
+| 169:13 | a | parameter | module/medicationSchedule/anonymous@169 | a |
+| 169:16 | b | parameter | module/medicationSchedule/anonymous@169 | b |
+| 170:9 | summary | const | module/medicationSchedule | { total: slots.length, taken: 0, missed: 0, unknown: 0, pending: 0, reported: 0 } |
+| 171:14 | slot | const | module/medicationSchedule | 초기값 없음 |
+| 176:10 | medicationEventTransaction | function | module |  |
+| 176:37 | db | parameter | module/medicationEventTransaction | db |
+| 176:41 | action | parameter | module/medicationEventTransaction | action |
+| 178:15 | result | const | module/medicationEventTransaction | action() |
+| 179:10 | error | catch | module/medicationEventTransaction |  |
+| 182:17 | saveMedicationEvent | function | module |  |
+| 182:37 | db | parameter | module/saveMedicationEvent | db |
+| 182:41 | patientId | parameter | module/saveMedicationEvent | patientId |
+| 182:52 | input | parameter | module/saveMedicationEvent | input |
+| 184:9 | body | const | module/saveMedicationEvent | objectBody(input) |
+| 186:9 | orderId | const | module/saveMedicationEvent | textValue(body.orderId, '복약계획 ID', { min: 1, max: 100 }) |
+| 187:9 | date | const | module/saveMedicationEvent | dateValue(body.date ?? todayKorea()) |
+| 189:9 | time | const | module/saveMedicationEvent | timeValue(body.time) |
+| 190:9 | status | const | module/saveMedicationEvent | choice(body.status, '복약 상태', ['taken', 'missed', 'unknown']) |
+| 191:9 | reason | const | module/saveMedicationEvent | body.reason === undefined ? '' : textValue(body.reason, '사유', { max: 1000 }) |
+| 192:9 | note | const | module/saveMedicationEvent | body.note === undefined ? '' : textValue(body.note, '메모', { max: 2000 }) |
+| 194:11 | order | const | module/saveMedicationEvent/anonymous@193 | requireOrder(db, orderId, patientId) |
+| 196:11 | oldRow | const | module/saveMedicationEvent/anonymous@193 | db.prepare('SELECT * FROM medication_events WHERE order_id=? AND date=? AND time=?').get(orderId, date, time) |
+| 197:11 | old | const | module/saveMedicationEvent/anonymous@193 | oldRow ? eventFromRow(oldRow) : null |
+| 199:11 | now | const | module/saveMedicationEvent/anonymous@193 | new Date().toISOString() |
+| 200:11 | id | const | module/saveMedicationEvent/anonymous@193 | old?.id ?? randomUUID() |
+| 201:11 | revision | const | module/saveMedicationEvent/anonymous@193 | (old?.revision ?? 0) + 1 |
+| 206:11 | event | const | module/saveMedicationEvent/anonymous@193 | eventFromRow(db.prepare('SELECT * FROM medication_events WHERE id=?').get(id)) |
+| 214:17 | getMedicationEvents | function | module |  |
+| 214:37 | db | parameter | module/getMedicationEvents | db |
+| 214:41 | patientId | parameter | module/getMedicationEvents | patientId |
+| 214:52 | requestedDate | parameter | module/getMedicationEvents | requestedDate |
+| 216:9 | date | const | module/getMedicationEvents | dateValue(requestedDate ?? todayKorea()) |
+| 217:9 | events | const | module/getMedicationEvents | db.prepare('SELECT * FROM medication_events WHERE patient_id=? AND date=? ORDER BY time,order_id').all(patientId, date).map(eventF |
+| 218:9 | audit | const | module/getMedicationEvents | db.prepare('SELECT * FROM medication_event_audit WHERE patient_id=? AND date=? ORDER BY time,order_id,revision').all(patientId, da |
+| 218:155 | row | parameter | module/getMedicationEvents/anonymous@218 | row |
+
+## lib/research.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:10 | createHash | import | module | node:crypto |
+| 1:22 | createHmac | import | module | node:crypto |
+| 1:34 | randomBytes | import | module | node:crypto |
+| 1:47 | randomUUID | import | module | node:crypto |
+| 2:10 | dateOffset | import | module | ./db.mjs |
+| 2:22 | mealFromRow | import | module | ./db.mjs |
+| 2:35 | todayKorea | import | module | ./db.mjs |
+| 2:47 | transaction | import | module | ./db.mjs |
+| 3:10 | effectiveRecords | import | module | ./analysis.mjs |
+| 3:28 | getPatients | import | module | ./analysis.mjs |
+| 4:10 | allowedKeys | import | module | ./validation.mjs |
+| 4:23 | choice | import | module | ./validation.mjs |
+| 4:31 | csvCell | import | module | ./validation.mjs |
+| 4:40 | dateValue | import | module | ./validation.mjs |
+| 4:51 | HttpError | import | module | ./validation.mjs |
+| 4:62 | objectBody | import | module | ./validation.mjs |
+| 4:74 | textValue | import | module | ./validation.mjs |
+| 6:7 | METHOD_VERSION | const | module | 'homecare-descriptive-v1' |
+| 7:7 | SOURCES | const | module | ['all', 'patient-self-report', 'health-connect', 'apple-health'] |
+| 8:7 | MAX_PATIENTS | const | module | 200 |
+| 9:7 | MAX_PATIENT_DAYS | const | module | 50000 |
+| 10:7 | uuid | const | module | value =&gt; typeof value === 'string' &amp;&amp; /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value) |
+| 10:14 | value | parameter | module/anonymous@10 | value |
+| 11:7 | round | const | module | value =&gt; value === null ? null : Math.round(value * 1e6) / 1e6 |
+| 11:15 | value | parameter | module/anonymous@11 | value |
+| 12:7 | total | const | module | values =&gt; values.reduce((sum, value) =&gt; sum + value, 0) |
+| 12:15 | values | parameter | module/anonymous@12 | values |
+| 12:40 | sum | parameter | module/anonymous@12/anonymous@12 | sum |
+| 12:45 | value | parameter | module/anonymous@12/anonymous@12 | value |
+| 13:7 | percent | const | module | (n, d) =&gt; d ? Math.round(n / d * 1000) / 10 : null |
+| 13:18 | n | parameter | module/anonymous@13 | n |
+| 13:21 | d | parameter | module/anonymous@13 | d |
+| 14:7 | hash | const | module | value =&gt; createHash('sha256').update(value).digest('hex') |
+| 14:14 | value | parameter | module/anonymous@14 | value |
+| 15:7 | exists | const | module | (db, table) =&gt; Boolean(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(table)) |
+| 15:17 | db | parameter | module/anonymous@15 | db |
+| 15:21 | table | parameter | module/anonymous@15 | table |
+| 16:7 | canonical | const | module | value =&gt; Array.isArray(value) ? value.map(canonical) : value &amp;&amp; typeof value === 'object' ? Object.fromEntries(Object.keys(value). |
+| 16:19 | value | parameter | module/anonymous@16 | value |
+| 16:160 | key | parameter | module/anonymous@16/anonymous@16 | key |
+| 17:7 | serialize | const | module | value =&gt; JSON.stringify(canonical(value)) |
+| 17:19 | value | parameter | module/anonymous@17 | value |
+| 19:17 | ensureResearchSchema | function | module |  |
+| 19:38 | db | parameter | module/ensureResearchSchema | db |
+| 34:17 | describeNumbers | function | module |  |
+| 34:33 | values | parameter | module/describeNumbers | values |
+| 35:9 | sorted | const | module/describeNumbers | values.filter(Number.isFinite).sort((a, b) =&gt; a - b) |
+| 35:55 | a | parameter | module/describeNumbers/anonymous@35 | a |
+| 35:58 | b | parameter | module/describeNumbers/anonymous@35 | b |
+| 37:9 | mean | const | module/describeNumbers | total(sorted) / sorted.length |
+| 38:9 | quantile | const | module/describeNumbers | p =&gt; { const h = (sorted.length - 1) * p; const low = Math.floor(h); return sorted[low] + (sorted[Math.ceil(h)] - sorted[low]) * ( |
+| 38:20 | p | parameter | module/describeNumbers/anonymous@38 | p |
+| 39:11 | h | const | module/describeNumbers/anonymous@38 | (sorted.length - 1) * p |
+| 40:11 | low | const | module/describeNumbers/anonymous@38 | Math.floor(h) |
+| 43:9 | q1 | const | module/describeNumbers | quantile(.25) |
+| 44:9 | q3 | const | module/describeNumbers | quantile(.75) |
+| 45:117 | value | parameter | module/describeNumbers/anonymous@45 | value |
+| 48:10 | scopeAndRecipe | function | module |  |
+| 48:25 | db | parameter | module/scopeAndRecipe | db |
+| 48:29 | input | parameter | module/scopeAndRecipe | input |
+| 48:36 | allowedPatientIds | parameter | module/scopeAndRecipe | allowedPatientIds |
+| 49:9 | body | const | module/scopeAndRecipe | objectBody(input) |
+| 51:9 | endDate | const | module/scopeAndRecipe | dateValue(body.endDate ?? todayKorea()) |
+| 52:9 | startDate | const | module/scopeAndRecipe | dateValue(body.startDate ?? dateOffset(endDate, -27)) |
+| 53:9 | calendarDays | const | module/scopeAndRecipe | Math.round((Date.parse('${endDate}T12:00:00Z') - Date.parse('${startDate}T12:00:00Z')) / 86400000) + 1 |
+| 55:9 | source | const | module/scopeAndRecipe | choice(body.source ?? 'all', '자료 출처', SOURCES) |
+| 56:9 | allIds | const | module/scopeAndRecipe | getPatients(db).map(patient =&gt; patient.id) |
+| 56:38 | patient | parameter | module/scopeAndRecipe/anonymous@56 | patient |
+| 57:9 | existing | const | module/scopeAndRecipe | new Set(allIds) |
+| 58:9 | allowed | const | module/scopeAndRecipe | allowedPatientIds === null \|\| allowedPatientIds === undefined ? null : new Set(allowedPatientIds) |
+| 59:7 | ids | let | module/scopeAndRecipe | 초기값 없음 |
+| 60:58 | id | parameter | module/scopeAndRecipe/anonymous@60 | id |
+| 63:43 | id | parameter | module/scopeAndRecipe/anonymous@63 | id |
+| 64:18 | id | parameter | module/scopeAndRecipe/anonymous@64 | id |
+| 65:18 | id | parameter | module/scopeAndRecipe/anonymous@65 | id |
+| 78:10 | pseudonymContext | function | module |  |
+| 78:27 | db | parameter | module/pseudonymContext | db |
+| 79:9 | secret | const | module/pseudonymContext | db.prepare("SELECT value FROM metadata WHERE key='research_pseudonym_secret'").get()?.value |
+| 80:9 | generation | const | module/pseudonymContext | db.prepare("SELECT value FROM metadata WHERE key='generation'").get()?.value |
+| 82:34 | id | parameter | module/pseudonymContext/anonymous@82 | id |
+| 85:10 | buildDataset | function | module |  |
+| 85:23 | db | parameter | module/buildDataset | db |
+| 85:27 | ids | parameter | module/buildDataset | ids |
+| 85:32 | recipe | parameter | module/buildDataset | recipe |
+| 86:11 | generation | const | module/buildDataset | pseudonymContext(db) |
+| 86:23 | identify | const | module/buildDataset | pseudonymContext(db) |
+| 87:9 | dates | const | module/buildDataset | Array.from({ length: recipe.calendarDays }, (_, i) =&gt; dateOffset(recipe.startDate, i)) |
+| 87:62 | _ | parameter | module/buildDataset/anonymous@87 | _ |
+| 87:65 | i | parameter | module/buildDataset/anonymous@87 | i |
+| 88:9 | includeManual | const | module/buildDataset | ['all', 'patient-self-report'].includes(recipe.source) |
+| 89:9 | sourceMatches | const | module/buildDataset | source =&gt; recipe.source === 'all' \|\| source === recipe.source |
+| 89:25 | source | parameter | module/buildDataset/anonymous@89 | source |
+| 90:9 | hasMedication | const | module/buildDataset | exists(db, 'medication_events') &amp;&amp; exists(db, 'medication_orders') |
+| 91:9 | today | const | module/buildDataset | todayKorea() |
+| 92:9 | nowTime | const | module/buildDataset | new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date |
+| 93:9 | rows | const | module/buildDataset | [] |
+| 94:9 | participants | const | module/buildDataset | [] |
+| 95:14 | patientId | const | module/buildDataset | 초기값 없음 |
+| 96:11 | participantId | const | module/buildDataset | identify(patientId) |
+| 97:11 | records | const | module/buildDataset | effectiveRecords(db, patientId, recipe.startDate, recipe.endDate) |
+| 98:11 | byDate | const | module/buildDataset | new Map(records.map(record =&gt; [record.date, record])) |
+| 98:40 | record | parameter | module/buildDataset/anonymous@98 | record |
+| 99:11 | meals | const | module/buildDataset | includeManual ? db.prepare('SELECT * FROM meals WHERE patient_id=? AND date&gt;=? AND date&lt;=? ORDER BY date,created_at,id').all(patie |
+| 100:11 | doses | const | module/buildDataset | hasMedication &amp;&amp; includeManual ? db.prepare('SELECT * FROM medication_events WHERE patient_id=? AND date&gt;=? AND date&lt;=? ORDER BY d |
+| 101:11 | orders | const | module/buildDataset | hasMedication &amp;&amp; includeManual ? db.prepare('SELECT id,times,start_date,end_date FROM medication_orders WHERE patient_id=? AND sta |
+| 101:266 | order | parameter | module/buildDataset/anonymous@101 | order |
+| 102:11 | patientRows | const | module/buildDataset | dates.map(date =&gt; { const record = byDate.get(date); const stepKnown = Number.isFinite(record?.steps) &amp;&amp; sourceMatches(record.step |
+| 102:35 | date | parameter | module/buildDataset/anonymous@102 | date |
+| 103:13 | record | const | module/buildDataset/anonymous@102 | byDate.get(date) |
+| 104:13 | stepKnown | const | module/buildDataset/anonymous@102 | Number.isFinite(record?.steps) &amp;&amp; sourceMatches(record.stepsSource) |
+| 105:13 | sleepKnown | const | module/buildDataset/anonymous@102 | Number.isFinite(record?.sleepHours) &amp;&amp; sourceMatches(record.sleepSource) |
+| 106:13 | dayMeals | const | module/buildDataset/anonymous@102 | meals.filter(meal =&gt; meal.date === date) |
+| 106:37 | meal | parameter | module/buildDataset/anonymous@102/anonymous@106 | meal |
+| 107:13 | knownMeals | const | module/buildDataset/anonymous@102 | dayMeals.filter(meal =&gt; Number.isFinite(meal.calories) &amp;&amp; Number.isFinite(meal.proteinGrams)) |
+| 107:42 | meal | parameter | module/buildDataset/anonymous@102/anonymous@107 | meal |
+| 108:13 | dayDoses | const | module/buildDataset/anonymous@102 | doses.filter(dose =&gt; dose.date === date) |
+| 108:37 | dose | parameter | module/buildDataset/anonymous@102/anonymous@108 | dose |
+| 109:13 | bySlot | const | module/buildDataset/anonymous@102 | new Map(dayDoses.map(dose =&gt; ['${dose.order_id}\0${dose.time}', dose])) |
+| 109:43 | dose | parameter | module/buildDataset/anonymous@102/anonymous@109 | dose |
+| 110:13 | dueSlots | const | module/buildDataset/anonymous@102 | orders.filter(order =&gt; order.start_date &lt;= date &amp;&amp; (!order.end_date \|\| order.end_date &gt;= date)).flatMap(order =&gt; order.times.filte |
+| 110:38 | order | parameter | module/buildDataset/anonymous@102/anonymous@110 | order |
+| 110:128 | order | parameter | module/buildDataset/anonymous@102/anonymous@110 | order |
+| 110:156 | time | parameter | module/buildDataset/anonymous@102/anonymous@110/anonymous@110 | time |
+| 110:201 | time | parameter | module/buildDataset/anonymous@102/anonymous@110/anonymous@110 | time |
+| 111:13 | nutritionSources | const | module/buildDataset/anonymous@102 | [...new Set(knownMeals.map(meal =&gt; meal.source))].sort() |
+| 111:59 | meal | parameter | module/buildDataset/anonymous@102/anonymous@111 | meal |
+| 112:13 | row | const | module/buildDataset/anonymous@102 | { participantId, observedDate: date, steps: stepKnown ? record.steps : null, stepsSource: stepKnown ? record.stepsSource : null, s |
+| 116:60 | meal | parameter | module/buildDataset/anonymous@102/anonymous@116 | meal |
+| 117:70 | meal | parameter | module/buildDataset/anonymous@102/anonymous@117 | meal |
+| 120:67 | dose | parameter | module/buildDataset/anonymous@102/anonymous@120 | dose |
+| 121:37 | dose | parameter | module/buildDataset/anonymous@102/anonymous@121 | dose |
+| 121:108 | dose | parameter | module/buildDataset/anonymous@102/anonymous@121 | dose |
+| 122:62 | status | parameter | module/buildDataset/anonymous@102/anonymous@122 | status |
+| 123:36 | status | parameter | module/buildDataset/anonymous@102/anonymous@123 | status |
+| 123:103 | status | parameter | module/buildDataset/anonymous@102/anonymous@123 | status |
+| 124:37 | status | parameter | module/buildDataset/anonymous@102/anonymous@124 | status |
+| 131:11 | reportingDays | const | module/buildDataset | patientRows.filter(row =&gt; row.hasReport).length |
+| 131:46 | row | parameter | module/buildDataset/anonymous@131 | row |
+| 134:9 | metrics | const | module/buildDataset | {} |
+| 135:9 | definitions | const | module/buildDataset | { steps: ['걸음', 'stepsSource'], sleepHours: ['시간', 'sleepSource'], weightKg: ['kg', null], calories: ['kcal', 'nutritionSource'],  |
+| 136:15 | key | const | module/buildDataset | 초기값 없음 |
+| 136:21 | unit | const | module/buildDataset | 초기값 없음 |
+| 136:27 | sourceKey | const | module/buildDataset | 초기값 없음 |
+| 137:11 | known | const | module/buildDataset | rows.filter(row =&gt; Number.isFinite(row[key])) |
+| 137:31 | row | parameter | module/buildDataset/anonymous@137 | row |
+| 138:11 | patientMeans | const | module/buildDataset | participants.map(participant =&gt; { const values = known.filter(row =&gt; row.participantId === participant.participantId).map(row =&gt; r |
+| 138:43 | participant | parameter | module/buildDataset/anonymous@138 | participant |
+| 139:13 | values | const | module/buildDataset/anonymous@138 | known.filter(row =&gt; row.participantId === participant.participantId).map(row =&gt; row[key]) |
+| 139:35 | row | parameter | module/buildDataset/anonymous@138/anonymous@139 | row |
+| 139:95 | row | parameter | module/buildDataset/anonymous@138/anonymous@139 | row |
+| 142:11 | sourceCounts | const | module/buildDataset | known.reduce((counts, row) =&gt; { const source = sourceKey ? row[sourceKey] : 'patient-self-report'; counts[source] = (counts[source |
+| 142:40 | counts | parameter | module/buildDataset/anonymous@142 | counts |
+| 142:48 | row | parameter | module/buildDataset/anonymous@142 | row |
+| 142:64 | source | const | module/buildDataset/anonymous@142 | sourceKey ? row[sourceKey] : 'patient-self-report' |
+| 144:41 | row | parameter | module/buildDataset/anonymous@144 | row |
+| 147:9 | sumField | const | module/buildDataset | key =&gt; total(rows.map(row =&gt; row[key])) |
+| 147:20 | key | parameter | module/buildDataset/anonymous@147 | key |
+| 147:42 | row | parameter | module/buildDataset/anonymous@147/anonymous@147 | row |
+| 148:9 | plannedDueSlots | const | module/buildDataset | sumField('dueSlots') |
+| 149:9 | takenSlots | const | module/buildDataset | sumField('dueTaken') |
+| 150:9 | missedSlots | const | module/buildDataset | sumField('dueMissed') |
+| 151:9 | unknownSlots | const | module/buildDataset | sumField('dueUnknown') |
+| 152:9 | reportedSlots | const | module/buildDataset | takenSlots + missedSlots + unknownSlots |
+| 153:9 | reportedPatientDays | const | module/buildDataset | rows.filter(row =&gt; row.hasReport).length |
+| 153:43 | row | parameter | module/buildDataset/anonymous@153 | row |
+| 154:9 | result | const | module/buildDataset | { recipe, summary: { patientCount: ids.length, calendarDays: recipe.calendarDays, plannedPatientDays: rows.length, reportedPatient |
+| 155:170 | p | parameter | module/buildDataset/anonymous@155 | p |
+| 163:9 | inputHash | const | module/buildDataset | hash(serialize({ generation, recipe, rows })) |
+| 167:17 | researchPreview | function | module |  |
+| 167:33 | db | parameter | module/researchPreview | db |
+| 167:37 | input | parameter | module/researchPreview | input = {} |
+| 167:49 | allowedPatientIds | parameter | module/researchPreview | allowedPatientIds = null |
+| 168:11 | ids | const | module/researchPreview | scopeAndRecipe(db, input, allowedPatientIds) |
+| 168:16 | recipe | const | module/researchPreview | scopeAndRecipe(db, input, allowedPatientIds) |
+| 172:10 | requireSnapshot | function | module |  |
+| 172:26 | db | parameter | module/requireSnapshot | db |
+| 172:30 | id | parameter | module/requireSnapshot | id |
+| 172:34 | allowedPatientIds | parameter | module/requireSnapshot | allowedPatientIds |
+| 173:9 | key | const | module/requireSnapshot | textValue(id, '스냅샷 ID', { min: 1, max: 100 }) |
+| 174:9 | row | const | module/requireSnapshot | db.prepare('SELECT * FROM research_snapshots WHERE id=?').get(key) |
+| 175:9 | generation | const | module/requireSnapshot | db.prepare("SELECT value FROM metadata WHERE key='generation'").get()?.value |
+| 177:9 | scope | const | module/requireSnapshot | JSON.parse(row.scope_json) |
+| 178:9 | allowed | const | module/requireSnapshot | allowedPatientIds === null \|\| allowedPatientIds === undefined ? null : new Set(allowedPatientIds) |
+| 179:29 | patientId | parameter | module/requireSnapshot/anonymous@179 | patientId |
+| 180:9 | data | const | module/requireSnapshot | JSON.parse(row.data_json) |
+| 185:10 | snapshotResult | function | module |  |
+| 185:25 | row | parameter | module/snapshotResult | row |
+| 185:30 | data | parameter | module/snapshotResult | data |
+| 186:9 | recipe | const | module/snapshotResult | JSON.parse(row.recipe_json) |
+| 197:17 | createResearchSnapshot | function | module |  |
+| 197:40 | db | parameter | module/createResearchSnapshot | db |
+| 197:44 | input | parameter | module/createResearchSnapshot | input |
+| 197:51 | actor | parameter | module/createResearchSnapshot | actor |
+| 197:58 | allowedPatientIds | parameter | module/createResearchSnapshot | allowedPatientIds = null |
+| 198:9 | body | const | module/createResearchSnapshot | objectBody(input) |
+| 202:9 | actorId | const | module/createResearchSnapshot | textValue(typeof actor === 'string' ? actor : actor?.accountId, '작성자', { min: 1, max: 150 }) |
+| 203:11 | clientRequestId | const | module/createResearchSnapshot | body |
+| 203:28 | expectedInputHash | const | module/createResearchSnapshot | body |
+| 203:50 | options | const | module/createResearchSnapshot | body |
+| 204:9 | requestHash | const | module/createResearchSnapshot | hash(serialize({ ...options, ...(expectedInputHash === undefined ? {} : { expectedInputHash }) })) |
+| 206:11 | previous | const | module/createResearchSnapshot/anonymous@205 | db.prepare('SELECT id,request_hash FROM research_snapshots WHERE created_by=? AND client_request_id=?').get(actorId, clientRequest |
+| 211:13 | ids | const | module/createResearchSnapshot/anonymous@205 | scopeAndRecipe(db, options, allowedPatientIds) |
+| 211:18 | recipe | const | module/createResearchSnapshot/anonymous@205 | scopeAndRecipe(db, options, allowedPatientIds) |
+| 213:11 | dataset | const | module/createResearchSnapshot/anonymous@205 | buildDataset(db, ids, recipe) |
+| 215:11 | id | const | module/createResearchSnapshot/anonymous@205 | randomUUID() |
+| 216:11 | createdAt | const | module/createResearchSnapshot/anonymous@205 | new Date().toISOString() |
+| 223:17 | getResearchSnapshot | function | module |  |
+| 223:37 | db | parameter | module/getResearchSnapshot | db |
+| 223:41 | id | parameter | module/getResearchSnapshot | id |
+| 223:45 | allowedPatientIds | parameter | module/getResearchSnapshot | allowedPatientIds = null |
+| 224:11 | row | const | module/getResearchSnapshot | requireSnapshot(db, id, allowedPatientIds) |
+| 224:16 | data | const | module/getResearchSnapshot | requireSnapshot(db, id, allowedPatientIds) |
+| 228:17 | exportResearchSnapshot | function | module |  |
+| 228:40 | db | parameter | module/exportResearchSnapshot | db |
+| 228:44 | id | parameter | module/exportResearchSnapshot | id |
+| 228:48 | allowedPatientIds | parameter | module/exportResearchSnapshot | allowedPatientIds = null |
+| 229:11 | row | const | module/exportResearchSnapshot | requireSnapshot(db, id, allowedPatientIds) |
+| 229:16 | data | const | module/exportResearchSnapshot | requireSnapshot(db, id, allowedPatientIds) |
+| 230:9 | snapshot | const | module/exportResearchSnapshot | snapshotResult(row, data) |
+| 231:9 | columns | const | module/exportResearchSnapshot | ['participantId', 'observedDate', 'steps', 'stepsSource', 'sleepHours', 'sleepSource', 'weightKg', 'calories', 'proteinGrams', 'nu |
+| 232:9 | csv | const | module/exportResearchSnapshot | '\ufeff' + [columns.map(csvCell).join(','), ...data.rows.map(record =&gt; columns.map(column =&gt; csvCell(record[column])).join(','))]. |
+| 232:76 | record | parameter | module/exportResearchSnapshot/anonymous@232 | record |
+| 232:98 | column | parameter | module/exportResearchSnapshot/anonymous@232/anonymous@232 | column |
+| 233:9 | units | const | module/exportResearchSnapshot | { observedDate: 'Asia/Seoul date', steps: 'steps/day', sleepHours: 'hours/day', weightKg: 'kg', calories: 'kcal from recorded know |
+| 234:86 | name | parameter | module/exportResearchSnapshot/anonymous@234 | name |
 
 ## lib/reset.mjs
 
@@ -1735,6 +2283,37 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 21:9 | mode | const | module | process.argv.includes('--empty') ? 'empty' : 'seed' |
 | 26:11 | db | const | module | openDatabase(process.env.DATA_DIR \|\| new URL('../data', import.meta.url).pathname) |
 | 26:15 | uploadDir | const | module | openDatabase(process.env.DATA_DIR \|\| new URL('../data', import.meta.url).pathname) |
+
+## lib/staff-access.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:10 | HttpError | import | module | ./validation.mjs |
+| 5:14 | staffRoleCapabilities | const | module | Object.freeze({ clinician: ['patient.read', 'clinical.write', 'workflow.write', 'workflow.review', 'correction.propose', 'correcti |
+| 12:7 | allCapabilities | const | module | [...new Set(Object.values(staffRoleCapabilities).flat())] |
+| 13:7 | denied | const | module | () =&gt; ({ staffRoles: [], capabilities: [], assignedPatientIds: [] }) |
+| 15:17 | staffAccessFor | function | module |  |
+| 15:32 | identity | parameter | module/staffAccessFor | identity |
+| 15:42 | env | parameter | module/staffAccessFor | env = process.env |
+| 23:7 | policy | let | module/staffAccessFor | {} |
+| 31:11 | entry | const | module/staffAccessFor | policy[identity.providerId] |
+| 34:26 | role | parameter | module/staffAccessFor/anonymous@34 | role |
+| 36:31 | id | parameter | module/staffAccessFor/anonymous@36 | id |
+| 37:11 | staffRoles | const | module/staffAccessFor | [...new Set(entry.roles)] |
+| 38:71 | role | parameter | module/staffAccessFor/anonymous@38 | role |
+| 40:9 | legacy | const | module/staffAccessFor | new Set((env.CLINICIAN_KAKAO_IDS \|\| '').split(',').map(value =&gt; value.trim()).filter(value =&gt; /^\d{1,30}$/.test(value))) |
+| 40:73 | value | parameter | module/staffAccessFor/anonymous@40 | value |
+| 40:103 | value | parameter | module/staffAccessFor/anonymous@40 | value |
+| 46:17 | hasCapability | function | module |  |
+| 46:31 | actor | parameter | module/hasCapability | actor |
+| 46:38 | capability | parameter | module/hasCapability | capability |
+| 50:17 | assignedPatientIds | function | module |  |
+| 50:36 | actor | parameter | module/assignedPatientIds | actor |
+| 55:17 | assertStaffCapability | function | module |  |
+| 55:39 | actor | parameter | module/assertStaffCapability | actor |
+| 55:46 | capability | parameter | module/assertStaffCapability | capability |
+| 55:58 | patientId | parameter | module/assertStaffCapability | patientId = null |
+| 57:9 | scope | const | module/assertStaffCapability | assignedPatientIds(actor) |
 
 ## lib/validation.mjs
 
@@ -1930,6 +2509,265 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 325:9 | now | const | module/markAnalysisApplied | new Date().toISOString() |
 | 326:9 | result | const | module/markAnalysisApplied | db.prepare('UPDATE photo_analyses SET applied_at=?,applied_meal_id=? WHERE id=? AND kind='meal' AND applied_at IS NULL AND expires |
 
+## lib/workflow.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:10 | createHash | import | module | node:crypto |
+| 1:22 | randomUUID | import | module | node:crypto |
+| 2:10 | recordFromRow | import | module | ./db.mjs |
+| 2:25 | todayKorea | import | module | ./db.mjs |
+| 3:10 | allowedKeys | import | module | ./validation.mjs |
+| 3:23 | choice | import | module | ./validation.mjs |
+| 3:31 | dateValue | import | module | ./validation.mjs |
+| 3:42 | HttpError | import | module | ./validation.mjs |
+| 3:53 | numberValue | import | module | ./validation.mjs |
+| 3:66 | objectBody | import | module | ./validation.mjs |
+| 3:78 | textValue | import | module | ./validation.mjs |
+| 4:10 | assertStaffCapability | import | module | ./staff-access.mjs |
+| 4:33 | assignedPatientIds | import | module | ./staff-access.mjs |
+| 6:7 | uuid | const | module | /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i |
+| 7:7 | canonical | const | module | value =&gt; Array.isArray(value) ? value.map(canonical) : value &amp;&amp; typeof value === 'object' ? Object.fromEntries(Object.keys(value). |
+| 7:19 | value | parameter | module/anonymous@7 | value |
+| 8:54 | key | parameter | module/anonymous@7/anonymous@8 | key |
+| 9:7 | hash | const | module | value =&gt; createHash('sha256').update(JSON.stringify(canonical(value))).digest('hex') |
+| 9:14 | value | parameter | module/anonymous@9 | value |
+| 10:7 | timestamp | const | module | () =&gt; new Date().toISOString() |
+| 11:7 | actorSnapshot | const | module | actor =&gt; ({ accountId: actor?.accountId ?? null, role: actor?.role ?? 'demo-anonymous', staffRoles: actor?.staffRoles ?? [], provi |
+| 11:23 | actor | parameter | module/anonymous@11 | actor |
+| 12:7 | taskTypes | const | module | ['contact', 'photo_review', 'data_quality', 'clinical_review'] |
+| 13:7 | taskStatuses | const | module | ['new', 'in_progress', 'waiting', 'review_requested', 'completed'] |
+| 14:7 | dailyColumns | const | module | { steps: 'steps', sleepHours: 'sleep_hours', weightKg: 'weight_kg', medicationStatus: 'medication_status', appetite: 'appetite', m |
+| 16:17 | ensureWorkflowSchema | function | module |  |
+| 16:38 | db | parameter | module/ensureWorkflowSchema | db |
+| 19:66 | column | parameter | module/ensureWorkflowSchema/anonymous@19 | column |
+| 87:12 | error | catch | module/ensureWorkflowSchema |  |
+| 93:10 | atomic | function | module |  |
+| 93:17 | db | parameter | module/atomic | db |
+| 93:21 | operation | parameter | module/atomic | operation |
+| 95:15 | value | const | module/atomic | operation() |
+| 96:10 | error | catch | module/atomic |  |
+| 99:10 | patientExists | function | module |  |
+| 99:24 | db | parameter | module/patientExists | db |
+| 99:28 | patientId | parameter | module/patientExists | patientId |
+| 103:10 | requirePatient | function | module |  |
+| 103:25 | db | parameter | module/requirePatient | db |
+| 103:29 | actor | parameter | module/requirePatient | actor |
+| 103:36 | capability | parameter | module/requirePatient | capability |
+| 103:48 | patientId | parameter | module/requirePatient | patientId |
+| 107:10 | version | function | module |  |
+| 107:18 | value | parameter | module/version | value |
+| 107:25 | minimum | parameter | module/version | minimum = 0 |
+| 111:10 | paginate | function | module |  |
+| 111:19 | input | parameter | module/paginate | input |
+| 115:10 | scopedWhere | function | module |  |
+| 115:22 | actor | parameter | module/scopedWhere | actor |
+| 115:29 | patientId | parameter | module/scopedWhere | patientId |
+| 115:40 | clauses | parameter | module/scopedWhere | clauses = [] |
+| 115:54 | params | parameter | module/scopedWhere | params = [] |
+| 115:67 | column | parameter | module/scopedWhere | column = 'patient_id' |
+| 116:9 | scope | const | module/scopedWhere | assignedPatientIds(actor) |
+| 125:10 | mutate | function | module |  |
+| 125:17 | db | parameter | module/mutate | db |
+| 125:21 | actor | parameter | module/mutate | actor |
+| 125:28 | patientId | parameter | module/mutate | patientId |
+| 125:39 | operation | parameter | module/mutate | operation |
+| 125:50 | input | parameter | module/mutate | input |
+| 125:57 | perform | parameter | module/mutate | perform |
+| 127:9 | requestHash | const | module/mutate | hash({ operation, patientId, input }) |
+| 129:11 | previous | const | module/mutate/anonymous@128 | db.prepare('SELECT * FROM workflow_mutations WHERE actor_id=? AND client_request_id=?').get(actor.accountId, input.clientRequestId |
+| 134:11 | result | const | module/mutate/anonymous@128 | perform() |
+| 141:10 | taskFromRow | function | module |  |
+| 141:22 | db | parameter | module/taskFromRow | db |
+| 141:26 | row | parameter | module/taskFromRow | row |
+| 141:31 | history | parameter | module/taskFromRow | history = true |
+| 145:128 | item | parameter | module/taskFromRow/anonymous@145 | item |
+| 148:10 | taskEvent | function | module |  |
+| 148:20 | db | parameter | module/taskEvent | db |
+| 148:24 | actor | parameter | module/taskEvent | actor |
+| 148:31 | row | parameter | module/taskEvent | row |
+| 153:17 | listTasks | function | module |  |
+| 153:27 | db | parameter | module/listTasks | db |
+| 153:31 | actor | parameter | module/listTasks | actor |
+| 153:38 | options | parameter | module/listTasks | options = {} |
+| 156:11 | limit | const | module/listTasks | paginate(options) |
+| 156:18 | offset | const | module/listTasks | paginate(options) |
+| 157:9 | clauses | const | module/listTasks | [] |
+| 157:23 | params | const | module/listTasks | [] |
+| 159:9 | scope | const | module/listTasks | scopedWhere(actor, options.patientId, clauses, params) |
+| 160:9 | total | const | module/listTasks | db.prepare('SELECT COUNT(*) count FROM workflow_tasks${scope.where}').get(...scope.params).count |
+| 161:9 | rows | const | module/listTasks | db.prepare('SELECT * FROM workflow_tasks${scope.where} ORDER BY updated_at DESC,id DESC LIMIT ? OFFSET ?').all(...scope.params, li |
+| 162:28 | row | parameter | module/listTasks/anonymous@162 | row |
+| 165:17 | createTask | function | module |  |
+| 165:28 | db | parameter | module/createTask | db |
+| 165:32 | actor | parameter | module/createTask | actor |
+| 165:39 | input | parameter | module/createTask | input |
+| 166:9 | body | const | module/createTask | objectBody(input) |
+| 167:9 | patientId | const | module/createTask | textValue(body.patientId, '환자 ID', { min: 1, max: 100 }) |
+| 168:9 | type | const | module/createTask | choice(body.type, '업무 종류', taskTypes) |
+| 168:55 | title | const | module/createTask | textValue(body.title, '업무 제목', { min: 1, max: 160 }) |
+| 169:9 | note | const | module/createTask | textValue(body.note ?? '', '업무 설명', { max: 2000 }) |
+| 169:68 | assignee | const | module/createTask | textValue(body.assignee ?? '', '담당자', { max: 100 }) |
+| 170:9 | dueDate | const | module/createTask | body.dueDate ? dateValue(body.dueDate) : null |
+| 172:11 | id | const | module/createTask/anonymous@171 | randomUUID() |
+| 172:30 | now | const | module/createTask/anonymous@171 | timestamp() |
+| 175:11 | row | const | module/createTask/anonymous@171 | db.prepare('SELECT * FROM workflow_tasks WHERE id=?').get(id) |
+| 180:17 | updateTask | function | module |  |
+| 180:28 | db | parameter | module/updateTask | db |
+| 180:32 | actor | parameter | module/updateTask | actor |
+| 180:39 | taskId | parameter | module/updateTask | taskId |
+| 180:47 | input | parameter | module/updateTask | input |
+| 181:9 | body | const | module/updateTask | objectBody(input) |
+| 182:9 | existing | const | module/updateTask | db.prepare('SELECT * FROM workflow_tasks WHERE id=?').get(taskId) |
+| 185:9 | expected | const | module/updateTask | version(body.version, 1) |
+| 185:46 | status | const | module/updateTask | choice(body.status, '업무 상태', taskStatuses) |
+| 187:9 | note | const | module/updateTask | body.note === undefined ? existing.note : textValue(body.note, '업무 설명', { max: 2000 }) |
+| 188:9 | assignee | const | module/updateTask | body.assignee === undefined ? existing.assignee : textValue(body.assignee, '담당자', { max: 100 }) |
+| 189:9 | dueDate | const | module/updateTask | body.dueDate === undefined ? existing.due_date : body.dueDate ? dateValue(body.dueDate) : null |
+| 191:11 | changed | const | module/updateTask/anonymous@190 | db.prepare('UPDATE workflow_tasks SET status=?,note=?,assignee=?,due_date=?,version=version+1,updated_by=?,updated_at=? WHERE id=? |
+| 194:11 | row | const | module/updateTask/anonymous@190 | db.prepare('SELECT * FROM workflow_tasks WHERE id=?').get(taskId) |
+| 199:17 | photoReview | function | module |  |
+| 199:29 | db | parameter | module/photoReview | db |
+| 199:33 | reportId | parameter | module/photoReview | reportId |
+| 200:9 | row | const | module/photoReview | db.prepare('SELECT * FROM medication_photo_reviews WHERE report_id=?').get(reportId) |
+| 205:17 | listPhotoReviews | function | module |  |
+| 205:34 | db | parameter | module/listPhotoReviews | db |
+| 205:38 | actor | parameter | module/listPhotoReviews | actor |
+| 205:45 | patientId | parameter | module/listPhotoReviews | patientId |
+| 205:56 | options | parameter | module/listPhotoReviews | options = {} |
+| 207:11 | limit | const | module/listPhotoReviews | paginate(options) |
+| 207:18 | offset | const | module/listPhotoReviews | paginate(options) |
+| 207:48 | clauses | const | module/listPhotoReviews | ['patient_id=?'] |
+| 207:76 | params | const | module/listPhotoReviews | [patientId] |
+| 209:9 | where | const | module/listPhotoReviews | clauses.join(' AND ') |
+| 210:9 | total | const | module/listPhotoReviews | db.prepare('SELECT COUNT(*) count FROM medication_photo_reports WHERE ${where}').get(...params).count |
+| 211:9 | rows | const | module/listPhotoReviews | db.prepare('SELECT id,patient_id,date,created_at,analysis_json FROM medication_photo_reports WHERE ${where} ORDER BY created_at DE |
+| 212:30 | row | parameter | module/listPhotoReviews/anonymous@212 | row |
+| 215:133 | item | parameter | module/listPhotoReviews/anonymous@212/anonymous@215 | item |
+| 220:17 | reviewPhoto | function | module |  |
+| 220:29 | db | parameter | module/reviewPhoto | db |
+| 220:33 | actor | parameter | module/reviewPhoto | actor |
+| 220:40 | patientId | parameter | module/reviewPhoto | patientId |
+| 220:51 | reportId | parameter | module/reviewPhoto | reportId |
+| 220:61 | input | parameter | module/reviewPhoto | input |
+| 221:9 | body | const | module/reviewPhoto | objectBody(input) |
+| 224:9 | status | const | module/reviewPhoto | choice(body.status, '사진 검토 상태', ['reviewed', 'needs_information']) |
+| 226:9 | expected | const | module/reviewPhoto | version(body.version) |
+| 226:43 | note | const | module/reviewPhoto | textValue(body.note, '검토 사유', { min: 1, max: 2000 }) |
+| 230:11 | now | const | module/reviewPhoto/anonymous@228 | timestamp() |
+| 233:11 | review | const | module/reviewPhoto/anonymous@228 | photoReview(db, reportId) |
+| 240:17 | appendDailyAudit | function | module |  |
+| 240:34 | db | parameter | module/appendDailyAudit | db |
+| 240:40 | patientId | parameter | module/appendDailyAudit | { patientId, date, before, after, actor = null, reason = '환자 입력', source = 'patient-self-report' } |
+| 240:51 | date | parameter | module/appendDailyAudit | { patientId, date, before, after, actor = null, reason = '환자 입력', source = 'patient-self-report' } |
+| 240:57 | before | parameter | module/appendDailyAudit | { patientId, date, before, after, actor = null, reason = '환자 입력', source = 'patient-self-report' } |
+| 240:65 | after | parameter | module/appendDailyAudit | { patientId, date, before, after, actor = null, reason = '환자 입력', source = 'patient-self-report' } |
+| 240:72 | actor | parameter | module/appendDailyAudit | { patientId, date, before, after, actor = null, reason = '환자 입력', source = 'patient-self-report' } |
+| 240:86 | reason | parameter | module/appendDailyAudit | { patientId, date, before, after, actor = null, reason = '환자 입력', source = 'patient-self-report' } |
+| 240:104 | source | parameter | module/appendDailyAudit | { patientId, date, before, after, actor = null, reason = '환자 입력', source = 'patient-self-report' } |
+| 242:9 | result | const | module/appendDailyAudit | db.prepare('INSERT INTO daily_record_audit(patient_id,date,before_json,after_json,actor_json,reason,source,created_at) VALUES (?,? |
+| 247:10 | validatePatch | function | module |  |
+| 247:24 | input | parameter | module/validatePatch | input |
+| 248:9 | patch | const | module/validatePatch | objectBody(input) |
+| 250:9 | result | const | module/validatePatch | {} |
+| 251:14 | key | const | module/validatePatch | 초기값 없음 |
+| 253:11 | value | const | module/validatePatch | patch[key] |
+| 265:10 | correctionFromRow | function | module |  |
+| 265:28 | row | parameter | module/correctionFromRow | row |
+| 272:17 | listCorrections | function | module |  |
+| 272:33 | db | parameter | module/listCorrections | db |
+| 272:37 | actor | parameter | module/listCorrections | actor |
+| 272:44 | patientId | parameter | module/listCorrections | patientId |
+| 272:55 | options | parameter | module/listCorrections | options = {} |
+| 274:11 | limit | const | module/listCorrections | paginate(options) |
+| 274:18 | offset | const | module/listCorrections | paginate(options) |
+| 274:48 | params | const | module/listCorrections | [patientId] |
+| 275:9 | statusClause | const | module/listCorrections | options.status ? ' AND status=?' : '' |
+| 277:9 | total | const | module/listCorrections | db.prepare('SELECT COUNT(*) count FROM record_corrections WHERE patient_id=?${statusClause}').get(...params).count |
+| 281:17 | proposeCorrection | function | module |  |
+| 281:35 | db | parameter | module/proposeCorrection | db |
+| 281:39 | actor | parameter | module/proposeCorrection | actor |
+| 281:46 | patientId | parameter | module/proposeCorrection | patientId |
+| 281:57 | input | parameter | module/proposeCorrection | input |
+| 282:9 | body | const | module/proposeCorrection | objectBody(input) |
+| 284:9 | date | const | module/proposeCorrection | dateValue(body.date) |
+| 284:38 | expected | const | module/proposeCorrection | version(body.expectedRevision, 1) |
+| 284:84 | patch | const | module/proposeCorrection | validatePatch(body.patch) |
+| 285:9 | reason | const | module/proposeCorrection | textValue(body.reason, '정정 사유', { min: 1, max: 2000 }) |
+| 287:11 | record | const | module/proposeCorrection/anonymous@286 | recordFromRow(db.prepare('SELECT * FROM daily_records WHERE patient_id=? AND date=?').get(patientId, date)) |
+| 290:11 | id | const | module/proposeCorrection/anonymous@286 | randomUUID() |
+| 297:17 | reviewCorrection | function | module |  |
+| 297:34 | db | parameter | module/reviewCorrection | db |
+| 297:38 | actor | parameter | module/reviewCorrection | actor |
+| 297:45 | correctionId | parameter | module/reviewCorrection | correctionId |
+| 297:59 | input | parameter | module/reviewCorrection | input |
+| 298:9 | body | const | module/reviewCorrection | objectBody(input) |
+| 299:9 | existing | const | module/reviewCorrection | db.prepare('SELECT * FROM record_corrections WHERE id=?').get(correctionId) |
+| 302:9 | expected | const | module/reviewCorrection | version(body.version, 1) |
+| 302:46 | status | const | module/reviewCorrection | choice(body.status, '검토 결과', ['approved', 'rejected']) |
+| 303:9 | reason | const | module/reviewCorrection | textValue(body.reason, '검토 사유', { min: 1, max: 2000 }) |
+| 305:11 | current | const | module/reviewCorrection/anonymous@304 | db.prepare('SELECT * FROM record_corrections WHERE id=?').get(correctionId) |
+| 308:13 | before | const | module/reviewCorrection/anonymous@304 | recordFromRow(db.prepare('SELECT * FROM daily_records WHERE patient_id=? AND date=?').get(current.patient_id, current.date)) |
+| 310:13 | patch | const | module/reviewCorrection/anonymous@304 | JSON.parse(current.patch_json) |
+| 310:53 | fields | const | module/reviewCorrection/anonymous@304 | Object.keys(patch) |
+| 311:57 | key | parameter | module/reviewCorrection/anonymous@304/anonymous@311 | key |
+| 312:28 | key | parameter | module/reviewCorrection/anonymous@304/anonymous@312 | key |
+| 313:13 | after | const | module/reviewCorrection/anonymous@304 | recordFromRow(db.prepare('SELECT * FROM daily_records WHERE patient_id=? AND date=?').get(current.patient_id, current.date)) |
+| 322:10 | participationFromRow | function | module |  |
+| 322:31 | row | parameter | module/participationFromRow | row |
+| 328:17 | getParticipation | function | module |  |
+| 328:34 | db | parameter | module/getParticipation | db |
+| 328:38 | actor | parameter | module/getParticipation | actor |
+| 328:45 | patientId | parameter | module/getParticipation | patientId |
+| 331:118 | row | parameter | module/getParticipation/anonymous@331 | row |
+| 334:17 | saveParticipation | function | module |  |
+| 334:35 | db | parameter | module/saveParticipation | db |
+| 334:39 | actor | parameter | module/saveParticipation | actor |
+| 334:46 | patientId | parameter | module/saveParticipation | patientId |
+| 334:57 | input | parameter | module/saveParticipation | input |
+| 335:9 | body | const | module/saveParticipation | objectBody(input) |
+| 337:9 | expected | const | module/saveParticipation | version(body.version) |
+| 337:43 | studyId | const | module/saveParticipation | textValue(body.studyId, '연구 ID', { min: 1, max: 100 }) |
+| 338:9 | status | const | module/saveParticipation | choice(body.status, '참여 상태', ['active', 'paused', 'withdrawn', 'completed']) |
+| 339:9 | startDate | const | module/saveParticipation | dateValue(body.startDate) |
+| 339:48 | endDate | const | module/saveParticipation | body.endDate ? dateValue(body.endDate) : null |
+| 342:9 | consentVersion | const | module/saveParticipation | textValue(body.consentVersion, '동의 문서 버전', { min: 1, max: 100 }) |
+| 343:9 | reason | const | module/saveParticipation | textValue(body.reason, '변경 사유', { min: 1, max: 2000 }) |
+| 345:9 | domains | const | module/saveParticipation | [...new Set(body.requiredDomains.map(value =&gt; choice(value, '필수 기록', ['meal', 'medication', 'steps', 'sleep', 'weight'])))].sort() |
+| 345:56 | value | parameter | module/saveParticipation/anonymous@345 | value |
+| 347:11 | old | const | module/saveParticipation/anonymous@346 | db.prepare('SELECT * FROM study_participation WHERE patient_id=?').get(patientId) |
+| 349:11 | now | const | module/saveParticipation/anonymous@346 | timestamp() |
+| 352:11 | participation | const | module/saveParticipation/anonymous@346 | participationFromRow(db.prepare('SELECT * FROM study_participation WHERE patient_id=?').get(patientId)) |
+| 359:10 | delegationFromRow | function | module |  |
+| 359:28 | row | parameter | module/delegationFromRow | row |
+| 367:17 | listDelegations | function | module |  |
+| 367:33 | db | parameter | module/listDelegations | db |
+| 367:37 | actor | parameter | module/listDelegations | actor |
+| 367:44 | patientId | parameter | module/listDelegations | patientId |
+| 372:17 | saveDelegation | function | module |  |
+| 372:32 | db | parameter | module/saveDelegation | db |
+| 372:36 | actor | parameter | module/saveDelegation | actor |
+| 372:43 | patientId | parameter | module/saveDelegation | patientId |
+| 372:54 | input | parameter | module/saveDelegation | input |
+| 373:9 | body | const | module/saveDelegation | objectBody(input) |
+| 375:9 | accountId | const | module/saveDelegation | textValue(body.accountId, '지원자 계정 ID', { min: 1, max: 100 }) |
+| 377:9 | startDate | const | module/saveDelegation | dateValue(body.startDate) |
+| 377:48 | endDate | const | module/saveDelegation | dateValue(body.endDate) |
+| 380:9 | scopes | const | module/saveDelegation | [...new Set(body.scopes.map(value =&gt; choice(value, '위임 범위', ['record.read', 'record.propose', 'message.read'])))].sort() |
+| 380:46 | value | parameter | module/saveDelegation/anonymous@380 | value |
+| 381:9 | reason | const | module/saveDelegation | textValue(body.reason, '위임 근거', { min: 1, max: 2000 }) |
+| 383:11 | id | const | module/saveDelegation/anonymous@382 | randomUUID() |
+| 390:17 | revokeDelegation | function | module |  |
+| 390:34 | db | parameter | module/revokeDelegation | db |
+| 390:38 | actor | parameter | module/revokeDelegation | actor |
+| 390:45 | patientId | parameter | module/revokeDelegation | patientId |
+| 390:56 | delegationId | parameter | module/revokeDelegation | delegationId |
+| 390:70 | input | parameter | module/revokeDelegation | input |
+| 391:9 | body | const | module/revokeDelegation | objectBody(input) |
+| 393:9 | expected | const | module/revokeDelegation | version(body.version, 1) |
+| 393:46 | reason | const | module/revokeDelegation | textValue(body.reason, '철회 사유', { min: 1, max: 2000 }) |
+| 395:11 | row | const | module/revokeDelegation/anonymous@394 | db.prepare('SELECT * FROM caregiver_delegations WHERE id=? AND patient_id=?').get(delegationId, patientId) |
+
 ## public/auth-page.js
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
@@ -2039,9 +2877,346 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 50:37 | controls | const | module/createClinicianCommunications/anonymous@45 | [...event.target.querySelectorAll('input,textarea,select,button')] |
 | 50:130 | el | parameter | module/createClinicianCommunications/anonymous@45/anonymous@50 | el |
 | 52:26 | result | const | module/createClinicianCommunications/anonymous@45 | await api('/api/clinician/notices'+(notice?'/'+notice.id:''),{method:notice?'PATCH':'POST',body:JSON.stringify({...draft,...(notic |
+| 53:323 | p | parameter | module/createClinicianCommunications/anonymous@45/anonymous@53 | p |
 | 54:12 | error | catch | module/createClinicianCommunications/anonymous@45 |  |
 | 54:95 | el | parameter | module/createClinicianCommunications/anonymous@45/anonymous@54 | el |
 | 56:12 | refresh | function | module/createClinicianCommunications |  |
+
+## public/clinician-evidence.js
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:7 | escapeHtml | const | module | value =&gt; String(value ?? '').replace(/[&amp;&lt;&gt;"']/g, char =&gt; ({ '&amp;': '&amp;amp;', '&lt;': '&amp;lt;', '&gt;': '&amp;gt;', '"': '&amp;quot;', "'": '&amp;#39;' }[ |
+| 1:20 | value | parameter | module/anonymous@1 | value |
+| 1:69 | char | parameter | module/anonymous@1/anonymous@1 | char |
+| 2:7 | displayTime | const | module | value =&gt; value ? new Date(value).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', hour12: false }) : '확인 시각 없음' |
+| 2:21 | value | parameter | module/anonymous@2 | value |
+| 3:7 | statuses | const | module | { saved: '보관', included: '검토 대상으로 포함', excluded: '검토 대상에서 제외', reviewed: '사람이 검토 완료' } |
+| 4:7 | emptyDraft | const | module | () =&gt; ({ status: 'saved', note: '', evidenceText: '', locator: '', reviewBasis: 'metadata' }) |
+| 5:10 | sourceLink | function | module |  |
+| 5:21 | url | parameter | module/sourceLink | url |
+| 5:26 | label | parameter | module/sourceLink | label |
+| 7:11 | parsed | const | module/sourceLink | new URL(url) |
+| 13:17 | createEvidenceWorkspace | function | module |  |
+| 13:43 | api | parameter | module/createEvidenceWorkspace | { api, getState, toast } |
+| 13:48 | getState | parameter | module/createEvidenceWorkspace | { api, getState, toast } |
+| 13:58 | toast | parameter | module/createEvidenceWorkspace | { api, getState, toast } |
+| 14:9 | root | const | module/createEvidenceWorkspace | document.querySelector('#app-content') |
+| 15:9 | $ | const | module/createEvidenceWorkspace | selector =&gt; root.querySelector(selector) |
+| 15:13 | selector | parameter | module/createEvidenceWorkspace/anonymous@15 | selector |
+| 16:7 | active | let | module/createEvidenceWorkspace | false |
+| 16:23 | generation | let | module/createEvidenceWorkspace | 0 |
+| 16:39 | pending | let | module/createEvidenceWorkspace | '' |
+| 16:53 | searchAbort | let | module/createEvidenceWorkspace | null |
+| 17:7 | library | let | module/createEvidenceWorkspace | { searches: [], bookmarks: [], permissions: { canReview: false }, limits: { searches: 20, bookmarks: 100 } } |
+| 18:7 | searchResult | let | module/createEvidenceWorkspace | null |
+| 18:28 | editor | let | module/createEvidenceWorkspace | null |
+| 18:43 | draft | let | module/createEvidenceWorkspace | emptyDraft() |
+| 18:65 | baseline | let | module/createEvidenceWorkspace | JSON.stringify(emptyDraft()) |
+| 19:7 | queryDraft | let | module/createEvidenceWorkspace | { query: '', yearFrom: '', yearTo: '' } |
+| 19:61 | queryBaseline | let | module/createEvidenceWorkspace | JSON.stringify(queryDraft) |
+| 20:7 | libraryGeneration | let | module/createEvidenceWorkspace | 0 |
+| 22:12 | setError | function | module/createEvidenceWorkspace |  |
+| 22:21 | error | parameter | module/createEvidenceWorkspace/setError | error |
+| 23:11 | target | const | module/createEvidenceWorkspace/setError | $('#evidence-error') |
+| 26:12 | clearError | function | module/createEvidenceWorkspace |  |
+| 27:12 | setStatus | function | module/createEvidenceWorkspace |  |
+| 27:22 | message | parameter | module/createEvidenceWorkspace/setStatus | message |
+| 28:12 | dirty | function | module/createEvidenceWorkspace |  |
+| 29:12 | canLeave | function | module/createEvidenceWorkspace |  |
+| 37:12 | updateControls | function | module/createEvidenceWorkspace |  |
+| 39:16 | control | const | module/createEvidenceWorkspace/updateControls | 초기값 없음 |
+| 42:11 | cancel | const | module/createEvidenceWorkspace/updateControls | $('#evidence-cancel-search') |
+| 44:11 | status | const | module/createEvidenceWorkspace/updateControls | $('#evidence-review-status') |
+| 45:28 | option | const | module/createEvidenceWorkspace/updateControls | 초기값 없음 |
+| 46:11 | save | const | module/createEvidenceWorkspace/updateControls | $('#evidence-review-save') |
+| 49:12 | articleDetails | function | module/createEvidenceWorkspace |  |
+| 49:27 | article | parameter | module/createEvidenceWorkspace/articleDetails | article |
+| 56:12 | renderResults | function | module/createEvidenceWorkspace |  |
+| 57:11 | target | const | module/createEvidenceWorkspace/renderResults | $('#evidence-results') |
+| 59:11 | count | const | module/createEvidenceWorkspace/renderResults | Number.isFinite(searchResult.totalCount) ? searchResult.totalCount.toLocaleString('ko-KR') : '확인 불가' |
+| 62:65 | article | parameter | module/createEvidenceWorkspace/renderResults/anonymous@62 | article |
+| 62:74 | index | parameter | module/createEvidenceWorkspace/renderResults/anonymous@62 | index |
+| 66:12 | renderLibrary | function | module/createEvidenceWorkspace |  |
+| 67:11 | target | const | module/createEvidenceWorkspace/renderLibrary | $('#evidence-library') |
+| 69:56 | search | parameter | module/createEvidenceWorkspace/renderLibrary/anonymous@69 | search |
+| 71:58 | bookmark | parameter | module/createEvidenceWorkspace/renderLibrary/anonymous@71 | bookmark |
+| 74:18 | loadLibrary | function | module/createEvidenceWorkspace |  |
+| 75:11 | request | const | module/createEvidenceWorkspace/loadLibrary | generation |
+| 75:33 | loading | const | module/createEvidenceWorkspace/loadLibrary | ++libraryGeneration |
+| 77:13 | response | const | module/createEvidenceWorkspace/loadLibrary | await api('/api/clinician/evidence') |
+| 80:14 | error | catch | module/createEvidenceWorkspace/loadLibrary |  |
+| 82:12 | editorView | function | module/createEvidenceWorkspace |  |
+| 83:11 | target | const | module/createEvidenceWorkspace/editorView | $('#evidence-editor') |
+| 85:11 | readonly | const | module/createEvidenceWorkspace/editorView | editor.status === 'reviewed' &amp;&amp; !library.permissions.canReview |
+| 89:157 | key | parameter | module/createEvidenceWorkspace/editorView/anonymous@89 | [key, label] |
+| 89:162 | label | parameter | module/createEvidenceWorkspace/editorView/anonymous@89 | [key, label] |
+| 90:186 | key | parameter | module/createEvidenceWorkspace/editorView/anonymous@90 | [key,label] |
+| 90:190 | label | parameter | module/createEvidenceWorkspace/editorView/anonymous@90 | [key,label] |
+| 99:12 | mount | function | module/createEvidenceWorkspace |  |
+| 113:18 | runSearch | function | module/createEvidenceWorkspace |  |
+| 113:28 | next | parameter | module/createEvidenceWorkspace/runSearch | next = false |
+| 115:11 | data | const | module/createEvidenceWorkspace/runSearch | next ? { query: searchResult.query, yearFrom: searchResult.parameters?.yearFrom, yearTo: searchResult.parameters?.yearTo, cursorMa |
+| 119:11 | request | const | module/createEvidenceWorkspace/runSearch | generation |
+| 119:33 | submitted | const | module/createEvidenceWorkspace/runSearch | JSON.stringify(queryDraft) |
+| 122:13 | result | const | module/createEvidenceWorkspace/runSearch | await api('/api/clinician/evidence/search', { method: 'POST', body: JSON.stringify(data), signal: searchAbort.signal }) |
+| 126:14 | error | catch | module/createEvidenceWorkspace/runSearch |  |
+| 133:18 | writeOperation | function | module/createEvidenceWorkspace |  |
+| 133:33 | path | parameter | module/createEvidenceWorkspace/writeOperation | path |
+| 133:39 | body | parameter | module/createEvidenceWorkspace/writeOperation | body |
+| 133:45 | method | parameter | module/createEvidenceWorkspace/writeOperation | method |
+| 133:53 | onSuccess | parameter | module/createEvidenceWorkspace/writeOperation | onSuccess |
+| 135:11 | request | const | module/createEvidenceWorkspace/writeOperation | generation |
+| 137:13 | result | const | module/createEvidenceWorkspace/writeOperation | await api(path, { method, body: JSON.stringify(body) }) |
+| 140:14 | error | catch | module/createEvidenceWorkspace/writeOperation |  |
+| 143:34 | event | parameter | module/createEvidenceWorkspace/anonymous@143 | event |
+| 145:11 | queryFields | const | module/createEvidenceWorkspace/anonymous@143 | { 'evidence-query': 'query', 'evidence-year-from': 'yearFrom', 'evidence-year-to': 'yearTo' } |
+| 147:11 | fields | const | module/createEvidenceWorkspace/anonymous@143 | { 'evidence-review-note': 'note', 'evidence-review-text': 'evidenceText', 'evidence-review-locator': 'locator' } |
+| 150:35 | event | parameter | module/createEvidenceWorkspace/anonymous@150 | event |
+| 155:35 | event | parameter | module/createEvidenceWorkspace/anonymous@155 | event |
+| 160:140 | result | parameter | module/createEvidenceWorkspace/anonymous@155/anonymous@160 | result |
+| 165:40 | event | parameter | module/createEvidenceWorkspace/anonymous@165 | event |
+| 166:11 | button | const | module/createEvidenceWorkspace/anonymous@165 | event.target.closest('[data-evidence]') |
+| 167:11 | action | const | module/createEvidenceWorkspace/anonymous@165 | button.dataset.evidence |
+| 173:13 | article | const | module/createEvidenceWorkspace/anonymous@165 | searchResult?.results[Number(button.dataset.index)] |
+| 174:136 | result | parameter | module/createEvidenceWorkspace/anonymous@165/anonymous@174 | result |
+| 178:13 | bookmark | const | module/createEvidenceWorkspace/anonymous@165 | library.bookmarks.find(item =&gt; item.id === button.dataset.id) |
+| 178:47 | item | parameter | module/createEvidenceWorkspace/anonymous@165/anonymous@178 | item |
+| 183:13 | request | const | module/createEvidenceWorkspace/anonymous@165 | generation |
+| 185:15 | result | const | module/createEvidenceWorkspace/anonymous@165 | await api('/api/clinician/evidence/searches/${encodeURIComponent(button.dataset.id)}') |
+| 190:16 | error | catch | module/createEvidenceWorkspace/anonymous@165 |  |
+
+## public/clinician-research.js
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:7 | esc | const | module | value=&gt;String(value??'').replace(/[&amp;&lt;&gt;"']/g,c=&gt;({'&amp;':'&amp;amp;','&lt;':'&amp;lt;','&gt;':'&amp;gt;','"':'&amp;quot;',"'":'&amp;#39;'}[c])) |
+| 1:11 | value | parameter | module/anonymous@1 | value |
+| 1:55 | c | parameter | module/anonymous@1/anonymous@1 | c |
+| 2:7 | number | const | module | value=&gt;value===null\|\|value===undefined?'산출 불가':Number(value).toLocaleString('ko-KR',{maximumFractionDigits:2}) |
+| 2:14 | value | parameter | module/anonymous@2 | value |
+| 3:7 | dayOffset | const | module | (date,days)=&gt;new Date(Date.parse(date+'T12:00:00Z')+days*86400000).toISOString().slice(0,10) |
+| 3:18 | date | parameter | module/anonymous@3 | date |
+| 3:23 | days | parameter | module/anonymous@3 | days |
+| 6:17 | createResearchWorkspace | function | module |  |
+| 6:42 | api | parameter | module/createResearchWorkspace | {api,getState,toast} |
+| 6:46 | getState | parameter | module/createResearchWorkspace | {api,getState,toast} |
+| 6:55 | toast | parameter | module/createResearchWorkspace | {api,getState,toast} |
+| 7:9 | root | const | module/createResearchWorkspace | document.querySelector('#app-content') |
+| 8:9 | $ | const | module/createResearchWorkspace | selector=&gt;root.querySelector(selector) |
+| 8:11 | selector | parameter | module/createResearchWorkspace/anonymous@8 | selector |
+| 9:7 | mounted | let | module/createResearchWorkspace | '' |
+| 9:18 | generation | let | module/createResearchWorkspace | 0 |
+| 9:31 | loading | let | module/createResearchWorkspace | false |
+| 9:45 | saving | let | module/createResearchWorkspace | false |
+| 9:58 | preview | let | module/createResearchWorkspace | null |
+| 9:71 | snapshot | let | module/createResearchWorkspace | null |
+| 9:85 | baseline | let | module/createResearchWorkspace | '' |
+| 9:97 | requestKey | let | module/createResearchWorkspace | '' |
+| 9:111 | requestId | let | module/createResearchWorkspace | '' |
+| 10:9 | allowed | const | module/createResearchWorkspace | capability=&gt;getState().staffAccess?.capabilities?.includes(capability) |
+| 10:17 | capability | parameter | module/createResearchWorkspace/anonymous@10 | capability |
+| 11:12 | values | function | module/createResearchWorkspace |  |
+| 13:11 | body | const | module/createResearchWorkspace/values | {startDate:$('#research-start').value,endDate:$('#research-end').value,source:$('#research-source').value} |
+| 14:127 | el | parameter | module/createResearchWorkspace/values/anonymous@14 | el |
+| 17:12 | dirty | function | module/createResearchWorkspace |  |
+| 18:12 | canLeave | function | module/createResearchWorkspace |  |
+| 19:12 | fail | function | module/createResearchWorkspace |  |
+| 19:17 | error | parameter | module/createResearchWorkspace/fail | error |
+| 20:12 | lock | function | module/createResearchWorkspace |  |
+| 20:17 | locked | parameter | module/createResearchWorkspace/lock | locked |
+| 20:87 | el | parameter | module/createResearchWorkspace/lock/anonymous@20 | el |
+| 21:12 | clearError | function | module/createResearchWorkspace |  |
+| 22:12 | valid | function | module/createResearchWorkspace |  |
+| 22:18 | body | parameter | module/createResearchWorkspace/valid | body |
+| 23:11 | days | const | module/createResearchWorkspace/valid | (Date.parse(body.endDate)-Date.parse(body.startDate))/86400000+1 |
+| 28:12 | statsTable | function | module/createResearchWorkspace |  |
+| 28:23 | stats | parameter | module/createResearchWorkspace/statsTable | stats |
+| 28:29 | countLabel | parameter | module/createResearchWorkspace/statsTable | countLabel='관측 수' |
+| 29:12 | renderResult | function | module/createResearchWorkspace |  |
+| 29:25 | result | parameter | module/createResearchWorkspace/renderResult | result |
+| 30:11 | s | const | module/createResearchWorkspace/renderResult | result.summary\|\|{} |
+| 30:32 | metricNames | const | module/createResearchWorkspace/renderResult | {steps:'걸음 수',sleepHours:'수면 시간',weightKg:'체중',calories:'기록된 끼니의 영양 추정 합계',proteinGrams:'기록된 끼니의 단백질 추정 합계'} |
+| 31:706 | key | parameter | module/createResearchWorkspace/renderResult/anonymous@31 | [key,m] |
+| 31:710 | m | parameter | module/createResearchWorkspace/renderResult/anonymous@31 | [key,m] |
+| 31:1126 | source | parameter | module/createResearchWorkspace/renderResult/anonymous@31/anonymous@31 | [source,count] |
+| 31:1133 | count | parameter | module/createResearchWorkspace/renderResult/anonymous@31/anonymous@31 | [source,count] |
+| 33:12 | renderSnapshot | function | module/createResearchWorkspace |  |
+| 34:11 | el | const | module/createResearchWorkspace/renderSnapshot | $('#research-snapshot') |
+| 38:12 | mount | function | module/createResearchWorkspace |  |
+| 39:11 | state | const | module/createResearchWorkspace/mount | getState() |
+| 39:28 | key | const | module/createResearchWorkspace/mount | [state.startDate,state.endDate,(state.staffAccess?.assignedPatientIds\|\|[]).join(',')].join('\|') |
+| 42:11 | start | const | module/createResearchWorkspace/mount | state.startDate\|\|dayOffset(state.data.today,-6) |
+| 42:65 | end | const | module/createResearchWorkspace/mount | state.endDate\|\|state.data.today |
+| 43:1124 | p | parameter | module/createResearchWorkspace/mount/anonymous@43 | p |
+| 46:12 | deactivate | function | module/createResearchWorkspace |  |
+| 47:18 | load | function | module/createResearchWorkspace |  |
+| 48:58 | body | let | module/createResearchWorkspace/load | 초기값 없음 |
+| 49:37 | error | catch | module/createResearchWorkspace/load |  |
+| 50:11 | request | const | module/createResearchWorkspace/load | generation |
+| 50:30 | key | const | module/createResearchWorkspace/load | JSON.stringify(body) |
+| 52:11 | query | const | module/createResearchWorkspace/load | new URLSearchParams({...body,...(body.patientIds?{patientIds:body.patientIds.join(',')}:{})}) |
+| 53:15 | result | const | module/createResearchWorkspace/load | await api('/api/research/preview?'+query) |
+| 54:11 | error | catch | module/createResearchWorkspace/load |  |
+| 57:18 | saveSnapshot | function | module/createResearchWorkspace |  |
+| 59:11 | body | const | module/createResearchWorkspace/saveSnapshot | values() |
+| 59:25 | key | const | module/createResearchWorkspace/saveSnapshot | JSON.stringify({body,inputHash:preview.inputHash}) |
+| 60:11 | request | const | module/createResearchWorkspace/saveSnapshot | generation |
+| 61:15 | result | const | module/createResearchWorkspace/saveSnapshot | await api('/api/research/snapshots',{method:'POST',body:JSON.stringify({...body,clientRequestId:requestId,expectedInputHash:previe |
+| 62:11 | error | catch | module/createResearchWorkspace/saveSnapshot |  |
+| 64:12 | download | function | module/createResearchWorkspace |  |
+| 64:21 | data | parameter | module/createResearchWorkspace/download | data |
+| 64:26 | name | parameter | module/createResearchWorkspace/download | name |
+| 64:31 | type | parameter | module/createResearchWorkspace/download | type |
+| 64:43 | url | const | module/createResearchWorkspace/download | URL.createObjectURL(new Blob([data],{type})) |
+| 64:98 | link | const | module/createResearchWorkspace/download | document.createElement('a') |
+| 65:18 | readSnapshot | function | module/createResearchWorkspace |  |
+| 65:31 | exporting | parameter | module/createResearchWorkspace/readSnapshot | exporting=false |
+| 66:48 | request | const | module/createResearchWorkspace/readSnapshot | generation |
+| 68:13 | result | const | module/createResearchWorkspace/readSnapshot | await api('/api/research/snapshots/'+encodeURIComponent(snapshot.id)+(exporting?'/export':'')) |
+| 71:12 | error | catch | module/createResearchWorkspace/readSnapshot |  |
+| 73:34 | event | parameter | module/createResearchWorkspace/anonymous@73 | event |
+| 74:34 | event | parameter | module/createResearchWorkspace/anonymous@74 | event |
+| 74:163 | el | parameter | module/createResearchWorkspace/anonymous@74/anonymous@74 | el |
+| 75:33 | event | parameter | module/createResearchWorkspace/anonymous@75 | event |
+| 75:47 | action | const | module/createResearchWorkspace/anonymous@75 | event.target.closest('[data-research]')?.dataset.research |
+
+## public/clinician-workflow.js
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:7 | esc | const | module | value=&gt;String(value??'').replace(/[&amp;&lt;&gt;"']/g,c=&gt;({'&amp;':'&amp;amp;','&lt;':'&amp;lt;','&gt;':'&amp;gt;','"':'&amp;quot;',"'":'&amp;#39;'}[c])) |
+| 1:11 | value | parameter | module/anonymous@1 | value |
+| 1:55 | c | parameter | module/anonymous@1/anonymous@1 | c |
+| 2:7 | taskTypes | const | module | {contact:'환자 연락',photo_review:'사진 검토',data_quality:'자료 확인',clinical_review:'임상 검토'} |
+| 3:7 | statuses | const | module | {new:'새 업무',in_progress:'진행 중',waiting:'답변 대기',review_requested:'전문 검토 요청',completed:'완료'} |
+| 4:7 | photoStates | const | module | {unreviewed:'미검토',reviewed:'검토 완료',needs_information:'추가 정보 필요'} |
+| 5:7 | domains | const | module | {meal:'식사',medication:'복약',steps:'걸음',sleep:'수면',weight:'체중'} |
+| 6:7 | options | const | module | (items,selected)=&gt;Object.entries(items).map(([value,label])=&gt;'&lt;option value="${value}" ${value===selected?'selected':''}&gt;${label}&lt; |
+| 6:16 | items | parameter | module/anonymous@6 | items |
+| 6:22 | selected | parameter | module/anonymous@6 | selected |
+| 6:61 | value | parameter | module/anonymous@6/anonymous@6 | [value,label] |
+| 6:67 | label | parameter | module/anonymous@6/anonymous@6 | [value,label] |
+| 9:17 | createClinicalWorklist | function | module |  |
+| 9:41 | api | parameter | module/createClinicalWorklist | {api,getState,toast,selectPatient} |
+| 9:45 | getState | parameter | module/createClinicalWorklist | {api,getState,toast,selectPatient} |
+| 9:54 | toast | parameter | module/createClinicalWorklist | {api,getState,toast,selectPatient} |
+| 9:60 | selectPatient | parameter | module/createClinicalWorklist | {api,getState,toast,selectPatient} |
+| 10:9 | root | const | module/createClinicalWorklist | document.querySelector('#app-content') |
+| 10:53 | $ | const | module/createClinicalWorklist | selector=&gt;root.querySelector(selector) |
+| 10:55 | selector | parameter | module/createClinicalWorklist/anonymous@10 | selector |
+| 11:7 | mounted | let | module/createClinicalWorklist | '' |
+| 11:18 | generation | let | module/createClinicalWorklist | 0 |
+| 11:31 | loading | let | module/createClinicalWorklist | false |
+| 11:45 | saving | let | module/createClinicalWorklist | false |
+| 11:58 | mode | let | module/createClinicalWorklist | 'tasks' |
+| 11:71 | offset | let | module/createClinicalWorklist | 0 |
+| 11:80 | data | let | module/createClinicalWorklist | null |
+| 11:90 | editor | let | module/createClinicalWorklist | null |
+| 11:102 | baseline | let | module/createClinicalWorklist | '' |
+| 11:114 | requestKey | let | module/createClinicalWorklist | '' |
+| 11:128 | requestId | let | module/createClinicalWorklist | '' |
+| 12:9 | can | const | module/createClinicalWorklist | capability=&gt;getState().staffAccess?.capabilities?.includes(capability) |
+| 12:13 | capability | parameter | module/createClinicalWorklist/anonymous@12 | capability |
+| 13:9 | patient | const | module/createClinicalWorklist | ()=&gt;getState().data?.patients.find(p=&gt;p.id===getState().selectedId) |
+| 13:52 | p | parameter | module/createClinicalWorklist/anonymous@13/anonymous@13 | p |
+| 14:9 | endpoint | const | module/createClinicalWorklist | ()=&gt;'/api/patients/${encodeURIComponent(getState().selectedId)}' |
+| 15:12 | values | function | module/createClinicalWorklist |  |
+| 15:150 | el | parameter | module/createClinicalWorklist/values/anonymous@15 | el |
+| 16:9 | dirty | const | module/createClinicalWorklist | ()=&gt;Boolean(mounted&amp;&amp;baseline!==values()) |
+| 17:12 | canLeave | function | module/createClinicalWorklist |  |
+| 18:12 | fail | function | module/createClinicalWorklist |  |
+| 18:17 | error | parameter | module/createClinicalWorklist/fail | error |
+| 18:30 | el | const | module/createClinicalWorklist/fail | $('#workflow-error') |
+| 19:12 | editorButtons | function | module/createClinicalWorklist |  |
+| 19:26 | label | parameter | module/createClinicalWorklist/editorButtons | label='저장' |
+| 20:12 | paginate | function | module/createClinicalWorklist |  |
+| 20:21 | total | parameter | module/createClinicalWorklist/paginate | total |
+| 21:12 | summaryPatch | function | module/createClinicalWorklist |  |
+| 21:25 | patch | parameter | module/createClinicalWorklist/summaryPatch | patch |
+| 21:38 | names | const | module/createClinicalWorklist/summaryPatch | {steps:'걸음 수',sleepHours:'수면 시간',weightKg:'체중',medicationStatus:'일일 복약',appetite:'식욕',mood:'기분',note:'메모'} |
+| 21:190 | key | parameter | module/createClinicalWorklist/summaryPatch/anonymous@21 | [key,value] |
+| 21:194 | value | parameter | module/createClinicalWorklist/summaryPatch/anonymous@21 | [key,value] |
+| 22:12 | renderEditor | function | module/createClinicalWorklist |  |
+| 24:11 | item | const | module/createClinicalWorklist/renderEditor | editor.item\|\|{} |
+| 24:32 | kind | const | module/createClinicalWorklist/renderEditor | editor.kind |
+| 25:654 | key | parameter | module/createClinicalWorklist/renderEditor/anonymous@25 | [key] |
+| 28:13 | records | const | module/createClinicalWorklist/renderEditor | editor.records\|\|[] |
+| 29:268 | record | parameter | module/createClinicalWorklist/renderEditor/anonymous@29 | record |
+| 32:840 | key | parameter | module/createClinicalWorklist/renderEditor/anonymous@32 | [key,label] |
+| 32:844 | label | parameter | module/createClinicalWorklist/renderEditor/anonymous@32 | [key,label] |
+| 33:565 | key | parameter | module/createClinicalWorklist/renderEditor/anonymous@33 | [key,label] |
+| 33:569 | label | parameter | module/createClinicalWorklist/renderEditor/anonymous@33 | [key,label] |
+| 37:12 | renderContent | function | module/createClinicalWorklist |  |
+| 39:202 | item | parameter | module/createClinicalWorklist/renderContent/anonymous@39 | item |
+| 39:819 | event | parameter | module/createClinicalWorklist/renderContent/anonymous@39/anonymous@39 | event |
+| 40:160 | item | parameter | module/createClinicalWorklist/renderContent/anonymous@40 | item |
+| 41:232 | item | parameter | module/createClinicalWorklist/renderContent/anonymous@41 | item |
+| 42:38 | item | const | module/createClinicalWorklist/renderContent | data.participation |
+| 42:504 | key | parameter | module/createClinicalWorklist/renderContent/anonymous@42 | key |
+| 43:171 | item | parameter | module/createClinicalWorklist/renderContent/anonymous@43 | item |
+| 45:12 | render | function | module/createClinicalWorklist |  |
+| 46:11 | state | const | module/createClinicalWorklist/render | getState() |
+| 46:28 | tabs | const | module/createClinicalWorklist/render | {tasks:'업무 목록',photos:'사진 검토',corrections:'원기록 정정',participation:'참여 계획',...(can('delegation.write')?{delegations:'위임 계획'}:{})} |
+| 47:155 | p | parameter | module/createClinicalWorklist/render/anonymous@47 | p |
+| 47:448 | key | parameter | module/createClinicalWorklist/render/anonymous@47 | [key,label] |
+| 47:452 | label | parameter | module/createClinicalWorklist/render/anonymous@47 | [key,label] |
+| 50:12 | mount | function | module/createClinicalWorklist |  |
+| 50:26 | key | const | module/createClinicalWorklist/mount | getState().selectedId\|\|'none' |
+| 51:12 | deactivate | function | module/createClinicalWorklist |  |
+| 52:18 | load | function | module/createClinicalWorklist |  |
+| 52:58 | ticket | const | module/createClinicalWorklist/load | ++generation |
+| 52:118 | query | const | module/createClinicalWorklist/load | new URLSearchParams({limit:20,offset}) |
+| 52:169 | path | const | module/createClinicalWorklist/load | mode==='tasks'?'/api/clinician/tasks?'+new URLSearchParams({patientId:getState().selectedId,limit:20,offset}):endpoint()+'/'+({pho |
+| 52:477 | result | const | module/createClinicalWorklist/load | await api(path) |
+| 52:572 | error | catch | module/createClinicalWorklist/load |  |
+| 53:12 | begin | function | module/createClinicalWorklist |  |
+| 53:18 | kind | parameter | module/createClinicalWorklist/begin | kind |
+| 53:23 | item | parameter | module/createClinicalWorklist/begin | item |
+| 53:160 | record | parameter | module/createClinicalWorklist/begin/anonymous@53 | record |
+| 54:18 | save | function | module/createClinicalWorklist |  |
+| 54:23 | form | parameter | module/createClinicalWorklist/save | form |
+| 55:46 | kind | const | module/createClinicalWorklist/save | editor.kind |
+| 55:63 | item | const | module/createClinicalWorklist/save | editor.item\|\|{} |
+| 55:84 | fields | const | module/createClinicalWorklist/save | new FormData(form) |
+| 55:114 | body | let | module/createClinicalWorklist/save | 초기값 없음 |
+| 55:119 | path | let | module/createClinicalWorklist/save | 초기값 없음 |
+| 55:124 | method | let | module/createClinicalWorklist/save | 'POST' |
+| 59:37 | record | const | module/createClinicalWorklist/save | editor.source |
+| 59:181 | value | const | module/createClinicalWorklist/save | fields.has('unknown')?null:Number(fields.get('value')) |
+| 64:13 | key | const | module/createClinicalWorklist/save | JSON.stringify({path,method,body}) |
+| 65:81 | el | parameter | module/createClinicalWorklist/save/anonymous@65 | el |
+| 67:12 | error | catch | module/createClinicalWorklist/save |  |
+| 67:111 | el | parameter | module/createClinicalWorklist/save/anonymous@67 | el |
+| 69:12 | showCorrectionSource | function | module/createClinicalWorklist |  |
+| 69:41 | form | const | module/createClinicalWorklist/showCorrectionSource | $('#workflow-editor') |
+| 69:68 | record | const | module/createClinicalWorklist/showCorrectionSource | editor?.source |
+| 70:18 | loadCorrectionSource | function | module/createClinicalWorklist |  |
+| 70:39 | date | parameter | module/createClinicalWorklist/loadCorrectionSource | date |
+| 71:71 | activeEditor | const | module/createClinicalWorklist/loadCorrectionSource | editor |
+| 71:91 | ticket | const | module/createClinicalWorklist/loadCorrectionSource | generation |
+| 71:218 | controls | const | module/createClinicalWorklist/loadCorrectionSource | [...$('#workflow-editor').querySelectorAll('input,select,textarea,button')] |
+| 71:309 | disabled | const | module/createClinicalWorklist/loadCorrectionSource | controls.map(el=&gt;el.disabled) |
+| 71:331 | el | parameter | module/createClinicalWorklist/loadCorrectionSource/anonymous@71 | el |
+| 71:365 | el | parameter | module/createClinicalWorklist/loadCorrectionSource/anonymous@71 | el |
+| 72:15 | result | const | module/createClinicalWorklist/loadCorrectionSource | await api(endpoint()+'/daily?'+new URLSearchParams({date})) |
+| 72:193 | error | catch | module/createClinicalWorklist/loadCorrectionSource |  |
+| 72:346 | el | parameter | module/createClinicalWorklist/loadCorrectionSource/anonymous@72 | el |
+| 72:349 | i | parameter | module/createClinicalWorklist/loadCorrectionSource/anonymous@72 | i |
+| 74:34 | event | parameter | module/createClinicalWorklist/anonymous@74 | event |
+| 75:34 | event | parameter | module/createClinicalWorklist/anonymous@75 | event |
+| 77:52 | id | const | module/createClinicalWorklist/anonymous@75 | event.target.value |
+| 78:45 | input | const | module/createClinicalWorklist/anonymous@75 | $('#workflow-editor [name=value]') |
+| 82:33 | event | parameter | module/createClinicalWorklist/anonymous@82 | event |
+| 83:30 | tab | const | module/createClinicalWorklist/anonymous@82 | event.target.closest('[data-workflow-mode]') |
+| 84:11 | button | const | module/createClinicalWorklist/anonymous@82 | event.target.closest('[data-workflow]') |
+| 84:82 | action | const | module/createClinicalWorklist/anonymous@82 | button.dataset.workflow |
+| 84:113 | id | const | module/createClinicalWorklist/anonymous@82 | button.dataset.id |
+| 86:59 | task | const | module/createClinicalWorklist/anonymous@82 | data.tasks.find(item=&gt;item.id===id) |
+| 86:80 | item | parameter | module/createClinicalWorklist/anonymous@82/anonymous@86 | item |
+| 87:87 | item | parameter | module/createClinicalWorklist/anonymous@82/anonymous@87 | item |
+| 89:103 | item | parameter | module/createClinicalWorklist/anonymous@82/anonymous@89 | item |
+| 92:88 | item | parameter | module/createClinicalWorklist/anonymous@82/anonymous@92 | item |
 
 ## public/clinician.js
 
@@ -2050,424 +3225,508 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 1:10 | bootstrapSession | import | module | ./session.js |
 | 1:28 | sessionHeaders | import | module | ./session.js |
 | 1:44 | sessionExpired | import | module | ./session.js |
+| 1:60 | sessionState | import | module | ./session.js |
+| 1:74 | assertSessionActive | import | module | ./session.js |
 | 2:10 | createClinicianCommunications | import | module | ./clinician-communications.js |
-| 5:9 | icons | const | module/anonymous@4 | { grid: '&lt;rect x="3" y="3" width="7" height="7" rx="1.5"/&gt;&lt;rect x="14" y="3" width="7" height="7" rx="1.5"/&gt;&lt;rect x="3" y="14" wid |
-| 33:9 | icon | const | module/anonymous@4 | (name, cls = '') =&gt; '&lt;svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap= |
-| 33:17 | name | parameter | module/anonymous@4/anonymous@33 | name |
-| 33:23 | cls | parameter | module/anonymous@4/anonymous@33 | cls = '' |
-| 34:9 | esc | const | module/anonymous@4 | value =&gt; String(value ?? '').replace(/[&amp;&lt;&gt;"']/g, char =&gt; ({'&amp;':'&amp;amp;','&lt;':'&amp;lt;','&gt;':'&amp;gt;','"':'&amp;quot;',"'":'&amp;#39;'}[char])) |
-| 34:15 | value | parameter | module/anonymous@4/anonymous@34 | value |
-| 34:64 | char | parameter | module/anonymous@4/anonymous@34/anonymous@34 | char |
-| 35:9 | num | const | module/anonymous@4 | (value, digits = 0) =&gt; value === null \|\| value === undefined \|\| !Number.isFinite(Number(value)) ? '—' : Number(value).toLocaleStri |
-| 35:16 | value | parameter | module/anonymous@4/anonymous@35 | value |
-| 35:23 | digits | parameter | module/anonymous@4/anonymous@35 | digits = 0 |
-| 36:9 | val | const | module/anonymous@4 | (metrics, key) =&gt; typeof metrics?.[key] === 'object' ? metrics[key]?.value : metrics?.[key] |
-| 36:16 | metrics | parameter | module/anonymous@4/anonymous@36 | metrics |
-| 36:25 | key | parameter | module/anonymous@4/anonymous@36 | key |
-| 37:9 | present | const | module/anonymous@4 | value =&gt; value !== null &amp;&amp; value !== undefined &amp;&amp; Number.isFinite(Number(value)) |
-| 37:19 | value | parameter | module/anonymous@4/anonymous@37 | value |
-| 38:9 | clamp | const | module/anonymous@4 | (value, min, max) =&gt; Math.min(max, Math.max(min, Number(value) \|\| 0)) |
-| 38:18 | value | parameter | module/anonymous@4/anonymous@38 | value |
-| 38:25 | min | parameter | module/anonymous@4/anonymous@38 | min |
-| 38:30 | max | parameter | module/anonymous@4/anonymous@38 | max |
-| 39:9 | shortDate | const | module/anonymous@4 | date =&gt; date ? date.slice(5).replace('-', '.') : '기록 없음' |
-| 39:21 | date | parameter | module/anonymous@4/anonymous@39 | date |
-| 40:9 | sexLabel | const | module/anonymous@4 | sex =&gt; ({ female:'여', male:'남', other:'기타' }[sex] \|\| '미입력') |
-| 40:20 | sex | parameter | module/anonymous@4/anonymous@40 | sex |
-| 41:9 | riskLabel | const | module/anonymous@4 | risk =&gt; risk?.label \|\| ({ high:'확인 우선',watch:'관찰 필요',stable:'안정적 기록',insufficient:'자료 부족' }[risk?.level] \|\| '자료 부족') |
-| 41:21 | risk | parameter | module/anonymous@4/anonymous@41 | risk |
-| 42:9 | riskClass | const | module/anonymous@4 | risk =&gt; ['high','watch','stable','insufficient'].includes(risk?.level) ? risk.level : 'insufficient' |
-| 42:21 | risk | parameter | module/anonymous@4/anonymous@42 | risk |
-| 43:9 | riskPill | const | module/anonymous@4 | risk =&gt; '&lt;span class="risk-pill ${riskClass(risk)}"&gt;${esc(riskLabel(risk))}&lt;/span&gt;' |
-| 43:20 | risk | parameter | module/anonymous@4/anonymous@43 | risk |
-| 44:9 | medLabel | const | module/anonymous@4 | status =&gt; ({taken:'복용 보고',partial:'일부 복용',missed:'미복용 보고',unknown:'알 수 없음'}[status] \|\| '미기록') |
-| 44:20 | status | parameter | module/anonymous@4/anonymous@44 | status |
-| 45:9 | foodLabel | const | module/anonymous@4 | food =&gt; ({balanced:'밥과 반찬',porridge:'죽',protein:'단백질 중심',noodles:'면 요리'}[food] \|\| food \|\| '식사') |
-| 45:21 | food | parameter | module/anonymous@4/anonymous@45 | food |
-| 46:9 | healthSourceName | const | module/anonymous@4 | source =&gt; ({'patient-self-report':'수동 자기보고','health-connect':'Health Connect 수신','apple-health':'Apple Health 수신'}[source] \|\| '출처  |
-| 46:28 | source | parameter | module/anonymous@4/anonymous@46 | source |
-| 47:9 | healthSourceSummary | const | module/anonymous@4 | metric =&gt; { const entries=Object.entries(metric?.sourceCounts\|\|{}).filter(([,days])=&gt;Number(days)&gt;0); return entries.length ? entr |
-| 47:31 | metric | parameter | module/anonymous@4/anonymous@47 | metric |
-| 48:11 | entries | const | module/anonymous@4/anonymous@47 | Object.entries(metric?.sourceCounts\|\|{}).filter(([,days])=&gt;Number(days)&gt;0) |
-| 48:70 | days | parameter | module/anonymous@4/anonymous@47/anonymous@48 | [,days] |
-| 49:43 | source | parameter | module/anonymous@4/anonymous@47/anonymous@49 | [source,days] |
-| 49:50 | days | parameter | module/anonymous@4/anonymous@47/anonymous@49 | [source,days] |
-| 51:9 | mealSourceLabel | const | module/anonymous@4 | meal =&gt; meal.source==='openai-image-estimate-v1' ? 'AI 사진 추정${meal.estimation?.patientConfirmed?' · 환자 확인':''}' : meal.source==='d |
-| 51:27 | meal | parameter | module/anonymous@4/anonymous@51 | meal |
-| 52:9 | mealLabel | const | module/anonymous@4 | meal =&gt; ({breakfast:'아침',lunch:'점심',dinner:'저녁',snack:'간식'}[meal] \|\| '식사') |
-| 52:21 | meal | parameter | module/anonymous@4/anonymous@52 | meal |
-| 53:9 | state | const | module/anonymous@4 | { view:'overview', data:null, summary:null, selectedId:new URLSearchParams(location.search).get('patientId'), filter:'all', search |
-| 54:9 | viewTitles | const | module/anonymous@4 | { overview:['CARE AT A GLANCE','오늘의 돌봄 현황','환자의 일상을 연결하고, 필요한 돌봄을 먼저 살펴보세요.','케어 대시보드'], patients:['PATIENT WORKSPACE','환자 관리','기록 |
-| 64:9 | urlView | const | module/anonymous@4 | new URLSearchParams(location.search).get('view') |
-| 66:9 | $ | const | module/anonymous@4 | selector =&gt; document.querySelector(selector) |
-| 66:13 | selector | parameter | module/anonymous@4/anonymous@66 | selector |
-| 67:52 | el | parameter | module/anonymous@4/anonymous@67 | el |
-| 68:9 | communication | const | module/anonymous@4 | createClinicianCommunications({api,getState:()=&gt;state,toast,selectPatient,invite:openInvitation}) |
-| 69:7 | historyIndex | let | module/anonymous@4 | Number(history.state?.hcClinicianIndex)\|\|0 |
-| 69:63 | restoringHistory | let | module/anonymous@4 | false |
-| 71:18 | api | function | module/anonymous@4 |  |
-| 71:22 | path | parameter | module/anonymous@4/api | path |
-| 71:28 | options | parameter | module/anonymous@4/api | options = {} |
-| 72:11 | response | const | module/anonymous@4/api | await fetch(path, { ...options, headers:{ 'Content-Type':'application/json', ...sessionHeaders(), ...options.headers } }) |
-| 73:11 | result | const | module/anonymous@4/api | await response.json().catch(() =&gt; ({})) |
-| 78:12 | syncUrl | function | module/anonymous@4 |  |
-| 78:20 | historyMode | parameter | module/anonymous@4/syncUrl | historyMode = 'replace' |
-| 79:11 | url | const | module/anonymous@4/syncUrl | new URL(location.href) |
-| 85:12 | focusPage | function | module/anonymous@4 |  |
-| 89:12 | restoreRoute | function | module/anonymous@4 |  |
-| 89:25 | event | parameter | module/anonymous@4/restoreRoute | event |
-| 90:11 | target | const | module/anonymous@4/restoreRoute | Number(event.state?.hcClinicianIndex)\|\|0 |
-| 92:41 | delta | const | module/anonymous@4/restoreRoute | historyIndex-target |
-| 94:11 | params | const | module/anonymous@4/restoreRoute | new URLSearchParams(location.search) |
-| 95:11 | view | const | module/anonymous@4/restoreRoute | params.get('view') |
-| 95:35 | patientId | const | module/anonymous@4/restoreRoute | params.get('patientId') |
-| 95:69 | date | const | module/anonymous@4/restoreRoute | params.get('medicationDate') |
-| 102:11 | selected | const | module/anonymous@4/restoreRoute | state.data?.patients.some(p=&gt;p.id===patientId)?patientId:state.data?.patients[0]?.id\|\|null |
-| 102:46 | p | parameter | module/anonymous@4/restoreRoute/anonymous@102 | p |
-| 110:12 | showError | function | module/anonymous@4 |  |
-| 110:22 | message | parameter | module/anonymous@4/showError | message |
-| 111:7 | toastTimer | let | module/anonymous@4 | 초기값 없음 |
-| 112:12 | toast | function | module/anonymous@4 |  |
-| 112:18 | message | parameter | module/anonymous@4/toast | message |
-| 112:27 | error | parameter | module/anonymous@4/toast | error = false |
-| 112:50 | el | const | module/anonymous@4/toast | $('#toast') |
-| 113:7 | refreshQueue | let | module/anonymous@4 | Promise.resolve() |
-| 114:12 | refresh | function | module/anonymous@4 |  |
-| 114:20 | options | parameter | module/anonymous@4/refresh | options = {} |
-| 115:11 | operation | const | module/anonymous@4/refresh | refreshQueue.then(() =&gt; performRefresh(options)) |
-| 119:18 | performRefresh | function | module/anonymous@4 |  |
-| 119:34 | quiet | parameter | module/anonymous@4/performRefresh | {quiet = false} = {} |
-| 123:13 | data | const | module/anonymous@4/performRefresh | await api('/api/dashboard') |
-| 126:30 | p | parameter | module/anonymous@4/performRefresh/anonymous@126 | p |
-| 126:101 | a | parameter | module/anonymous@4/performRefresh/anonymous@126 | a |
-| 126:103 | b | parameter | module/anonymous@4/performRefresh/anonymous@126 | b |
-| 128:15 | selected | const | module/anonymous@4/performRefresh | state.selectedId |
-| 128:41 | request | const | module/anonymous@4/performRefresh | state.selectionRequest |
-| 129:15 | summary | const | module/anonymous@4/performRefresh | await api('/api/patients/${encodeURIComponent(selected)}/summary') |
-| 142:13 | error | catch | module/anonymous@4/performRefresh |  |
-| 145:18 | selectPatient | function | module/anonymous@4 |  |
-| 145:32 | id | parameter | module/anonymous@4/selectPatient | id |
-| 145:36 | changeView | parameter | module/anonymous@4/selectPatient | changeView = false |
-| 145:57 | historyMode | parameter | module/anonymous@4/selectPatient | {historyMode='push'} = {} |
-| 146:35 | p | parameter | module/anonymous@4/selectPatient/anonymous@146 | p |
-| 151:11 | request | const | module/anonymous@4/selectPatient | ++state.selectionRequest |
-| 156:13 | summary | const | module/anonymous@4/selectPatient | await api('/api/patients/${encodeURIComponent(id)}/summary') |
-| 162:13 | error | catch | module/anonymous@4/selectPatient |  |
-| 165:12 | spark | function | module/anonymous@4 |  |
-| 165:18 | values | parameter | module/anonymous@4/spark | values |
-| 165:25 | color | parameter | module/anonymous@4/spark | color='#80b7a7' |
-| 165:41 | width | parameter | module/anonymous@4/spark | width=76 |
-| 165:50 | height | parameter | module/anonymous@4/spark | height=25 |
-| 166:11 | numeric | const | module/anonymous@4/spark | values.filter(present).map(Number) |
-| 167:11 | min | const | module/anonymous@4/spark | Math.min(...numeric) |
-| 167:36 | max | const | module/anonymous@4/spark | Math.max(...numeric) |
-| 167:67 | range | const | module/anonymous@4/spark | max-min\|\|1 |
-| 168:11 | coords | const | module/anonymous@4/spark | values.map((v,i)=&gt;present(v)?'${i/(Math.max(values.length-1,1))*width},${height-3-(v-min)/range*(height-7)}':null) |
-| 168:30 | v | parameter | module/anonymous@4/spark/anonymous@168 | v |
-| 168:32 | i | parameter | module/anonymous@4/spark/anonymous@168 | i |
-| 169:9 | d | let | module/anonymous@4/spark | '' |
-| 169:18 | active | let | module/anonymous@4/spark | false |
-| 169:46 | p | parameter | module/anonymous@4/spark/anonymous@169 | p |
-| 172:12 | chart | function | module/anonymous@4 |  |
-| 172:18 | rows | parameter | module/anonymous@4/chart | rows |
-| 172:24 | key | parameter | module/anonymous@4/chart | key |
-| 172:30 | color | parameter | module/anonymous@4/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 172:46 | unit | parameter | module/anonymous@4/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 172:54 | type | parameter | module/anonymous@4/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 172:66 | height | parameter | module/anonymous@4/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 172:77 | max | parameter | module/anonymous@4/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 172:86 | secondary | parameter | module/anonymous@4/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 172:101 | label | parameter | module/anonymous@4/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
-| 174:11 | values | const | module/anonymous@4/chart | rows.map(r=&gt;r[key]) |
-| 174:27 | r | parameter | module/anonymous@4/chart/anonymous@174 | r |
-| 174:44 | numeric | const | module/anonymous@4/chart | values.filter(present).map(Number) |
-| 176:11 | w | const | module/anonymous@4/chart | 440 |
-| 176:17 | h | const | module/anonymous@4/chart | height |
-| 176:26 | left | const | module/anonymous@4/chart | 34 |
-| 176:34 | right | const | module/anonymous@4/chart | 12 |
-| 176:43 | top | const | module/anonymous@4/chart | 14 |
-| 176:50 | bottom | const | module/anonymous@4/chart | 25 |
-| 176:60 | plotW | const | module/anonymous@4/chart | w-left-right |
-| 176:79 | plotH | const | module/anonymous@4/chart | h-top-bottom |
-| 177:11 | ceiling | const | module/anonymous@4/chart | max \|\| Math.max(1,...numeric)*1.16 |
-| 178:11 | x | const | module/anonymous@4/chart | i=&gt;left+(rows.length===1?plotW/2:i/(rows.length-1)*plotW) |
-| 178:13 | i | parameter | module/anonymous@4/chart/anonymous@178 | i |
-| 179:11 | y | const | module/anonymous@4/chart | v=&gt;top+plotH-clamp(v,0,ceiling)/ceiling*plotH |
-| 179:13 | v | parameter | module/anonymous@4/chart/anonymous@179 | v |
-| 180:9 | content | let | module/anonymous@4/chart | '' |
-| 181:13 | i | let | module/anonymous@4/chart | 0 |
-| 181:34 | v | const | module/anonymous@4/chart | ceiling/3*i |
-| 181:54 | yy | const | module/anonymous@4/chart | y(v) |
-| 182:11 | interval | const | module/anonymous@4/chart | Math.max(1,Math.floor((rows.length-1)/4)) |
-| 182:76 | r | parameter | module/anonymous@4/chart/anonymous@182 | r |
-| 182:78 | i | parameter | module/anonymous@4/chart/anonymous@182 | i |
-| 184:13 | bw | const | module/anonymous@4/chart | Math.min(17,plotW/rows.length*.62) |
-| 185:23 | v | parameter | module/anonymous@4/chart/anonymous@185 | v |
-| 185:25 | i | parameter | module/anonymous@4/chart/anonymous@185 | i |
-| 187:11 | d | let | module/anonymous@4/chart | '' |
-| 187:16 | segment | let | module/anonymous@4/chart | [] |
-| 187:33 | segments | const | module/anonymous@4/chart | [] |
-| 188:23 | v | parameter | module/anonymous@4/chart/anonymous@188 | v |
-| 188:25 | i | parameter | module/anonymous@4/chart/anonymous@188 | i |
-| 189:24 | seg | parameter | module/anonymous@4/chart/anonymous@189 | seg |
-| 189:42 | p | parameter | module/anonymous@4/chart/anonymous@189/anonymous@189 | p |
-| 189:44 | i | parameter | module/anonymous@4/chart/anonymous@189/anonymous@189 | i |
-| 189:165 | p | parameter | module/anonymous@4/chart/anonymous@189/anonymous@189 | p |
-| 191:23 | v | parameter | module/anonymous@4/chart/anonymous@191 | v |
-| 191:25 | i | parameter | module/anonymous@4/chart/anonymous@191 | i |
-| 195:12 | stats | function | module/anonymous@4 |  |
-| 196:11 | s | const | module/anonymous@4/stats | state.data.stats |
-| 196:36 | ts | const | module/anonymous@4/stats | state.data.trends\|\|[] |
-| 197:11 | cards | const | module/anonymous@4/stats | [['전체 관리 환자',s.patients,'명','users','등록된 가상 환자','연구 참여 데모',ts.map(()=&gt;s.patients)],['확인이 필요한 환자',s.needsReview,'명','alert','기록에 따른 |
-| 197:177 | r | parameter | module/anonymous@4/stats/anonymous@197 | r |
-| 197:309 | r | parameter | module/anonymous@4/stats/anonymous@197 | r |
-| 197:417 | r | parameter | module/anonymous@4/stats/anonymous@197 | r |
-| 198:50 | c | parameter | module/anonymous@4/stats/anonymous@198 | c |
-| 198:52 | i | parameter | module/anonymous@4/stats/anonymous@198 | i |
-| 200:12 | filteredPatients | function | module/anonymous@4 |  |
-| 201:39 | p | parameter | module/anonymous@4/filteredPatients/anonymous@201 | p |
-| 203:12 | patientRows | function | module/anonymous@4 |  |
-| 203:24 | full | parameter | module/anonymous@4/patientRows | full = false |
-| 204:11 | patients | const | module/anonymous@4/patientRows | filteredPatients() |
-| 206:25 | p | parameter | module/anonymous@4/patientRows/anonymous@206 | p |
-| 208:12 | patientList | function | module/anonymous@4 |  |
-| 208:24 | full | parameter | module/anonymous@4/patientList | full = false |
-| 209:531 | key | parameter | module/anonymous@4/patientList/anonymous@209 | [key,label] |
-| 209:535 | label | parameter | module/anonymous@4/patientList/anonymous@209 | [key,label] |
-| 211:12 | briefingCard | function | module/anonymous@4 |  |
-| 212:11 | s | const | module/anonymous@4/briefingCard | state.summary |
-| 213:11 | first | const | module/anonymous@4/briefingCard | s.briefing.items.slice(0,3) |
-| 214:11 | headline | const | module/anonymous@4/briefingCard | s.risk.reasons.length?s.risk.reasons.slice(0,2).join('. ')+'.':'최근 기록의 변화를 확인하고, 방문 시 환자의 생활 상태와 함께 살펴보세요.' |
-| 215:584 | item | parameter | module/anonymous@4/briefingCard/anonymous@215 | item |
-| 217:12 | reportingChart | function | module/anonymous@4 |  |
-| 218:11 | t | const | module/anonymous@4/reportingChart | state.data.trends |
-| 221:12 | alerts | function | module/anonymous@4 |  |
-| 222:11 | alerts | const | module/anonymous@4/alerts | state.data.alerts.slice(0,3) |
-| 223:188 | a | parameter | module/anonymous@4/alerts/anonymous@223 | a |
-| 225:12 | metricPanels | function | module/anonymous@4 |  |
-| 226:11 | s | const | module/anonymous@4/metricPanels | state.summary |
-| 226:27 | m | const | module/anonymous@4/metricPanels | s.metrics |
-| 226:39 | t | const | module/anonymous@4/metricPanels | s.trends.slice(-14) |
-| 227:11 | panels | const | module/anonymous@4/metricPanels | [['steps','steps','평균 활동',num(m.steps.value),'걸음','${m.steps.coverageDays}/7일 활동 보고',healthSourceSummary(m.steps),'#7db6a4'],['sle |
-| 228:60 | key | parameter | module/anonymous@4/metricPanels/anonymous@228 | [key,ic,title,value,unit,caption,source,color] |
-| 228:64 | ic | parameter | module/anonymous@4/metricPanels/anonymous@228 | [key,ic,title,value,unit,caption,source,color] |
-| 228:67 | title | parameter | module/anonymous@4/metricPanels/anonymous@228 | [key,ic,title,value,unit,caption,source,color] |
-| 228:73 | value | parameter | module/anonymous@4/metricPanels/anonymous@228 | [key,ic,title,value,unit,caption,source,color] |
-| 228:79 | unit | parameter | module/anonymous@4/metricPanels/anonymous@228 | [key,ic,title,value,unit,caption,source,color] |
-| 228:84 | caption | parameter | module/anonymous@4/metricPanels/anonymous@228 | [key,ic,title,value,unit,caption,source,color] |
-| 228:92 | source | parameter | module/anonymous@4/metricPanels/anonymous@228 | [key,ic,title,value,unit,caption,source,color] |
-| 228:99 | color | parameter | module/anonymous@4/metricPanels/anonymous@228 | [key,ic,title,value,unit,caption,source,color] |
-| 228:353 | r | parameter | module/anonymous@4/metricPanels/anonymous@228/anonymous@228 | r |
-| 228:467 | r | parameter | module/anonymous@4/metricPanels/anonymous@228/anonymous@228 | r |
-| 230:12 | detailCharts | function | module/anonymous@4 |  |
-| 231:11 | t | const | module/anonymous@4/detailCharts | state.summary.trends.slice(-14) |
-| 232:11 | medication | const | module/anonymous@4/detailCharts | t.map(r=&gt;({...r,medValue:r.medicationStatus==='taken'?100:r.medicationStatus==='partial'?50:r.medicationStatus==='missed'?0:null}) |
-| 232:28 | r | parameter | module/anonymous@4/detailCharts/anonymous@232 | r |
-| 233:11 | panels | const | module/anonymous@4/detailCharts | [['활동 추이','최근 14일',t,'steps',{unit:'걸음',color:'#73ad98'},healthSourceSummary(state.summary.metrics.steps),'미기록일은 연결하지 않음'],['수면 추이 |
-| 234:59 | title | parameter | module/anonymous@4/detailCharts/anonymous@234 | [title,period,rows,key,options,note,right] |
-| 234:65 | period | parameter | module/anonymous@4/detailCharts/anonymous@234 | [title,period,rows,key,options,note,right] |
-| 234:72 | rows | parameter | module/anonymous@4/detailCharts/anonymous@234 | [title,period,rows,key,options,note,right] |
-| 234:77 | key | parameter | module/anonymous@4/detailCharts/anonymous@234 | [title,period,rows,key,options,note,right] |
-| 234:81 | options | parameter | module/anonymous@4/detailCharts/anonymous@234 | [title,period,rows,key,options,note,right] |
-| 234:89 | note | parameter | module/anonymous@4/detailCharts/anonymous@234 | [title,period,rows,key,options,note,right] |
-| 234:94 | right | parameter | module/anonymous@4/detailCharts/anonymous@234 | [title,period,rows,key,options,note,right] |
-| 236:12 | coverage | function | module/anonymous@4 |  |
-| 237:11 | s | const | module/anonymous@4/coverage | state.summary |
-| 237:27 | m | const | module/anonymous@4/coverage | s.metrics |
-| 237:45 | data | const | module/anonymous@4/coverage | [['활동',m.steps.coverageDays],['수면',m.sleepHours.coverageDays],['복약',m.medication.reportedDays],['식사',m.nutrition.recordedDays]] |
-| 238:146 | label | parameter | module/anonymous@4/coverage/anonymous@238 | [label,days] |
-| 238:152 | days | parameter | module/anonymous@4/coverage/anonymous@238 | [label,days] |
-| 238:630 | r | parameter | module/anonymous@4/coverage/anonymous@238 | r |
-| 240:12 | foodIllustration | function | module/anonymous@4 |  |
-| 240:29 | food | parameter | module/anonymous@4/foodIllustration | food |
-| 241:11 | content | const | module/anonymous@4/foodIllustration | {balanced:'&lt;ellipse cx="55" cy="54" rx="14" ry="18" fill="#e9ddc0"/&gt;&lt;circle cx="82" cy="37" r="11" fill="#88a276"/&gt;&lt;circle cx="93" |
-| 244:12 | meals | function | module/anonymous@4 |  |
-| 245:11 | meals | const | module/anonymous@4/meals | state.summary.recentMeals.slice(0,3) |
-| 246:256 | m | parameter | module/anonymous@4/meals/anonymous@246 | m |
-| 248:12 | recordTable | function | module/anonymous@4 |  |
-| 248:24 | full | parameter | module/anonymous@4/recordTable | full = false |
-| 249:11 | records | const | module/anonymous@4/recordTable | state.summary?.recentRecords.slice(0,full?14:5)\|\|[] |
-| 250:296 | r | parameter | module/anonymous@4/recordTable/anonymous@250 | r |
-| 252:12 | recentRecords | function | module/anonymous@4 |  |
-| 253:12 | expandedBriefing | function | module/anonymous@4 |  |
-| 254:11 | s | const | module/anonymous@4/expandedBriefing | state.summary |
-| 255:247 | item | parameter | module/anonymous@4/expandedBriefing/anonymous@255 | item |
-| 255:402 | e | parameter | module/anonymous@4/expandedBriefing/anonymous@255/anonymous@255 | e |
-| 257:12 | patientDetails | function | module/anonymous@4 |  |
-| 257:27 | expanded | parameter | module/anonymous@4/patientDetails | expanded = false |
-| 258:11 | s | const | module/anonymous@4/patientDetails | state.summary |
-| 259:997 | q | parameter | module/anonymous@4/patientDetails/anonymous@259 | q |
-| 261:12 | emptyWorkspace | function | module/anonymous@4 |  |
-| 264:12 | overview | function | module/anonymous@4 |  |
-| 267:12 | patientsView | function | module/anonymous@4 |  |
-| 269:11 | s | const | module/anonymous@4/patientsView | state.summary |
-| 272:12 | recordsView | function | module/anonymous@4 |  |
-| 274:129 | p | parameter | module/anonymous@4/recordsView/anonymous@274 | p |
-| 276:18 | loadIntegrationSettings | function | module/anonymous@4 |  |
-| 276:43 | renderAfter | parameter | module/anonymous@4/loadIntegrationSettings | {renderAfter=true}={} |
-| 283:12 | integrationSettings | function | module/anonymous@4 |  |
-| 284:11 | vision | const | module/anonymous@4/integrationSettings | state.capabilities?.vision |
-| 285:11 | status | const | module/anonymous@4/integrationSettings | state.capabilityError?'설정 상태 조회 실패':!vision?'설정 상태 확인 중':vision.available?'서버 설정 준비됨 · 실제 분석 필요':vision.reasonCode==='missing_key' |
-| 288:12 | settingsView | function | module/anonymous@4 |  |
-| 291:9 | medicationStatusLabel | const | module/anonymous@4 | status =&gt; ({taken:'복용 보고',missed:'미복용 보고',unknown:'기억 안 남',pending:'미응답'}[status] \|\| '미응답') |
-| 291:33 | status | parameter | module/anonymous@4/anonymous@291 | status |
-| 292:9 | medicationReason | const | module/anonymous@4 | reason =&gt; ({forgot:'깜빡함',side_effect:'불편한 증상',side_effects:'불편한 증상',unavailable:'약이 없음',refused:'복용 원치 않음',other:'기타',not_sure:'잘  |
-| 292:28 | reason | parameter | module/anonymous@4/anonymous@292 | reason |
-| 293:9 | reportTime | const | module/anonymous@4 | timestamp =&gt; timestamp ? new Date(timestamp).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-d |
-| 293:22 | timestamp | parameter | module/anonymous@4/anonymous@293 | timestamp |
-| 294:9 | medDate | const | module/anonymous@4 | () =&gt; state.medicationDate \|\| state.data?.today \|\| state.summary?.today \|\| '' |
-| 295:9 | medicationCurrent | const | module/anonymous@4 | () =&gt; state.medications?.patientId===state.selectedId &amp;&amp; state.medications?.date===medDate() ? state.medications : null |
-| 296:9 | orderActive | const | module/anonymous@4 | order =&gt; order.startDate&lt;=state.data.today &amp;&amp; (!order.endDate \|\| order.endDate&gt;=state.data.today) |
-| 296:23 | order | parameter | module/anonymous@4/anonymous@296 | order |
-| 297:12 | orderPeriodLabel | function | module/anonymous@4 |  |
-| 297:29 | order | parameter | module/anonymous@4/orderPeriodLabel | order |
-| 303:18 | loadMedications | function | module/anonymous@4 |  |
-| 303:35 | renderAfter | parameter | module/anonymous@4/loadMedications | {renderAfter=true}={} |
-| 305:11 | patientId | const | module/anonymous@4/loadMedications | state.selectedId |
-| 305:38 | date | const | module/anonymous@4/loadMedications | medDate() |
-| 305:53 | generation | const | module/anonymous@4/loadMedications | ++state.medicationRequest |
-| 308:13 | base | const | module/anonymous@4/loadMedications | '/api/patients/${encodeURIComponent(patientId)}' |
-| 309:14 | orders | const | module/anonymous@4/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
-| 309:21 | schedule | const | module/anonymous@4/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
-| 309:30 | events | const | module/anonymous@4/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
-| 312:13 | error | catch | module/anonymous@4/loadMedications |  |
-| 322:12 | medicationOrdersCard | function | module/anonymous@4 |  |
-| 322:33 | data | parameter | module/anonymous@4/medicationOrdersCard | data |
-| 323:11 | active | const | module/anonymous@4/medicationOrdersCard | data.orders.filter(orderActive).length |
-| 324:363 | order | parameter | module/anonymous@4/medicationOrdersCard/anonymous@324 | order |
-| 324:896 | time | parameter | module/anonymous@4/medicationOrdersCard/anonymous@324/anonymous@324 | time |
-| 326:12 | medicationScheduleCard | function | module/anonymous@4 |  |
-| 326:35 | data | parameter | module/anonymous@4/medicationScheduleCard | data |
-| 327:11 | schedule | const | module/anonymous@4/medicationScheduleCard | data.schedule |
-| 327:34 | totals | const | module/anonymous@4/medicationScheduleCard | schedule.summary\|\|{} |
-| 327:62 | slots | const | module/anonymous@4/medicationScheduleCard | schedule.slots\|\|[] |
-| 328:357 | key | parameter | module/anonymous@4/medicationScheduleCard/anonymous@328 | [key,label] |
-| 328:361 | label | parameter | module/anonymous@4/medicationScheduleCard/anonymous@328 | [key,label] |
-| 328:442 | s | parameter | module/anonymous@4/medicationScheduleCard/anonymous@328/anonymous@328 | s |
-| 328:576 | slot | parameter | module/anonymous@4/medicationScheduleCard/anonymous@328 | slot |
-| 330:12 | medicationPhotoReportsCard | function | module/anonymous@4 |  |
-| 330:39 | data | parameter | module/anonymous@4/medicationPhotoReportsCard | data |
-| 331:11 | reports | const | module/anonymous@4/medicationPhotoReportsCard | data.photoReports\|\|[] |
-| 332:260 | report | parameter | module/anonymous@4/medicationPhotoReportsCard/anonymous@332 | report |
-| 332:621 | event | parameter | module/anonymous@4/medicationPhotoReportsCard/anonymous@332/anonymous@332 | event |
-| 332:925 | candidate | parameter | module/anonymous@4/medicationPhotoReportsCard/anonymous@332/anonymous@332 | candidate |
-| 334:12 | medicationsView | function | module/anonymous@4 |  |
-| 336:11 | data | const | module/anonymous@4/medicationsView | medicationCurrent() |
-| 337:137 | p | parameter | module/anonymous@4/medicationsView/anonymous@337 | p |
-| 339:12 | medicationModalFrame | function | module/anonymous@4 |  |
-| 339:33 | type | parameter | module/anonymous@4/medicationModalFrame | type |
-| 339:38 | title | parameter | module/anonymous@4/medicationModalFrame | title |
-| 339:44 | description | parameter | module/anonymous@4/medicationModalFrame | description |
-| 346:12 | openMedicationOrder | function | module/anonymous@4 |  |
-| 353:18 | loadMedicationCapability | function | module/anonymous@4 |  |
-| 353:43 | generation | parameter | module/anonymous@4/loadMedicationCapability | generation |
-| 355:13 | capabilities | const | module/anonymous@4/loadMedicationCapability | await api('/api/capabilities') |
-| 357:13 | enabled | const | module/anonymous@4/loadMedicationCapability | capabilities.vision?.available===true |
-| 361:13 | error | catch | module/anonymous@4/loadMedicationCapability |  |
-| 365:12 | updatePhotoAnalyzeButton | function | module/anonymous@4 |  |
-| 369:12 | clearMedicationPhoto | function | module/anonymous@4 |  |
-| 377:12 | readMedicationPhoto | function | module/anonymous@4 |  |
-| 377:32 | file | parameter | module/anonymous@4/readMedicationPhoto | file |
-| 383:11 | generation | const | module/anonymous@4/readMedicationPhoto | state.modal.photoGeneration |
-| 383:50 | patientId | const | module/anonymous@4/readMedicationPhoto | state.modal.patientId |
-| 384:11 | reader | const | module/anonymous@4/readMedicationPhoto | new FileReader() |
-| 392:18 | analyzeMedicationPhoto | function | module/anonymous@4 |  |
-| 393:11 | modal | const | module/anonymous@4/analyzeMedicationPhoto | state.modal |
-| 395:11 | generation | const | module/anonymous@4/analyzeMedicationPhoto | modal.photoGeneration |
-| 395:44 | patientId | const | module/anonymous@4/analyzeMedicationPhoto | modal.patientId |
-| 399:13 | result | const | module/anonymous@4/analyzeMedicationPhoto | await api('/api/patients/${encodeURIComponent(patientId)}/photo-analyses',{method:'POST',body:JSON.stringify({kind:'medication',im |
-| 401:13 | analysis | const | module/anonymous@4/analyzeMedicationPhoto | result.analysis |
-| 404:13 | candidates | const | module/anonymous@4/analyzeMedicationPhoto | analysis.proposal?.medications\|\|[] |
-| 405:228 | candidate | parameter | module/anonymous@4/analyzeMedicationPhoto/anonymous@405 | candidate |
-| 405:238 | index | parameter | module/anonymous@4/analyzeMedicationPhoto/anonymous@405 | index |
-| 405:827 | w | parameter | module/anonymous@4/analyzeMedicationPhoto/anonymous@405 | w |
-| 406:13 | error | catch | module/anonymous@4/analyzeMedicationPhoto |  |
-| 413:12 | useMedicationCandidate | function | module/anonymous@4 |  |
-| 413:35 | index | parameter | module/anonymous@4/useMedicationCandidate | index |
-| 414:11 | candidate | const | module/anonymous@4/useMedicationCandidate | state.modal?.photo?.analysis?.proposal?.medications?.[index] |
-| 421:12 | openMedicationEnd | function | module/anonymous@4 |  |
-| 421:30 | id | parameter | module/anonymous@4/openMedicationEnd | id |
-| 422:11 | order | const | module/anonymous@4/openMedicationEnd | medicationCurrent()?.orders.find(item=&gt;item.id===id) |
-| 422:50 | item | parameter | module/anonymous@4/openMedicationEnd/anonymous@422 | item |
-| 425:11 | minimum | const | module/anonymous@4/openMedicationEnd | order.startDate&gt;state.data.today?order.startDate:state.data.today |
-| 429:12 | openMedicationHistory | function | module/anonymous@4 |  |
-| 429:34 | orderId | parameter | module/anonymous@4/openMedicationHistory | orderId |
-| 429:42 | time | parameter | module/anonymous@4/openMedicationHistory | time |
-| 430:11 | data | const | module/anonymous@4/openMedicationHistory | medicationCurrent() |
-| 431:11 | slot | const | module/anonymous@4/openMedicationHistory | data.schedule.slots.find(s=&gt;s.orderId===orderId &amp;&amp; s.time===time) |
-| 431:41 | s | parameter | module/anonymous@4/openMedicationHistory/anonymous@431 | s |
-| 433:11 | audit | const | module/anonymous@4/openMedicationHistory | data.audit.filter(item=&gt;item.orderId===orderId &amp;&amp; item.time===time &amp;&amp; item.date===data.date).sort((a,b)=&gt;Number(b.revision)-Number |
-| 433:35 | item | parameter | module/anonymous@4/openMedicationHistory/anonymous@433 | item |
-| 433:116 | a | parameter | module/anonymous@4/openMedicationHistory/anonymous@433 | a |
-| 433:118 | b | parameter | module/anonymous@4/openMedicationHistory/anonymous@433 | b |
-| 434:510 | entry | parameter | module/anonymous@4/openMedicationHistory/anonymous@434 | entry |
-| 437:18 | submitMedicationModal | function | module/anonymous@4 |  |
-| 437:40 | event | parameter | module/anonymous@4/submitMedicationModal | event |
-| 438:11 | form | const | module/anonymous@4/submitMedicationModal | event.target |
-| 439:34 | modal | const | module/anonymous@4/submitMedicationModal | state.modal |
-| 440:11 | patientId | const | module/anonymous@4/submitMedicationModal | modal.patientId |
-| 440:37 | err | const | module/anonymous@4/submitMedicationModal | $('#modal-error') |
-| 442:11 | submit | const | module/anonymous@4/submitMedicationModal | form.querySelector('[type="submit"]') |
-| 444:13 | fields | const | module/anonymous@4/submitMedicationModal | new FormData(form) |
-| 446:15 | times | const | module/anonymous@4/submitMedicationModal | fields.getAll('times').filter(Boolean) |
-| 448:15 | payload | const | module/anonymous@4/submitMedicationModal | {name:String(fields.get('name')).trim(),strength:String(fields.get('strength')).trim(),dose:String(fields.get('dose')).trim(),rout |
-| 453:13 | error | catch | module/anonymous@4/submitMedicationModal |  |
-| 457:12 | render | function | module/anonymous@4 |  |
-| 457:19 | historyMode | parameter | module/anonymous@4/render | historyMode = 'replace' |
-| 459:12 | eyebrow | const | module/anonymous@4/render | viewTitles[state.view] |
-| 459:20 | title | const | module/anonymous@4/render | viewTitles[state.view] |
-| 459:26 | subtitle | const | module/anonymous@4/render | viewTitles[state.view] |
-| 459:35 | breadcrumb | const | module/anonymous@4/render | viewTitles[state.view] |
-| 461:64 | btn | parameter | module/anonymous@4/render/anonymous@461 | btn |
-| 461:76 | active | const | module/anonymous@4/render/anonymous@461 | btn.dataset.view===state.view |
-| 462:11 | inputFocused | const | module/anonymous@4/render | document.activeElement?.id==='patient-search' |
-| 462:76 | cursor | const | module/anonymous@4/render | inputFocused?document.activeElement.selectionStart:null |
-| 463:11 | patientLink | const | module/anonymous@4/render | $('.patient-site-link') |
-| 472:12 | changeView | function | module/anonymous@4 |  |
-| 472:23 | view | parameter | module/anonymous@4/changeView | view |
-| 473:18 | openInvitation | function | module/anonymous@4 |  |
-| 475:50 | marker | const | module/anonymous@4/openInvitation | {type:'invitation'} |
-| 478:27 | result | const | module/anonymous@4/openInvitation | await api('/api/clinician/patients/${encodeURIComponent(state.selectedId)}/invitations',{method:'POST',body:'{}'}) |
-| 479:11 | error | catch | module/anonymous@4/openInvitation |  |
-| 481:12 | closeModal | function | module/anonymous@4 |  |
-| 485:12 | openModal | function | module/anonymous@4 |  |
-| 485:22 | type | parameter | module/anonymous@4/openModal | type |
-| 485:28 | mode | parameter | module/anonymous@4/openModal | mode='seed' |
-| 488:11 | close | const | module/anonymous@4/openModal | '&lt;button class="icon-button" data-modal-action="close" aria-label="닫기"&gt;${icon('close')}&lt;/button&gt;' |
-| 493:13 | seed | const | module/anonymous@4/openModal | mode==='seed' |
-| 498:18 | submitModal | function | module/anonymous@4 |  |
-| 498:30 | event | parameter | module/anonymous@4/submitModal | event |
-| 499:11 | form | const | module/anonymous@4/submitModal | event.target |
-| 500:11 | err | const | module/anonymous@4/submitModal | $('#modal-error') |
-| 500:55 | submit | const | module/anonymous@4/submitModal | form.querySelector('[type=submit]') |
-| 502:13 | fields | const | module/anonymous@4/submitModal | new FormData(form) |
-| 504:15 | result | const | module/anonymous@4/submitModal | await api('/api/patients',{method:'POST',body:JSON.stringify({name:String(fields.get('name')).trim(),age:Number(fields.get('age')) |
-| 504:234 | s | parameter | module/anonymous@4/submitModal/anonymous@504 | s |
-| 508:15 | mode | const | module/anonymous@4/submitModal | state.modal.mode |
-| 512:13 | error | catch | module/anonymous@4/submitModal |  |
-| 515:43 | event | parameter | module/anonymous@4/anonymous@515 | event |
-| 515:57 | btn | const | module/anonymous@4/anonymous@515 | event.target.closest('[data-view]') |
-| 518:46 | event | parameter | module/anonymous@4/anonymous@518 | event |
-| 519:11 | el | const | module/anonymous@4/anonymous@518 | event.target.closest('[data-action]') |
-| 520:11 | action | const | module/anonymous@4/anonymous@518 | el.dataset.action |
-| 535:48 | event | parameter | module/anonymous@4/anonymous@535 | event |
-| 535:62 | row | const | module/anonymous@4/anonymous@535 | event.target.closest('.patient-row') |
-| 536:46 | event | parameter | module/anonymous@4/anonymous@536 | event |
-| 539:47 | event | parameter | module/anonymous@4/anonymous@539 | event |
-| 540:49 | event | parameter | module/anonymous@4/anonymous@540 | event |
-| 543:40 | event | parameter | module/anonymous@4/anonymous@543 | event |
-| 544:11 | button | const | module/anonymous@4/anonymous@543 | event.target.closest('[data-modal-action]') |
-| 545:56 | rows | const | module/anonymous@4/anonymous@543 | $('#medication-times') |
-| 545:90 | count | const | module/anonymous@4/anonymous@543 | rows.querySelectorAll('input').length |
-| 550:41 | event | parameter | module/anonymous@4/anonymous@550 | event |
-| 553:65 | index | const | module/anonymous@4/anonymous@550 | event.target.dataset.candidateConfirm |
-| 553:115 | btn | const | module/anonymous@4/anonymous@550 | $('#modal').querySelector('[data-candidate="${index}"]') |
-| 556:39 | event | parameter | module/anonymous@4/anonymous@556 | event |
-| 559:34 | items | const | module/anonymous@4/anonymous@556 | [...$('#modal').querySelectorAll('button:not([disabled]),input:not([disabled]),select,textarea,a[href]')] |
-| 559:152 | first | const | module/anonymous@4/anonymous@556 | items[0] |
-| 559:167 | last | const | module/anonymous@4/anonymous@556 | items.at(-1) |
-| 562:42 | event | parameter | module/anonymous@4/anonymous@562 | event |
-| 563:61 | error | catch | module/anonymous@4 |  |
+| 3:10 | createClinicalWorklist | import | module | ./clinician-workflow.js |
+| 4:10 | createResearchWorkspace | import | module | ./clinician-research.js |
+| 5:10 | createEvidenceWorkspace | import | module | ./clinician-evidence.js |
+| 8:9 | icons | const | module/anonymous@7 | { grid: '&lt;rect x="3" y="3" width="7" height="7" rx="1.5"/&gt;&lt;rect x="14" y="3" width="7" height="7" rx="1.5"/&gt;&lt;rect x="3" y="14" wid |
+| 36:9 | icon | const | module/anonymous@7 | (name, cls = '') =&gt; '&lt;svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap= |
+| 36:17 | name | parameter | module/anonymous@7/anonymous@36 | name |
+| 36:23 | cls | parameter | module/anonymous@7/anonymous@36 | cls = '' |
+| 37:9 | esc | const | module/anonymous@7 | value =&gt; String(value ?? '').replace(/[&amp;&lt;&gt;"']/g, char =&gt; ({'&amp;':'&amp;amp;','&lt;':'&amp;lt;','&gt;':'&amp;gt;','"':'&amp;quot;',"'":'&amp;#39;'}[char])) |
+| 37:15 | value | parameter | module/anonymous@7/anonymous@37 | value |
+| 37:64 | char | parameter | module/anonymous@7/anonymous@37/anonymous@37 | char |
+| 38:9 | num | const | module/anonymous@7 | (value, digits = 0) =&gt; value === null \|\| value === undefined \|\| !Number.isFinite(Number(value)) ? '—' : Number(value).toLocaleStri |
+| 38:16 | value | parameter | module/anonymous@7/anonymous@38 | value |
+| 38:23 | digits | parameter | module/anonymous@7/anonymous@38 | digits = 0 |
+| 39:9 | val | const | module/anonymous@7 | (metrics, key) =&gt; typeof metrics?.[key] === 'object' ? metrics[key]?.value : metrics?.[key] |
+| 39:16 | metrics | parameter | module/anonymous@7/anonymous@39 | metrics |
+| 39:25 | key | parameter | module/anonymous@7/anonymous@39 | key |
+| 40:9 | present | const | module/anonymous@7 | value =&gt; value !== null &amp;&amp; value !== undefined &amp;&amp; Number.isFinite(Number(value)) |
+| 40:19 | value | parameter | module/anonymous@7/anonymous@40 | value |
+| 41:9 | clamp | const | module/anonymous@7 | (value, min, max) =&gt; Math.min(max, Math.max(min, Number(value) \|\| 0)) |
+| 41:18 | value | parameter | module/anonymous@7/anonymous@41 | value |
+| 41:25 | min | parameter | module/anonymous@7/anonymous@41 | min |
+| 41:30 | max | parameter | module/anonymous@7/anonymous@41 | max |
+| 42:9 | shortDate | const | module/anonymous@7 | date =&gt; date ? date.slice(5).replace('-', '.') : '기록 없음' |
+| 42:21 | date | parameter | module/anonymous@7/anonymous@42 | date |
+| 43:9 | sexLabel | const | module/anonymous@7 | sex =&gt; ({ female:'여', male:'남', other:'기타' }[sex] \|\| '미입력') |
+| 43:20 | sex | parameter | module/anonymous@7/anonymous@43 | sex |
+| 44:9 | riskLabel | const | module/anonymous@7 | risk =&gt; risk?.label \|\| ({ high:'확인 우선',watch:'관찰 필요',stable:'규칙 미해당',insufficient:'자료 부족' }[risk?.level] \|\| '자료 부족') |
+| 44:21 | risk | parameter | module/anonymous@7/anonymous@44 | risk |
+| 45:9 | riskClass | const | module/anonymous@7 | risk =&gt; ['high','watch','stable','insufficient'].includes(risk?.level) ? risk.level : 'insufficient' |
+| 45:21 | risk | parameter | module/anonymous@7/anonymous@45 | risk |
+| 46:9 | riskPill | const | module/anonymous@7 | risk =&gt; '&lt;span class="risk-pill ${riskClass(risk)}"&gt;${esc(riskLabel(risk))}&lt;/span&gt;' |
+| 46:20 | risk | parameter | module/anonymous@7/anonymous@46 | risk |
+| 47:9 | medLabel | const | module/anonymous@7 | status =&gt; ({taken:'복용 보고',partial:'일부 복용',missed:'미복용 보고',unknown:'알 수 없음'}[status] \|\| '미기록') |
+| 47:20 | status | parameter | module/anonymous@7/anonymous@47 | status |
+| 48:9 | foodLabel | const | module/anonymous@7 | food =&gt; ({balanced:'밥과 반찬',porridge:'죽',protein:'단백질 중심',noodles:'면 요리'}[food] \|\| food \|\| '식사') |
+| 48:21 | food | parameter | module/anonymous@7/anonymous@48 | food |
+| 49:9 | healthSourceName | const | module/anonymous@7 | source =&gt; ({'patient-self-report':'수동 자기보고','health-connect':'Health Connect 수신','apple-health':'Apple Health 수신'}[source] \|\| '출처  |
+| 49:28 | source | parameter | module/anonymous@7/anonymous@49 | source |
+| 50:9 | healthSourceSummary | const | module/anonymous@7 | metric =&gt; { const entries=Object.entries(metric?.sourceCounts\|\|{}).filter(([,days])=&gt;Number(days)&gt;0); return entries.length ? entr |
+| 50:31 | metric | parameter | module/anonymous@7/anonymous@50 | metric |
+| 51:11 | entries | const | module/anonymous@7/anonymous@50 | Object.entries(metric?.sourceCounts\|\|{}).filter(([,days])=&gt;Number(days)&gt;0) |
+| 51:70 | days | parameter | module/anonymous@7/anonymous@50/anonymous@51 | [,days] |
+| 52:43 | source | parameter | module/anonymous@7/anonymous@50/anonymous@52 | [source,days] |
+| 52:50 | days | parameter | module/anonymous@7/anonymous@50/anonymous@52 | [source,days] |
+| 54:9 | mealSourceLabel | const | module/anonymous@7 | meal =&gt; meal.source==='openai-image-estimate-v1' ? 'AI 사진 추정${meal.estimation?.patientConfirmed?' · 환자 확인':''}' : meal.source==='d |
+| 54:27 | meal | parameter | module/anonymous@7/anonymous@54 | meal |
+| 55:9 | mealLabel | const | module/anonymous@7 | meal =&gt; ({breakfast:'아침',lunch:'점심',dinner:'저녁',snack:'간식'}[meal] \|\| '식사') |
+| 55:21 | meal | parameter | module/anonymous@7/anonymous@55 | meal |
+| 56:9 | state | const | module/anonymous@7 | { view:'overview', data:null, summary:null, selectedId:new URLSearchParams(location.search).get('patientId'), filter:'all', search |
+| 61:9 | viewTitles | const | module/anonymous@7 | { overview:['CARE AT A GLANCE','오늘의 돌봄 현황','환자의 일상을 연결하고, 필요한 돌봄을 먼저 살펴보세요.','케어 대시보드'], patients:['PATIENT WORKSPACE','환자 관리','기록 |
+| 74:9 | urlView | const | module/anonymous@7 | new URLSearchParams(location.search).get('view') |
+| 76:9 | $ | const | module/anonymous@7 | selector =&gt; document.querySelector(selector) |
+| 76:13 | selector | parameter | module/anonymous@7/anonymous@76 | selector |
+| 77:52 | el | parameter | module/anonymous@7/anonymous@77 | el |
+| 78:9 | communication | const | module/anonymous@7 | createClinicianCommunications({api,getState:()=&gt;state,toast,selectPatient,invite:openInvitation}) |
+| 79:9 | workspaces | const | module/anonymous@7 | {worklist:createClinicalWorklist({api,getState:()=&gt;state,toast,selectPatient}),research:createResearchWorkspace({api,getState:()=&gt; |
+| 80:9 | currentWorkspace | const | module/anonymous@7 | ()=&gt;workspaces[state.view] |
+| 81:9 | can | const | module/anonymous@7 | capability=&gt;Boolean(state.staffAccess?.capabilities?.includes(capability)) |
+| 81:13 | capability | parameter | module/anonymous@7/anonymous@81 | capability |
+| 82:9 | viewPermissions | const | module/anonymous@7 | {overview:'patient.read',patients:'patient.read',records:'patient.read',medications:'patient.read',worklist:'patient.read',researc |
+| 83:12 | authorizedView | function | module/anonymous@7 |  |
+| 83:27 | view | parameter | module/anonymous@7/authorizedView | view |
+| 83:101 | key | parameter | module/anonymous@7/authorizedView/anonymous@83 | key |
+| 84:12 | lockModal | function | module/anonymous@7 |  |
+| 84:22 | locked | parameter | module/anonymous@7/lockModal | locked |
+| 84:99 | el | parameter | module/anonymous@7/lockModal/anonymous@84 | el |
+| 85:9 | periodQuery | const | module/anonymous@7 | ()=&gt;state.startDate&amp;&amp;state.endDate?'?'+new URLSearchParams({startDate:state.startDate,endDate:state.endDate}):'' |
+| 86:9 | periodDays | const | module/anonymous@7 | ()=&gt;state.summary?.period?.totalDays\|\|7 |
+| 87:9 | periodLabel | const | module/anonymous@7 | ()=&gt;state.startDate&amp;&amp;state.endDate?'${state.startDate} ~ ${state.endDate}':'최근 7일' |
+| 88:9 | offsetDate | const | module/anonymous@7 | (date,days)=&gt;new Date(Date.parse('${date}T12:00:00Z')+days*86400000).toISOString().slice(0,10) |
+| 88:21 | date | parameter | module/anonymous@7/anonymous@88 | date |
+| 88:26 | days | parameter | module/anonymous@7/anonymous@88 | days |
+| 89:9 | modalValues | const | module/anonymous@7 | ()=&gt;JSON.stringify([...$('#modal').querySelectorAll('input,select,textarea')].map(el=&gt;[el.id\|\|el.name,el.type==='checkbox'\|\|el.typ |
+| 89:103 | el | parameter | module/anonymous@7/anonymous@89/anonymous@89 | el |
+| 89:209 | f | parameter | module/anonymous@7/anonymous@89/anonymous@89/anonymous@89 | f |
+| 90:9 | modalBusy | const | module/anonymous@7 | ()=&gt;Boolean(state.modal?.saving\|\|state.modal?.busy) |
+| 91:9 | modalDirty | const | module/anonymous@7 | ()=&gt;Boolean(state.modal&amp;&amp;state.modal.baseline!==undefined&amp;&amp;state.modal.baseline!==modalValues()) |
+| 92:12 | rememberModal | function | module/anonymous@7 |  |
+| 93:12 | canCloseModal | function | module/anonymous@7 |  |
+| 94:12 | canLeave | function | module/anonymous@7 |  |
+| 101:7 | historyIndex | let | module/anonymous@7 | Number(history.state?.hcClinicianIndex)\|\|0 |
+| 101:63 | restoringHistory | let | module/anonymous@7 | false |
+| 103:18 | api | function | module/anonymous@7 |  |
+| 103:22 | path | parameter | module/anonymous@7/api | path |
+| 103:28 | options | parameter | module/anonymous@7/api | options = {} |
+| 105:11 | response | const | module/anonymous@7/api | await fetch(path, { ...options, headers:{ 'Content-Type':'application/json', ...sessionHeaders(), ...options.headers } }) |
+| 106:11 | result | const | module/anonymous@7/api | await response.json().catch(() =&gt; ({})) |
+| 111:12 | syncUrl | function | module/anonymous@7 |  |
+| 111:20 | historyMode | parameter | module/anonymous@7/syncUrl | historyMode = 'replace' |
+| 112:11 | url | const | module/anonymous@7/syncUrl | new URL(location.href) |
+| 119:12 | focusPage | function | module/anonymous@7 |  |
+| 123:12 | restoreRoute | function | module/anonymous@7 |  |
+| 123:25 | event | parameter | module/anonymous@7/restoreRoute | event |
+| 124:11 | target | const | module/anonymous@7/restoreRoute | Number(event.state?.hcClinicianIndex)\|\|0 |
+| 126:27 | delta | const | module/anonymous@7/restoreRoute | historyIndex-target |
+| 128:11 | params | const | module/anonymous@7/restoreRoute | new URLSearchParams(location.search) |
+| 129:11 | view | const | module/anonymous@7/restoreRoute | params.get('view') |
+| 129:35 | patientId | const | module/anonymous@7/restoreRoute | params.get('patientId') |
+| 129:69 | date | const | module/anonymous@7/restoreRoute | params.get('medicationDate') |
+| 132:11 | periodChanged | const | module/anonymous@7/restoreRoute | state.startDate!==(params.get('startDate')\|\|'')\|\|state.endDate!==(params.get('endDate')\|\|'') |
+| 138:11 | selected | const | module/anonymous@7/restoreRoute | state.data?.patients.some(p=&gt;p.id===patientId)?patientId:state.data?.patients[0]?.id\|\|null |
+| 138:46 | p | parameter | module/anonymous@7/restoreRoute/anonymous@138 | p |
+| 147:12 | showError | function | module/anonymous@7 |  |
+| 147:22 | message | parameter | module/anonymous@7/showError | message |
+| 148:7 | toastTimer | let | module/anonymous@7 | 초기값 없음 |
+| 149:12 | toast | function | module/anonymous@7 |  |
+| 149:18 | message | parameter | module/anonymous@7/toast | message |
+| 149:27 | error | parameter | module/anonymous@7/toast | error = false |
+| 149:50 | el | const | module/anonymous@7/toast | $('#toast') |
+| 149:220 | result | const | module/anonymous@7/toast | $('#operation-result') |
+| 150:7 | refreshQueue | let | module/anonymous@7 | Promise.resolve() |
+| 151:12 | refresh | function | module/anonymous@7 |  |
+| 151:20 | options | parameter | module/anonymous@7/refresh | options = {} |
+| 152:11 | operation | const | module/anonymous@7/refresh | refreshQueue.then(() =&gt; performRefresh(options)) |
+| 156:18 | performRefresh | function | module/anonymous@7 |  |
+| 156:34 | quiet | parameter | module/anonymous@7/performRefresh | {quiet = false} = {} |
+| 161:13 | data | const | module/anonymous@7/performRefresh | await api('/api/dashboard'+periodQuery()) |
+| 164:30 | p | parameter | module/anonymous@7/performRefresh/anonymous@164 | p |
+| 164:101 | a | parameter | module/anonymous@7/performRefresh/anonymous@164 | a |
+| 164:103 | b | parameter | module/anonymous@7/performRefresh/anonymous@164 | b |
+| 167:15 | selected | const | module/anonymous@7/performRefresh | state.selectedId |
+| 167:41 | request | const | module/anonymous@7/performRefresh | state.selectionRequest |
+| 168:15 | summary | const | module/anonymous@7/performRefresh | await api('/api/patients/${encodeURIComponent(selected)}/summary${periodQuery()}') |
+| 181:13 | error | catch | module/anonymous@7/performRefresh |  |
+| 184:18 | selectPatient | function | module/anonymous@7 |  |
+| 184:32 | id | parameter | module/anonymous@7/selectPatient | id |
+| 184:36 | changeView | parameter | module/anonymous@7/selectPatient | changeView = false |
+| 184:57 | historyMode | parameter | module/anonymous@7/selectPatient | {historyMode='push'} = {} |
+| 185:57 | p | parameter | module/anonymous@7/selectPatient/anonymous@185 | p |
+| 190:11 | request | const | module/anonymous@7/selectPatient | ++state.selectionRequest |
+| 195:13 | summary | const | module/anonymous@7/selectPatient | await api('/api/patients/${encodeURIComponent(id)}/summary${periodQuery()}') |
+| 201:13 | error | catch | module/anonymous@7/selectPatient |  |
+| 204:12 | spark | function | module/anonymous@7 |  |
+| 204:18 | values | parameter | module/anonymous@7/spark | values |
+| 204:25 | color | parameter | module/anonymous@7/spark | color='#80b7a7' |
+| 204:41 | width | parameter | module/anonymous@7/spark | width=76 |
+| 204:50 | height | parameter | module/anonymous@7/spark | height=25 |
+| 205:11 | numeric | const | module/anonymous@7/spark | values.filter(present).map(Number) |
+| 206:11 | min | const | module/anonymous@7/spark | Math.min(...numeric) |
+| 206:36 | max | const | module/anonymous@7/spark | Math.max(...numeric) |
+| 206:67 | range | const | module/anonymous@7/spark | max-min\|\|1 |
+| 207:11 | coords | const | module/anonymous@7/spark | values.map((v,i)=&gt;present(v)?'${i/(Math.max(values.length-1,1))*width},${height-3-(v-min)/range*(height-7)}':null) |
+| 207:30 | v | parameter | module/anonymous@7/spark/anonymous@207 | v |
+| 207:32 | i | parameter | module/anonymous@7/spark/anonymous@207 | i |
+| 208:9 | d | let | module/anonymous@7/spark | '' |
+| 208:18 | active | let | module/anonymous@7/spark | false |
+| 208:46 | p | parameter | module/anonymous@7/spark/anonymous@208 | p |
+| 211:12 | chart | function | module/anonymous@7 |  |
+| 211:18 | rows | parameter | module/anonymous@7/chart | rows |
+| 211:24 | key | parameter | module/anonymous@7/chart | key |
+| 211:30 | color | parameter | module/anonymous@7/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 211:46 | unit | parameter | module/anonymous@7/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 211:54 | type | parameter | module/anonymous@7/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 211:66 | height | parameter | module/anonymous@7/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 211:77 | max | parameter | module/anonymous@7/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 211:86 | secondary | parameter | module/anonymous@7/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 211:101 | label | parameter | module/anonymous@7/chart | {color='#5ba994',unit='',type='line',height=137,max=null,secondary=null,label='기록 추이'}={} |
+| 213:11 | values | const | module/anonymous@7/chart | rows.map(r=&gt;r[key]) |
+| 213:27 | r | parameter | module/anonymous@7/chart/anonymous@213 | r |
+| 213:44 | numeric | const | module/anonymous@7/chart | values.filter(present).map(Number) |
+| 215:11 | w | const | module/anonymous@7/chart | 440 |
+| 215:17 | h | const | module/anonymous@7/chart | height |
+| 215:26 | left | const | module/anonymous@7/chart | 34 |
+| 215:34 | right | const | module/anonymous@7/chart | 12 |
+| 215:43 | top | const | module/anonymous@7/chart | 14 |
+| 215:50 | bottom | const | module/anonymous@7/chart | 25 |
+| 215:60 | plotW | const | module/anonymous@7/chart | w-left-right |
+| 215:79 | plotH | const | module/anonymous@7/chart | h-top-bottom |
+| 216:11 | ceiling | const | module/anonymous@7/chart | max \|\| Math.max(1,...numeric)*1.16 |
+| 217:11 | x | const | module/anonymous@7/chart | i=&gt;left+(rows.length===1?plotW/2:i/(rows.length-1)*plotW) |
+| 217:13 | i | parameter | module/anonymous@7/chart/anonymous@217 | i |
+| 218:11 | y | const | module/anonymous@7/chart | v=&gt;top+plotH-clamp(v,0,ceiling)/ceiling*plotH |
+| 218:13 | v | parameter | module/anonymous@7/chart/anonymous@218 | v |
+| 219:9 | content | let | module/anonymous@7/chart | '' |
+| 220:13 | i | let | module/anonymous@7/chart | 0 |
+| 220:34 | v | const | module/anonymous@7/chart | ceiling/3*i |
+| 220:54 | yy | const | module/anonymous@7/chart | y(v) |
+| 221:11 | interval | const | module/anonymous@7/chart | Math.max(1,Math.floor((rows.length-1)/4)) |
+| 221:76 | r | parameter | module/anonymous@7/chart/anonymous@221 | r |
+| 221:78 | i | parameter | module/anonymous@7/chart/anonymous@221 | i |
+| 223:13 | bw | const | module/anonymous@7/chart | Math.min(17,plotW/rows.length*.62) |
+| 224:23 | v | parameter | module/anonymous@7/chart/anonymous@224 | v |
+| 224:25 | i | parameter | module/anonymous@7/chart/anonymous@224 | i |
+| 226:11 | d | let | module/anonymous@7/chart | '' |
+| 226:16 | segment | let | module/anonymous@7/chart | [] |
+| 226:33 | segments | const | module/anonymous@7/chart | [] |
+| 227:23 | v | parameter | module/anonymous@7/chart/anonymous@227 | v |
+| 227:25 | i | parameter | module/anonymous@7/chart/anonymous@227 | i |
+| 228:24 | seg | parameter | module/anonymous@7/chart/anonymous@228 | seg |
+| 228:42 | p | parameter | module/anonymous@7/chart/anonymous@228/anonymous@228 | p |
+| 228:44 | i | parameter | module/anonymous@7/chart/anonymous@228/anonymous@228 | i |
+| 228:165 | p | parameter | module/anonymous@7/chart/anonymous@228/anonymous@228 | p |
+| 230:23 | v | parameter | module/anonymous@7/chart/anonymous@230 | v |
+| 230:25 | i | parameter | module/anonymous@7/chart/anonymous@230 | i |
+| 232:544 | row | parameter | module/anonymous@7/chart/anonymous@232 | row |
+| 234:12 | stats | function | module/anonymous@7 |  |
+| 235:11 | s | const | module/anonymous@7/stats | state.data.stats |
+| 235:36 | ts | const | module/anonymous@7/stats | state.data.trends\|\|[] |
+| 236:11 | cards | const | module/anonymous@7/stats | [['전체 관리 환자',s.patients,'명','users','현재 접근 가능한 환자','환자 수와 관측 수 구분',ts.map(()=&gt;s.patients)],['확인이 필요한 환자',s.needsReview,'명','alert' |
+| 236:180 | r | parameter | module/anonymous@7/stats/anonymous@236 | r |
+| 236:419 | r | parameter | module/anonymous@7/stats/anonymous@236 | r |
+| 236:532 | r | parameter | module/anonymous@7/stats/anonymous@236 | r |
+| 237:50 | c | parameter | module/anonymous@7/stats/anonymous@237 | c |
+| 237:52 | i | parameter | module/anonymous@7/stats/anonymous@237 | i |
+| 239:12 | filteredPatients | function | module/anonymous@7 |  |
+| 240:39 | p | parameter | module/anonymous@7/filteredPatients/anonymous@240 | p |
+| 242:12 | patientRows | function | module/anonymous@7 |  |
+| 242:24 | full | parameter | module/anonymous@7/patientRows | full = false |
+| 243:11 | patients | const | module/anonymous@7/patientRows | filteredPatients() |
+| 245:25 | p | parameter | module/anonymous@7/patientRows/anonymous@245 | p |
+| 247:12 | patientList | function | module/anonymous@7 |  |
+| 247:24 | full | parameter | module/anonymous@7/patientList | full = false |
+| 248:531 | key | parameter | module/anonymous@7/patientList/anonymous@248 | [key,label] |
+| 248:535 | label | parameter | module/anonymous@7/patientList/anonymous@248 | [key,label] |
+| 250:12 | briefingCard | function | module/anonymous@7 |  |
+| 251:11 | s | const | module/anonymous@7/briefingCard | state.summary |
+| 252:11 | first | const | module/anonymous@7/briefingCard | s.briefing.items.slice(0,3) |
+| 253:11 | headline | const | module/anonymous@7/briefingCard | s.risk.reasons.length?s.risk.reasons.slice(0,2).join('. ')+'.':'최근 기록의 변화를 확인하고, 방문 시 환자의 생활 상태와 함께 살펴보세요.' |
+| 254:584 | item | parameter | module/anonymous@7/briefingCard/anonymous@254 | item |
+| 256:12 | reportingChart | function | module/anonymous@7 |  |
+| 257:11 | t | const | module/anonymous@7/reportingChart | state.data.trends |
+| 260:12 | alerts | function | module/anonymous@7 |  |
+| 261:11 | alerts | const | module/anonymous@7/alerts | state.data.alerts.slice(0,3) |
+| 262:238 | a | parameter | module/anonymous@7/alerts/anonymous@262 | a |
+| 264:12 | metricPanels | function | module/anonymous@7 |  |
+| 265:11 | s | const | module/anonymous@7/metricPanels | state.summary |
+| 265:27 | m | const | module/anonymous@7/metricPanels | s.metrics |
+| 265:39 | t | const | module/anonymous@7/metricPanels | state.startDate?s.trends:s.trends.slice(-14) |
+| 266:11 | panels | const | module/anonymous@7/metricPanels | [['steps','steps','평균 활동',num(m.steps.value),'걸음','${m.steps.coverageDays}/${periodDays()}일 활동 보고',healthSourceSummary(m.steps),'# |
+| 267:60 | key | parameter | module/anonymous@7/metricPanels/anonymous@267 | [key,ic,title,value,unit,caption,source,color] |
+| 267:64 | ic | parameter | module/anonymous@7/metricPanels/anonymous@267 | [key,ic,title,value,unit,caption,source,color] |
+| 267:67 | title | parameter | module/anonymous@7/metricPanels/anonymous@267 | [key,ic,title,value,unit,caption,source,color] |
+| 267:73 | value | parameter | module/anonymous@7/metricPanels/anonymous@267 | [key,ic,title,value,unit,caption,source,color] |
+| 267:79 | unit | parameter | module/anonymous@7/metricPanels/anonymous@267 | [key,ic,title,value,unit,caption,source,color] |
+| 267:84 | caption | parameter | module/anonymous@7/metricPanels/anonymous@267 | [key,ic,title,value,unit,caption,source,color] |
+| 267:92 | source | parameter | module/anonymous@7/metricPanels/anonymous@267 | [key,ic,title,value,unit,caption,source,color] |
+| 267:99 | color | parameter | module/anonymous@7/metricPanels/anonymous@267 | [key,ic,title,value,unit,caption,source,color] |
+| 267:353 | r | parameter | module/anonymous@7/metricPanels/anonymous@267/anonymous@267 | r |
+| 267:467 | r | parameter | module/anonymous@7/metricPanels/anonymous@267/anonymous@267 | r |
+| 269:12 | detailCharts | function | module/anonymous@7 |  |
+| 270:11 | t | const | module/anonymous@7/detailCharts | state.startDate?state.summary.trends:state.summary.trends.slice(-14) |
+| 271:11 | medication | const | module/anonymous@7/detailCharts | t.map(r=&gt;({...r,medValue:r.medicationStatus==='taken'?100:r.medicationStatus==='partial'?50:r.medicationStatus==='missed'?0:null}) |
+| 271:28 | r | parameter | module/anonymous@7/detailCharts/anonymous@271 | r |
+| 272:11 | chartPeriod | const | module/anonymous@7/detailCharts | state.startDate?periodLabel():'최근 14일' |
+| 273:11 | panels | const | module/anonymous@7/detailCharts | [['활동 추이',chartPeriod,t,'steps',{unit:'걸음',color:'#73ad98'},healthSourceSummary(state.summary.metrics.steps),'미기록일은 연결하지 않음'],['수면 |
+| 274:59 | title | parameter | module/anonymous@7/detailCharts/anonymous@274 | [title,period,rows,key,options,note,right] |
+| 274:65 | period | parameter | module/anonymous@7/detailCharts/anonymous@274 | [title,period,rows,key,options,note,right] |
+| 274:72 | rows | parameter | module/anonymous@7/detailCharts/anonymous@274 | [title,period,rows,key,options,note,right] |
+| 274:77 | key | parameter | module/anonymous@7/detailCharts/anonymous@274 | [title,period,rows,key,options,note,right] |
+| 274:81 | options | parameter | module/anonymous@7/detailCharts/anonymous@274 | [title,period,rows,key,options,note,right] |
+| 274:89 | note | parameter | module/anonymous@7/detailCharts/anonymous@274 | [title,period,rows,key,options,note,right] |
+| 274:94 | right | parameter | module/anonymous@7/detailCharts/anonymous@274 | [title,period,rows,key,options,note,right] |
+| 276:12 | coverage | function | module/anonymous@7 |  |
+| 277:11 | s | const | module/anonymous@7/coverage | state.summary |
+| 277:27 | m | const | module/anonymous@7/coverage | s.metrics |
+| 277:45 | data | const | module/anonymous@7/coverage | [['활동',m.steps.coverageDays],['수면',m.sleepHours.coverageDays],['일일 복약 보고',m.medication.reportedDays],['약별 복약 보고',m.medication.dose |
+| 278:162 | label | parameter | module/anonymous@7/coverage/anonymous@278 | [label,days] |
+| 278:168 | days | parameter | module/anonymous@7/coverage/anonymous@278 | [label,days] |
+| 278:701 | r | parameter | module/anonymous@7/coverage/anonymous@278 | r |
+| 280:12 | foodIllustration | function | module/anonymous@7 |  |
+| 280:29 | food | parameter | module/anonymous@7/foodIllustration | food |
+| 281:11 | content | const | module/anonymous@7/foodIllustration | {balanced:'&lt;ellipse cx="55" cy="54" rx="14" ry="18" fill="#e9ddc0"/&gt;&lt;circle cx="82" cy="37" r="11" fill="#88a276"/&gt;&lt;circle cx="93" |
+| 284:12 | meals | function | module/anonymous@7 |  |
+| 285:11 | meals | const | module/anonymous@7/meals | state.summary.recentMeals.slice(0,state.view==='records'?24:3) |
+| 286:256 | m | parameter | module/anonymous@7/meals/anonymous@286 | m |
+| 288:12 | recordTable | function | module/anonymous@7 |  |
+| 288:24 | full | parameter | module/anonymous@7/recordTable | full = false |
+| 289:11 | records | const | module/anonymous@7/recordTable | state.summary?.recentRecords.slice(0,full?366:5)\|\|[] |
+| 290:296 | r | parameter | module/anonymous@7/recordTable/anonymous@290 | r |
+| 292:12 | recentRecords | function | module/anonymous@7 |  |
+| 293:12 | expandedBriefing | function | module/anonymous@7 |  |
+| 294:11 | s | const | module/anonymous@7/expandedBriefing | state.summary |
+| 295:247 | item | parameter | module/anonymous@7/expandedBriefing/anonymous@295 | item |
+| 295:402 | e | parameter | module/anonymous@7/expandedBriefing/anonymous@295/anonymous@295 | e |
+| 297:12 | patientDetails | function | module/anonymous@7 |  |
+| 297:27 | expanded | parameter | module/anonymous@7/patientDetails | expanded = false |
+| 298:11 | s | const | module/anonymous@7/patientDetails | state.summary |
+| 299:1101 | q | parameter | module/anonymous@7/patientDetails/anonymous@299 | q |
+| 301:12 | emptyWorkspace | function | module/anonymous@7 |  |
+| 304:12 | overview | function | module/anonymous@7 |  |
+| 307:12 | patientsView | function | module/anonymous@7 |  |
+| 309:11 | s | const | module/anonymous@7/patientsView | state.summary |
+| 312:12 | recordsView | function | module/anonymous@7 |  |
+| 314:129 | p | parameter | module/anonymous@7/recordsView/anonymous@314 | p |
+| 316:18 | loadIntegrationSettings | function | module/anonymous@7 |  |
+| 316:43 | renderAfter | parameter | module/anonymous@7/loadIntegrationSettings | {renderAfter=true}={} |
+| 323:12 | integrationSettings | function | module/anonymous@7 |  |
+| 324:11 | vision | const | module/anonymous@7/integrationSettings | state.capabilities?.vision |
+| 325:11 | status | const | module/anonymous@7/integrationSettings | state.capabilityError?'설정 상태 조회 실패':!vision?'설정 상태 확인 중':vision.available?'서버 설정 준비됨 · 실제 분석 필요':vision.reasonCode==='missing_key' |
+| 328:12 | settingsView | function | module/anonymous@7 |  |
+| 331:9 | medicationStatusLabel | const | module/anonymous@7 | status =&gt; ({taken:'복용 보고',missed:'미복용 보고',unknown:'기억 안 남',pending:'미응답'}[status] \|\| '미응답') |
+| 331:33 | status | parameter | module/anonymous@7/anonymous@331 | status |
+| 332:9 | medicationReason | const | module/anonymous@7 | reason =&gt; ({forgot:'깜빡함',side_effect:'불편한 증상',side_effects:'불편한 증상',unavailable:'약이 없음',refused:'복용 원치 않음',other:'기타',not_sure:'잘  |
+| 332:28 | reason | parameter | module/anonymous@7/anonymous@332 | reason |
+| 333:9 | reportTime | const | module/anonymous@7 | timestamp =&gt; timestamp ? new Date(timestamp).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-d |
+| 333:22 | timestamp | parameter | module/anonymous@7/anonymous@333 | timestamp |
+| 334:9 | medDate | const | module/anonymous@7 | () =&gt; state.medicationDate \|\| state.data?.today \|\| state.summary?.today \|\| '' |
+| 335:9 | medicationCurrent | const | module/anonymous@7 | () =&gt; state.medications?.patientId===state.selectedId &amp;&amp; state.medications?.date===medDate() ? state.medications : null |
+| 336:9 | orderActive | const | module/anonymous@7 | order =&gt; order.startDate&lt;=state.data.today &amp;&amp; (!order.endDate \|\| order.endDate&gt;=state.data.today) |
+| 336:23 | order | parameter | module/anonymous@7/anonymous@336 | order |
+| 337:12 | orderPeriodLabel | function | module/anonymous@7 |  |
+| 337:29 | order | parameter | module/anonymous@7/orderPeriodLabel | order |
+| 343:18 | loadMedications | function | module/anonymous@7 |  |
+| 343:35 | renderAfter | parameter | module/anonymous@7/loadMedications | {renderAfter=true}={} |
+| 345:11 | patientId | const | module/anonymous@7/loadMedications | state.selectedId |
+| 345:38 | date | const | module/anonymous@7/loadMedications | medDate() |
+| 345:53 | generation | const | module/anonymous@7/loadMedications | ++state.medicationRequest |
+| 348:13 | base | const | module/anonymous@7/loadMedications | '/api/patients/${encodeURIComponent(patientId)}' |
+| 349:14 | orders | const | module/anonymous@7/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
+| 349:21 | schedule | const | module/anonymous@7/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
+| 349:30 | events | const | module/anonymous@7/loadMedications | await Promise.all([api('${base}/medication-orders'),api('${base}/medication-schedule?date=${encodeURIComponent(date)}'),api('${bas |
+| 352:13 | error | catch | module/anonymous@7/loadMedications |  |
+| 362:12 | medicationOrdersCard | function | module/anonymous@7 |  |
+| 362:33 | data | parameter | module/anonymous@7/medicationOrdersCard | data |
+| 363:11 | active | const | module/anonymous@7/medicationOrdersCard | data.orders.filter(orderActive).length |
+| 364:363 | order | parameter | module/anonymous@7/medicationOrdersCard/anonymous@364 | order |
+| 364:896 | time | parameter | module/anonymous@7/medicationOrdersCard/anonymous@364/anonymous@364 | time |
+| 366:12 | medicationScheduleCard | function | module/anonymous@7 |  |
+| 366:35 | data | parameter | module/anonymous@7/medicationScheduleCard | data |
+| 367:11 | schedule | const | module/anonymous@7/medicationScheduleCard | data.schedule |
+| 367:34 | totals | const | module/anonymous@7/medicationScheduleCard | schedule.summary\|\|{} |
+| 367:62 | slots | const | module/anonymous@7/medicationScheduleCard | schedule.slots\|\|[] |
+| 368:357 | key | parameter | module/anonymous@7/medicationScheduleCard/anonymous@368 | [key,label] |
+| 368:361 | label | parameter | module/anonymous@7/medicationScheduleCard/anonymous@368 | [key,label] |
+| 368:442 | s | parameter | module/anonymous@7/medicationScheduleCard/anonymous@368/anonymous@368 | s |
+| 368:576 | slot | parameter | module/anonymous@7/medicationScheduleCard/anonymous@368 | slot |
+| 370:12 | medicationPhotoReportsCard | function | module/anonymous@7 |  |
+| 370:39 | data | parameter | module/anonymous@7/medicationPhotoReportsCard | data |
+| 371:11 | reports | const | module/anonymous@7/medicationPhotoReportsCard | data.photoReports\|\|[] |
+| 372:282 | report | parameter | module/anonymous@7/medicationPhotoReportsCard/anonymous@372 | report |
+| 372:768 | event | parameter | module/anonymous@7/medicationPhotoReportsCard/anonymous@372/anonymous@372 | event |
+| 372:1072 | candidate | parameter | module/anonymous@7/medicationPhotoReportsCard/anonymous@372/anonymous@372 | candidate |
+| 374:12 | medicationsView | function | module/anonymous@7 |  |
+| 376:11 | data | const | module/anonymous@7/medicationsView | medicationCurrent() |
+| 377:137 | p | parameter | module/anonymous@7/medicationsView/anonymous@377 | p |
+| 379:12 | medicationModalFrame | function | module/anonymous@7 |  |
+| 379:33 | type | parameter | module/anonymous@7/medicationModalFrame | type |
+| 379:38 | title | parameter | module/anonymous@7/medicationModalFrame | title |
+| 379:44 | description | parameter | module/anonymous@7/medicationModalFrame | description |
+| 386:12 | openMedicationOrder | function | module/anonymous@7 |  |
+| 393:18 | loadMedicationCapability | function | module/anonymous@7 |  |
+| 393:43 | generation | parameter | module/anonymous@7/loadMedicationCapability | generation |
+| 395:13 | capabilities | const | module/anonymous@7/loadMedicationCapability | await api('/api/capabilities') |
+| 397:13 | enabled | const | module/anonymous@7/loadMedicationCapability | capabilities.vision?.available===true |
+| 401:13 | error | catch | module/anonymous@7/loadMedicationCapability |  |
+| 405:12 | updatePhotoAnalyzeButton | function | module/anonymous@7 |  |
+| 409:12 | clearMedicationPhoto | function | module/anonymous@7 |  |
+| 417:12 | readMedicationPhoto | function | module/anonymous@7 |  |
+| 417:32 | file | parameter | module/anonymous@7/readMedicationPhoto | file |
+| 423:11 | generation | const | module/anonymous@7/readMedicationPhoto | state.modal.photoGeneration |
+| 423:50 | patientId | const | module/anonymous@7/readMedicationPhoto | state.modal.patientId |
+| 424:11 | reader | const | module/anonymous@7/readMedicationPhoto | new FileReader() |
+| 432:18 | analyzeMedicationPhoto | function | module/anonymous@7 |  |
+| 433:11 | modal | const | module/anonymous@7/analyzeMedicationPhoto | state.modal |
+| 435:11 | generation | const | module/anonymous@7/analyzeMedicationPhoto | modal.photoGeneration |
+| 435:44 | patientId | const | module/anonymous@7/analyzeMedicationPhoto | modal.patientId |
+| 439:13 | result | const | module/anonymous@7/analyzeMedicationPhoto | await api('/api/patients/${encodeURIComponent(patientId)}/photo-analyses',{method:'POST',body:JSON.stringify({kind:'medication',im |
+| 441:13 | analysis | const | module/anonymous@7/analyzeMedicationPhoto | result.analysis |
+| 444:13 | candidates | const | module/anonymous@7/analyzeMedicationPhoto | analysis.proposal?.medications\|\|[] |
+| 445:228 | candidate | parameter | module/anonymous@7/analyzeMedicationPhoto/anonymous@445 | candidate |
+| 445:238 | index | parameter | module/anonymous@7/analyzeMedicationPhoto/anonymous@445 | index |
+| 445:827 | w | parameter | module/anonymous@7/analyzeMedicationPhoto/anonymous@445 | w |
+| 446:13 | error | catch | module/anonymous@7/analyzeMedicationPhoto |  |
+| 453:12 | useMedicationCandidate | function | module/anonymous@7 |  |
+| 453:35 | index | parameter | module/anonymous@7/useMedicationCandidate | index |
+| 454:11 | candidate | const | module/anonymous@7/useMedicationCandidate | state.modal?.photo?.analysis?.proposal?.medications?.[index] |
+| 461:12 | openMedicationEnd | function | module/anonymous@7 |  |
+| 461:30 | id | parameter | module/anonymous@7/openMedicationEnd | id |
+| 462:11 | order | const | module/anonymous@7/openMedicationEnd | medicationCurrent()?.orders.find(item=&gt;item.id===id) |
+| 462:50 | item | parameter | module/anonymous@7/openMedicationEnd/anonymous@462 | item |
+| 465:11 | minimum | const | module/anonymous@7/openMedicationEnd | order.startDate&gt;state.data.today?order.startDate:state.data.today |
+| 469:12 | openMedicationHistory | function | module/anonymous@7 |  |
+| 469:34 | orderId | parameter | module/anonymous@7/openMedicationHistory | orderId |
+| 469:42 | time | parameter | module/anonymous@7/openMedicationHistory | time |
+| 470:11 | data | const | module/anonymous@7/openMedicationHistory | medicationCurrent() |
+| 471:11 | slot | const | module/anonymous@7/openMedicationHistory | data.schedule.slots.find(s=&gt;s.orderId===orderId &amp;&amp; s.time===time) |
+| 471:41 | s | parameter | module/anonymous@7/openMedicationHistory/anonymous@471 | s |
+| 473:11 | audit | const | module/anonymous@7/openMedicationHistory | data.audit.filter(item=&gt;item.orderId===orderId &amp;&amp; item.time===time &amp;&amp; item.date===data.date).sort((a,b)=&gt;Number(b.revision)-Number |
+| 473:35 | item | parameter | module/anonymous@7/openMedicationHistory/anonymous@473 | item |
+| 473:116 | a | parameter | module/anonymous@7/openMedicationHistory/anonymous@473 | a |
+| 473:118 | b | parameter | module/anonymous@7/openMedicationHistory/anonymous@473 | b |
+| 474:510 | entry | parameter | module/anonymous@7/openMedicationHistory/anonymous@474 | entry |
+| 477:18 | submitMedicationModal | function | module/anonymous@7 |  |
+| 477:40 | event | parameter | module/anonymous@7/submitMedicationModal | event |
+| 478:11 | form | const | module/anonymous@7/submitMedicationModal | event.target |
+| 479:34 | modal | const | module/anonymous@7/submitMedicationModal | state.modal |
+| 480:11 | patientId | const | module/anonymous@7/submitMedicationModal | modal.patientId |
+| 480:37 | err | const | module/anonymous@7/submitMedicationModal | $('#modal-error') |
+| 482:11 | submit | const | module/anonymous@7/submitMedicationModal | form.querySelector('[type="submit"]') |
+| 482:62 | fields | const | module/anonymous@7/submitMedicationModal | new FormData(form) |
+| 485:15 | times | const | module/anonymous@7/submitMedicationModal | fields.getAll('times').filter(Boolean) |
+| 487:15 | payload | const | module/anonymous@7/submitMedicationModal | {name:String(fields.get('name')).trim(),strength:String(fields.get('strength')).trim(),dose:String(fields.get('dose')).trim(),rout |
+| 488:15 | payloadKey | const | module/anonymous@7/submitMedicationModal | JSON.stringify(payload) |
+| 494:13 | error | catch | module/anonymous@7/submitMedicationModal |  |
+| 498:7 | renderedContext | let | module/anonymous@7 | '' |
+| 499:12 | captureReadingState | function | module/anonymous@7 |  |
+| 500:11 | root | const | module/anonymous@7/captureReadingState | $('#app-content') |
+| 500:34 | active | const | module/anonymous@7/captureReadingState | document.activeElement |
+| 501:9 | focus | let | module/anonymous@7/captureReadingState | '' |
+| 505:87 | key | parameter | module/anonymous@7/captureReadingState/anonymous@505 | [key] |
+| 505:147 | key | parameter | module/anonymous@7/captureReadingState/anonymous@505 | [key,value] |
+| 505:151 | value | parameter | module/anonymous@7/captureReadingState/anonymous@505 | [key,value] |
+| 507:191 | el | parameter | module/anonymous@7/captureReadingState/anonymous@507 | el |
+| 507:274 | el | parameter | module/anonymous@7/captureReadingState/anonymous@507 | el |
+| 509:12 | restoreReadingState | function | module/anonymous@7 |  |
+| 509:32 | saved | parameter | module/anonymous@7/restoreReadingState | saved |
+| 511:15 | key | const | module/anonymous@7/restoreReadingState | 초기값 없음 |
+| 511:40 | el | const | module/anonymous@7/restoreReadingState | $('#app-content').querySelector('[data-preserve-key="${CSS.escape(key)}"]') |
+| 512:66 | el | parameter | module/anonymous@7/restoreReadingState/anonymous@512 | el |
+| 512:69 | i | parameter | module/anonymous@7/restoreReadingState/anonymous@512 | i |
+| 513:11 | focus | const | module/anonymous@7/restoreReadingState | saved.focus?$('#app-content').querySelector(saved.focus):null |
+| 517:12 | applyAccess | function | module/anonymous@7 |  |
+| 518:15 | button | const | module/anonymous@7/applyAccess | 초기값 없음 |
+| 520:15 | el | const | module/anonymous@7/applyAccess | 초기값 없음 |
+| 521:15 | el | const | module/anonymous@7/applyAccess | 초기값 없음 |
+| 522:15 | el | const | module/anonymous@7/applyAccess | 초기값 없음 |
+| 523:15 | el | const | module/anonymous@7/applyAccess | 초기값 없음 |
+| 524:11 | roles | const | module/anonymous@7/applyAccess | {clinician:'임상 검토',support:'환자 관리 지원',researcher:'연구 분석',administrator:'운영 관리'} |
+| 525:11 | profile | const | module/anonymous@7/applyAccess | $('.sidebar-profile b') |
+| 525:114 | role | parameter | module/anonymous@7/applyAccess/anonymous@525 | role |
+| 527:12 | render | function | module/anonymous@7 |  |
+| 527:19 | historyMode | parameter | module/anonymous@7/render | historyMode = 'replace' |
+| 530:11 | context | const | module/anonymous@7/render | [state.view,state.selectedId,state.startDate,state.endDate,medDate()].join('\|') |
+| 531:11 | saved | const | module/anonymous@7/render | context===renderedContext?captureReadingState():null |
+| 532:12 | eyebrow | const | module/anonymous@7/render | viewTitles[state.view] |
+| 532:20 | title | const | module/anonymous@7/render | viewTitles[state.view] |
+| 532:26 | subtitle | const | module/anonymous@7/render | viewTitles[state.view] |
+| 532:35 | breadcrumb | const | module/anonymous@7/render | viewTitles[state.view] |
+| 534:64 | btn | parameter | module/anonymous@7/render/anonymous@534 | btn |
+| 534:76 | active | const | module/anonymous@7/render/anonymous@534 | btn.dataset.view===state.view |
+| 535:11 | inputFocused | const | module/anonymous@7/render | document.activeElement?.id==='patient-search' |
+| 535:76 | cursor | const | module/anonymous@7/render | inputFocused?document.activeElement.selectionStart:null |
+| 536:11 | patientLink | const | module/anonymous@7/render | $('.patient-site-link') |
+| 537:11 | periodForm | const | module/anonymous@7/render | $('#clinical-period-form') |
+| 544:16 | key | const | module/anonymous@7/render | 초기값 없음 |
+| 544:20 | workspace | const | module/anonymous@7/render | 초기값 없음 |
+| 555:12 | changeView | function | module/anonymous@7 |  |
+| 555:23 | view | parameter | module/anonymous@7/changeView | view |
+| 556:18 | openInvitation | function | module/anonymous@7 |  |
+| 558:50 | marker | const | module/anonymous@7/openInvitation | {type:'invitation',busy:true} |
+| 561:27 | result | const | module/anonymous@7/openInvitation | await api('/api/clinician/patients/${encodeURIComponent(state.selectedId)}/invitations',{method:'POST',body:'{}'}) |
+| 562:11 | error | catch | module/anonymous@7/openInvitation |  |
+| 565:12 | openExport | function | module/anonymous@7 |  |
+| 572:18 | previewExport | function | module/anonymous@7 |  |
+| 572:32 | event | parameter | module/anonymous@7/previewExport | event |
+| 574:11 | modal | const | module/anonymous@7/previewExport | state.modal |
+| 575:11 | params | const | module/anonymous@7/previewExport | new URLSearchParams({startDate:$('#export-start').value,endDate:$('#export-end').value}) |
+| 577:107 | key | const | module/anonymous@7/previewExport | params.toString() |
+| 579:13 | result | const | module/anonymous@7/previewExport | await api('/api/export-preview?'+key) |
+| 580:354 | c | parameter | module/anonymous@7/previewExport/anonymous@580 | c |
+| 582:12 | error | catch | module/anonymous@7/previewExport |  |
+| 585:12 | closeModal | function | module/anonymous@7 |  |
+| 585:24 | force | parameter | module/anonymous@7/closeModal | {force=false}={} |
+| 591:12 | openModal | function | module/anonymous@7 |  |
+| 591:22 | type | parameter | module/anonymous@7/openModal | type |
+| 591:28 | mode | parameter | module/anonymous@7/openModal | mode='seed' |
+| 594:11 | close | const | module/anonymous@7/openModal | '&lt;button class="icon-button" data-modal-action="close" aria-label="닫기"&gt;${icon('close')}&lt;/button&gt;' |
+| 599:13 | seed | const | module/anonymous@7/openModal | mode==='seed' |
+| 604:18 | submitModal | function | module/anonymous@7 |  |
+| 604:30 | event | parameter | module/anonymous@7/submitModal | event |
+| 605:11 | form | const | module/anonymous@7/submitModal | event.target |
+| 606:11 | modal | const | module/anonymous@7/submitModal | state.modal |
+| 607:11 | err | const | module/anonymous@7/submitModal | $('#modal-error') |
+| 607:55 | fields | const | module/anonymous@7/submitModal | new FormData(form) |
+| 610:15 | result | const | module/anonymous@7/submitModal | await api('/api/patients',{method:'POST',body:JSON.stringify({name:String(fields.get('name')).trim(),age:Number(fields.get('age')) |
+| 610:234 | s | parameter | module/anonymous@7/submitModal/anonymous@610 | s |
+| 614:15 | mode | const | module/anonymous@7/submitModal | state.modal.mode |
+| 618:13 | error | catch | module/anonymous@7/submitModal |  |
+| 621:43 | event | parameter | module/anonymous@7/anonymous@621 | event |
+| 621:57 | btn | const | module/anonymous@7/anonymous@621 | event.target.closest('[data-view]') |
+| 625:58 | event | parameter | module/anonymous@7/anonymous@625 | event |
+| 626:11 | count | const | module/anonymous@7/anonymous@625 | Number(event.target.value) |
+| 630:56 | event | parameter | module/anonymous@7/anonymous@630 | event |
+| 632:11 | start | const | module/anonymous@7/anonymous@630 | $('#clinical-start-date').value |
+| 632:49 | end | const | module/anonymous@7/anonymous@630 | $('#clinical-end-date').value |
+| 632:83 | days | const | module/anonymous@7/anonymous@630 | (Date.parse(end)-Date.parse(start))/86400000+1 |
+| 637:46 | event | parameter | module/anonymous@7/anonymous@637 | event |
+| 638:11 | el | const | module/anonymous@7/anonymous@637 | event.target.closest('[data-action]') |
+| 639:11 | action | const | module/anonymous@7/anonymous@637 | el.dataset.action |
+| 655:48 | event | parameter | module/anonymous@7/anonymous@655 | event |
+| 655:62 | row | const | module/anonymous@7/anonymous@655 | event.target.closest('.patient-row') |
+| 656:46 | event | parameter | module/anonymous@7/anonymous@656 | event |
+| 659:47 | event | parameter | module/anonymous@7/anonymous@659 | event |
+| 659:131 | id | const | module/anonymous@7/anonymous@659 | event.target.value |
+| 660:49 | event | parameter | module/anonymous@7/anonymous@660 | event |
+| 664:40 | event | parameter | module/anonymous@7/anonymous@664 | event |
+| 665:11 | button | const | module/anonymous@7/anonymous@664 | event.target.closest('[data-modal-action]') |
+| 666:56 | rows | const | module/anonymous@7/anonymous@664 | $('#medication-times') |
+| 666:90 | count | const | module/anonymous@7/anonymous@664 | rows.querySelectorAll('input').length |
+| 671:41 | event | parameter | module/anonymous@7/anonymous@671 | event |
+| 675:65 | index | const | module/anonymous@7/anonymous@671 | event.target.dataset.candidateConfirm |
+| 675:115 | btn | const | module/anonymous@7/anonymous@671 | $('#modal').querySelector('[data-candidate="${index}"]') |
+| 678:39 | event | parameter | module/anonymous@7/anonymous@678 | event |
+| 681:34 | items | const | module/anonymous@7/anonymous@678 | [...$('#modal').querySelectorAll('button:not([disabled]),input:not([disabled]),select,textarea,a[href]')] |
+| 681:152 | first | const | module/anonymous@7/anonymous@678 | items[0] |
+| 681:167 | last | const | module/anonymous@7/anonymous@678 | items.at(-1) |
+| 684:42 | event | parameter | module/anonymous@7/anonymous@684 | event |
+| 685:61 | error | catch | module/anonymous@7 |  |
+| 686:67 | error | catch | module/anonymous@7 |  |
 
 ## public/patient-communications.js
 
@@ -2528,95 +3787,122 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 41:13 | signature | const | module/createPatientCommunications/loadNotices | JSON.stringify(result.notices) |
 | 44:13 | opened | const | module/createPatientCommunications/loadNotices | new Set([...notices.querySelectorAll('details[open]')].map(el=&gt;el.dataset.noticeId+':'+el.dataset.version)) |
 | 44:79 | el | parameter | module/createPatientCommunications/loadNotices/anonymous@44 | el |
-| 45:194 | n | parameter | module/createPatientCommunications/loadNotices/anonymous@45 | n |
-| 46:13 | issue | catch | module/createPatientCommunications/loadNotices |  |
-| 48:36 | event | parameter | module/createPatientCommunications/anonymous@48 | event |
-| 49:43 | event | parameter | module/createPatientCommunications/anonymous@49 | event |
-| 50:11 | details | const | module/createPatientCommunications/anonymous@49 | event.target |
-| 52:11 | request | const | module/createPatientCommunications/anonymous@49 | generation |
-| 54:11 | issue | catch | module/createPatientCommunications/anonymous@49 |  |
-| 56:62 | event | parameter | module/createPatientCommunications/anonymous@56 | event |
-| 58:11 | body | const | module/createPatientCommunications/anonymous@56 | input.value.trim() |
-| 60:11 | target | const | module/createPatientCommunications/anonymous@56 | patientId |
-| 60:28 | request | const | module/createPatientCommunications/anonymous@56 | generation |
-| 65:13 | issue | catch | module/createPatientCommunications/anonymous@56 |  |
-| 74:11 | id | parameter | module/createPatientCommunications/anonymous@74 | id |
+| 45:13 | moreOpen | const | module/createPatientCommunications/loadNotices | Boolean(notices.querySelector('.notice-more[open]')) |
+| 46:13 | renderNotice | const | module/createPatientCommunications/loadNotices | n =&gt; '&lt;details class="patient-notice" data-notice-id="${n.id}" data-version="${n.version}" ${opened.has(n.id+':'+n.version)?'open' |
+| 46:28 | n | parameter | module/createPatientCommunications/loadNotices/anonymous@46 | n |
+| 50:13 | issue | catch | module/createPatientCommunications/loadNotices |  |
+| 52:36 | event | parameter | module/createPatientCommunications/anonymous@52 | event |
+| 53:43 | event | parameter | module/createPatientCommunications/anonymous@53 | event |
+| 54:11 | details | const | module/createPatientCommunications/anonymous@53 | event.target |
+| 56:11 | request | const | module/createPatientCommunications/anonymous@53 | generation |
+| 58:11 | issue | catch | module/createPatientCommunications/anonymous@53 |  |
+| 60:62 | event | parameter | module/createPatientCommunications/anonymous@60 | event |
+| 62:11 | body | const | module/createPatientCommunications/anonymous@60 | input.value.trim() |
+| 64:11 | target | const | module/createPatientCommunications/anonymous@60 | patientId |
+| 64:28 | request | const | module/createPatientCommunications/anonymous@60 | generation |
+| 68:71 | status | let | module/createPatientCommunications/anonymous@60 | $('#patient-message-sent') |
+| 69:13 | issue | catch | module/createPatientCommunications/anonymous@60 |  |
+| 72:61 | button | parameter | module/createPatientCommunications/anonymous@72 | button |
+| 74:11 | phrase | const | module/createPatientCommunications/anonymous@72/anonymous@72 | button.dataset.quickMessage |
+| 84:11 | id | parameter | module/createPatientCommunications/anonymous@84 | id |
+
+## public/patient-image.js
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 2:7 | MAX_UPLOAD | const | module | 5 * 1024 * 1024 |
+| 3:7 | SUPPORTED | const | module | new Set(['image/jpeg', 'image/png', 'image/webp']) |
+| 4:7 | readDataUrl | const | module | blob =&gt; new Promise((resolve, reject) =&gt; { const reader = new FileReader(); reader.onload = () =&gt; resolve(reader.result); reader.o |
+| 4:21 | blob | parameter | module/anonymous@4 | blob |
+| 4:42 | resolve | parameter | module/anonymous@4/anonymous@4 | resolve |
+| 4:51 | reject | parameter | module/anonymous@4/anonymous@4 | reject |
+| 5:9 | reader | const | module/anonymous@4/anonymous@4 | new FileReader() |
+| 10:23 | preparePatientImage | function | module |  |
+| 10:43 | file | parameter | module/preparePatientImage | file |
+| 13:9 | heic | const | module/preparePatientImage | /image\/hei[cf]/i.test(file.type) \|\| /\.hei[cf]$/i.test(file.name \|\| '') |
+| 17:7 | bitmap | let | module/preparePatientImage | 초기값 없음 |
+| 21:11 | scale | const | module/preparePatientImage | Math.min(1, 2048 / Math.max(bitmap.width, bitmap.height)) |
+| 22:11 | canvas | const | module/preparePatientImage | document.createElement('canvas') |
+| 25:11 | context | const | module/preparePatientImage | canvas.getContext('2d') |
+| 29:16 | quality | const | module/preparePatientImage | 초기값 없음 |
+| 30:13 | blob | const | module/preparePatientImage | await new Promise(resolve =&gt; canvas.toBlob(resolve, 'image/jpeg', quality)) |
+| 30:38 | resolve | parameter | module/preparePatientImage/anonymous@30 | resolve |
 
 ## public/patient-medication-photo.js
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
 |---|---|---|---|---|
-| 3:17 | createMedicationPhoto | function | module |  |
-| 3:41 | api | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
-| 3:46 | getContext | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
-| 3:58 | openDialog | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
-| 3:70 | setBusy | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
-| 3:79 | onSaved | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
-| 3:88 | escape | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
-| 4:9 | $ | const | module/createMedicationPhoto | selector =&gt; document.querySelector(selector) |
-| 4:13 | selector | parameter | module/createMedicationPhoto/anonymous@4 | selector |
-| 5:9 | form | const | module/createMedicationPhoto | $('#medication-photo-form') |
-| 6:9 | dialog | const | module/createMedicationPhoto | $('#medication-photo-dialog') |
-| 7:9 | state | const | module/createMedicationPhoto | { imageData: null, analysis: null, loading: false, analyzing: false, saving: false, generation: 0, patientId: null, date: null, sc |
-| 9:9 | normalize | const | module/createMedicationPhoto | value =&gt; String(value \|\| '').normalize('NFKC').toLocaleLowerCase().replace(/\s+/g, '') |
-| 9:21 | value | parameter | module/createMedicationPhoto/anonymous@9 | value |
-| 10:9 | statusLabel | const | module/createMedicationPhoto | status =&gt; ({ taken: '먹었어요', missed: '못 먹었어요', unknown: '기억 안 나요' })[status] \|\| '미보고' |
-| 10:23 | status | parameter | module/createMedicationPhoto/anonymous@10 | status |
-| 11:12 | error | function | module/createMedicationPhoto |  |
-| 11:18 | message | parameter | module/createMedicationPhoto/error | message |
-| 12:12 | invalidate | function | module/createMedicationPhoto |  |
-| 18:12 | reset | function | module/createMedicationPhoto |  |
-| 23:12 | refresh | function | module/createMedicationPhoto |  |
-| 24:11 | context | const | module/createMedicationPhoto/refresh | getContext() |
-| 26:11 | available | const | module/createMedicationPhoto/refresh | context.vision?.available === true |
-| 30:11 | busy | const | module/createMedicationPhoto/refresh | state.loading \|\| state.analyzing \|\| state.saving |
-| 40:153 | input | parameter | module/createMedicationPhoto/refresh/anonymous@40 | input |
-| 42:12 | open | function | module/createMedicationPhoto |  |
-| 43:11 | context | const | module/createMedicationPhoto/open | getContext() |
-| 50:12 | renderReview | function | module/createMedicationPhoto |  |
-| 51:11 | candidates | const | module/createMedicationPhoto/renderReview | state.analysis.proposal.medications \|\| [] |
-| 52:11 | orders | const | module/createMedicationPhoto/renderReview | state.schedule.orders |
-| 53:11 | candidateHtml | const | module/createMedicationPhoto/renderReview | candidates.map(candidate =&gt; { const sameName = orders.filter(order =&gt; normalize(order.name) === normalize(candidate.name)); const  |
-| 53:42 | candidate | parameter | module/createMedicationPhoto/renderReview/anonymous@53 | candidate |
-| 54:13 | sameName | const | module/createMedicationPhoto/renderReview/anonymous@53 | orders.filter(order =&gt; normalize(order.name) === normalize(candidate.name)) |
-| 54:38 | order | parameter | module/createMedicationPhoto/renderReview/anonymous@53/anonymous@54 | order |
-| 55:13 | matches | const | module/createMedicationPhoto/renderReview/anonymous@53 | sameName.length ? sameName.map(order =&gt; '${order.name} ${order.strength} · ${!candidate.strength \|\| !order.strength ? '함량 직접 확인 필요 |
-| 55:54 | order | parameter | module/createMedicationPhoto/renderReview/anonymous@53/anonymous@55 | order |
-| 58:322 | slot | parameter | module/createMedicationPhoto/renderReview/anonymous@58 | slot |
-| 58:328 | index | parameter | module/createMedicationPhoto/renderReview/anonymous@58 | index |
-| 58:1441 | warning | parameter | module/createMedicationPhoto/renderReview/anonymous@58 | warning |
-| 61:18 | analyze | function | module/createMedicationPhoto |  |
-| 63:25 | generation | const | module/createMedicationPhoto/analyze | state.generation |
-| 63:56 | patientId | const | module/createMedicationPhoto/analyze | state.patientId |
-| 63:85 | imageData | const | module/createMedicationPhoto/analyze | state.imageData |
-| 66:13 | result | const | module/createMedicationPhoto/analyze | await api('/api/patients/${encodeURIComponent(patientId)}/photo-analyses', { method: 'POST', body: JSON.stringify({ kind: 'medicat |
-| 70:14 | cause | catch | module/createMedicationPhoto/analyze |  |
-| 73:18 | save | function | module/createMedicationPhoto |  |
-| 73:23 | event | parameter | module/createMedicationPhoto/save | event |
-| 75:11 | data | const | module/createMedicationPhoto/save | new FormData(form) |
-| 76:11 | slots | const | module/createMedicationPhoto/save | state.schedule.slots.flatMap((slot, index) =&gt; data.has('selected-${index}') ? [{ orderId: slot.orderId, time: slot.time, status: d |
-| 76:49 | slot | parameter | module/createMedicationPhoto/save/anonymous@76 | slot |
-| 76:55 | index | parameter | module/createMedicationPhoto/save/anonymous@76 | index |
-| 78:58 | slot | parameter | module/createMedicationPhoto/save/anonymous@78 | slot |
-| 79:11 | payload | const | module/createMedicationPhoto/save | { analysisId: state.analysis.id, imageData: state.imageData, date: state.date, patientConfirmed: true, slots } |
-| 80:11 | signature | const | module/createMedicationPhoto/save | JSON.stringify(payload) |
-| 83:9 | saved | let | module/createMedicationPhoto/save | false |
-| 87:14 | cause | catch | module/createMedicationPhoto/save |  |
-| 91:57 | event | parameter | module/createMedicationPhoto/anonymous@91 | event |
-| 92:11 | file | const | module/createMedicationPhoto/anonymous@91 | event.target.files?.[0] |
-| 95:11 | generation | const | module/createMedicationPhoto/anonymous@91 | state.generation |
-| 97:13 | imageData | const | module/createMedicationPhoto/anonymous@91 | await new Promise((resolve, reject) =&gt; { const reader = new FileReader(); reader.onload = () =&gt; resolve(reader.result); reader.one |
-| 97:44 | resolve | parameter | module/createMedicationPhoto/anonymous@91/anonymous@97 | resolve |
-| 97:53 | reject | parameter | module/createMedicationPhoto/anonymous@91/anonymous@97 | reject |
-| 97:72 | reader | const | module/createMedicationPhoto/anonymous@91/anonymous@97 | new FileReader() |
-| 100:14 | cause | catch | module/createMedicationPhoto/anonymous@91 |  |
-| 104:14 | id | const | module/createMedicationPhoto | 초기값 없음 |
-| 105:35 | event | parameter | module/createMedicationPhoto/anonymous@105 | event |
-| 110:34 | event | parameter | module/createMedicationPhoto/anonymous@110 | event |
-| 112:12 | renderReports | function | module/createMedicationPhoto |  |
-| 112:26 | reports | parameter | module/createMedicationPhoto/renderReports | reports |
-| 113:101 | report | parameter | module/createMedicationPhoto/renderReports/anonymous@113 | report |
-| 113:384 | event | parameter | module/createMedicationPhoto/renderReports/anonymous@113/anonymous@113 | event |
+| 1:10 | preparePatientImage | import | module | ./patient-image.js |
+| 4:17 | createMedicationPhoto | function | module |  |
+| 4:41 | api | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
+| 4:46 | getContext | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
+| 4:58 | openDialog | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
+| 4:70 | setBusy | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
+| 4:79 | onSaved | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
+| 4:88 | escape | parameter | module/createMedicationPhoto | { api, getContext, openDialog, setBusy, onSaved, escape } |
+| 5:9 | $ | const | module/createMedicationPhoto | selector =&gt; document.querySelector(selector) |
+| 5:13 | selector | parameter | module/createMedicationPhoto/anonymous@5 | selector |
+| 6:9 | form | const | module/createMedicationPhoto | $('#medication-photo-form') |
+| 7:9 | dialog | const | module/createMedicationPhoto | $('#medication-photo-dialog') |
+| 8:9 | state | const | module/createMedicationPhoto | { imageData: null, analysis: null, loading: false, analyzing: false, saving: false, generation: 0, patientId: null, date: null, sc |
+| 10:9 | normalize | const | module/createMedicationPhoto | value =&gt; String(value \|\| '').normalize('NFKC').toLocaleLowerCase().replace(/\s+/g, '') |
+| 10:21 | value | parameter | module/createMedicationPhoto/anonymous@10 | value |
+| 11:9 | statusLabel | const | module/createMedicationPhoto | status =&gt; ({ taken: '먹었어요', missed: '못 먹었어요', unknown: '기억 안 나요' })[status] \|\| '미보고' |
+| 11:23 | status | parameter | module/createMedicationPhoto/anonymous@11 | status |
+| 12:12 | error | function | module/createMedicationPhoto |  |
+| 12:18 | message | parameter | module/createMedicationPhoto/error | message |
+| 12:35 | element | const | module/createMedicationPhoto/error | $('#med-photo-error') |
+| 13:12 | invalidate | function | module/createMedicationPhoto |  |
+| 19:12 | reset | function | module/createMedicationPhoto |  |
+| 24:12 | refresh | function | module/createMedicationPhoto |  |
+| 25:11 | context | const | module/createMedicationPhoto/refresh | getContext() |
+| 27:11 | available | const | module/createMedicationPhoto/refresh | context.vision?.available === true |
+| 31:11 | busy | const | module/createMedicationPhoto/refresh | state.loading \|\| state.analyzing \|\| state.saving |
+| 42:153 | input | parameter | module/createMedicationPhoto/refresh/anonymous@42 | input |
+| 44:12 | open | function | module/createMedicationPhoto |  |
+| 45:11 | context | const | module/createMedicationPhoto/open | getContext() |
+| 52:12 | renderReview | function | module/createMedicationPhoto |  |
+| 53:11 | candidates | const | module/createMedicationPhoto/renderReview | state.analysis.proposal.medications \|\| [] |
+| 54:11 | orders | const | module/createMedicationPhoto/renderReview | state.schedule.orders |
+| 55:11 | candidateHtml | const | module/createMedicationPhoto/renderReview | candidates.map(candidate =&gt; { const sameName = orders.filter(order =&gt; normalize(order.name) === normalize(candidate.name)); const  |
+| 55:42 | candidate | parameter | module/createMedicationPhoto/renderReview/anonymous@55 | candidate |
+| 56:13 | sameName | const | module/createMedicationPhoto/renderReview/anonymous@55 | orders.filter(order =&gt; normalize(order.name) === normalize(candidate.name)) |
+| 56:38 | order | parameter | module/createMedicationPhoto/renderReview/anonymous@55/anonymous@56 | order |
+| 57:13 | matches | const | module/createMedicationPhoto/renderReview/anonymous@55 | sameName.length ? sameName.map(order =&gt; '${order.name} ${order.strength} · ${!candidate.strength \|\| !order.strength ? '함량 직접 확인 필요 |
+| 57:54 | order | parameter | module/createMedicationPhoto/renderReview/anonymous@55/anonymous@57 | order |
+| 60:324 | slot | parameter | module/createMedicationPhoto/renderReview/anonymous@60 | slot |
+| 60:330 | index | parameter | module/createMedicationPhoto/renderReview/anonymous@60 | index |
+| 60:1521 | warning | parameter | module/createMedicationPhoto/renderReview/anonymous@60 | warning |
+| 63:18 | analyze | function | module/createMedicationPhoto |  |
+| 65:25 | generation | const | module/createMedicationPhoto/analyze | state.generation |
+| 65:56 | patientId | const | module/createMedicationPhoto/analyze | state.patientId |
+| 65:85 | imageData | const | module/createMedicationPhoto/analyze | state.imageData |
+| 68:13 | result | const | module/createMedicationPhoto/analyze | await api('/api/patients/${encodeURIComponent(patientId)}/photo-analyses', { method: 'POST', body: JSON.stringify({ kind: 'medicat |
+| 72:14 | cause | catch | module/createMedicationPhoto/analyze |  |
+| 75:18 | save | function | module/createMedicationPhoto |  |
+| 75:23 | event | parameter | module/createMedicationPhoto/save | event |
+| 77:11 | data | const | module/createMedicationPhoto/save | new FormData(form) |
+| 78:11 | slots | const | module/createMedicationPhoto/save | state.schedule.slots.flatMap((slot, index) =&gt; data.has('selected-${index}') ? [{ orderId: slot.orderId, time: slot.time, status: d |
+| 78:49 | slot | parameter | module/createMedicationPhoto/save/anonymous@78 | slot |
+| 78:55 | index | parameter | module/createMedicationPhoto/save/anonymous@78 | index |
+| 80:58 | slot | parameter | module/createMedicationPhoto/save/anonymous@80 | slot |
+| 81:11 | payload | const | module/createMedicationPhoto/save | { analysisId: state.analysis.id, imageData: state.imageData, date: state.date, patientConfirmed: true, slots } |
+| 82:11 | signature | const | module/createMedicationPhoto/save | JSON.stringify(payload) |
+| 85:9 | saved | let | module/createMedicationPhoto/save | false |
+| 89:14 | cause | catch | module/createMedicationPhoto/save |  |
+| 93:18 | choosePhoto | function | module/createMedicationPhoto |  |
+| 93:30 | event | parameter | module/createMedicationPhoto/choosePhoto | event |
+| 94:11 | file | const | module/createMedicationPhoto/choosePhoto | event.target.files?.[0] |
+| 96:11 | generation | const | module/createMedicationPhoto/choosePhoto | state.generation |
+| 99:13 | prepared | const | module/createMedicationPhoto/choosePhoto | await preparePatientImage(file) |
+| 103:14 | cause | catch | module/createMedicationPhoto/choosePhoto |  |
+| 109:14 | id | const | module/createMedicationPhoto | 초기값 없음 |
+| 110:35 | event | parameter | module/createMedicationPhoto/anonymous@110 | event |
+| 115:34 | event | parameter | module/createMedicationPhoto/anonymous@115 | event |
+| 117:12 | renderReports | function | module/createMedicationPhoto |  |
+| 117:26 | reports | parameter | module/createMedicationPhoto/renderReports | reports |
+| 118:101 | report | parameter | module/createMedicationPhoto/renderReports/anonymous@118 | report |
+| 118:497 | event | parameter | module/createMedicationPhoto/renderReports/anonymous@118/anonymous@118 | event |
 
 ## public/patient-screens.js
 
@@ -2634,355 +3920,393 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 3:42 | sessionHeaders | import | module | ./session.js |
 | 3:58 | sessionExpired | import | module | ./session.js |
 | 3:74 | demoPatient | import | module | ./session.js |
+| 3:87 | assertSessionActive | import | module | ./session.js |
 | 4:10 | createMedicationPhoto | import | module | ./patient-medication-photo.js |
 | 5:10 | createPatientCommunications | import | module | ./patient-communications.js |
-| 7:10 | PATIENT_SCREENS | import | module | ./patient-screens.js |
-| 7:27 | PATIENT_INPUT_SCREENS | import | module | ./patient-screens.js |
-| 10:9 | $ | const | module/anonymous@9 | (selector, scope = document) =&gt; scope.querySelector(selector) |
-| 10:14 | selector | parameter | module/anonymous@9/anonymous@10 | selector |
-| 10:24 | scope | parameter | module/anonymous@9/anonymous@10 | scope = document |
-| 11:9 | $$ | const | module/anonymous@9 | (selector, scope = document) =&gt; [...scope.querySelectorAll(selector)] |
-| 11:15 | selector | parameter | module/anonymous@9/anonymous@11 | selector |
-| 11:25 | scope | parameter | module/anonymous@9/anonymous@11 | scope = document |
-| 12:9 | views | const | module/anonymous@9 | Object.keys(PATIENT_SCREENS) |
-| 13:9 | metrics | const | module/anonymous@9 | ["steps", "sleepHours", "proteinGrams"] |
-| 14:9 | dailyModes | const | module/anonymous@9 | { all: { fields: ["steps", "sleepHours", "weightKg", "medicationStatus", "appetite", "mood", "note"], hint: "입력하거나 바꾼 항목만 저장해요. 답하 |
-| 15:9 | state | const | module/anonymous@9 | { patients: [], patientId: null, summary: null, view: "home", metric: "steps", section: null, imageData: null, loading: false, sav |
-| 16:9 | communication | const | module/anonymous@9 | createPatientCommunications({api,getView:()=&gt;state.view,isBusy:()=&gt;Boolean(state.saving\|\|state.loading),setBusy:value=&gt;{state.savi |
-| 16:137 | value | parameter | module/anonymous@9/anonymous@16 | value |
-| 17:9 | labels | const | module/anonymous@9 | { meal: { breakfast: "아침", lunch: "점심", dinner: "저녁", snack: "간식" }, food: { balanced: "밥과 반찬", porridge: "죽·부드러운 식사", protein: "고 |
-| 18:9 | icons | const | module/anonymous@9 | { steps: '&lt;path d="M10 3 7 7l1 5-3 7m3-7 5 2 2 7m-3-12 3 3h5"/&gt;&lt;circle cx="14" cy="4" r="2"/&gt;', sleep: '&lt;path d="M20 14a8 8 0 0 1- |
-| 25:9 | svg | const | module/anonymous@9 | (key) =&gt; '&lt;svg viewBox="0 0 24 24" aria-hidden="true"&gt;${icons[key] \|\| icons.meal}&lt;/svg&gt;' |
-| 25:16 | key | parameter | module/anonymous@9/anonymous@25 | key |
-| 26:9 | escape | const | module/anonymous@9 | (value) =&gt; String(value ?? "").replace(/[&amp;&lt;&gt;"']/g, (char) =&gt; ({ "&amp;": "&amp;amp;", "&lt;": "&amp;lt;", "&gt;": "&amp;gt;", '"': "&amp;quot;", "'": "&amp;#39; |
-| 26:19 | value | parameter | module/anonymous@9/anonymous@26 | value |
-| 26:70 | char | parameter | module/anonymous@9/anonymous@26/anonymous@26 | char |
-| 27:9 | medicationPhoto | const | module/anonymous@9 | createMedicationPhoto({ api, escape, getContext: () =&gt; ({ patientId: state.patientId, date: state.medicationDate, schedule: state. |
-| 29:44 | value | parameter | module/anonymous@9/anonymous@29 | value |
-| 36:9 | numeric | const | module/anonymous@9 | (value) =&gt; value !== null &amp;&amp; value !== undefined &amp;&amp; value !== "" &amp;&amp; Number.isFinite(Number(value)) |
-| 36:20 | value | parameter | module/anonymous@9/anonymous@36 | value |
-| 37:9 | number | const | module/anonymous@9 | (value, digits = 0) =&gt; numeric(value) ? Number(value).toLocaleString("ko-KR", { maximumFractionDigits: digits }) : "—" |
-| 37:19 | value | parameter | module/anonymous@9/anonymous@37 | value |
-| 37:26 | digits | parameter | module/anonymous@9/anonymous@37 | digits = 0 |
-| 38:9 | dateObject | const | module/anonymous@9 | (date) =&gt; new Date('${date}T12:00:00+09:00') |
-| 38:23 | date | parameter | module/anonymous@9/anonymous@38 | date |
-| 39:9 | shortDate | const | module/anonymous@9 | (date) =&gt; date ? dateObject(date).toLocaleDateString("ko-KR", { month: "numeric", day: "numeric", timeZone: "Asia/Seoul" }) : "" |
-| 39:22 | date | parameter | module/anonymous@9/anonymous@39 | date |
-| 40:9 | weekday | const | module/anonymous@9 | (date) =&gt; date ? dateObject(date).toLocaleDateString("ko-KR", { weekday: "short", timeZone: "Asia/Seoul" }) : "" |
-| 40:20 | date | parameter | module/anonymous@9/anonymous@40 | date |
-| 41:9 | fallbackToday | const | module/anonymous@9 | () =&gt; new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new D |
-| 42:9 | today | const | module/anonymous@9 | () =&gt; state.summary?.today \|\| fallbackToday() |
-| 43:7 | toastTimer | let | module/anonymous@9 | 초기값 없음 |
-| 44:9 | dialogBaseline | const | module/anonymous@9 | new Map() |
-| 45:9 | dialogOpeners | const | module/anonymous@9 | new Map() |
-| 46:9 | medicationBaseline | const | module/anonymous@9 | new Map() |
-| 47:7 | dailyLoadedDate | let | module/anonymous@9 | 초기값 없음 |
-| 49:12 | formSnapshot | function | module/anonymous@9 |  |
-| 49:25 | form | parameter | module/anonymous@9/formSnapshot | form |
-| 50:53 | element | parameter | module/anonymous@9/formSnapshot/anonymous@50 | element |
-| 50:196 | element | parameter | module/anonymous@9/formSnapshot/anonymous@50 | element |
-| 55:12 | dialogDirty | function | module/anonymous@9 |  |
-| 55:24 | dialog | parameter | module/anonymous@9/dialogDirty | dialog |
-| 56:11 | form | const | module/anonymous@9/dialogDirty | $('form', dialog) |
-| 60:12 | medicationDirty | function | module/anonymous@9 |  |
-| 61:101 | form | parameter | module/anonymous@9/medicationDirty/anonymous@61 | form |
-| 65:12 | canLeavePatient | function | module/anonymous@9 |  |
-| 67:11 | dirty | const | module/anonymous@9/canLeavePatient | $$('dialog[open]').some(dialogDirty)\|\|medicationDirty()\|\|communication.dirty() |
-| 72:12 | openRecordDialog | function | module/anonymous@9 |  |
-| 72:29 | id | parameter | module/anonymous@9/openRecordDialog | id |
-| 73:11 | dialog | const | module/anonymous@9/openRecordDialog | $('#${id}') |
-| 79:12 | closeRecordDialog | function | module/anonymous@9 |  |
-| 79:30 | dialog | parameter | module/anonymous@9/closeRecordDialog | dialog |
-| 84:12 | renderNavigation | function | module/anonymous@9 |  |
-| 85:11 | screen | const | module/anonymous@9/renderNavigation | PATIENT_SCREENS[state.view] |
-| 87:11 | locked | const | module/anonymous@9/renderNavigation | Boolean(state.saving \|\| state.loading) |
-| 93:38 | button | parameter | module/anonymous@9/renderNavigation/anonymous@93 | button |
-| 98:18 | api | function | module/anonymous@9 |  |
-| 98:22 | path | parameter | module/anonymous@9/api | path |
-| 98:28 | options | parameter | module/anonymous@9/api | options = {} |
-| 99:11 | controller | const | module/anonymous@9/api | new AbortController() |
-| 100:11 | timeout | const | module/anonymous@9/api | setTimeout(() =&gt; controller.abort(), path.endsWith("/photo-analyses") ? 65000 : 20000) |
-| 102:13 | response | const | module/anonymous@9/api | await fetch(path, { ...options, headers: { "Content-Type": "application/json", ...sessionHeaders(), ...(options.headers \|\| {}) },  |
-| 103:13 | payload | const | module/anonymous@9/api | await response.json().catch(() =&gt; ({})) |
-| 107:14 | error | catch | module/anonymous@9/api |  |
-| 114:12 | toast | function | module/anonymous@9 |  |
-| 114:18 | message | parameter | module/anonymous@9/toast | message |
-| 116:11 | element | const | module/anonymous@9/toast | $("#toast") |
-| 122:12 | showError | function | module/anonymous@9 |  |
-| 122:22 | message | parameter | module/anonymous@9/showError | message |
-| 128:12 | clearConnectionToken | function | module/anonymous@9 |  |
-| 129:16 | id | const | module/anonymous@9/clearConnectionToken | 초기값 없음 |
-| 133:12 | invalidateAnalysis | function | module/anonymous@9 |  |
-| 145:18 | loadPatient | function | module/anonymous@9 |  |
-| 145:30 | patientId | parameter | module/anonymous@9/loadPatient | patientId |
-| 145:43 | initial | parameter | module/anonymous@9/loadPatient | { initial = false, historyMode = "replace", preserveMedicationInputs = false } = {} |
-| 145:60 | historyMode | parameter | module/anonymous@9/loadPatient | { initial = false, historyMode = "replace", preserveMedicationInputs = false } = {} |
-| 145:85 | preserveMedicationInputs | parameter | module/anonymous@9/loadPatient | { initial = false, historyMode = "replace", preserveMedicationInputs = false } = {} |
-| 146:11 | requestId | const | module/anonymous@9/loadPatient | ++state.requestId |
-| 147:11 | changed | const | module/anonymous@9/loadPatient | patientId !== state.patientId |
-| 160:53 | dialog | parameter | module/anonymous@9/loadPatient/anonymous@160 | dialog |
-| 166:14 | summary | const | module/anonymous@9/loadPatient | await Promise.all([ api('/api/patients/${encodeURIComponent(patientId)}/summary'), api('/api/patients/${encodeURIComponent(patient |
-| 166:23 | todayMedication | const | module/anonymous@9/loadPatient | await Promise.all([ api('/api/patients/${encodeURIComponent(patientId)}/summary'), api('/api/patients/${encodeURIComponent(patient |
-| 176:76 | _ | catch | module/anonymous@9/loadPatient |  |
-| 181:14 | error | catch | module/anonymous@9/loadPatient |  |
-| 192:12 | currentMeals | function | module/anonymous@9 |  |
-| 193:84 | meal | parameter | module/anonymous@9/currentMeals/anonymous@193 | meal |
-| 196:12 | render | function | module/anonymous@9 |  |
-| 197:11 | summary | const | module/anonymous@9/render | state.summary |
-| 198:11 | record | const | module/anonymous@9/render | summary.todayRecord |
-| 199:11 | name | const | module/anonymous@9/render | summary.patient?.name \|\| "환자" |
-| 202:11 | clinicianUrl | const | module/anonymous@9/render | '/clinician?patientId=${encodeURIComponent(state.patientId)}' |
-| 209:12 | sourceLabel | function | module/anonymous@9 |  |
-| 209:24 | source | parameter | module/anonymous@9/sourceLabel | source |
-| 209:32 | value | parameter | module/anonymous@9/sourceLabel | value |
-| 214:12 | renderHome | function | module/anonymous@9 |  |
-| 214:23 | record | parameter | module/anonymous@9/renderHome | record |
-| 215:11 | meals | const | module/anonymous@9/renderHome | currentMeals() |
-| 216:11 | schedule | const | module/anonymous@9/renderHome | state.todayMedication |
-| 217:11 | scheduled | const | module/anonymous@9/renderHome | Boolean(schedule?.orders?.length) |
-| 218:11 | slots | const | module/anonymous@9/renderHome | schedule?.slots \|\| [] |
-| 219:11 | reported | const | module/anonymous@9/renderHome | slots.filter(slot =&gt; slot.status !== "pending").length |
-| 219:35 | slot | parameter | module/anonymous@9/renderHome/anonymous@219 | slot |
-| 220:11 | taken | const | module/anonymous@9/renderHome | slots.filter(slot =&gt; slot.status === "taken").length |
-| 220:32 | slot | parameter | module/anonymous@9/renderHome/anonymous@220 | slot |
-| 221:11 | tasks | const | module/anonymous@9/renderHome | [ { label: "식사", done: meals.length &gt; 0 }, { label: "복약", done: Boolean(schedule) &amp;&amp; (scheduled ? slots.length &gt; 0 &amp;&amp; reported === |
-| 227:11 | count | const | module/anonymous@9/renderHome | tasks.filter((task) =&gt; task.done).length |
-| 227:33 | task | parameter | module/anonymous@9/renderHome/anonymous@227 | task |
-| 231:45 | task | parameter | module/anonymous@9/renderHome/anonymous@231 | task |
-| 232:11 | protein | const | module/anonymous@9/renderHome | meals.reduce((sum, meal) =&gt; sum + (Number(meal.proteinGrams) \|\| 0), 0) |
-| 232:35 | sum | parameter | module/anonymous@9/renderHome/anonymous@232 | sum |
-| 232:40 | meal | parameter | module/anonymous@9/renderHome/anonymous@232 | meal |
-| 233:11 | cards | const | module/anonymous@9/renderHome | [ { icon: "steps", label: "걸음 수", value: numeric(record?.steps) ? number(record.steps) : null, unit: "걸음", status: numeric(record? |
-| 239:48 | card | parameter | module/anonymous@9/renderHome/anonymous@239 | card |
-| 244:12 | safeImageUrl | function | module/anonymous@9 |  |
-| 244:25 | value | parameter | module/anonymous@9/safeImageUrl | value |
-| 251:12 | renderMeals | function | module/anonymous@9 |  |
-| 251:24 | container | parameter | module/anonymous@9/renderMeals | container |
-| 251:35 | meals | parameter | module/anonymous@9/renderMeals | meals |
-| 256:64 | meal | parameter | module/anonymous@9/renderMeals/anonymous@256 | meal |
-| 257:13 | imageUrl | const | module/anonymous@9/renderMeals/anonymous@256 | safeImageUrl(meal.imageUrl) |
-| 258:13 | portion | const | module/anonymous@9/renderMeals/anonymous@256 | Number(meal.portion) === 1 ? "모두" : '${number(Number(meal.portion) * 100)}%' |
-| 263:12 | renderRecords | function | module/anonymous@9 |  |
-| 265:11 | trends | const | module/anonymous@9/renderRecords | [...(state.summary.trends \|\| [])].slice(-7).reverse() |
-| 266:65 | entry | parameter | module/anonymous@9/renderRecords/anonymous@266 | entry |
-| 267:13 | hasDaily | const | module/anonymous@9/renderRecords/anonymous@266 | entry.hasDaily \|\| numeric(entry.steps) \|\| numeric(entry.sleepHours) \|\| Boolean(entry.medicationStatus) |
-| 268:13 | values | const | module/anonymous@9/renderRecords/anonymous@266 | [numeric(entry.steps) ? '${number(entry.steps)}걸음' : "활동 미기록", numeric(entry.sleepHours) ? '수면 ${number(entry.sleepHours, 1)}시간' : |
-| 271:11 | meals | const | module/anonymous@9/renderRecords | state.summary.recentMeals \|\| [] |
-| 276:12 | renderChart | function | module/anonymous@9 |  |
-| 277:11 | config | const | module/anonymous@9/renderChart | { steps: { unit: "걸음", label: "걸음 수", digits: 0, note: "기록이 있는 날의 하루 평균 걸음 수예요." }, sleepHours: { unit: "시간", label: "수면 시간", digi |
-| 282:11 | trends | const | module/anonymous@9/renderChart | [...(state.summary.trends \|\| [])].slice(-7) |
-| 283:11 | entries | const | module/anonymous@9/renderChart | trends.map((entry) =&gt; { const hasValue = state.metric === "proteinGrams" ? numeric(entry.proteinGrams) &amp;&amp; (Number(entry.calories)  |
-| 283:33 | entry | parameter | module/anonymous@9/renderChart/anonymous@283 | entry |
-| 284:13 | hasValue | const | module/anonymous@9/renderChart/anonymous@283 | state.metric === "proteinGrams" ? numeric(entry.proteinGrams) &amp;&amp; (Number(entry.calories) &gt; 0 \|\| Number(entry.proteinGrams) &gt; 0) :  |
-| 287:11 | values | const | module/anonymous@9/renderChart | entries.filter((entry) =&gt; entry.value !== null).map((entry) =&gt; entry.value) |
-| 287:36 | entry | parameter | module/anonymous@9/renderChart/anonymous@287 | entry |
-| 287:73 | entry | parameter | module/anonymous@9/renderChart/anonymous@287 | entry |
-| 288:11 | average | const | module/anonymous@9/renderChart | values.length ? values.reduce((sum, value) =&gt; sum + value, 0) / values.length : null |
-| 288:52 | sum | parameter | module/anonymous@9/renderChart/anonymous@288 | sum |
-| 288:57 | value | parameter | module/anonymous@9/renderChart/anonymous@288 | value |
-| 293:11 | sourceKey | const | module/anonymous@9/renderChart | state.metric === "steps" ? "stepsSource" : "sleepSource" |
-| 294:11 | chartSources | const | module/anonymous@9/renderChart | state.metric === "proteinGrams" ? [] : [...new Set(entries.filter(entry =&gt; numeric(entry.value)).map(entry =&gt; sourceLabel(entry[so |
-| 294:92 | entry | parameter | module/anonymous@9/renderChart/anonymous@294 | entry |
-| 294:127 | entry | parameter | module/anonymous@9/renderChart/anonymous@294 | entry |
-| 296:11 | chart | const | module/anonymous@9/renderChart | $("#trend-chart") |
-| 297:11 | max | const | module/anonymous@9/renderChart | Math.max(...values, state.metric === "sleepHours" ? 10 : 1) |
-| 298:36 | entry | parameter | module/anonymous@9/renderChart/anonymous@298 | entry |
-| 299:80 | entry | parameter | module/anonymous@9/renderChart/anonymous@299 | entry |
-| 302:12 | routeFromUrl | function | module/anonymous@9 |  |
-| 303:11 | params | const | module/anonymous@9/routeFromUrl | new URL(location.href).searchParams |
-| 307:11 | date | const | module/anonymous@9/routeFromUrl | params.get("date") |
-| 313:12 | syncUrl | function | module/anonymous@9 |  |
-| 313:20 | historyMode | parameter | module/anonymous@9/syncUrl | historyMode = "push" |
-| 314:11 | url | const | module/anonymous@9/syncUrl | new URL(location.href) |
-| 316:16 | key | const | module/anonymous@9/syncUrl | 초기값 없음 |
-| 327:12 | applyView | function | module/anonymous@9 |  |
-| 327:24 | historyMode | parameter | module/anonymous@9/applyView | { historyMode = "push", focus = true, refreshMedication = true } = {} |
-| 327:46 | focus | parameter | module/anonymous@9/applyView | { historyMode = "push", focus = true, refreshMedication = true } = {} |
-| 327:60 | refreshMedication | parameter | module/anonymous@9/applyView | { historyMode = "push", focus = true, refreshMedication = true } = {} |
-| 330:29 | element | parameter | module/anonymous@9/applyView/anonymous@330 | element |
-| 331:43 | button | parameter | module/anonymous@9/applyView/anonymous@331 | button |
-| 332:13 | active | const | module/anonymous@9/applyView/anonymous@331 | button.dataset.view === state.view |
-| 336:30 | tab | parameter | module/anonymous@9/applyView/anonymous@336 | tab |
-| 336:45 | active | const | module/anonymous@9/applyView/anonymous@336 | tab.dataset.metric === state.metric |
-| 342:13 | section | const | module/anonymous@9/applyView | state.view === "records" ? ({ meals: "#meal-records-section", history: ".history-section", chart: ".trend-card" }[state.section])  |
-| 343:13 | destination | const | module/anonymous@9/applyView | section ? $(section) : $("#main-content") |
-| 350:12 | switchView | function | module/anonymous@9 |  |
-| 350:23 | view | parameter | module/anonymous@9/switchView | view |
-| 350:31 | section | parameter | module/anonymous@9/switchView | { section = null, metric, historyMode = "push" } = {} |
-| 350:47 | metric | parameter | module/anonymous@9/switchView | { section = null, metric, historyMode = "push" } = {} |
-| 350:55 | historyMode | parameter | module/anonymous@9/switchView | { section = null, metric, historyMode = "push" } = {} |
-| 360:12 | openMeal | function | module/anonymous@9 |  |
-| 367:11 | hour | const | module/anonymous@9/openMeal | Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Seoul", hour: "numeric", hourCycle: "h23" }).format(new Date())) |
-| 368:11 | type | const | module/anonymous@9/openMeal | hour &lt; 10 ? "breakfast" : hour &lt; 16 ? "lunch" : "dinner" |
-| 376:12 | fieldValue | function | module/anonymous@9 |  |
-| 376:23 | name | parameter | module/anonymous@9/fieldValue | name |
-| 376:29 | record | parameter | module/anonymous@9/fieldValue | record |
-| 380:12 | applyDailyRecord | function | module/anonymous@9 |  |
-| 380:29 | record | parameter | module/anonymous@9/applyDailyRecord | record |
-| 382:16 | name | const | module/anonymous@9/applyDailyRecord | 초기값 없음 |
-| 386:16 | name | const | module/anonymous@9/applyDailyRecord | 초기값 없음 |
-| 387:55 | input | parameter | module/anonymous@9/applyDailyRecord/anonymous@387 | input |
-| 394:12 | openDaily | function | module/anonymous@9 |  |
-| 394:22 | mode | parameter | module/anonymous@9/openDaily | mode = "all" |
-| 394:36 | date | parameter | module/anonymous@9/openDaily | date = today() |
-| 400:11 | config | const | module/anonymous@9/openDaily | dailyModes[mode] |
-| 403:51 | group | parameter | module/anonymous@9/openDaily/anonymous@403 | group |
-| 404:13 | names | const | module/anonymous@9/openDaily/anonymous@403 | group.dataset.dailyFields.split(" ") |
-| 405:34 | name | parameter | module/anonymous@9/openDaily/anonymous@403/anonymous@405 | name |
-| 417:12 | clearPhoto | function | module/anonymous@9 |  |
-| 430:12 | updateEstimate | function | module/anonymous@9 |  |
-| 431:11 | data | const | module/anonymous@9/updateEstimate | new FormData($("#meal-form")) |
-| 432:11 | portion | const | module/anonymous@9/updateEstimate | Number(data.get("portion")) |
-| 433:11 | portionLabel | const | module/anonymous@9/updateEstimate | portion === 1 ? "모두" : portion === .5 ? "절반" : '${portion * 100}%' |
-| 434:11 | proposal | const | module/anonymous@9/updateEstimate | state.analysis?.proposal |
-| 440:12 | formError | function | module/anonymous@9 |  |
-| 440:22 | id | parameter | module/anonymous@9/formError | id |
-| 440:26 | message | parameter | module/anonymous@9/formError | message |
-| 441:11 | element | const | module/anonymous@9/formError | $(id) |
-| 447:12 | setFormBusy | function | module/anonymous@9 |  |
-| 447:24 | formId | parameter | module/anonymous@9/setFormBusy | formId |
-| 447:32 | busy | parameter | module/anonymous@9/setFormBusy | busy |
-| 448:55 | element | parameter | module/anonymous@9/setFormBusy/anonymous@448 | element |
-| 452:12 | setDailyFieldsDisabled | function | module/anonymous@9 |  |
-| 452:35 | disabled | parameter | module/anonymous@9/setDailyFieldsDisabled | disabled |
-| 453:78 | element | parameter | module/anonymous@9/setDailyFieldsDisabled/anonymous@453 | element |
-| 457:18 | saveMeal | function | module/anonymous@9 |  |
-| 457:27 | event | parameter | module/anonymous@9/saveMeal | event |
-| 459:11 | button | const | module/anonymous@9/saveMeal | $("#meal-submit") |
-| 461:11 | data | const | module/anonymous@9/saveMeal | new FormData(event.currentTarget) |
-| 462:11 | patientId | const | module/anonymous@9/saveMeal | state.patientId |
-| 463:11 | payload | const | module/anonymous@9/saveMeal | { date: data.get("date"), mealType: data.get("mealType"), foodType: data.get("foodType"), portion: Number(data.get("portion")) } |
-| 479:14 | error | catch | module/anonymous@9/saveMeal |  |
-| 490:18 | saveDaily | function | module/anonymous@9 |  |
-| 490:28 | event | parameter | module/anonymous@9/saveDaily | event |
-| 492:11 | button | const | module/anonymous@9/saveDaily | $("#daily-submit") |
-| 494:11 | data | const | module/anonymous@9/saveDaily | new FormData(event.currentTarget) |
-| 495:11 | patientId | const | module/anonymous@9/saveDaily | state.patientId |
-| 496:11 | payload | const | module/anonymous@9/saveDaily | { date: data.get("date") } |
-| 497:16 | name | const | module/anonymous@9/saveDaily | 초기값 없음 |
-| 498:13 | raw | const | module/anonymous@9/saveDaily | data.get(name) |
-| 499:13 | value | const | module/anonymous@9/saveDaily | ["steps", "sleepHours", "weightKg"].includes(name) ? raw === "" ? null : Number(raw) : name === "note" ? String(raw ?? "").trim()  |
-| 512:14 | error | catch | module/anonymous@9/saveDaily |  |
-| 523:18 | selectDailyDate | function | module/anonymous@9 |  |
-| 524:11 | date | const | module/anonymous@9/selectDailyDate | $("#daily-date").value |
-| 530:11 | requestId | const | module/anonymous@9/selectDailyDate | ++state.dateRequestId |
-| 531:11 | patientId | const | module/anonymous@9/selectDailyDate | state.patientId |
-| 536:13 | result | const | module/anonymous@9/selectDailyDate | await api('/api/patients/${encodeURIComponent(patientId)}/daily?date=${encodeURIComponent(date)}') |
-| 539:13 | effective | const | module/anonymous@9/selectDailyDate | state.summary?.trends.find(entry =&gt; entry.date === date) |
-| 539:52 | entry | parameter | module/anonymous@9/selectDailyDate/anonymous@539 | entry |
-| 540:13 | automatic | const | module/anonymous@9/selectDailyDate | [state.dailyMode === "sleep" ? "sleepHours" : "steps", ...(state.dailyMode === "all" ? ["sleepHours"] : [])].filter(name =&gt; numeri |
-| 540:141 | name | parameter | module/anonymous@9/selectDailyDate/anonymous@540 | name |
-| 544:14 | error | catch | module/anonymous@9/selectDailyDate |  |
-| 551:18 | loadCapabilities | function | module/anonymous@9 |  |
-| 553:12 | _ | catch | module/anonymous@9/loadCapabilities |  |
-| 558:12 | refreshAnalysisControls | function | module/anonymous@9 |  |
-| 559:11 | available | const | module/anonymous@9/refreshAnalysisControls | state.capabilities?.vision?.available === true |
-| 560:11 | ready | const | module/anonymous@9/refreshAnalysisControls | available &amp;&amp; Boolean(state.imageData) &amp;&amp; !state.photoLoading |
-| 569:18 | analyzeMeal | function | module/anonymous@9 |  |
-| 571:11 | requestId | const | module/anonymous@9/analyzeMeal | ++state.analysisRequestId |
-| 572:11 | patientId | const | module/anonymous@9/analyzeMeal | state.patientId |
-| 573:11 | imageData | const | module/anonymous@9/analyzeMeal | state.imageData |
-| 574:11 | date | const | module/anonymous@9/analyzeMeal | $("#meal-date").value |
-| 583:13 | result | const | module/anonymous@9/analyzeMeal | await api('/api/patients/${encodeURIComponent(patientId)}/photo-analyses', { method: "POST", body: JSON.stringify({ kind: "meal",  |
-| 585:13 | analysis | const | module/anonymous@9/analyzeMeal | result.analysis |
-| 588:13 | proposal | const | module/anonymous@9/analyzeMeal | analysis.proposal |
-| 589:13 | choice | const | module/anonymous@9/analyzeMeal | $('#meal-form [name="foodType"][value="${proposal.foodType}"]') |
-| 592:176 | food | parameter | module/anonymous@9/analyzeMeal/anonymous@592 | food |
-| 592:515 | warning | parameter | module/anonymous@9/analyzeMeal/anonymous@592 | warning |
-| 594:14 | error | catch | module/anonymous@9/analyzeMeal |  |
-| 601:12 | renderMedicationSummary | function | module/anonymous@9 |  |
-| 601:36 | schedule | parameter | module/anonymous@9/renderMedicationSummary | schedule |
-| 602:11 | total | const | module/anonymous@9/renderMedicationSummary | schedule.slots?.length \|\| 0 |
-| 603:11 | pending | const | module/anonymous@9/renderMedicationSummary | (schedule.slots \|\| []).filter(slot =&gt; slot.status === 'pending').length |
-| 603:51 | slot | parameter | module/anonymous@9/renderMedicationSummary/anonymous@603 | slot |
-| 607:18 | loadMedicationSchedule | function | module/anonymous@9 |  |
-| 609:11 | requestId | const | module/anonymous@9/loadMedicationSchedule | ++state.medicationRequestId |
-| 610:11 | patientId | const | module/anonymous@9/loadMedicationSchedule | state.patientId |
-| 612:11 | date | const | module/anonymous@9/loadMedicationSchedule | state.medicationDate \|\| today() |
-| 625:14 | schedule | const | module/anonymous@9/loadMedicationSchedule | await Promise.all([api('/api/patients/${encodeURIComponent(patientId)}/medication-schedule?date=${encodeURIComponent(date)}'), api |
-| 625:24 | photos | const | module/anonymous@9/loadMedicationSchedule | await Promise.all([api('/api/patients/${encodeURIComponent(patientId)}/medication-schedule?date=${encodeURIComponent(date)}'), api |
-| 631:69 | slot | parameter | module/anonymous@9/loadMedicationSchedule/anonymous@631 | slot |
-| 631:75 | index | parameter | module/anonymous@9/loadMedicationSchedule/anonymous@631 | index |
-| 632:15 | labels | const | module/anonymous@9/loadMedicationSchedule/anonymous@631 | { pending: "미보고", taken: "복용 보고", missed: "미복용 보고", unknown: "기억나지 않음" } |
-| 633:661 | value | parameter | module/anonymous@9/loadMedicationSchedule/anonymous@631/anonymous@633 | [value, label] |
-| 633:668 | label | parameter | module/anonymous@9/loadMedicationSchedule/anonymous@631/anonymous@633 | [value, label] |
-| 636:15 | result | const | module/anonymous@9/loadMedicationSchedule | await api('/api/patients/${encodeURIComponent(patientId)}/daily?date=${encodeURIComponent(date)}') |
-| 639:71 | input | parameter | module/anonymous@9/loadMedicationSchedule/anonymous@639 | input |
-| 643:68 | form | parameter | module/anonymous@9/loadMedicationSchedule/anonymous@643 | form |
-| 644:14 | error | catch | module/anonymous@9/loadMedicationSchedule |  |
-| 651:18 | saveMedication | function | module/anonymous@9 |  |
-| 651:33 | event | parameter | module/anonymous@9/saveMedication | event |
-| 654:11 | form | const | module/anonymous@9/saveMedication | event.target |
-| 655:11 | data | const | module/anonymous@9/saveMedication | new FormData(form) |
-| 656:11 | legacy | const | module/anonymous@9/saveMedication | form.id === "legacy-medication-form" |
-| 657:11 | status | const | module/anonymous@9/saveMedication | data.get(legacy ? "medicationStatus" : "status") |
-| 658:11 | errorElement | const | module/anonymous@9/saveMedication | legacy ? $("#legacy-medication-error") : $("[data-slot-error]", form) |
-| 660:11 | patientId | const | module/anonymous@9/saveMedication | state.patientId |
-| 661:11 | date | const | module/anonymous@9/saveMedication | state.medicationDate |
-| 662:11 | slot | const | module/anonymous@9/saveMedication | legacy ? null : state.medicationSchedule.slots[Number(form.dataset.slotIndex)] |
-| 664:11 | payload | const | module/anonymous@9/saveMedication | legacy ? { date, medicationStatus: status } : { orderId: slot.orderId, date, time: slot.time, status, reason: String(data.get("rea |
-| 668:94 | input | parameter | module/anonymous@9/saveMedication/anonymous@668 | input |
-| 671:13 | saved | const | module/anonymous@9/saveMedication | await api('/api/patients/${encodeURIComponent(patientId)}/${legacy ? "daily" : "medication-events"}', { method: "POST", body: JSON |
-| 675:15 | badge | const | module/anonymous@9/saveMedication | $('.medication-status', form) |
-| 681:13 | revision | let | module/anonymous@9/saveMedication | $('.record-source', form) |
-| 689:14 | error | catch | module/anonymous@9/saveMedication |  |
-| 694:96 | input | parameter | module/anonymous@9/saveMedication/anonymous@694 | input |
-| 699:18 | loadConnections | function | module/anonymous@9 |  |
-| 701:11 | requestId | const | module/anonymous@9/loadConnections | ++state.connectionRequestId |
-| 702:11 | patientId | const | module/anonymous@9/loadConnections | state.patientId |
-| 707:13 | result | const | module/anonymous@9/loadConnections | await api('/api/patients/${encodeURIComponent(patientId)}/health-connections') |
-| 710:93 | connection | parameter | module/anonymous@9/loadConnections/anonymous@710 | connection |
-| 711:14 | error | catch | module/anonymous@9/loadConnections |  |
-| 718:18 | createConnection | function | module/anonymous@9 |  |
-| 718:35 | event | parameter | module/anonymous@9/createConnection | event |
-| 722:11 | patientId | const | module/anonymous@9/createConnection | state.patientId |
-| 723:11 | requestId | const | module/anonymous@9/createConnection | state.connectionRequestId |
-| 724:11 | fields | const | module/anonymous@9/createConnection | new FormData(event.target) |
-| 725:11 | payload | const | module/anonymous@9/createConnection | { platform: fields.get("platform") } |
-| 731:13 | result | const | module/anonymous@9/createConnection | await api('/api/patients/${encodeURIComponent(patientId)}/health-connections', { method: "POST", body: JSON.stringify(payload) }) |
-| 733:13 | patient | const | module/anonymous@9/createConnection | state.summary?.patient |
-| 742:14 | error | catch | module/anonymous@9/createConnection |  |
-| 747:18 | revokeConnection | function | module/anonymous@9 |  |
-| 747:35 | connectionId | parameter | module/anonymous@9/revokeConnection | connectionId |
-| 748:91 | connection | parameter | module/anonymous@9/revokeConnection/anonymous@748 | connection |
-| 750:11 | patientId | const | module/anonymous@9/revokeConnection | state.patientId |
-| 756:14 | error | catch | module/anonymous@9/revokeConnection |  |
-| 761:12 | bindEvents | function | module/anonymous@9 |  |
-| 762:55 | event | parameter | module/anonymous@9/bindEvents/anonymous@762 | event |
-| 764:53 | event | parameter | module/anonymous@9/bindEvents/anonymous@764 | event |
-| 771:13 | dirty | const | module/anonymous@9/bindEvents/anonymous@770 | medicationDirty() |
-| 778:40 | event | parameter | module/anonymous@9/bindEvents/anonymous@778 | event |
-| 779:13 | viewButton | const | module/anonymous@9/bindEvents/anonymous@778 | event.target.closest("[data-view]") |
-| 781:13 | action | const | module/anonymous@9/bindEvents/anonymous@778 | event.target.closest("[data-action]") |
-| 792:30 | button | parameter | module/anonymous@9/bindEvents/anonymous@792 | button |
-| 795:32 | tab | parameter | module/anonymous@9/bindEvents/anonymous@792/anonymous@792/anonymous@795 | tab |
-| 795:47 | active | const | module/anonymous@9/bindEvents/anonymous@792/anonymous@792/anonymous@795 | tab === button |
-| 799:33 | button | parameter | module/anonymous@9/bindEvents/anonymous@799 | button |
-| 800:26 | dialog | parameter | module/anonymous@9/bindEvents/anonymous@800 | dialog |
-| 801:40 | event | parameter | module/anonymous@9/bindEvents/anonymous@800/anonymous@801 | event |
-| 803:15 | bounds | const | module/anonymous@9/bindEvents/anonymous@800/anonymous@801 | dialog.getBoundingClientRect() |
-| 806:41 | event | parameter | module/anonymous@9/bindEvents/anonymous@800/anonymous@806 | event |
-| 812:15 | opener | const | module/anonymous@9/bindEvents/anonymous@800/anonymous@807 | dialogOpeners.get(dialog.id) |
-| 820:48 | event | parameter | module/anonymous@9/bindEvents/anonymous@820 | event |
-| 830:13 | date | const | module/anonymous@9/bindEvents/anonymous@829 | $("#medication-date").value |
-| 842:45 | event | parameter | module/anonymous@9/bindEvents/anonymous@842 | event |
-| 851:13 | requestedId | const | module/anonymous@9/bindEvents/anonymous@849 | routeFromUrl() |
-| 856:53 | dialog | parameter | module/anonymous@9/bindEvents/anonymous@849/anonymous@856 | dialog |
-| 857:81 | patient | parameter | module/anonymous@9/bindEvents/anonymous@849/anonymous@857 | patient |
-| 860:56 | event | parameter | module/anonymous@9/bindEvents/anonymous@860 | event |
-| 861:13 | file | const | module/anonymous@9/bindEvents/anonymous@860 | event.target.files?.[0] |
-| 871:13 | reader | const | module/anonymous@9/bindEvents/anonymous@860 | new FileReader() |
-| 872:13 | photoRequestId | const | module/anonymous@9/bindEvents/anonymous@860 | ++state.photoRequestId |
-| 889:18 | initialize | function | module/anonymous@9 |  |
-| 893:13 | result | const | module/anonymous@9/initialize | await api("/api/patients") |
-| 896:60 | patient | parameter | module/anonymous@9/initialize/anonymous@896 | patient |
-| 897:11 | storedId | let | module/anonymous@9/initialize | 초기값 없음 |
-| 898:76 | _ | catch | module/anonymous@9/initialize |  |
-| 899:13 | requestedId | const | module/anonymous@9/initialize | new URL(location.href).searchParams.get("patientId") \|\| storedId |
-| 900:13 | patientId | const | module/anonymous@9/initialize | state.patients.some((patient) =&gt; patient.id === requestedId) ? requestedId : state.patients[0].id |
-| 900:46 | patient | parameter | module/anonymous@9/initialize/anonymous@900 | patient |
-| 903:14 | error | catch | module/anonymous@9/initialize |  |
-| 907:60 | issue | catch | module/anonymous@9 |  |
+| 6:10 | preparePatientImage | import | module | ./patient-image.js |
+| 8:10 | PATIENT_SCREENS | import | module | ./patient-screens.js |
+| 8:27 | PATIENT_INPUT_SCREENS | import | module | ./patient-screens.js |
+| 11:9 | $ | const | module/anonymous@10 | (selector, scope = document) =&gt; scope.querySelector(selector) |
+| 11:14 | selector | parameter | module/anonymous@10/anonymous@11 | selector |
+| 11:24 | scope | parameter | module/anonymous@10/anonymous@11 | scope = document |
+| 12:9 | $$ | const | module/anonymous@10 | (selector, scope = document) =&gt; [...scope.querySelectorAll(selector)] |
+| 12:15 | selector | parameter | module/anonymous@10/anonymous@12 | selector |
+| 12:25 | scope | parameter | module/anonymous@10/anonymous@12 | scope = document |
+| 13:9 | views | const | module/anonymous@10 | Object.keys(PATIENT_SCREENS) |
+| 14:9 | metrics | const | module/anonymous@10 | ["steps", "sleepHours", "proteinGrams"] |
+| 15:9 | dailyModes | const | module/anonymous@10 | { all: { fields: ["steps", "sleepHours", "weightKg", "medicationStatus", "appetite", "mood", "note"], hint: "입력하거나 바꾼 항목만 저장해요. 답하 |
+| 16:9 | state | const | module/anonymous@10 | { patients: [], patientId: null, summary: null, view: "home", metric: "steps", section: null, imageData: null, loading: false, sav |
+| 17:9 | communication | const | module/anonymous@10 | createPatientCommunications({api,getView:()=&gt;state.view,isBusy:()=&gt;Boolean(state.saving\|\|state.loading),setBusy:value=&gt;{state.savi |
+| 17:137 | value | parameter | module/anonymous@10/anonymous@17 | value |
+| 18:9 | labels | const | module/anonymous@10 | { meal: { breakfast: "아침", lunch: "점심", dinner: "저녁", snack: "간식" }, food: { balanced: "밥과 반찬", porridge: "죽·부드러운 식사", protein: "고 |
+| 19:9 | icons | const | module/anonymous@10 | { steps: '&lt;path d="M10 3 7 7l1 5-3 7m3-7 5 2 2 7m-3-12 3 3h5"/&gt;&lt;circle cx="14" cy="4" r="2"/&gt;', sleep: '&lt;path d="M20 14a8 8 0 0 1- |
+| 26:9 | svg | const | module/anonymous@10 | (key) =&gt; '&lt;svg viewBox="0 0 24 24" aria-hidden="true"&gt;${icons[key] \|\| icons.meal}&lt;/svg&gt;' |
+| 26:16 | key | parameter | module/anonymous@10/anonymous@26 | key |
+| 27:9 | escape | const | module/anonymous@10 | (value) =&gt; String(value ?? "").replace(/[&amp;&lt;&gt;"']/g, (char) =&gt; ({ "&amp;": "&amp;amp;", "&lt;": "&amp;lt;", "&gt;": "&amp;gt;", '"': "&amp;quot;", "'": "&amp;#39; |
+| 27:19 | value | parameter | module/anonymous@10/anonymous@27 | value |
+| 27:70 | char | parameter | module/anonymous@10/anonymous@27/anonymous@27 | char |
+| 28:9 | medicationPhoto | const | module/anonymous@10 | createMedicationPhoto({ api, escape, getContext: () =&gt; ({ patientId: state.patientId, date: state.medicationDate, schedule: state. |
+| 30:44 | value | parameter | module/anonymous@10/anonymous@30 | value |
+| 37:9 | numeric | const | module/anonymous@10 | (value) =&gt; value !== null &amp;&amp; value !== undefined &amp;&amp; value !== "" &amp;&amp; Number.isFinite(Number(value)) |
+| 37:20 | value | parameter | module/anonymous@10/anonymous@37 | value |
+| 38:9 | number | const | module/anonymous@10 | (value, digits = 0) =&gt; numeric(value) ? Number(value).toLocaleString("ko-KR", { maximumFractionDigits: digits }) : "—" |
+| 38:19 | value | parameter | module/anonymous@10/anonymous@38 | value |
+| 38:26 | digits | parameter | module/anonymous@10/anonymous@38 | digits = 0 |
+| 39:9 | dateObject | const | module/anonymous@10 | (date) =&gt; new Date('${date}T12:00:00+09:00') |
+| 39:23 | date | parameter | module/anonymous@10/anonymous@39 | date |
+| 40:9 | shortDate | const | module/anonymous@10 | (date) =&gt; date ? dateObject(date).toLocaleDateString("ko-KR", { month: "numeric", day: "numeric", timeZone: "Asia/Seoul" }) : "" |
+| 40:22 | date | parameter | module/anonymous@10/anonymous@40 | date |
+| 41:9 | weekday | const | module/anonymous@10 | (date) =&gt; date ? dateObject(date).toLocaleDateString("ko-KR", { weekday: "short", timeZone: "Asia/Seoul" }) : "" |
+| 41:20 | date | parameter | module/anonymous@10/anonymous@41 | date |
+| 42:9 | fallbackToday | const | module/anonymous@10 | () =&gt; new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new D |
+| 43:9 | today | const | module/anonymous@10 | () =&gt; state.summary?.today \|\| fallbackToday() |
+| 44:7 | toastTimer | let | module/anonymous@10 | 초기값 없음 |
+| 45:9 | dialogBaseline | const | module/anonymous@10 | new Map() |
+| 46:9 | dialogOpeners | const | module/anonymous@10 | new Map() |
+| 47:9 | medicationBaseline | const | module/anonymous@10 | new Map() |
+| 48:7 | dailyLoadedDate | let | module/anonymous@10 | 초기값 없음 |
+| 50:12 | formSnapshot | function | module/anonymous@10 |  |
+| 50:25 | form | parameter | module/anonymous@10/formSnapshot | form |
+| 51:53 | element | parameter | module/anonymous@10/formSnapshot/anonymous@51 | element |
+| 51:196 | element | parameter | module/anonymous@10/formSnapshot/anonymous@51 | element |
+| 56:12 | dialogDirty | function | module/anonymous@10 |  |
+| 56:24 | dialog | parameter | module/anonymous@10/dialogDirty | dialog |
+| 57:11 | form | const | module/anonymous@10/dialogDirty | $('form', dialog) |
+| 61:12 | medicationDirty | function | module/anonymous@10 |  |
+| 62:101 | form | parameter | module/anonymous@10/medicationDirty/anonymous@62 | form |
+| 66:12 | canLeavePatient | function | module/anonymous@10 |  |
+| 68:11 | dirty | const | module/anonymous@10/canLeavePatient | $$('dialog[open]').some(dialogDirty)\|\|medicationDirty()\|\|communication.dirty() |
+| 73:12 | openRecordDialog | function | module/anonymous@10 |  |
+| 73:29 | id | parameter | module/anonymous@10/openRecordDialog | id |
+| 74:11 | dialog | const | module/anonymous@10/openRecordDialog | $('#${id}') |
+| 80:12 | closeRecordDialog | function | module/anonymous@10 |  |
+| 80:30 | dialog | parameter | module/anonymous@10/closeRecordDialog | dialog |
+| 85:12 | renderNavigation | function | module/anonymous@10 |  |
+| 86:11 | screen | const | module/anonymous@10/renderNavigation | PATIENT_SCREENS[state.view] |
+| 88:11 | locked | const | module/anonymous@10/renderNavigation | Boolean(state.saving \|\| state.loading) |
+| 94:38 | button | parameter | module/anonymous@10/renderNavigation/anonymous@94 | button |
+| 99:18 | api | function | module/anonymous@10 |  |
+| 99:22 | path | parameter | module/anonymous@10/api | path |
+| 99:28 | options | parameter | module/anonymous@10/api | options = {} |
+| 101:11 | controller | const | module/anonymous@10/api | new AbortController() |
+| 102:11 | timeout | const | module/anonymous@10/api | setTimeout(() =&gt; controller.abort(), path.endsWith("/photo-analyses") ? 65000 : 20000) |
+| 104:13 | response | const | module/anonymous@10/api | await fetch(path, { ...options, headers: { "Content-Type": "application/json", ...sessionHeaders(), ...(options.headers \|\| {}) },  |
+| 105:13 | payload | const | module/anonymous@10/api | await response.json().catch(() =&gt; ({})) |
+| 107:33 | issue | const | module/anonymous@10/api | new Error(payload.error \|\| "기록을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.") |
+| 109:14 | error | catch | module/anonymous@10/api |  |
+| 116:12 | toast | function | module/anonymous@10 |  |
+| 116:18 | message | parameter | module/anonymous@10/toast | message |
+| 118:11 | element | const | module/anonymous@10/toast | $("#toast") |
+| 124:12 | savedFeedback | function | module/anonymous@10 |  |
+| 124:26 | item | parameter | module/anonymous@10/savedFeedback | item |
+| 124:32 | date | parameter | module/anonymous@10/savedFeedback | date |
+| 124:38 | detail | parameter | module/anonymous@10/savedFeedback | detail = '저장한 내용은 내 기록에서 다시 확인할 수 있어요.' |
+| 131:12 | savedRefreshFailed | function | module/anonymous@10 |  |
+| 136:12 | networkNotice | function | module/anonymous@10 |  |
+| 137:11 | notice | const | module/anonymous@10/networkNotice | $('#connection-status-notice') |
+| 142:12 | showError | function | module/anonymous@10 |  |
+| 142:22 | message | parameter | module/anonymous@10/showError | message |
+| 148:12 | clearConnectionToken | function | module/anonymous@10 |  |
+| 149:16 | id | const | module/anonymous@10/clearConnectionToken | 초기값 없음 |
+| 153:12 | invalidateAnalysis | function | module/anonymous@10 |  |
+| 155:73 | input | parameter | module/anonymous@10/invalidateAnalysis/anonymous@155 | input |
+| 166:18 | loadPatient | function | module/anonymous@10 |  |
+| 166:30 | patientId | parameter | module/anonymous@10/loadPatient | patientId |
+| 166:43 | initial | parameter | module/anonymous@10/loadPatient | { initial = false, historyMode = "replace", preserveMedicationInputs = false } = {} |
+| 166:60 | historyMode | parameter | module/anonymous@10/loadPatient | { initial = false, historyMode = "replace", preserveMedicationInputs = false } = {} |
+| 166:85 | preserveMedicationInputs | parameter | module/anonymous@10/loadPatient | { initial = false, historyMode = "replace", preserveMedicationInputs = false } = {} |
+| 167:11 | requestId | const | module/anonymous@10/loadPatient | ++state.requestId |
+| 168:11 | changed | const | module/anonymous@10/loadPatient | patientId !== state.patientId |
+| 183:53 | dialog | parameter | module/anonymous@10/loadPatient/anonymous@183 | dialog |
+| 189:14 | summary | const | module/anonymous@10/loadPatient | await Promise.all([ api('/api/patients/${encodeURIComponent(patientId)}/summary'), api('/api/patients/${encodeURIComponent(patient |
+| 189:23 | todayMedication | const | module/anonymous@10/loadPatient | await Promise.all([ api('/api/patients/${encodeURIComponent(patientId)}/summary'), api('/api/patients/${encodeURIComponent(patient |
+| 199:76 | _ | catch | module/anonymous@10/loadPatient |  |
+| 204:14 | error | catch | module/anonymous@10/loadPatient |  |
+| 215:12 | currentMeals | function | module/anonymous@10 |  |
+| 216:84 | meal | parameter | module/anonymous@10/currentMeals/anonymous@216 | meal |
+| 219:12 | render | function | module/anonymous@10 |  |
+| 220:11 | summary | const | module/anonymous@10/render | state.summary |
+| 221:11 | record | const | module/anonymous@10/render | summary.todayRecord |
+| 222:11 | name | const | module/anonymous@10/render | summary.patient?.name \|\| "환자" |
+| 225:11 | clinicianUrl | const | module/anonymous@10/render | '/clinician?patientId=${encodeURIComponent(state.patientId)}' |
+| 232:12 | sourceLabel | function | module/anonymous@10 |  |
+| 232:24 | source | parameter | module/anonymous@10/sourceLabel | source |
+| 232:32 | value | parameter | module/anonymous@10/sourceLabel | value |
+| 237:12 | renderHome | function | module/anonymous@10 |  |
+| 237:23 | record | parameter | module/anonymous@10/renderHome | record |
+| 238:11 | meals | const | module/anonymous@10/renderHome | currentMeals() |
+| 239:11 | schedule | const | module/anonymous@10/renderHome | state.todayMedication |
+| 240:11 | scheduled | const | module/anonymous@10/renderHome | Boolean(schedule?.orders?.length) |
+| 241:11 | slots | const | module/anonymous@10/renderHome | schedule?.slots \|\| [] |
+| 242:11 | reported | const | module/anonymous@10/renderHome | slots.filter(slot =&gt; slot.status !== "pending").length |
+| 242:35 | slot | parameter | module/anonymous@10/renderHome/anonymous@242 | slot |
+| 243:11 | taken | const | module/anonymous@10/renderHome | slots.filter(slot =&gt; slot.status === "taken").length |
+| 243:32 | slot | parameter | module/anonymous@10/renderHome/anonymous@243 | slot |
+| 244:11 | tasks | const | module/anonymous@10/renderHome | [ { label: "식사", done: meals.length &gt; 0 }, { label: "복약", done: Boolean(schedule) &amp;&amp; (scheduled ? slots.length &gt; 0 &amp;&amp; reported === |
+| 250:11 | count | const | module/anonymous@10/renderHome | tasks.filter((task) =&gt; task.done).length |
+| 250:33 | task | parameter | module/anonymous@10/renderHome/anonymous@250 | task |
+| 254:45 | task | parameter | module/anonymous@10/renderHome/anonymous@254 | task |
+| 255:11 | knownMeals | const | module/anonymous@10/renderHome | meals.filter(meal =&gt; numeric(meal.proteinGrams)) |
+| 255:37 | meal | parameter | module/anonymous@10/renderHome/anonymous@255 | meal |
+| 256:11 | protein | const | module/anonymous@10/renderHome | knownMeals.reduce((sum, meal) =&gt; sum + Number(meal.proteinGrams), 0) |
+| 256:40 | sum | parameter | module/anonymous@10/renderHome/anonymous@256 | sum |
+| 256:45 | meal | parameter | module/anonymous@10/renderHome/anonymous@256 | meal |
+| 257:11 | cards | const | module/anonymous@10/renderHome | [ { icon: "steps", label: "걸음 수", value: numeric(record?.steps) ? number(record.steps) : null, unit: "걸음", status: numeric(record? |
+| 263:48 | card | parameter | module/anonymous@10/renderHome/anonymous@263 | card |
+| 268:12 | safeImageUrl | function | module/anonymous@10 |  |
+| 268:25 | value | parameter | module/anonymous@10/safeImageUrl | value |
+| 275:12 | renderMeals | function | module/anonymous@10 |  |
+| 275:24 | container | parameter | module/anonymous@10/renderMeals | container |
+| 275:35 | meals | parameter | module/anonymous@10/renderMeals | meals |
+| 280:64 | meal | parameter | module/anonymous@10/renderMeals/anonymous@280 | meal |
+| 281:13 | imageUrl | const | module/anonymous@10/renderMeals/anonymous@280 | safeImageUrl(meal.imageUrl) |
+| 282:13 | portion | const | module/anonymous@10/renderMeals/anonymous@280 | !numeric(meal.portion) ? "드신 양 모름" : Number(meal.portion) === 0 ? "안 먹었어요" : Number(meal.portion) === 1 ? "모두" : '${number(Number( |
+| 287:12 | renderRecords | function | module/anonymous@10 |  |
+| 289:11 | trends | const | module/anonymous@10/renderRecords | [...(state.summary.trends \|\| [])].slice(-7).reverse() |
+| 290:65 | entry | parameter | module/anonymous@10/renderRecords/anonymous@290 | entry |
+| 291:13 | hasDaily | const | module/anonymous@10/renderRecords/anonymous@290 | entry.hasDaily \|\| entry.hasDoseReport \|\| numeric(entry.steps) \|\| numeric(entry.sleepHours) \|\| Boolean(entry.medicationStatus) |
+| 292:13 | values | const | module/anonymous@10/renderRecords/anonymous@290 | [numeric(entry.steps) ? '${number(entry.steps)}걸음' : "활동 미기록", numeric(entry.sleepHours) ? '수면 ${number(entry.sleepHours, 1)}시간' : |
+| 295:11 | meals | const | module/anonymous@10/renderRecords | state.summary.recentMeals \|\| [] |
+| 300:12 | renderChart | function | module/anonymous@10 |  |
+| 301:11 | config | const | module/anonymous@10/renderChart | { steps: { unit: "걸음", label: "걸음 수", digits: 0, note: "기록이 있는 날의 하루 평균 걸음 수예요." }, sleepHours: { unit: "시간", label: "수면 시간", digi |
+| 306:11 | trends | const | module/anonymous@10/renderChart | [...(state.summary.trends \|\| [])].slice(-7) |
+| 307:11 | entries | const | module/anonymous@10/renderChart | trends.map((entry) =&gt; { const hasValue = numeric(entry[state.metric]); return { ...entry, value: hasValue ? Number(entry[state.met |
+| 307:33 | entry | parameter | module/anonymous@10/renderChart/anonymous@307 | entry |
+| 308:13 | hasValue | const | module/anonymous@10/renderChart/anonymous@307 | numeric(entry[state.metric]) |
+| 311:11 | values | const | module/anonymous@10/renderChart | entries.filter((entry) =&gt; entry.value !== null).map((entry) =&gt; entry.value) |
+| 311:36 | entry | parameter | module/anonymous@10/renderChart/anonymous@311 | entry |
+| 311:73 | entry | parameter | module/anonymous@10/renderChart/anonymous@311 | entry |
+| 312:11 | average | const | module/anonymous@10/renderChart | values.length ? values.reduce((sum, value) =&gt; sum + value, 0) / values.length : null |
+| 312:52 | sum | parameter | module/anonymous@10/renderChart/anonymous@312 | sum |
+| 312:57 | value | parameter | module/anonymous@10/renderChart/anonymous@312 | value |
+| 315:139 | entry | parameter | module/anonymous@10/renderChart/anonymous@315 | entry |
+| 317:11 | sourceKey | const | module/anonymous@10/renderChart | state.metric === "steps" ? "stepsSource" : "sleepSource" |
+| 318:11 | chartSources | const | module/anonymous@10/renderChart | state.metric === "proteinGrams" ? [] : [...new Set(entries.filter(entry =&gt; numeric(entry.value)).map(entry =&gt; sourceLabel(entry[so |
+| 318:92 | entry | parameter | module/anonymous@10/renderChart/anonymous@318 | entry |
+| 318:127 | entry | parameter | module/anonymous@10/renderChart/anonymous@318 | entry |
+| 319:11 | unknownMeals | const | module/anonymous@10/renderChart | trends.reduce((sum, entry) =&gt; sum + (Number(entry.unknownMealCount) \|\| 0), 0) |
+| 319:41 | sum | parameter | module/anonymous@10/renderChart/anonymous@319 | sum |
+| 319:46 | entry | parameter | module/anonymous@10/renderChart/anonymous@319 | entry |
+| 321:218 | entry | parameter | module/anonymous@10/renderChart/anonymous@321 | entry |
+| 322:11 | chart | const | module/anonymous@10/renderChart | $("#trend-chart") |
+| 323:11 | max | const | module/anonymous@10/renderChart | Math.max(...values, state.metric === "sleepHours" ? 10 : 1) |
+| 324:36 | entry | parameter | module/anonymous@10/renderChart/anonymous@324 | entry |
+| 325:80 | entry | parameter | module/anonymous@10/renderChart/anonymous@325 | entry |
+| 328:12 | routeFromUrl | function | module/anonymous@10 |  |
+| 329:11 | params | const | module/anonymous@10/routeFromUrl | new URL(location.href).searchParams |
+| 333:11 | date | const | module/anonymous@10/routeFromUrl | params.get("date") |
+| 339:12 | syncUrl | function | module/anonymous@10 |  |
+| 339:20 | historyMode | parameter | module/anonymous@10/syncUrl | historyMode = "push" |
+| 340:11 | url | const | module/anonymous@10/syncUrl | new URL(location.href) |
+| 342:16 | key | const | module/anonymous@10/syncUrl | 초기값 없음 |
+| 353:12 | applyView | function | module/anonymous@10 |  |
+| 353:24 | historyMode | parameter | module/anonymous@10/applyView | { historyMode = "push", focus = true, refreshMedication = true } = {} |
+| 353:46 | focus | parameter | module/anonymous@10/applyView | { historyMode = "push", focus = true, refreshMedication = true } = {} |
+| 353:60 | refreshMedication | parameter | module/anonymous@10/applyView | { historyMode = "push", focus = true, refreshMedication = true } = {} |
+| 356:29 | element | parameter | module/anonymous@10/applyView/anonymous@356 | element |
+| 357:43 | button | parameter | module/anonymous@10/applyView/anonymous@357 | button |
+| 358:13 | active | const | module/anonymous@10/applyView/anonymous@357 | button.dataset.view === state.view |
+| 362:30 | tab | parameter | module/anonymous@10/applyView/anonymous@362 | tab |
+| 362:45 | active | const | module/anonymous@10/applyView/anonymous@362 | tab.dataset.metric === state.metric |
+| 368:13 | section | const | module/anonymous@10/applyView | state.view === "records" ? ({ meals: "#meal-records-section", history: ".history-section", chart: ".trend-card" }[state.section])  |
+| 369:13 | destination | const | module/anonymous@10/applyView | section ? $(section) : $("#main-content") |
+| 376:12 | switchView | function | module/anonymous@10 |  |
+| 376:23 | view | parameter | module/anonymous@10/switchView | view |
+| 376:31 | section | parameter | module/anonymous@10/switchView | { section = null, metric, historyMode = "push" } = {} |
+| 376:47 | metric | parameter | module/anonymous@10/switchView | { section = null, metric, historyMode = "push" } = {} |
+| 376:55 | historyMode | parameter | module/anonymous@10/switchView | { section = null, metric, historyMode = "push" } = {} |
+| 386:12 | openMeal | function | module/anonymous@10 |  |
+| 394:11 | hour | const | module/anonymous@10/openMeal | Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Seoul", hour: "numeric", hourCycle: "h23" }).format(new Date())) |
+| 395:11 | type | const | module/anonymous@10/openMeal | hour &lt; 10 ? "breakfast" : hour &lt; 16 ? "lunch" : "dinner" |
+| 403:12 | fieldValue | function | module/anonymous@10 |  |
+| 403:23 | name | parameter | module/anonymous@10/fieldValue | name |
+| 403:29 | record | parameter | module/anonymous@10/fieldValue | record |
+| 407:12 | applyDailyRecord | function | module/anonymous@10 |  |
+| 407:29 | record | parameter | module/anonymous@10/applyDailyRecord | record |
+| 412:16 | name | const | module/anonymous@10/applyDailyRecord | 초기값 없음 |
+| 416:16 | name | const | module/anonymous@10/applyDailyRecord | 초기값 없음 |
+| 417:55 | input | parameter | module/anonymous@10/applyDailyRecord/anonymous@417 | input |
+| 424:12 | openDaily | function | module/anonymous@10 |  |
+| 424:22 | mode | parameter | module/anonymous@10/openDaily | mode = "all" |
+| 424:36 | date | parameter | module/anonymous@10/openDaily | date = today() |
+| 430:11 | config | const | module/anonymous@10/openDaily | dailyModes[mode] |
+| 433:51 | group | parameter | module/anonymous@10/openDaily/anonymous@433 | group |
+| 434:13 | names | const | module/anonymous@10/openDaily/anonymous@433 | group.dataset.dailyFields.split(" ") |
+| 435:34 | name | parameter | module/anonymous@10/openDaily/anonymous@433/anonymous@435 | name |
+| 448:12 | clearPhoto | function | module/anonymous@10 |  |
+| 463:12 | updateEstimate | function | module/anonymous@10 |  |
+| 464:11 | data | const | module/anonymous@10/updateEstimate | new FormData($('#meal-form')) |
+| 465:11 | raw | const | module/anonymous@10/updateEstimate | data.get('portion') |
+| 466:11 | portion | const | module/anonymous@10/updateEstimate | raw === null \|\| raw === 'unknown' ? null : Number(raw) |
+| 467:11 | portionLabel | const | module/anonymous@10/updateEstimate | raw === null ? '드신 양을 골라 주세요' : portion === null ? '드신 양 모름' : portion === 0 ? '안 먹었어요' : portion === 1 ? '모두' : portion === .5 ?  |
+| 468:11 | proposal | const | module/anonymous@10/updateEstimate | state.analysis?.proposal |
+| 474:12 | formError | function | module/anonymous@10 |  |
+| 474:22 | id | parameter | module/anonymous@10/formError | id |
+| 474:26 | message | parameter | module/anonymous@10/formError | message |
+| 475:11 | element | const | module/anonymous@10/formError | $(id) |
+| 483:12 | setFormBusy | function | module/anonymous@10 |  |
+| 483:24 | formId | parameter | module/anonymous@10/setFormBusy | formId |
+| 483:32 | busy | parameter | module/anonymous@10/setFormBusy | busy |
+| 484:63 | element | parameter | module/anonymous@10/setFormBusy/anonymous@484 | element |
+| 488:12 | setDailyFieldsDisabled | function | module/anonymous@10 |  |
+| 488:35 | disabled | parameter | module/anonymous@10/setDailyFieldsDisabled | disabled |
+| 489:78 | element | parameter | module/anonymous@10/setDailyFieldsDisabled/anonymous@489 | element |
+| 490:83 | element | parameter | module/anonymous@10/setDailyFieldsDisabled/anonymous@490 | element |
+| 494:18 | saveMeal | function | module/anonymous@10 |  |
+| 494:27 | event | parameter | module/anonymous@10/saveMeal | event |
+| 496:11 | button | const | module/anonymous@10/saveMeal | $("#meal-submit") |
+| 498:11 | data | const | module/anonymous@10/saveMeal | new FormData(event.currentTarget) |
+| 499:11 | patientId | const | module/anonymous@10/saveMeal | state.patientId |
+| 502:11 | payload | const | module/anonymous@10/saveMeal | { date: data.get("date"), mealType: data.get("mealType"), foodType: data.get("foodType"), portion: data.get('portion') === 'unknow |
+| 509:11 | signature | const | module/anonymous@10/saveMeal | JSON.stringify(payload) |
+| 521:14 | error | catch | module/anonymous@10/saveMeal |  |
+| 532:18 | saveDaily | function | module/anonymous@10 |  |
+| 532:28 | event | parameter | module/anonymous@10/saveDaily | event |
+| 534:11 | button | const | module/anonymous@10/saveDaily | $("#daily-submit") |
+| 536:11 | data | const | module/anonymous@10/saveDaily | new FormData(event.currentTarget) |
+| 537:11 | patientId | const | module/anonymous@10/saveDaily | state.patientId |
+| 538:11 | payload | const | module/anonymous@10/saveDaily | { date: data.get("date") } |
+| 539:16 | name | const | module/anonymous@10/saveDaily | 초기값 없음 |
+| 540:13 | raw | const | module/anonymous@10/saveDaily | data.get(name) |
+| 541:13 | value | const | module/anonymous@10/saveDaily | ["steps", "sleepHours", "weightKg"].includes(name) ? raw === "" ? null : Number(raw) : name === "note" ? String(raw ?? "").trim()  |
+| 546:11 | signature | const | module/anonymous@10/saveDaily | JSON.stringify(payload) |
+| 558:14 | error | catch | module/anonymous@10/saveDaily |  |
+| 569:18 | selectDailyDate | function | module/anonymous@10 |  |
+| 570:11 | date | const | module/anonymous@10/selectDailyDate | $("#daily-date").value |
+| 576:11 | requestId | const | module/anonymous@10/selectDailyDate | ++state.dateRequestId |
+| 577:11 | patientId | const | module/anonymous@10/selectDailyDate | state.patientId |
+| 582:13 | result | const | module/anonymous@10/selectDailyDate | await api('/api/patients/${encodeURIComponent(patientId)}/daily?date=${encodeURIComponent(date)}') |
+| 586:13 | effective | const | module/anonymous@10/selectDailyDate | state.summary?.trends.find(entry =&gt; entry.date === date) |
+| 586:52 | entry | parameter | module/anonymous@10/selectDailyDate/anonymous@586 | entry |
+| 587:13 | automatic | const | module/anonymous@10/selectDailyDate | [state.dailyMode === "sleep" ? "sleepHours" : "steps", ...(state.dailyMode === "all" ? ["sleepHours"] : [])].filter(name =&gt; numeri |
+| 587:141 | name | parameter | module/anonymous@10/selectDailyDate/anonymous@587 | name |
+| 591:14 | error | catch | module/anonymous@10/selectDailyDate |  |
+| 598:18 | loadCapabilities | function | module/anonymous@10 |  |
+| 600:12 | _ | catch | module/anonymous@10/loadCapabilities |  |
+| 605:12 | refreshAnalysisControls | function | module/anonymous@10 |  |
+| 606:11 | available | const | module/anonymous@10/refreshAnalysisControls | state.capabilities?.vision?.available === true |
+| 607:11 | ready | const | module/anonymous@10/refreshAnalysisControls | available &amp;&amp; Boolean(state.imageData) &amp;&amp; !state.photoLoading |
+| 616:18 | analyzeMeal | function | module/anonymous@10 |  |
+| 618:11 | requestId | const | module/anonymous@10/analyzeMeal | ++state.analysisRequestId |
+| 619:11 | patientId | const | module/anonymous@10/analyzeMeal | state.patientId |
+| 620:11 | imageData | const | module/anonymous@10/analyzeMeal | state.imageData |
+| 621:11 | date | const | module/anonymous@10/analyzeMeal | $("#meal-date").value |
+| 622:73 | input | parameter | module/anonymous@10/analyzeMeal/anonymous@622 | input |
+| 631:13 | result | const | module/anonymous@10/analyzeMeal | await api('/api/patients/${encodeURIComponent(patientId)}/photo-analyses', { method: "POST", body: JSON.stringify({ kind: "meal",  |
+| 633:13 | analysis | const | module/anonymous@10/analyzeMeal | result.analysis |
+| 636:13 | proposal | const | module/anonymous@10/analyzeMeal | analysis.proposal |
+| 637:13 | choice | const | module/anonymous@10/analyzeMeal | $('#meal-form [name="foodType"][value="${proposal.foodType}"]') |
+| 640:176 | food | parameter | module/anonymous@10/analyzeMeal/anonymous@640 | food |
+| 640:515 | warning | parameter | module/anonymous@10/analyzeMeal/anonymous@640 | warning |
+| 642:14 | error | catch | module/anonymous@10/analyzeMeal |  |
+| 649:12 | renderMedicationSummary | function | module/anonymous@10 |  |
+| 649:36 | schedule | parameter | module/anonymous@10/renderMedicationSummary | schedule |
+| 650:11 | total | const | module/anonymous@10/renderMedicationSummary | schedule.slots?.length \|\| 0 |
+| 651:11 | pending | const | module/anonymous@10/renderMedicationSummary | (schedule.slots \|\| []).filter(slot =&gt; slot.status === 'pending').length |
+| 651:51 | slot | parameter | module/anonymous@10/renderMedicationSummary/anonymous@651 | slot |
+| 655:18 | loadMedicationSchedule | function | module/anonymous@10 |  |
+| 657:11 | requestId | const | module/anonymous@10/loadMedicationSchedule | ++state.medicationRequestId |
+| 658:11 | patientId | const | module/anonymous@10/loadMedicationSchedule | state.patientId |
+| 660:11 | date | const | module/anonymous@10/loadMedicationSchedule | state.medicationDate \|\| today() |
+| 673:14 | schedule | const | module/anonymous@10/loadMedicationSchedule | await Promise.all([api('/api/patients/${encodeURIComponent(patientId)}/medication-schedule?date=${encodeURIComponent(date)}'), api |
+| 673:24 | photos | const | module/anonymous@10/loadMedicationSchedule | await Promise.all([api('/api/patients/${encodeURIComponent(patientId)}/medication-schedule?date=${encodeURIComponent(date)}'), api |
+| 679:13 | slotForms | const | module/anonymous@10/loadMedicationSchedule | (schedule.slots \|\| []).map((slot, index) =&gt; { const labels = { pending: "미보고", taken: "복용 보고", missed: "미복용 보고", unknown: "기억나지 않음 |
+| 679:53 | slot | parameter | module/anonymous@10/loadMedicationSchedule/anonymous@679 | slot |
+| 679:59 | index | parameter | module/anonymous@10/loadMedicationSchedule/anonymous@679 | index |
+| 680:15 | labels | const | module/anonymous@10/loadMedicationSchedule/anonymous@679 | { pending: "미보고", taken: "복용 보고", missed: "미복용 보고", unknown: "기억나지 않음" } |
+| 681:661 | value | parameter | module/anonymous@10/loadMedicationSchedule/anonymous@679/anonymous@681 | [value, label] |
+| 681:668 | label | parameter | module/anonymous@10/loadMedicationSchedule/anonymous@679/anonymous@681 | [value, label] |
+| 683:13 | times | const | module/anonymous@10/loadMedicationSchedule | [...new Set((schedule.slots \|\| []).map(slot =&gt; slot.time))].sort() |
+| 683:60 | slot | parameter | module/anonymous@10/loadMedicationSchedule/anonymous@683 | slot |
+| 684:51 | time | parameter | module/anonymous@10/loadMedicationSchedule/anonymous@684 | time |
+| 684:160 | slot | parameter | module/anonymous@10/loadMedicationSchedule/anonymous@684/anonymous@684 | slot |
+| 684:166 | index | parameter | module/anonymous@10/loadMedicationSchedule/anonymous@684/anonymous@684 | index |
+| 686:15 | result | const | module/anonymous@10/loadMedicationSchedule | await api('/api/patients/${encodeURIComponent(patientId)}/daily?date=${encodeURIComponent(date)}') |
+| 691:71 | input | parameter | module/anonymous@10/loadMedicationSchedule/anonymous@691 | input |
+| 695:68 | form | parameter | module/anonymous@10/loadMedicationSchedule/anonymous@695 | form |
+| 696:14 | error | catch | module/anonymous@10/loadMedicationSchedule |  |
+| 703:12 | medicationDateMatches | function | module/anonymous@10 |  |
+| 704:11 | field | const | module/anonymous@10/medicationDateMatches | $('#medication-date') |
+| 711:18 | saveMedication | function | module/anonymous@10 |  |
+| 711:33 | event | parameter | module/anonymous@10/saveMedication | event |
+| 715:11 | form | const | module/anonymous@10/saveMedication | event.target |
+| 716:11 | data | const | module/anonymous@10/saveMedication | new FormData(form) |
+| 717:11 | legacy | const | module/anonymous@10/saveMedication | form.id === "legacy-medication-form" |
+| 718:11 | status | const | module/anonymous@10/saveMedication | data.get(legacy ? "medicationStatus" : "status") |
+| 719:11 | errorElement | const | module/anonymous@10/saveMedication | legacy ? $("#legacy-medication-error") : $("[data-slot-error]", form) |
+| 721:11 | patientId | const | module/anonymous@10/saveMedication | state.patientId |
+| 722:11 | date | const | module/anonymous@10/saveMedication | state.medicationDate |
+| 723:11 | slot | const | module/anonymous@10/saveMedication | legacy ? null : state.medicationSchedule.slots[Number(form.dataset.slotIndex)] |
+| 725:11 | payload | const | module/anonymous@10/saveMedication | legacy ? { date, medicationStatus: status, expectedRevision: state.legacyDailyRevision } : { orderId: slot.orderId, date, time: sl |
+| 727:13 | signature | const | module/anonymous@10/saveMedication | JSON.stringify(payload) |
+| 734:94 | input | parameter | module/anonymous@10/saveMedication/anonymous@734 | input |
+| 737:13 | saved | const | module/anonymous@10/saveMedication | await api('/api/patients/${encodeURIComponent(patientId)}/${legacy ? "daily" : "medication-events"}', { method: "POST", body: JSON |
+| 742:15 | badge | const | module/anonymous@10/saveMedication | $('.medication-status', form) |
+| 748:13 | revision | let | module/anonymous@10/saveMedication | $('.record-source', form) |
+| 756:14 | error | catch | module/anonymous@10/saveMedication |  |
+| 761:96 | input | parameter | module/anonymous@10/saveMedication/anonymous@761 | input |
+| 766:18 | loadConnections | function | module/anonymous@10 |  |
+| 768:11 | requestId | const | module/anonymous@10/loadConnections | ++state.connectionRequestId |
+| 769:11 | patientId | const | module/anonymous@10/loadConnections | state.patientId |
+| 774:13 | result | const | module/anonymous@10/loadConnections | await api('/api/patients/${encodeURIComponent(patientId)}/health-connections') |
+| 777:93 | connection | parameter | module/anonymous@10/loadConnections/anonymous@777 | connection |
+| 778:14 | error | catch | module/anonymous@10/loadConnections |  |
+| 785:18 | createConnection | function | module/anonymous@10 |  |
+| 785:35 | event | parameter | module/anonymous@10/createConnection | event |
+| 789:11 | patientId | const | module/anonymous@10/createConnection | state.patientId |
+| 790:11 | requestId | const | module/anonymous@10/createConnection | state.connectionRequestId |
+| 791:11 | fields | const | module/anonymous@10/createConnection | new FormData(event.target) |
+| 792:11 | payload | const | module/anonymous@10/createConnection | { platform: fields.get("platform") } |
+| 798:13 | result | const | module/anonymous@10/createConnection | await api('/api/patients/${encodeURIComponent(patientId)}/health-connections', { method: "POST", body: JSON.stringify(payload) }) |
+| 800:13 | patient | const | module/anonymous@10/createConnection | state.summary?.patient |
+| 809:14 | error | catch | module/anonymous@10/createConnection |  |
+| 814:18 | revokeConnection | function | module/anonymous@10 |  |
+| 814:35 | connectionId | parameter | module/anonymous@10/revokeConnection | connectionId |
+| 815:91 | connection | parameter | module/anonymous@10/revokeConnection/anonymous@815 | connection |
+| 817:11 | patientId | const | module/anonymous@10/revokeConnection | state.patientId |
+| 823:14 | error | catch | module/anonymous@10/revokeConnection |  |
+| 828:12 | bindEvents | function | module/anonymous@10 |  |
+| 829:55 | event | parameter | module/anonymous@10/bindEvents/anonymous@829 | event |
+| 831:53 | event | parameter | module/anonymous@10/bindEvents/anonymous@831 | event |
+| 839:13 | dirty | const | module/anonymous@10/bindEvents/anonymous@837 | medicationDirty() |
+| 846:40 | event | parameter | module/anonymous@10/bindEvents/anonymous@846 | event |
+| 847:13 | viewButton | const | module/anonymous@10/bindEvents/anonymous@846 | event.target.closest("[data-view]") |
+| 849:13 | action | const | module/anonymous@10/bindEvents/anonymous@846 | event.target.closest("[data-action]") |
+| 860:30 | button | parameter | module/anonymous@10/bindEvents/anonymous@860 | button |
+| 863:32 | tab | parameter | module/anonymous@10/bindEvents/anonymous@860/anonymous@860/anonymous@863 | tab |
+| 863:47 | active | const | module/anonymous@10/bindEvents/anonymous@860/anonymous@860/anonymous@863 | tab === button |
+| 867:33 | button | parameter | module/anonymous@10/bindEvents/anonymous@867 | button |
+| 868:26 | dialog | parameter | module/anonymous@10/bindEvents/anonymous@868 | dialog |
+| 869:40 | event | parameter | module/anonymous@10/bindEvents/anonymous@868/anonymous@869 | event |
+| 871:15 | bounds | const | module/anonymous@10/bindEvents/anonymous@868/anonymous@869 | dialog.getBoundingClientRect() |
+| 874:41 | event | parameter | module/anonymous@10/bindEvents/anonymous@868/anonymous@874 | event |
+| 880:15 | opener | const | module/anonymous@10/bindEvents/anonymous@868/anonymous@875 | dialogOpeners.get(dialog.id) |
+| 894:48 | event | parameter | module/anonymous@10/bindEvents/anonymous@894 | event |
+| 904:13 | date | const | module/anonymous@10/bindEvents/anonymous@903 | $("#medication-date").value |
+| 917:45 | event | parameter | module/anonymous@10/bindEvents/anonymous@917 | event |
+| 926:13 | requestedId | const | module/anonymous@10/bindEvents/anonymous@924 | routeFromUrl() |
+| 931:53 | dialog | parameter | module/anonymous@10/bindEvents/anonymous@924/anonymous@931 | dialog |
+| 932:81 | patient | parameter | module/anonymous@10/bindEvents/anonymous@924/anonymous@932 | patient |
+| 935:20 | chooseMealPhoto | function | module/anonymous@10/bindEvents |  |
+| 935:36 | event | parameter | module/anonymous@10/bindEvents/chooseMealPhoto | event |
+| 936:13 | file | const | module/anonymous@10/bindEvents/chooseMealPhoto | event.target.files?.[0] |
+| 939:13 | request | const | module/anonymous@10/bindEvents/chooseMealPhoto | ++state.photoRequestId |
+| 943:15 | prepared | const | module/anonymous@10/bindEvents/chooseMealPhoto | await preparePatientImage(file) |
+| 949:16 | issue | catch | module/anonymous@10/bindEvents/chooseMealPhoto |  |
+| 958:13 | hours | const | module/anonymous@10/bindEvents/anonymous@957 | $('#sleep-helper-hours') |
+| 958:47 | minutes | const | module/anonymous@10/bindEvents/anonymous@957 | $('#sleep-helper-minutes') |
+| 969:56 | event | parameter | module/anonymous@10/bindEvents/anonymous@969 | event |
+| 970:13 | enabled | const | module/anonymous@10/bindEvents/anonymous@969 | document.body.classList.toggle('patient-large-text') |
+| 975:18 | initialize | function | module/anonymous@10 |  |
+| 979:13 | result | const | module/anonymous@10/initialize | await api("/api/patients") |
+| 982:60 | patient | parameter | module/anonymous@10/initialize/anonymous@982 | patient |
+| 983:11 | storedId | let | module/anonymous@10/initialize | 초기값 없음 |
+| 984:76 | _ | catch | module/anonymous@10/initialize |  |
+| 985:13 | requestedId | const | module/anonymous@10/initialize | new URL(location.href).searchParams.get("patientId") \|\| storedId |
+| 986:13 | patientId | const | module/anonymous@10/initialize | state.patients.some((patient) =&gt; patient.id === requestedId) ? requestedId : state.patients[0].id |
+| 986:46 | patient | parameter | module/anonymous@10/initialize/anonymous@986 | patient |
+| 989:14 | error | catch | module/anonymous@10/initialize |  |
+| 993:60 | issue | catch | module/anonymous@10 |  |
 
 ## public/session.js
 
@@ -2990,26 +4314,42 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 |---|---|---|---|---|
 | 1:14 | sessionState | const | module | { mode: null, user: null, csrfToken: null } |
 | 2:14 | sessionHeaders | const | module | () =&gt; sessionState.csrfToken ? { 'X-CSRF-Token': sessionState.csrfToken } : {} |
-| 3:17 | sessionExpired | function | module |  |
-| 9:23 | refreshSession | function | module |  |
-| 10:9 | response | const | module/refreshSession | await fetch('/api/auth/session', { cache: 'no-store' }) |
-| 12:9 | result | const | module/refreshSession | await response.json() |
-| 15:23 | sessionRequest | function | module |  |
-| 15:38 | path | parameter | module/sessionRequest | path |
-| 15:44 | options | parameter | module/sessionRequest | options = {} |
-| 16:9 | response | const | module/sessionRequest | await fetch(path, { ...options, headers: { 'Content-Type': 'application/json', ...sessionHeaders(), ...options.headers } }) |
-| 17:9 | result | const | module/sessionRequest | await response.json().catch(() =&gt; ({})) |
-| 21:23 | demoPatient | function | module |  |
-| 21:35 | patientId | parameter | module/demoPatient | patientId |
-| 26:10 | renderSession | function | module |  |
-| 27:58 | el | parameter | module/renderSession/anonymous@27 | el |
-| 28:57 | el | parameter | module/renderSession/anonymous@28 | el |
-| 29:59 | el | parameter | module/renderSession/anonymous@29 | el |
-| 35:13 | error | catch | module/renderSession/anonymous@29/anonymous@31 |  |
-| 35:44 | status | const | module/renderSession/anonymous@29/anonymous@31 | document.querySelector('[data-auth-label]') |
-| 39:23 | bootstrapSession | function | module |  |
-| 39:40 | role | parameter | module/bootstrapSession | role |
-| 53:36 | event | parameter | module/anonymous@53 | event |
+| 3:5 | recoveryIdentity | let | module | null |
+| 4:7 | identityKey | const | module | user =&gt; JSON.stringify(user ? [user.id,user.role,user.patientId,user.staffRoles,user.capabilities,user.assignedPatientIds] : null) |
+| 4:21 | user | parameter | module/anonymous@4 | user |
+| 5:17 | sessionExpired | function | module |  |
+| 16:9 | dialog | const | module/sessionExpired | document.createElement('dialog') |
+| 19:9 | style | const | module/sessionExpired | document.createElement('style') |
+| 21:9 | title | const | module/sessionExpired | document.createElement('h2') |
+| 22:9 | message | const | module/sessionExpired | document.createElement('p') |
+| 23:9 | login | const | module/sessionExpired | document.createElement('a') |
+| 24:9 | check | const | module/sessionExpired | document.createElement('button') |
+| 25:9 | status | const | module/sessionExpired | document.createElement('p') |
+| 26:9 | discard | const | module/sessionExpired | document.createElement('button') |
+| 31:13 | result | const | module/sessionExpired/anonymous@28 | await readSession() |
+| 40:13 | error | catch | module/sessionExpired/anonymous@28 |  |
+| 43:36 | event | parameter | module/sessionExpired/anonymous@43 | event |
+| 46:16 | readSession | function | module |  |
+| 47:9 | response | const | module/readSession | await fetch('/api/auth/session', { cache: 'no-store' }) |
+| 51:17 | assertSessionActive | function | module |  |
+| 54:23 | refreshSession | function | module |  |
+| 56:9 | result | const | module/refreshSession | await readSession() |
+| 59:23 | sessionRequest | function | module |  |
+| 59:38 | path | parameter | module/sessionRequest | path |
+| 59:44 | options | parameter | module/sessionRequest | options = {} |
+| 61:9 | response | const | module/sessionRequest | await fetch(path, { ...options, headers: { 'Content-Type': 'application/json', ...sessionHeaders(), ...options.headers } }) |
+| 62:9 | result | const | module/sessionRequest | await response.json().catch(() =&gt; ({})) |
+| 66:23 | demoPatient | function | module |  |
+| 66:35 | patientId | parameter | module/demoPatient | patientId |
+| 71:10 | renderSession | function | module |  |
+| 72:58 | el | parameter | module/renderSession/anonymous@72 | el |
+| 73:57 | el | parameter | module/renderSession/anonymous@73 | el |
+| 74:59 | el | parameter | module/renderSession/anonymous@74 | el |
+| 80:13 | error | catch | module/renderSession/anonymous@74/anonymous@76 |  |
+| 80:44 | status | const | module/renderSession/anonymous@74/anonymous@76 | document.querySelector('[data-auth-label]') |
+| 84:23 | bootstrapSession | function | module |  |
+| 84:40 | role | parameter | module/bootstrapSession | role |
+| 98:36 | event | parameter | module/anonymous@98 | event |
 
 ## scripts/check-deployment.mjs
 
@@ -3194,14 +4534,18 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 23:66 | match | parameter | module/anonymous@23 | match |
 | 24:56 | screen | parameter | module/anonymous@24 | screen |
 | 25:7 | header | const | module | html.match(/&lt;header class="patient-header"&gt;([\s\S]*?)&lt;\/header&gt;/)?.[1] |
-| 28:7 | guide | const | module | html.slice(html.indexOf('&lt;section id="view-guide"'), html.indexOf('&lt;/section&gt;', html.indexOf('&lt;section id="view-guide"'))) |
-| 33:7 | clinicianIds | const | module | { overview: 'C-OVERVIEW', patients: 'C-PATIENTS', medications: 'C-MED', records: 'C-RECORDS', notices: 'C-NOTICES', messages: 'C-M |
-| 34:7 | clinicianSource | const | module | readFileSync(new URL('../public/clinician.js', import.meta.url), 'utf8') |
-| 35:5 | clinicianTitles | let | module | 초기값 없음 |
-| 36:10 | visit | function | module |  |
-| 36:16 | node | parameter | module/visit | node |
-| 44:49 | property | parameter | module/anonymous@44 | property |
-| 45:12 | id | const | module | 초기값 없음 |
+| 29:7 | guideStart | const | module | html.indexOf('&lt;section id="view-guide"') |
+| 31:5 | guideDepth | let | module | 0 |
+| 31:21 | guideEnd | let | module | -1 |
+| 32:12 | tag | const | module | 초기값 없음 |
+| 37:7 | guide | const | module | html.slice(guideStart, guideEnd) |
+| 42:7 | clinicianIds | const | module | { overview: 'C-OVERVIEW', patients: 'C-PATIENTS', medications: 'C-MED', records: 'C-RECORDS', notices: 'C-NOTICES', messages: 'C-M |
+| 43:7 | clinicianSource | const | module | readFileSync(new URL('../public/clinician.js', import.meta.url), 'utf8') |
+| 44:5 | clinicianTitles | let | module | 초기값 없음 |
+| 45:10 | visit | function | module |  |
+| 45:16 | node | parameter | module/visit | node |
+| 53:49 | property | parameter | module/anonymous@53 | property |
+| 54:12 | id | const | module | 초기값 없음 |
 
 ## scripts/check-vision.mjs
 
@@ -3244,20 +4588,24 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 8:10 | ensureHealthSchema | import | module | ../lib/health-sync.mjs |
 | 10:10 | ensureAuthSchema | import | module | ../lib/auth.mjs |
 | 11:10 | ensureCommunicationSchema | import | module | ../lib/communications.mjs |
-| 13:7 | output | const | module | new URL('../docs/generated/SCHEMA.md', import.meta.url) |
-| 14:7 | temp | const | module | await mkdtemp(join(tmpdir(), 'homecare-schema-doc-')) |
-| 15:7 | escape | const | module | value =&gt; String(value ?? '').replaceAll('\|', '\\\|').replaceAll('\n', ' ') |
-| 15:16 | value | parameter | module/anonymous@15 | value |
-| 16:5 | db | let | module | 초기값 없음 |
-| 25:9 | tables | const | module | db.prepare("SELECT name,sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all() |
-| 26:9 | sections | const | module | tables.map(table =&gt; { const columns = db.prepare('PRAGMA table_info("${table.name}")').all(); const keys = db.prepare('PRAGMA fore |
-| 26:31 | table | parameter | module/anonymous@26 | table |
-| 27:11 | columns | const | module/anonymous@26 | db.prepare('PRAGMA table_info("${table.name}")').all() |
-| 28:11 | keys | const | module/anonymous@26 | db.prepare('PRAGMA foreign_key_list("${table.name}")').all() |
-| 29:107 | column | parameter | module/anonymous@26/anonymous@29 | column |
-| 29:309 | key | parameter | module/anonymous@26/anonymous@29 | key |
-| 31:9 | document | const | module | '# DB 스키마 기준\n\n자동 생성: 임시 SQLite에 현재 추가 마이그레이션을 적용한 결과다. 사용자/공개 DB에 접근하지 않으며 행 값·토큰·사진을 저장하지 않는다. 의미와 단위는 [자료 사전](../DATA_DICTIONA |
-| 33:9 | existing | let | module | '' |
+| 12:10 | ensureMealSchema | import | module | ../lib/meals.mjs |
+| 13:10 | ensureWorkflowSchema | import | module | ../lib/workflow.mjs |
+| 14:10 | ensureResearchSchema | import | module | ../lib/research.mjs |
+| 15:10 | ensureEvidenceSchema | import | module | ../lib/evidence.mjs |
+| 17:7 | output | const | module | new URL('../docs/generated/SCHEMA.md', import.meta.url) |
+| 18:7 | temp | const | module | await mkdtemp(join(tmpdir(), 'homecare-schema-doc-')) |
+| 19:7 | escape | const | module | value =&gt; String(value ?? '').replaceAll('\|', '\\\|').replaceAll('\n', ' ') |
+| 19:16 | value | parameter | module/anonymous@19 | value |
+| 20:5 | db | let | module | 초기값 없음 |
+| 33:9 | tables | const | module | db.prepare("SELECT name,sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all() |
+| 34:9 | sections | const | module | tables.map(table =&gt; { const columns = db.prepare('PRAGMA table_info("${table.name}")').all(); const keys = db.prepare('PRAGMA fore |
+| 34:31 | table | parameter | module/anonymous@34 | table |
+| 35:11 | columns | const | module/anonymous@34 | db.prepare('PRAGMA table_info("${table.name}")').all() |
+| 36:11 | keys | const | module/anonymous@34 | db.prepare('PRAGMA foreign_key_list("${table.name}")').all() |
+| 37:107 | column | parameter | module/anonymous@34/anonymous@37 | column |
+| 37:309 | key | parameter | module/anonymous@34/anonymous@37 | key |
+| 39:9 | document | const | module | '# DB 스키마 기준\n\n자동 생성: 임시 SQLite에 현재 추가 마이그레이션을 적용한 결과다. 사용자/공개 DB에 접근하지 않으며 행 값·토큰·사진을 저장하지 않는다. 의미와 단위는 [자료 사전](../DATA_DICTIONA |
+| 41:9 | existing | let | module | '' |
 
 ## scripts/generate-variable-docs.mjs
 
@@ -3358,196 +4706,268 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 3:25 | extname | import | module | node:path |
 | 3:34 | basename | import | module | node:path |
 | 4:10 | fileURLToPath | import | module | node:url |
-| 5:10 | randomUUID | import | module | node:crypto |
-| 6:10 | foodTable | import | module | ./lib/db.mjs |
-| 6:21 | mealFromRow | import | module | ./lib/db.mjs |
-| 6:34 | openDatabase | import | module | ./lib/db.mjs |
-| 6:48 | recordFromRow | import | module | ./lib/db.mjs |
-| 6:63 | todayKorea | import | module | ./lib/db.mjs |
-| 6:75 | transaction | import | module | ./lib/db.mjs |
-| 7:10 | dashboard | import | module | ./lib/analysis.mjs |
-| 7:21 | effectiveRecords | import | module | ./lib/analysis.mjs |
-| 7:39 | getPatient | import | module | ./lib/analysis.mjs |
-| 7:51 | getPatients | import | module | ./lib/analysis.mjs |
-| 7:64 | patientSummary | import | module | ./lib/analysis.mjs |
-| 7:80 | provenance | import | module | ./lib/analysis.mjs |
-| 8:10 | resetDemo | import | module | ./lib/reset.mjs |
-| 9:10 | allowedKeys | import | module | ./lib/validation.mjs |
-| 9:23 | choice | import | module | ./lib/validation.mjs |
-| 9:31 | csvCell | import | module | ./lib/validation.mjs |
-| 9:40 | dateValue | import | module | ./lib/validation.mjs |
-| 9:51 | decodeImage | import | module | ./lib/validation.mjs |
-| 9:64 | HttpError | import | module | ./lib/validation.mjs |
-| 9:75 | numberValue | import | module | ./lib/validation.mjs |
-| 9:88 | objectBody | import | module | ./lib/validation.mjs |
-| 9:100 | textList | import | module | ./lib/validation.mjs |
-| 9:110 | textValue | import | module | ./lib/validation.mjs |
-| 10:10 | ensureMedicationSchema | import | module | ./lib/medications.mjs |
-| 10:34 | getMedicationOrders | import | module | ./lib/medications.mjs |
-| 10:55 | createMedicationOrder | import | module | ./lib/medications.mjs |
-| 10:78 | endMedicationOrder | import | module | ./lib/medications.mjs |
-| 10:98 | medicationSchedule | import | module | ./lib/medications.mjs |
-| 10:118 | saveMedicationEvent | import | module | ./lib/medications.mjs |
-| 10:139 | getMedicationEvents | import | module | ./lib/medications.mjs |
-| 11:10 | ensureVisionSchema | import | module | ./lib/vision.mjs |
-| 11:30 | visionCapabilities | import | module | ./lib/vision.mjs |
-| 11:50 | analyzePhoto | import | module | ./lib/vision.mjs |
-| 11:64 | resolveMealAnalysis | import | module | ./lib/vision.mjs |
-| 11:85 | markAnalysisApplied | import | module | ./lib/vision.mjs |
-| 12:10 | ensureMedicationPhotoSchema | import | module | ./lib/medication-photos.mjs |
-| 12:39 | saveMedicationPhotoReport | import | module | ./lib/medication-photos.mjs |
-| 12:66 | getMedicationPhotoReports | import | module | ./lib/medication-photos.mjs |
-| 12:93 | getMedicationPhotoImage | import | module | ./lib/medication-photos.mjs |
-| 13:10 | healthCapabilities | import | module | ./lib/health-sync.mjs |
-| 13:30 | ensureHealthSchema | import | module | ./lib/health-sync.mjs |
-| 13:50 | getHealthConnections | import | module | ./lib/health-sync.mjs |
-| 13:72 | createHealthConnection | import | module | ./lib/health-sync.mjs |
-| 13:96 | revokeHealthConnection | import | module | ./lib/health-sync.mjs |
-| 13:120 | receiveHealthBatch | import | module | ./lib/health-sync.mjs |
-| 13:140 | getHealthConnectionIdentity | import | module | ./lib/health-sync.mjs |
-| 15:10 | createAuthService | import | module | ./lib/auth.mjs |
-| 16:10 | ensureCommunicationSchema | import | module | ./lib/communications.mjs |
-| 16:37 | listNotices | import | module | ./lib/communications.mjs |
-| 16:50 | createNotice | import | module | ./lib/communications.mjs |
-| 16:64 | updateNotice | import | module | ./lib/communications.mjs |
-| 16:78 | activeNotices | import | module | ./lib/communications.mjs |
-| 16:93 | readNotice | import | module | ./lib/communications.mjs |
-| 16:105 | listMessages | import | module | ./lib/communications.mjs |
-| 16:119 | sendMessage | import | module | ./lib/communications.mjs |
-| 16:132 | readMessages | import | module | ./lib/communications.mjs |
-| 16:146 | conversations | import | module | ./lib/communications.mjs |
-| 18:7 | root | const | module | fileURLToPath(new URL('.', import.meta.url)) |
-| 19:7 | publicDir | const | module | join(root, 'public') |
-| 20:9 | db | const | module | openDatabase(process.env.DATA_DIR \|\| join(root, 'data')) |
-| 20:13 | uploadDir | const | module | openDatabase(process.env.DATA_DIR \|\| join(root, 'data')) |
-| 25:7 | auth | const | module | createAuthService({db}) |
-| 28:7 | port | const | module | Number(process.env.PORT \|\| 3000) |
-| 29:7 | bodyLimit | const | module | 7 * 1024 * 1024 |
-| 30:7 | schemaVersion | const | module | 5 |
-| 32:10 | respond | function | module |  |
-| 32:18 | res | parameter | module/respond | res |
-| 32:23 | status | parameter | module/respond | status |
-| 32:31 | value | parameter | module/respond | value |
-| 32:38 | extraHeaders | parameter | module/respond | extraHeaders = {} |
-| 33:9 | body | const | module/respond | JSON.stringify(value) |
-| 38:16 | readJson | function | module |  |
-| 38:25 | req | parameter | module/readJson | req |
-| 39:9 | contentType | const | module/readJson | req.headers['content-type'] \|\| '' |
-| 41:9 | declaredLength | const | module/readJson | Number(req.headers['content-length'] \|\| 0) |
-| 43:7 | length | let | module/readJson | 0 |
-| 44:9 | chunks | const | module/readJson | [] |
-| 45:20 | chunk | const | module/readJson | 초기값 없음 |
-| 51:10 | error | catch | module/readJson |  |
-| 54:10 | requirePatient | function | module |  |
-| 54:25 | id | parameter | module/requirePatient | id |
-| 55:9 | patient | const | module/requirePatient | getPatient(db, id) |
-| 60:10 | assertSameOrigin | function | module |  |
-| 60:27 | req | parameter | module/assertSameOrigin | req |
-| 62:9 | site | const | module/assertSameOrigin | req.headers['sec-fetch-site'] |
-| 64:9 | origin | const | module/assertSameOrigin | req.headers.origin |
-| 66:9 | originHost | let | module/assertSameOrigin | 초기값 없음 |
-| 69:11 | expected | let | module/assertSameOrigin | 초기값 없음 |
-| 74:11 | forwardedHost | const | module/assertSameOrigin | req.headers['x-forwarded-host']?.split(',')[0]?.trim() |
-| 79:10 | health | function | module |  |
-| 80:9 | counts | const | module/health | {} |
-| 81:15 | key | const | module/health | 초기값 없음 |
-| 81:20 | table | const | module/health | 초기값 없음 |
-| 85:10 | createPatient | function | module |  |
-| 85:24 | body | parameter | module/createPatient | body |
-| 87:9 | id | const | module/createPatient | 'p-${randomUUID()}' |
-| 88:9 | name | const | module/createPatient | textValue(body.name, '이름', { min: 1, max: 40 }) |
-| 89:9 | age | const | module/createPatient | numberValue(body.age, '나이', 1, 120, true) |
-| 90:9 | sex | const | module/createPatient | choice(body.sex, '성별', ['female', 'male', 'other']) |
-| 91:9 | conditions | const | module/createPatient | body.conditions === undefined ? [] : textList(body.conditions, '질환') |
-| 92:9 | medications | const | module/createPatient | body.medications === undefined ? [] : textList(body.medications, '복약') |
-| 93:9 | caregiver | const | module/createPatient | body.caregiver === undefined ? '' : textValue(body.caregiver, '돌봄 정보', { max: 200 }) |
-| 98:10 | saveDaily | function | module |  |
-| 98:20 | id | parameter | module/saveDaily | id |
-| 98:24 | body | parameter | module/saveDaily | body |
-| 100:9 | fields | const | module/saveDaily | ['date', 'steps', 'sleepHours', 'medicationStatus', 'appetite', 'mood', 'note', 'weightKg'] |
-| 102:31 | k | parameter | module/saveDaily/anonymous@102 | k |
-| 103:9 | date | const | module/saveDaily | dateValue(body.date ?? todayKorea()) |
-| 104:9 | old | const | module/saveDaily | db.prepare('SELECT * FROM daily_records WHERE patient_id=? AND date=?').get(id, date) |
-| 105:9 | value | const | module/saveDaily | { steps: old?.steps ?? null, sleepHours: old?.sleep_hours ?? null, medicationStatus: old?.medication_status ?? null, appetite: old |
-| 117:9 | now | const | module/saveDaily | new Date().toISOString() |
-| 125:10 | saveMeal | function | module |  |
-| 125:19 | id | parameter | module/saveMeal | id |
-| 125:23 | body | parameter | module/saveMeal | body |
-| 128:9 | date | const | module/saveMeal | dateValue(body.date ?? todayKorea()) |
-| 129:9 | mealType | const | module/saveMeal | choice(body.mealType, '식사 종류', ['breakfast', 'lunch', 'dinner', 'snack']) |
-| 130:9 | portion | const | module/saveMeal | choice(body.portion, '섭취 비율', [.25, .5, .75, 1]) |
-| 131:9 | analysis | const | module/saveMeal | body.analysisId === undefined ? null : resolveMealAnalysis(db, { analysisId: body.analysisId, patientId: id, imageData: body.image |
-| 133:9 | foodType | const | module/saveMeal | analysis?.foodType ?? choice(body.foodType, '음식 유형', Object.keys(foodTable)) |
-| 134:9 | food | const | module/saveMeal | analysis \|\| foodTable[foodType] |
-| 135:7 | filename | let | module/saveMeal | null |
-| 137:11 | decoded | const | module/saveMeal | decodeImage(body.imageData) |
-| 141:9 | mealId | const | module/saveMeal | randomUUID() |
-| 148:12 | error | catch | module/saveMeal |  |
-| 152:10 | exportCsv | function | module |  |
-| 152:20 | res | parameter | module/exportCsv | res |
-| 153:9 | columns | const | module/exportCsv | ['recordType', 'id', 'patientId', 'patientName', 'date', 'steps', 'sleepHours', 'medicationStatus', 'appetite', 'mood', 'note', 'w |
-| 154:9 | names | const | module/exportCsv | new Map(getPatients(db).map(p =&gt; [p.id, p.name])) |
-| 154:45 | p | parameter | module/exportCsv/anonymous@154 | p |
-| 155:9 | rows | const | module/exportCsv | getPatients(db).flatMap(patient =&gt; effectiveRecords(db, patient.id, '1900-01-01', '2200-01-01')).map(r =&gt; ({ ...r, recordType: 'da |
-| 155:40 | patient | parameter | module/exportCsv/anonymous@155 | patient |
-| 155:117 | r | parameter | module/exportCsv/anonymous@155 | r |
-| 156:113 | m | parameter | module/exportCsv/anonymous@156 | m |
-| 157:103 | row | parameter | module/exportCsv/anonymous@157 | row |
-| 158:102 | row | parameter | module/exportCsv/anonymous@158 | row |
-| 159:161 | row | parameter | module/exportCsv/anonymous@159 | row |
-| 160:9 | body | const | module/exportCsv | '\ufeff' + [columns.map(csvCell).join(','), ...rows.map(row =&gt; columns.map(column =&gt; csvCell(row[column])).join(','))].join('\r\n' |
-| 160:72 | row | parameter | module/exportCsv/anonymous@160 | row |
-| 160:91 | column | parameter | module/exportCsv/anonymous@160/anonymous@160 | column |
-| 165:10 | staticFile | function | module |  |
-| 165:21 | req | parameter | module/staticFile | req |
-| 165:26 | res | parameter | module/staticFile | res |
-| 165:31 | pathname | parameter | module/staticFile | pathname |
-| 166:7 | file | let | module/staticFile | 초기값 없음 |
-| 168:11 | filename | const | module/staticFile | pathname.slice('/uploads/'.length) |
-| 171:11 | owner | const | module/staticFile | db.prepare('SELECT patient_id FROM meals WHERE image_filename=?').get(filename) |
-| 175:11 | aliases | const | module/staticFile | { '/': '/index.html', '/patient': '/patient.html', '/patient/': '/patient.html', '/clinician': '/clinician.html', '/clinician/': ' |
-| 176:11 | relative | const | module/staticFile | aliases[pathname] \|\| pathname |
-| 179:34 | part | parameter | module/staticFile/anonymous@179 | part |
-| 182:9 | extension | const | module/staticFile | extname(file) |
-| 183:9 | mime | const | module/staticFile | { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'appli |
-| 188:7 | server | const | module | http.createServer(async (req, res) =&gt; { res.setHeader('X-Content-Type-Options', 'nosniff'); res.setHeader('Referrer-Policy', 'same |
-| 188:41 | req | parameter | module/anonymous@188 | req |
-| 188:46 | res | parameter | module/anonymous@188 | res |
-| 194:11 | url | const | module/anonymous@188 | new URL(req.url, 'http://localhost') |
-| 195:9 | path | let | module/anonymous@188 | 초기값 없음 |
-| 197:11 | method | const | module/anonymous@188 | req.method |
-| 199:11 | redirect | const | module/anonymous@188 | (location,cookies=[])=&gt;{res.writeHead(302,{'Location':location,'Cache-Control':'no-store',...(cookies.length?{'Set-Cookie':cookies |
-| 199:21 | location | parameter | module/anonymous@188/anonymous@199 | location |
-| 199:30 | cookies | parameter | module/anonymous@188/anonymous@199 | cookies=[] |
-| 201:13 | result | const | module/anonymous@188 | auth.startOAuth(req,url.searchParams.get('next')) |
-| 204:18 | result | const | module/anonymous@188 | await auth.finishOAuth(req,url) |
-| 209:13 | result | const | module/anonymous@188 | auth.demoLogin(req,await readJson(req)) |
-| 213:11 | invite | const | module/anonymous@188 | /^\/api\/clinician\/patients\/([^/]+)\/invitations$/.exec(path) |
-| 216:13 | actor | const | module/anonymous@188 | auth.authorize(req,{staff:true,communication:true,write:method==='POST'}) |
-| 220:11 | notice | const | module/anonymous@188 | /^\/api\/clinician\/notices\/([1-9]\d*)$/.exec(path) |
-| 223:11 | noticeRead | const | module/anonymous@188 | /^\/api\/notices\/([1-9]\d*)\/read$/.exec(path) |
-| 226:11 | messages | const | module/anonymous@188 | /^\/api\/patients\/([^/]+)\/messages(\/read)?$/.exec(path) |
-| 228:13 | actor | const | module/anonymous@188 | auth.authorize(req,{patientId:messages[1],communication:true,write:method==='POST'}) |
-| 241:13 | token | const | module/anonymous@188 | /^Bearer ([^\s]+)$/.exec(req.headers.authorization \|\| '')?.[1] |
-| 246:13 | header | const | module/anonymous@188 | req.headers.authorization \|\| '' |
-| 247:13 | token | const | module/anonymous@188 | /^Bearer ([^\s]+)$/.exec(header)?.[1] |
-| 252:62 | actor | const | module/anonymous@188 | auth.authorize(req) |
-| 252:94 | patients | const | module/anonymous@188 | getPatients(db) |
-| 252:231 | p | parameter | module/anonymous@188/anonymous@252 | p |
-| 254:9 | match | let | module/anonymous@188 | /^\/api\/patients\/([^/]+)\/(medication-orders\|medication-schedule\|medication-events\|medication-photo-reports\|photo-analyses\|healt |
-| 256:16 | id | const | module/anonymous@188 | match |
-| 256:20 | operation | const | module/anonymous@188 | match |
-| 274:13 | image | const | module/anonymous@188 | getMedicationPhotoImage(db, match[1], match[2]) |
-| 288:16 | id | const | module/anonymous@188 | match |
-| 288:20 | operation | const | module/anonymous@188 | match |
-| 294:15 | date | const | module/anonymous@188 | dateValue(url.searchParams.get('date') ?? todayKorea()) |
-| 303:13 | meal | const | module/anonymous@188 | db.prepare('SELECT * FROM meals WHERE id=?').get(match[1]) |
-| 307:99 | error | catch | module/anonymous@188 |  |
-| 312:13 | body | const | module/anonymous@188 | await readJson(req) |
-| 315:13 | mode | const | module/anonymous@188 | choice(body.mode ?? 'seed', '리셋 종류', ['seed', 'empty']) |
-| 323:12 | error | catch | module/anonymous@188 |  |
-| 325:11 | status | const | module/anonymous@188 | error instanceof HttpError ? error.status : 500 |
-| 334:12 | signal | const | module | 초기값 없음 |
+| 5:10 | createHash | import | module | node:crypto |
+| 5:22 | randomUUID | import | module | node:crypto |
+| 6:10 | ensureMealSchema | import | module | ./lib/meals.mjs |
+| 6:40 | persistMeal | import | module | ./lib/meals.mjs |
+| 7:10 | buildRecordExport | import | module | ./lib/export.mjs |
+| 8:10 | assignedPatientIds | import | module | ./lib/staff-access.mjs |
+| 8:30 | hasCapability | import | module | ./lib/staff-access.mjs |
+| 8:45 | assertStaffCapability | import | module | ./lib/staff-access.mjs |
+| 9:10 | ensureWorkflowSchema | import | module | ./lib/workflow.mjs |
+| 9:32 | listTasks | import | module | ./lib/workflow.mjs |
+| 9:43 | createTask | import | module | ./lib/workflow.mjs |
+| 9:55 | updateTask | import | module | ./lib/workflow.mjs |
+| 9:67 | photoReview | import | module | ./lib/workflow.mjs |
+| 9:80 | listPhotoReviews | import | module | ./lib/workflow.mjs |
+| 9:98 | reviewPhoto | import | module | ./lib/workflow.mjs |
+| 9:111 | listCorrections | import | module | ./lib/workflow.mjs |
+| 9:128 | proposeCorrection | import | module | ./lib/workflow.mjs |
+| 9:147 | reviewCorrection | import | module | ./lib/workflow.mjs |
+| 9:165 | getParticipation | import | module | ./lib/workflow.mjs |
+| 9:183 | saveParticipation | import | module | ./lib/workflow.mjs |
+| 9:202 | listDelegations | import | module | ./lib/workflow.mjs |
+| 9:219 | saveDelegation | import | module | ./lib/workflow.mjs |
+| 9:235 | revokeDelegation | import | module | ./lib/workflow.mjs |
+| 9:253 | appendDailyAudit | import | module | ./lib/workflow.mjs |
+| 10:10 | ensureResearchSchema | import | module | ./lib/research.mjs |
+| 10:32 | researchPreview | import | module | ./lib/research.mjs |
+| 10:49 | createResearchSnapshot | import | module | ./lib/research.mjs |
+| 10:73 | getResearchSnapshot | import | module | ./lib/research.mjs |
+| 10:94 | exportResearchSnapshot | import | module | ./lib/research.mjs |
+| 11:10 | ensureEvidenceSchema | import | module | ./lib/evidence.mjs |
+| 11:32 | createEvidenceService | import | module | ./lib/evidence.mjs |
+| 12:10 | foodTable | import | module | ./lib/db.mjs |
+| 12:21 | mealFromRow | import | module | ./lib/db.mjs |
+| 12:34 | openDatabase | import | module | ./lib/db.mjs |
+| 12:48 | recordFromRow | import | module | ./lib/db.mjs |
+| 12:63 | todayKorea | import | module | ./lib/db.mjs |
+| 12:75 | transaction | import | module | ./lib/db.mjs |
+| 13:10 | dashboard | import | module | ./lib/analysis.mjs |
+| 13:21 | effectiveRecords | import | module | ./lib/analysis.mjs |
+| 13:39 | getPatient | import | module | ./lib/analysis.mjs |
+| 13:51 | getPatients | import | module | ./lib/analysis.mjs |
+| 13:64 | patientSummary | import | module | ./lib/analysis.mjs |
+| 13:80 | provenance | import | module | ./lib/analysis.mjs |
+| 14:10 | resetDemo | import | module | ./lib/reset.mjs |
+| 15:10 | allowedKeys | import | module | ./lib/validation.mjs |
+| 15:23 | choice | import | module | ./lib/validation.mjs |
+| 15:31 | csvCell | import | module | ./lib/validation.mjs |
+| 15:40 | dateValue | import | module | ./lib/validation.mjs |
+| 15:51 | decodeImage | import | module | ./lib/validation.mjs |
+| 15:64 | HttpError | import | module | ./lib/validation.mjs |
+| 15:75 | numberValue | import | module | ./lib/validation.mjs |
+| 15:88 | objectBody | import | module | ./lib/validation.mjs |
+| 15:100 | textList | import | module | ./lib/validation.mjs |
+| 15:110 | textValue | import | module | ./lib/validation.mjs |
+| 16:10 | ensureMedicationSchema | import | module | ./lib/medications.mjs |
+| 16:34 | getMedicationOrders | import | module | ./lib/medications.mjs |
+| 16:55 | createMedicationOrder | import | module | ./lib/medications.mjs |
+| 16:78 | endMedicationOrder | import | module | ./lib/medications.mjs |
+| 16:98 | medicationSchedule | import | module | ./lib/medications.mjs |
+| 16:118 | saveMedicationEvent | import | module | ./lib/medications.mjs |
+| 16:139 | getMedicationEvents | import | module | ./lib/medications.mjs |
+| 17:10 | ensureVisionSchema | import | module | ./lib/vision.mjs |
+| 17:30 | visionCapabilities | import | module | ./lib/vision.mjs |
+| 17:50 | analyzePhoto | import | module | ./lib/vision.mjs |
+| 17:64 | resolveMealAnalysis | import | module | ./lib/vision.mjs |
+| 17:85 | markAnalysisApplied | import | module | ./lib/vision.mjs |
+| 18:10 | ensureMedicationPhotoSchema | import | module | ./lib/medication-photos.mjs |
+| 18:39 | saveMedicationPhotoReport | import | module | ./lib/medication-photos.mjs |
+| 18:66 | getMedicationPhotoReports | import | module | ./lib/medication-photos.mjs |
+| 18:93 | getMedicationPhotoImage | import | module | ./lib/medication-photos.mjs |
+| 19:10 | healthCapabilities | import | module | ./lib/health-sync.mjs |
+| 19:30 | ensureHealthSchema | import | module | ./lib/health-sync.mjs |
+| 19:50 | getHealthConnections | import | module | ./lib/health-sync.mjs |
+| 19:72 | createHealthConnection | import | module | ./lib/health-sync.mjs |
+| 19:96 | revokeHealthConnection | import | module | ./lib/health-sync.mjs |
+| 19:120 | receiveHealthBatch | import | module | ./lib/health-sync.mjs |
+| 19:140 | getHealthConnectionIdentity | import | module | ./lib/health-sync.mjs |
+| 21:10 | createAuthService | import | module | ./lib/auth.mjs |
+| 22:10 | ensureCommunicationSchema | import | module | ./lib/communications.mjs |
+| 22:37 | listNotices | import | module | ./lib/communications.mjs |
+| 22:50 | createNotice | import | module | ./lib/communications.mjs |
+| 22:64 | updateNotice | import | module | ./lib/communications.mjs |
+| 22:78 | activeNotices | import | module | ./lib/communications.mjs |
+| 22:93 | readNotice | import | module | ./lib/communications.mjs |
+| 22:105 | listMessages | import | module | ./lib/communications.mjs |
+| 22:119 | sendMessage | import | module | ./lib/communications.mjs |
+| 22:132 | readMessages | import | module | ./lib/communications.mjs |
+| 22:146 | conversations | import | module | ./lib/communications.mjs |
+| 24:7 | root | const | module | fileURLToPath(new URL('.', import.meta.url)) |
+| 25:7 | publicDir | const | module | join(root, 'public') |
+| 26:9 | db | const | module | openDatabase(process.env.DATA_DIR \|\| join(root, 'data')) |
+| 26:13 | uploadDir | const | module | openDatabase(process.env.DATA_DIR \|\| join(root, 'data')) |
+| 32:7 | auth | const | module | createAuthService({db}) |
+| 37:7 | evidenceService | const | module | createEvidenceService({db}) |
+| 39:7 | port | const | module | Number(process.env.PORT \|\| 3000) |
+| 40:7 | bodyLimit | const | module | 7 * 1024 * 1024 |
+| 41:7 | schemaVersion | const | module | 6 |
+| 43:10 | respond | function | module |  |
+| 43:18 | res | parameter | module/respond | res |
+| 43:23 | status | parameter | module/respond | status |
+| 43:31 | value | parameter | module/respond | value |
+| 43:38 | extraHeaders | parameter | module/respond | extraHeaders = {} |
+| 44:9 | body | const | module/respond | JSON.stringify(value) |
+| 49:16 | readJson | function | module |  |
+| 49:25 | req | parameter | module/readJson | req |
+| 50:9 | contentType | const | module/readJson | req.headers['content-type'] \|\| '' |
+| 52:9 | declaredLength | const | module/readJson | Number(req.headers['content-length'] \|\| 0) |
+| 54:7 | length | let | module/readJson | 0 |
+| 55:9 | chunks | const | module/readJson | [] |
+| 56:20 | chunk | const | module/readJson | 초기값 없음 |
+| 62:10 | error | catch | module/readJson |  |
+| 65:10 | legacyStaff | function | module |  |
+| 65:22 | req | parameter | module/legacyStaff | req |
+| 65:27 | capability | parameter | module/legacyStaff | capability = 'clinical.write' |
+| 65:58 | patientId | parameter | module/legacyStaff | patientId = null |
+| 65:76 | write | parameter | module/legacyStaff | write = false |
+| 68:10 | scopeFor | function | module |  |
+| 68:19 | actor | parameter | module/scopeFor | actor |
+| 69:10 | staffActor | function | module |  |
+| 69:21 | req | parameter | module/staffActor | req |
+| 69:26 | capability | parameter | module/staffActor | capability |
+| 69:38 | patientId | parameter | module/staffActor | patientId=null |
+| 69:54 | write | parameter | module/staffActor | write=false |
+| 72:10 | requirePatientWriter | function | module |  |
+| 72:31 | req | parameter | module/requirePatientWriter | req |
+| 72:36 | patientId | parameter | module/requirePatientWriter | patientId |
+| 73:9 | actor | const | module/requirePatientWriter | auth.authorize(req,{patientId,write:true}) |
+| 77:10 | photoReports | function | module |  |
+| 77:23 | patientId | parameter | module/photoReports | patientId |
+| 77:33 | date | parameter | module/photoReports | date |
+| 77:38 | actor | parameter | module/photoReports | actor |
+| 78:9 | result | const | module/photoReports | getMedicationPhotoReports(db,patientId,date) |
+| 79:37 | report | parameter | module/photoReports/anonymous@79 | report |
+| 79:52 | review | const | module/photoReports/anonymous@79 | photoReview(db,report.id) |
+| 83:10 | requirePatient | function | module |  |
+| 83:25 | id | parameter | module/requirePatient | id |
+| 84:9 | patient | const | module/requirePatient | getPatient(db, id) |
+| 89:10 | assertSameOrigin | function | module |  |
+| 89:27 | req | parameter | module/assertSameOrigin | req |
+| 91:9 | site | const | module/assertSameOrigin | req.headers['sec-fetch-site'] |
+| 93:9 | origin | const | module/assertSameOrigin | req.headers.origin |
+| 95:9 | originHost | let | module/assertSameOrigin | 초기값 없음 |
+| 98:11 | expected | let | module/assertSameOrigin | 초기값 없음 |
+| 103:11 | forwardedHost | const | module/assertSameOrigin | req.headers['x-forwarded-host']?.split(',')[0]?.trim() |
+| 108:10 | health | function | module |  |
+| 109:9 | counts | const | module/health | {} |
+| 110:15 | key | const | module/health | 초기값 없음 |
+| 110:20 | table | const | module/health | 초기값 없음 |
+| 114:10 | createPatient | function | module |  |
+| 114:24 | body | parameter | module/createPatient | body |
+| 116:9 | id | const | module/createPatient | 'p-${randomUUID()}' |
+| 117:9 | name | const | module/createPatient | textValue(body.name, '이름', { min: 1, max: 40 }) |
+| 118:9 | age | const | module/createPatient | numberValue(body.age, '나이', 1, 120, true) |
+| 119:9 | sex | const | module/createPatient | choice(body.sex, '성별', ['female', 'male', 'other']) |
+| 120:9 | conditions | const | module/createPatient | body.conditions === undefined ? [] : textList(body.conditions, '질환') |
+| 121:9 | medications | const | module/createPatient | body.medications === undefined ? [] : textList(body.medications, '복약') |
+| 122:9 | caregiver | const | module/createPatient | body.caregiver === undefined ? '' : textValue(body.caregiver, '돌봄 정보', { max: 200 }) |
+| 127:10 | saveDaily | function | module |  |
+| 127:20 | id | parameter | module/saveDaily | id |
+| 127:24 | body | parameter | module/saveDaily | body |
+| 127:30 | actor | parameter | module/saveDaily | actor = null |
+| 129:9 | fields | const | module/saveDaily | ['date', 'steps', 'sleepHours', 'medicationStatus', 'appetite', 'mood', 'note', 'weightKg', 'expectedRevision', 'clientSubmissionI |
+| 131:31 | k | parameter | module/saveDaily/anonymous@131 | k |
+| 132:9 | requestId | const | module/saveDaily | body.clientSubmissionId |
+| 136:9 | requestHash | const | module/saveDaily | requestId ? createHash('sha256').update(JSON.stringify(Object.fromEntries(Object.keys(body).filter(key =&gt; key !== 'clientSubmissio |
+| 136:122 | key | parameter | module/saveDaily/anonymous@136 | key |
+| 136:170 | key | parameter | module/saveDaily/anonymous@136 | key |
+| 139:11 | previous | const | module/saveDaily/anonymous@137 | db.prepare('SELECT request_hash,response_json FROM daily_record_submissions WHERE patient_id=? AND request_id=?').get(id, requestI |
+| 145:9 | date | const | module/saveDaily/anonymous@137 | dateValue(body.date ?? todayKorea()) |
+| 147:9 | old | const | module/saveDaily/anonymous@137 | db.prepare('SELECT * FROM daily_records WHERE patient_id=? AND date=?').get(id, date) |
+| 149:9 | value | const | module/saveDaily/anonymous@137 | { steps: old?.steps ?? null, sleepHours: old?.sleep_hours ?? null, medicationStatus: old?.medication_status ?? null, appetite: old |
+| 161:9 | now | const | module/saveDaily/anonymous@137 | new Date().toISOString() |
+| 166:9 | record | const | module/saveDaily/anonymous@137 | recordFromRow(db.prepare('SELECT * FROM daily_records WHERE patient_id=? AND date=?').get(id, date)) |
+| 173:10 | saveMeal | function | module |  |
+| 173:19 | id | parameter | module/saveMeal | id |
+| 173:23 | body | parameter | module/saveMeal | body |
+| 175:10 | exportCsv | function | module |  |
+| 175:20 | res | parameter | module/exportCsv | res |
+| 175:25 | query | parameter | module/exportCsv | query = {} |
+| 175:37 | allowedPatientIds | parameter | module/exportCsv | allowedPatientIds = null |
+| 176:9 | result | const | module/exportCsv | buildRecordExport(db, query, allowedPatientIds) |
+| 181:10 | staticFile | function | module |  |
+| 181:21 | req | parameter | module/staticFile | req |
+| 181:26 | res | parameter | module/staticFile | res |
+| 181:31 | pathname | parameter | module/staticFile | pathname |
+| 182:7 | file | let | module/staticFile | 초기값 없음 |
+| 184:11 | filename | const | module/staticFile | pathname.slice('/uploads/'.length) |
+| 187:11 | owner | const | module/staticFile | db.prepare('SELECT patient_id FROM meals WHERE image_filename=?').get(filename) |
+| 191:11 | aliases | const | module/staticFile | { '/': '/index.html', '/patient': '/patient.html', '/patient/': '/patient.html', '/clinician': '/clinician.html', '/clinician/': ' |
+| 192:11 | relative | const | module/staticFile | aliases[pathname] \|\| pathname |
+| 195:34 | part | parameter | module/staticFile/anonymous@195 | part |
+| 198:9 | extension | const | module/staticFile | extname(file) |
+| 199:9 | mime | const | module/staticFile | { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'appli |
+| 204:7 | server | const | module | http.createServer(async (req, res) =&gt; { res.setHeader('X-Content-Type-Options', 'nosniff'); res.setHeader('Referrer-Policy', 'same |
+| 204:41 | req | parameter | module/anonymous@204 | req |
+| 204:46 | res | parameter | module/anonymous@204 | res |
+| 210:11 | url | const | module/anonymous@204 | new URL(req.url, 'http://localhost') |
+| 211:9 | path | let | module/anonymous@204 | 초기값 없음 |
+| 213:11 | method | const | module/anonymous@204 | req.method |
+| 215:11 | redirect | const | module/anonymous@204 | (location,cookies=[])=&gt;{res.writeHead(302,{'Location':location,'Cache-Control':'no-store',...(cookies.length?{'Set-Cookie':cookies |
+| 215:21 | location | parameter | module/anonymous@204/anonymous@215 | location |
+| 215:30 | cookies | parameter | module/anonymous@204/anonymous@215 | cookies=[] |
+| 217:13 | result | const | module/anonymous@204 | auth.startOAuth(req,url.searchParams.get('next')) |
+| 220:18 | result | const | module/anonymous@204 | await auth.finishOAuth(req,url) |
+| 225:13 | result | const | module/anonymous@204 | auth.demoLogin(req,await readJson(req)) |
+| 229:11 | invite | const | module/anonymous@204 | /^\/api\/clinician\/patients\/([^/]+)\/invitations$/.exec(path) |
+| 232:13 | actor | const | module/anonymous@204 | staffActor(req,'notice.write',null,method==='POST') |
+| 236:11 | notice | const | module/anonymous@204 | /^\/api\/clinician\/notices\/([1-9]\d*)$/.exec(path) |
+| 239:11 | noticeRead | const | module/anonymous@204 | /^\/api\/notices\/([1-9]\d*)\/read$/.exec(path) |
+| 241:71 | actor | const | module/anonymous@204 | staffActor(req,'message.write') |
+| 241:115 | result | const | module/anonymous@204 | conversations(db,actor) |
+| 241:152 | scope | const | module/anonymous@204 | assignedPatientIds(actor) |
+| 241:249 | c | parameter | module/anonymous@204/anonymous@241 | c |
+| 242:11 | messages | const | module/anonymous@204 | /^\/api\/patients\/([^/]+)\/messages(\/read)?$/.exec(path) |
+| 244:13 | actor | const | module/anonymous@204 | auth.authorize(req,{patientId:messages[1],communication:true,write:method==='POST'}) |
+| 259:13 | token | const | module/anonymous@204 | /^Bearer ([^\s]+)$/.exec(req.headers.authorization \|\| '')?.[1] |
+| 264:13 | header | const | module/anonymous@204 | req.headers.authorization \|\| '' |
+| 265:13 | token | const | module/anonymous@204 | /^Bearer ([^\s]+)$/.exec(header)?.[1] |
+| 270:13 | actor | const | module/anonymous@204 | auth.requireActor(req) |
+| 275:13 | actor | const | module/anonymous@204 | staffActor(req,method==='POST'?'workflow.write':'patient.read',null,method==='POST') |
+| 279:9 | workspaceMatch | let | module/anonymous@204 | /^\/api\/clinician\/tasks\/([^/]+)$/.exec(path) |
+| 285:15 | patientId | const | module/anonymous@204 | workspaceMatch |
+| 285:25 | operation | const | module/anonymous@204 | workspaceMatch |
+| 285:35 | entityId | const | module/anonymous@204 | workspaceMatch |
+| 286:13 | write | const | module/anonymous@204 | ['POST','PUT','PATCH','DELETE'].includes(method) |
+| 287:13 | capability | const | module/anonymous@204 | operation==='delegations'?'delegation.write':write?({ 'photo-reviews':'workflow.write',corrections:'correction.propose',participat |
+| 288:13 | actor | const | module/anonymous@204 | staffActor(req,capability,patientId,write) |
+| 289:13 | query | const | module/anonymous@204 | Object.fromEntries(url.searchParams) |
+| 291:77 | body | const | module/anonymous@204 | await readJson(req) |
+| 301:13 | actor | const | module/anonymous@204 | staffActor(req,'research.read') |
+| 302:13 | query | const | module/anonymous@204 | Object.fromEntries(url.searchParams) |
+| 307:13 | actor | const | module/anonymous@204 | staffActor(req,'research.read',null,true) |
+| 312:13 | actor | const | module/anonymous@204 | staffActor(req,workspaceMatch[2]?'research.export':'research.read') |
+| 322:63 | actor | const | module/anonymous@204 | auth.capabilities().mode==='demo'?legacyStaff(req):auth.requireActor(req) |
+| 322:509 | query | const | module/anonymous@204 | Object.fromEntries(url.searchParams) |
+| 323:62 | actor | const | module/anonymous@204 | auth.authorize(req) |
+| 323:92 | patients | let | module/anonymous@204 | getPatients(db) |
+| 323:209 | p | parameter | module/anonymous@204/anonymous@323 | p |
+| 323:304 | scope | const | module/anonymous@204 | assignedPatientIds(actor) |
+| 323:377 | p | parameter | module/anonymous@204/anonymous@323 | p |
+| 324:63 | actor | const | module/anonymous@204 | legacyStaff(req,'clinical.write',null,true) |
+| 325:9 | match | let | module/anonymous@204 | /^\/api\/patients\/([^/]+)\/(medication-orders\|medication-schedule\|medication-events\|medication-photo-reports\|photo-analyses\|healt |
+| 327:16 | id | const | module/anonymous@204 | match |
+| 327:20 | operation | const | module/anonymous@204 | match |
+| 328:13 | actor | const | module/anonymous@204 | auth.authorize(req,{patientId:id,write:method==='POST'}) |
+| 347:13 | image | const | module/anonymous@204 | getMedicationPhotoImage(db, match[1], match[2]) |
+| 352:45 | order | const | module/anonymous@204 | db.prepare('SELECT patient_id FROM medication_orders WHERE id=?').get(match[1]) |
+| 355:13 | actor | const | module/anonymous@204 | auth.authorize(req,{patientId:match[1],write:true}) |
+| 362:16 | id | const | module/anonymous@204 | match |
+| 362:20 | operation | const | module/anonymous@204 | match |
+| 368:15 | date | const | module/anonymous@204 | dateValue(url.searchParams.get('date') ?? todayKorea()) |
+| 377:13 | meal | const | module/anonymous@204 | db.prepare('SELECT * FROM meals WHERE id=?').get(match[1]) |
+| 381:99 | error | catch | module/anonymous@204 |  |
+| 387:13 | body | const | module/anonymous@204 | await readJson(req) |
+| 390:13 | mode | const | module/anonymous@204 | choice(body.mode ?? 'seed', '리셋 종류', ['seed', 'empty']) |
+| 394:68 | actor | const | module/anonymous@204 | legacyStaff(req,'clinical.write') |
+| 394:115 | csv | const | module/anonymous@204 | buildRecordExport(db,Object.fromEntries(url.searchParams),scopeFor(actor)) |
+| 394:122 | preview | const | module/anonymous@204 | buildRecordExport(db,Object.fromEntries(url.searchParams),scopeFor(actor)) |
+| 395:64 | actor | const | module/anonymous@204 | legacyStaff(req,'clinical.write') |
+| 399:12 | error | catch | module/anonymous@204 |  |
+| 401:11 | status | const | module/anonymous@204 | error instanceof HttpError ? error.status : 500 |
+| 410:12 | signal | const | module | 초기값 없음 |
 
 ## test/analysis.test.mjs
 
@@ -3700,83 +5120,92 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 7:8 | net | import | module | node:net |
 | 8:24 | delay | import | module | node:timers/promises |
 | 9:10 | chromium | import | module | playwright |
-| 10:7 | listener | const | module | net.createServer() |
-| 10:53 | r | parameter | module/anonymous@10 | r |
-| 10:96 | port | const | module | listener.address().port |
-| 10:143 | r | parameter | module/anonymous@10 | r |
-| 11:7 | base | const | module | 'http://127.0.0.1:${port}' |
-| 11:39 | dir | const | module | await mkdtemp(join(tmpdir(),'hc-auth-browser-')) |
-| 12:5 | output | let | module | '' |
-| 12:15 | browser | let | module | 초기값 없음 |
-| 13:7 | child | const | module | spawn(process.execPath,['--disable-warning=ExperimentalWarning','--import','./test/helpers/kakao-provider-fixture.mjs','--import', |
-| 14:24 | s | parameter | module/anonymous@14 | s |
-| 14:61 | s | parameter | module/anonymous@14 | s |
-| 15:7 | issues | const | module | [] |
-| 16:16 | login | function | module |  |
-| 16:22 | context | parameter | module/login | context |
-| 16:30 | id | parameter | module/login | id |
-| 16:33 | next | parameter | module/login | next='/clinician' |
-| 17:8 | page | const | module/login | await context.newPage() |
-| 17:57 | e | parameter | module/login/anonymous@17 | e |
-| 19:8 | start | const | module/login | await context.request.get(base+await page.locator('#kakao-login').getAttribute('href'),{maxRedirects:0}) |
-| 20:41 | provider | const | module/login | new URL(start.headers().location) |
-| 23:24 | url | parameter | module/login/anonymous@23 | url |
-| 26:16 | write | function | module |  |
-| 26:22 | context | parameter | module/write | context |
-| 26:30 | path | parameter | module/write | path |
-| 26:35 | body | parameter | module/write | body |
-| 26:40 | method | parameter | module/write | method='POST' |
-| 26:54 | csrf | parameter | module/write | csrf=true |
-| 26:71 | session | const | module/write | await(await context.request.get(base+'/api/auth/session')).json() |
-| 27:16 | eventually | function | module |  |
-| 27:27 | check | parameter | module/eventually | check |
-| 27:42 | i | let | module/eventually | 0 |
-| 29:10 | i | let | module | 0 |
-| 31:8 | anonymous | const | module | await browser.newContext() |
-| 34:8 | staff | const | module | await browser.newContext({viewport:{width:1440,height:1000}}) |
-| 34:76 | patient | const | module | await browser.newContext({viewport:{width:390,height:844}}) |
-| 34:144 | other | const | module | await browser.newContext({viewport:{width:320,height:740}}) |
-| 35:8 | clinician | const | module | await login(staff,'101','') |
-| 37:8 | invite | const | module | await write(staff,'/api/clinician/patients/p001/invitations',{}) |
-| 37:120 | code | const | module | (await invite.json()).invitation.code |
-| 38:8 | mobile | const | module | await login(patient,'201','/patient') |
-| 40:8 | third | const | module | await login(other,'202','/patient') |
-| 40:56 | invite2 | const | module | await write(staff,'/api/clinician/patients/p002/invitations',{}) |
-| 41:166 | p | parameter | module/anonymous@41 | p |
-| 42:12 | path | const | module | 초기값 없음 |
-| 45:8 | png | const | module | 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6WlEAAAAASUVORK5CYII=' |
-| 46:8 | meal | const | module | await write(patient,'/api/patients/p001/meals',{mealType:'lunch',foodType:'balanced',portion:1,imageData:png}) |
-| 46:162 | photo | const | module | (await meal.json()).meal.imageUrl |
-| 48:8 | date | const | module | (await(await staff.request.get(base+'/api/patients/p001/summary')).json()).today |
-| 49:8 | orderResponse | const | module | await write(staff,'/api/patients/p001/medication-orders',{name:'가상약A',strength:'5mg',dose:'1정',times:['08:00'],startDate:date}) |
-| 49:197 | order | const | module | (await orderResponse.json()).order |
-| 50:8 | analysisResponse | const | module | await write(patient,'/api/patients/p001/photo-analyses',{kind:'medication',imageData:png,consentExternalProcessing:true}) |
-| 50:197 | analysis | const | module | (await analysisResponse.json()).analysis |
-| 51:8 | photoBody | const | module | {clientSubmissionId:crypto.randomUUID(),analysisId:analysis.id,imageData:png,date,patientConfirmed:true,slots:[{orderId:order.id,t |
-| 54:8 | medicationPhotoResponse | const | module | await write(patient,'/api/patients/p001/medication-photo-reports',photoBody) |
-| 54:166 | medicationPhoto | const | module | (await medicationPhotoResponse.json()).report |
-| 67:6 | n | let | module | (await(await staff.request.get(base+'/api/clinician/notices')).json()).notices[0] |
-| 69:26 | d | parameter | module/anonymous@69 | d |
+| 10:10 | DatabaseSync | import | module | node:sqlite |
+| 11:7 | listener | const | module | net.createServer() |
+| 11:53 | r | parameter | module/anonymous@11 | r |
+| 11:96 | port | const | module | listener.address().port |
+| 11:143 | r | parameter | module/anonymous@11 | r |
+| 12:7 | base | const | module | 'http://127.0.0.1:${port}' |
+| 12:39 | dir | const | module | await mkdtemp(join(tmpdir(),'hc-auth-browser-')) |
+| 13:5 | output | let | module | '' |
+| 13:15 | browser | let | module | 초기값 없음 |
+| 14:7 | child | const | module | spawn(process.execPath,['--disable-warning=ExperimentalWarning','--import','./test/helpers/kakao-provider-fixture.mjs','--import', |
+| 15:24 | s | parameter | module/anonymous@15 | s |
+| 15:61 | s | parameter | module/anonymous@15 | s |
+| 16:7 | issues | const | module | [] |
+| 17:16 | login | function | module |  |
+| 17:22 | context | parameter | module/login | context |
+| 17:30 | id | parameter | module/login | id |
+| 17:33 | next | parameter | module/login | next='/clinician' |
+| 18:8 | page | const | module/login | await context.newPage() |
+| 18:57 | e | parameter | module/login/anonymous@18 | e |
+| 20:8 | start | const | module/login | await context.request.get(base+await page.locator('#kakao-login').getAttribute('href'),{maxRedirects:0}) |
+| 21:41 | provider | const | module/login | new URL(start.headers().location) |
+| 24:24 | url | parameter | module/login/anonymous@24 | url |
+| 27:16 | write | function | module |  |
+| 27:22 | context | parameter | module/write | context |
+| 27:30 | path | parameter | module/write | path |
+| 27:35 | body | parameter | module/write | body |
+| 27:40 | method | parameter | module/write | method='POST' |
+| 27:54 | csrf | parameter | module/write | csrf=true |
+| 27:71 | session | const | module/write | await(await context.request.get(base+'/api/auth/session')).json() |
+| 28:16 | eventually | function | module |  |
+| 28:27 | check | parameter | module/eventually | check |
+| 28:42 | i | let | module/eventually | 0 |
+| 30:10 | i | let | module | 0 |
+| 32:8 | anonymous | const | module | await browser.newContext() |
+| 35:8 | staff | const | module | await browser.newContext({viewport:{width:1440,height:1000}}) |
+| 35:76 | patient | const | module | await browser.newContext({viewport:{width:390,height:844}}) |
+| 35:144 | other | const | module | await browser.newContext({viewport:{width:320,height:740}}) |
+| 36:8 | clinician | const | module | await login(staff,'101','') |
+| 38:8 | invite | const | module | await write(staff,'/api/clinician/patients/p001/invitations',{}) |
+| 38:120 | code | const | module | (await invite.json()).invitation.code |
+| 39:8 | mobile | const | module | await login(patient,'201','/patient') |
+| 41:8 | third | const | module | await login(other,'202','/patient') |
+| 41:56 | invite2 | const | module | await write(staff,'/api/clinician/patients/p002/invitations',{}) |
+| 42:166 | p | parameter | module/anonymous@42 | p |
+| 43:12 | path | const | module | 초기값 없음 |
+| 46:8 | png | const | module | 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6WlEAAAAASUVORK5CYII=' |
+| 47:8 | meal | const | module | await write(patient,'/api/patients/p001/meals',{mealType:'lunch',foodType:'balanced',portion:1,imageData:png}) |
+| 47:162 | photo | const | module | (await meal.json()).meal.imageUrl |
+| 49:8 | date | const | module | (await(await staff.request.get(base+'/api/patients/p001/summary')).json()).today |
+| 50:8 | orderResponse | const | module | await write(staff,'/api/patients/p001/medication-orders',{name:'가상약A',strength:'5mg',dose:'1정',times:['08:00'],startDate:date}) |
+| 50:197 | order | const | module | (await orderResponse.json()).order |
+| 51:8 | analysisResponse | const | module | await write(patient,'/api/patients/p001/photo-analyses',{kind:'medication',imageData:png,consentExternalProcessing:true}) |
+| 51:197 | analysis | const | module | (await analysisResponse.json()).analysis |
+| 52:8 | photoBody | const | module | {clientSubmissionId:crypto.randomUUID(),analysisId:analysis.id,imageData:png,date,patientConfirmed:true,slots:[{orderId:order.id,t |
+| 55:8 | medicationPhotoResponse | const | module | await write(patient,'/api/patients/p001/medication-photo-reports',photoBody) |
+| 55:166 | medicationPhoto | const | module | (await medicationPhotoResponse.json()).report |
+| 68:6 | n | let | module | (await(await staff.request.get(base+'/api/clinician/notices')).json()).notices[0] |
 | 70:26 | d | parameter | module/anonymous@70 | d |
-| 73:6 | loseOnce | let | module | true |
-| 74:62 | route | parameter | module/anonymous@74 | route |
-| 74:139 | response | const | module/anonymous@74 | await route.fetch() |
-| 81:6 | release | let | module | 초기값 없음 |
-| 81:20 | gate | const | module | new Promise(r=&gt;release=r) |
-| 81:37 | r | parameter | module/anonymous@81 | r |
-| 81:55 | started | let | module | 초기값 없음 |
-| 81:69 | waiting | const | module | new Promise(r=&gt;started=r) |
-| 81:89 | r | parameter | module/anonymous@81 | r |
-| 82:70 | route | parameter | module/anonymous@82 | route |
-| 82:84 | response | const | module/anonymous@82 | await route.fetch() |
-| 87:26 | d | parameter | module/anonymous@87 | d |
+| 71:26 | d | parameter | module/anonymous@71 | d |
+| 74:6 | loseOnce | let | module | true |
+| 75:62 | route | parameter | module/anonymous@75 | route |
+| 75:139 | response | const | module/anonymous@75 | await route.fetch() |
+| 82:6 | release | let | module | 초기값 없음 |
+| 82:20 | gate | const | module | new Promise(r=&gt;release=r) |
+| 82:37 | r | parameter | module/anonymous@82 | r |
+| 82:55 | started | let | module | 초기값 없음 |
+| 82:69 | waiting | const | module | new Promise(r=&gt;started=r) |
+| 82:89 | r | parameter | module/anonymous@82 | r |
+| 83:70 | route | parameter | module/anonymous@83 | route |
+| 83:84 | response | const | module/anonymous@83 | await route.fetch() |
 | 88:26 | d | parameter | module/anonymous@88 | d |
-| 89:179 | d | parameter | module/anonymous@89 | d |
-| 90:23 | d | parameter | module/anonymous@90 | d |
-| 90:243 | d | parameter | module/anonymous@90 | d |
-| 91:12 | page | const | module | 초기값 없음 |
-| 93:26 | d | parameter | module/anonymous@93 | d |
-| 96:86 | r | parameter | module/anonymous@96 | r |
+| 89:26 | d | parameter | module/anonymous@89 | d |
+| 90:179 | d | parameter | module/anonymous@90 | d |
+| 91:23 | d | parameter | module/anonymous@91 | d |
+| 91:243 | d | parameter | module/anonymous@91 | d |
+| 92:12 | page | const | module | 초기값 없음 |
+| 96:8 | expiryDb | const | module | new DatabaseSync(join(dir,'homecare.sqlite')) |
+| 101:8 | repeated | const | module | await mobile.evaluate(async()=&gt;{const session=await import('/session.js');const response=await fetch('/api/patients/p001/messages' |
+| 101:55 | session | const | module/anonymous@101 | await import('/session.js') |
+| 101:97 | response | const | module/anonymous@101 | await fetch('/api/patients/p001/messages') |
+| 101:203 | blocked | let | module/anonymous@101 | '' |
+| 101:285 | error | catch | module/anonymous@101 |  |
+| 103:8 | different | const | module | await login(patient,'202','/patient') |
+| 106:8 | restored | const | module | await login(patient,'201','/patient') |
+| 113:26 | d | parameter | module/anonymous@113 | d |
+| 116:86 | r | parameter | module/anonymous@116 | r |
 
 ## test/auth-communication.test.mjs
 
@@ -4089,186 +5518,201 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 46:16 | flushUi | function | module |  |
 | 46:24 | page | parameter | module/flushUi | page |
 | 46:70 | resolve | parameter | module/flushUi/anonymous@46/anonymous@46 | resolve |
-| 47:16 | newPage | function | module |  |
-| 47:24 | mobile | parameter | module/newPage | mobile = false |
-| 48:9 | page | const | module/newPage | await browser.newPage(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width: 14 |
-| 50:24 | error | parameter | module/newPage/anonymous@50 | error |
-| 53:16 | patientPage | function | module |  |
-| 53:28 | page | parameter | module/patientPage | page |
-| 53:34 | id | parameter | module/patientPage | id |
-| 53:38 | suffix | parameter | module/patientPage | suffix = '' |
-| 57:16 | saveDaily | function | module |  |
-| 57:26 | page | parameter | module/saveDaily | page |
-| 57:32 | id | parameter | module/saveDaily | id |
-| 57:36 | expected | parameter | module/saveDaily | expected |
-| 58:9 | request | const | module/saveDaily | page.waitForRequest(request =&gt; request.url() === '${base}/api/patients/${id}/daily' &amp;&amp; request.method() === 'POST') |
-| 58:39 | request | parameter | module/saveDaily/anonymous@58 | request |
-| 64:16 | enableMockVision | function | module |  |
-| 64:33 | page | parameter | module/enableMockVision | page |
-| 65:9 | capabilities | const | module/enableMockVision | await get('/api/capabilities') |
-| 66:43 | route | parameter | module/enableMockVision/anonymous@66 | route |
-| 70:10 | draft | function | module |  |
-| 70:16 | patientId | parameter | module/draft | patientId |
-| 70:27 | kind | parameter | module/draft | kind |
-| 70:33 | proposal | parameter | module/draft | proposal |
-| 71:9 | createdAt | const | module/draft | new Date().toISOString() |
-| 78:10 | storeMockDraft | function | module |  |
-| 78:25 | analysis | parameter | module/storeMockDraft | analysis |
-| 78:35 | imageData | parameter | module/storeMockDraft | imageData |
-| 79:9 | hash | const | module/storeMockDraft | createHash('sha256').update(Buffer.from(imageData.split(',')[1], 'base64')).digest('hex') |
-| 86:12 | attempt | let | module | 0 |
-| 91:9 | today | const | module | (await get('/api/health')).today |
-| 95:9 | mobile | const | module | await newPage(true) |
-| 96:9 | desktop | const | module | await newPage() |
-| 97:9 | patients | const | module | [] |
-| 98:14 | name | const | module | 초기값 없음 |
-| 99:11 | response | const | module | await post('/api/patients', { name, age: 76, sex: 'female', conditions: ['합성 테스트'] }) |
-| 103:10 | patient | const | module | patients |
-| 103:19 | otherPatient | const | module | patients |
-| 106:18 | clinicianRoute | function | module |  |
-| 106:33 | page | parameter | module/clinicianRoute | page |
-| 106:39 | view | parameter | module/clinicianRoute | view |
-| 106:45 | id | parameter | module/clinicianRoute | id |
-| 106:49 | date | parameter | module/clinicianRoute | date = null |
-| 107:35 | view | parameter | module/clinicianRoute/anonymous@107 | { view, id, date } |
-| 107:41 | id | parameter | module/clinicianRoute/anonymous@107 | { view, id, date } |
-| 107:45 | date | parameter | module/clinicianRoute/anonymous@107 | { view, id, date } |
-| 108:13 | url | const | module/clinicianRoute/anonymous@107 | new URL(location.href) |
-| 117:11 | page | const | module/anonymous@116 | await newPage() |
-| 121:11 | id | const | module/anonymous@116 | new URL(page.url()).searchParams.get('patientId') |
-| 122:11 | views | const | module/anonymous@116 | ['overview', 'patients', 'medications', 'records', 'notices', 'messages', 'settings'] |
-| 123:16 | view | const | module/anonymous@116 | 초기값 없음 |
-| 127:11 | length | const | module/anonymous@116 | await page.evaluate(() =&gt; history.length) |
-| 132:11 | autoRefresh | const | module/anonymous@116 | page.waitForResponse(r =&gt; r.url() === '${base}/api/dashboard') |
-| 132:46 | r | parameter | module/anonymous@116/anonymous@132 | r |
-| 140:16 | view | const | module/anonymous@116 | 초기값 없음 |
-| 147:11 | page | const | module/anonymous@146 | await newPage() |
-| 151:32 | name | parameter | module/anonymous@146/anonymous@151 | name |
-| 153:32 | name | parameter | module/anonymous@146/anonymous@153 | name |
-| 158:11 | previous | const | module/anonymous@146 | new Date(Date.parse('${today}T12:00:00+09:00') - 86400000).toISOString().slice(0, 10) |
-| 173:11 | page | const | module/anonymous@172 | await newPage() |
-| 175:9 | release | let | module/anonymous@172 | 초기값 없음 |
-| 176:11 | gate | const | module/anonymous@172 | new Promise(resolve =&gt; { release = resolve; }) |
-| 176:30 | resolve | parameter | module/anonymous@172/anonymous@176 | resolve |
-| 177:9 | intercepted | let | module/anonymous@172 | false |
-| 178:74 | route | parameter | module/anonymous@172/anonymous@178 | route |
-| 187:11 | response | const | module/anonymous@172 | page.waitForResponse(r =&gt; r.url() === '${base}/api/patients/${otherPatient.id}/summary') |
-| 187:43 | r | parameter | module/anonymous@172/anonymous@187 | r |
-| 197:16 | width | const | module/anonymous@196 | 초기값 없음 |
-| 201:11 | closeBounds | let | module/anonymous@196 | 초기값 없음 |
-| 202:18 | view | const | module/anonymous@196 | 초기값 없음 |
-| 205:15 | close | const | module/anonymous@196 | mobile.getByRole('button', { name: '홈으로 돌아가기', exact: true }) |
-| 207:15 | bounds | const | module/anonymous@196 | await close.boundingBox() |
-| 224:11 | page | const | module/anonymous@223 | await newPage(true) |
-| 226:50 | route | parameter | module/anonymous@223/anonymous@226 | route |
-| 241:27 | dialog | parameter | module/anonymous@233/anonymous@241 | dialog |
-| 245:27 | dialog | parameter | module/anonymous@233/anonymous@245 | dialog |
-| 253:16 | action | const | module/anonymous@233 | 초기값 없음 |
-| 258:31 | dialog | parameter | module/anonymous@233/anonymous@258 | dialog |
-| 261:31 | dialog | parameter | module/anonymous@233/anonymous@261 | dialog |
-| 273:27 | dialog | parameter | module/anonymous@269/anonymous@273 | dialog |
-| 276:27 | dialog | parameter | module/anonymous@269/anonymous@276 | dialog |
-| 279:9 | release | let | module/anonymous@269 | 초기값 없음 |
-| 280:74 | route | parameter | module/anonymous@269/anonymous@280 | route |
-| 282:25 | resolve | parameter | module/anonymous@269/anonymous@280/anonymous@282 | resolve |
-| 301:11 | original | const | module/anonymous@300 | { date: today, steps: 1234, sleepHours: 6.5, medicationStatus: 'partial', appetite: 'poor', mood: 'poor', note: '다른 항목 보존', weight |
-| 311:9 | record | let | module/anonymous@300 | (await get('/api/patients/${patient.id}/daily?date=${today}')).record |
-| 313:16 | key | const | module/anonymous@300 | 초기값 없음 |
-| 331:11 | before | const | module/anonymous@330 | (await get('/api/patients/${patient.id}/daily?date=${today}')).record |
-| 336:11 | request | const | module/anonymous@330 | mobile.waitForRequest(request =&gt; request.url() === '${base}/api/patients/${otherPatient.id}/daily' &amp;&amp; request.method() === 'POST') |
-| 336:43 | request | parameter | module/anonymous@330/anonymous@336 | request |
-| 340:11 | record | const | module/anonymous@330 | (await get('/api/patients/${otherPatient.id}/daily?date=${today}')).record |
-| 342:16 | key | const | module/anonymous@330 | 초기값 없음 |
-| 375:34 | id | parameter | module/anonymous@352/anonymous@375 | id |
-| 394:11 | creating | const | module/anonymous@380 | responseFor(desktop, '/api/patients/${patient.id}/medication-orders') |
-| 405:9 | saving | let | module/anonymous@380 | responseFor(mobile, '/api/patients/${patient.id}/medication-events') |
-| 418:11 | schedule | const | module/anonymous@380 | await get('/api/patients/${patient.id}/medication-schedule?date=${today}') |
-| 423:11 | history | const | module/anonymous@380 | await desktop.locator('.medication-history-timeline').innerText() |
-| 440:27 | dialog | parameter | module/anonymous@430/anonymous@440 | dialog |
-| 443:11 | leavePrompt | const | module/anonymous@430 | mobile.waitForEvent('dialog') |
-| 447:11 | prompt | const | module/anonymous@430 | await leavePrompt |
-| 455:11 | schedule | const | module/anonymous@430 | await get('/api/patients/${patient.id}/medication-schedule?date=${today}') |
-| 463:11 | privateFields | const | module/anonymous@462 | ['connection-token-value', 'connection-server-origin', 'connection-patient-name', 'connection-patient-id'] |
-| 464:11 | assertConnectionIdentity | const | module/anonymous@462 | async () =&gt; { assert.equal(await mobile.locator('#connection-server-origin').textContent(), base); assert.equal(await mobile.locat |
-| 469:11 | assertCredentialsCleared | const | module/anonymous@462 | async () =&gt; { await assertHidden(mobile.locator('#connection-token')); for (const id of privateFields) assert.equal(await mobile.l |
-| 471:18 | id | const | module/anonymous@462/anonymous@469 | 초기값 없음 |
-| 480:11 | token | const | module/anonymous@462 | await mobile.locator('#connection-token-value').innerText() |
-| 483:40 | value | parameter | module/anonymous@462/anonymous@483 | value |
-| 483:82 | item | parameter | module/anonymous@462/anonymous@483/anonymous@483 | item |
-| 485:11 | connections | const | module/anonymous@462 | await get('/api/patients/${patient.id}/health-connections') |
-| 500:27 | dialog | parameter | module/anonymous@462/anonymous@500 | dialog |
-| 507:11 | created | const | module/anonymous@506 | await post('/api/patients', { name: '부분권한수신검증', age: 76, sex: 'female', conditions: ['합성 자료'] }) |
-| 508:11 | fixturePatient | const | module/anonymous@506 | (await created.json()).patient |
-| 509:11 | path | const | module/anonymous@506 | '/api/patients/${fixturePatient.id}' |
-| 510:11 | connection | const | module/anonymous@506 | await (await post('${path}/health-connections', { platform: 'health-connect' })).json() |
-| 511:11 | headers | const | module/anonymous@506 | { Authorization: 'Bearer ${connection.token}', 'Content-Type': 'application/json' } |
-| 512:11 | identity | const | module/anonymous@506 | await (await fetch(base + '/api/health-sync/connection', { headers })).json() |
-| 515:11 | send | const | module/anonymous@506 | (batchId, day) =&gt; fetch(base + '/api/health-sync', { method: 'POST', headers, body: JSON.stringify({ batchId, timeZone: 'Asia/Seou |
-| 515:19 | batchId | parameter | module/anonymous@506/anonymous@515 | batchId |
-| 515:28 | day | parameter | module/anonymous@506/anonymous@515 | day |
-| 518:9 | summary | let | module/anonymous@506 | await get('${path}/summary') |
-| 543:11 | page | const | module/anonymous@542 | await newPage(true) |
-| 544:11 | created | const | module/anonymous@542 | await post('/api/patients', { name: '아이폰합성수신', age: 75, sex: 'female' }) |
-| 545:11 | p | const | module/anonymous@542 | (await created.json()).patient |
-| 550:53 | el | parameter | module/anonymous@542/anonymous@550 | el |
-| 551:11 | connected | const | module/anonymous@542 | responseFor(page, '/api/patients/${p.id}/health-connections') |
-| 553:11 | connection | const | module/anonymous@542 | await (await connected).json() |
-| 555:11 | token | const | module/anonymous@542 | connection.token |
-| 556:11 | headers | const | module/anonymous@542 | { Authorization: 'Bearer ${token}', 'Content-Type': 'application/json' } |
-| 557:11 | identity | const | module/anonymous@542 | await (await fetch(base + '/api/health-sync/connection', { headers })).json() |
-| 560:11 | send | const | module/anonymous@542 | async (batchId, day) =&gt; { const response = await fetch(base + '/api/health-sync', { method: 'POST', headers, body: JSON.stringify( |
-| 560:25 | batchId | parameter | module/anonymous@542/anonymous@560 | batchId |
-| 560:34 | day | parameter | module/anonymous@542/anonymous@560 | day |
-| 561:13 | response | const | module/anonymous@542/anonymous@560 | await fetch(base + '/api/health-sync', { method: 'POST', headers, body: JSON.stringify({ batchId, timeZone: 'Asia/Seoul', days: [{ |
-| 566:11 | summary | const | module/anonymous@542 | await get('/api/patients/${p.id}/summary') |
-| 581:11 | page | const | module/anonymous@580 | await newPage() |
-| 582:11 | caps | const | module/anonymous@580 | await get('/api/capabilities') |
-| 583:9 | mode | let | module/anonymous@580 | 'missing' |
-| 583:27 | inferences | let | module/anonymous@580 | 0 |
-| 584:24 | request | parameter | module/anonymous@580/anonymous@584 | request |
-| 585:45 | route | parameter | module/anonymous@580/anonymous@585 | route |
-| 590:11 | length | const | module/anonymous@580 | await page.evaluate(() =&gt; history.length) |
-| 605:9 | analysisRequests | let | module/anonymous@603 | 0 |
-| 606:11 | listener | const | module/anonymous@603 | request =&gt; { if (request.url().endsWith('/photo-analyses')) analysisRequests++; } |
-| 606:22 | request | parameter | module/anonymous@603/anonymous@606 | request |
-| 616:11 | saving | const | module/anonymous@603 | responseFor(mobile, '/api/patients/${patient.id}/meals') |
-| 618:11 | response | const | module/anonymous@603 | await saving |
-| 619:11 | saved | const | module/anonymous@603 | (await response.json()).meal |
-| 629:11 | page | const | module/anonymous@628 | await newPage(true) |
-| 630:11 | proposal | const | module/anonymous@628 | { foodType: 'protein', foodLabel: '가상 제공자 두부 식사', foods: [{ name: '가상 두부' }], calories: 612, proteinGrams: 30.8, confidence: .7 } |
-| 631:9 | analysis | let | module/anonymous@628 | 초기값 없음 |
-| 632:9 | calls | let | module/anonymous@628 | 0 |
-| 633:64 | route | parameter | module/anonymous@628/anonymous@633 | route |
-| 635:13 | body | const | module/anonymous@628/anonymous@633 | route.request().postDataJSON() |
-| 652:11 | saving | const | module/anonymous@628 | responseFor(page, '/api/patients/${patient.id}/meals') |
-| 654:11 | response | const | module/anonymous@628 | await saving |
-| 655:11 | payload | const | module/anonymous@628 | response.request().postDataJSON() |
-| 658:11 | saved | const | module/anonymous@628 | (await response.json()).meal |
-| 669:11 | page | const | module/anonymous@668 | await newPage(true) |
-| 670:11 | pending | const | module/anonymous@668 | [] |
-| 671:64 | route | parameter | module/anonymous@668/anonymous@671 | route |
-| 672:11 | release | let | module/anonymous@668/anonymous@671 | 초기값 없음 |
-| 673:13 | held | const | module/anonymous@668/anonymous@671 | new Promise(resolve =&gt; { release = resolve; }) |
-| 673:32 | resolve | parameter | module/anonymous@668/anonymous@671/anonymous@673 | resolve |
-| 683:11 | changedImage | const | module/anonymous@668 | await page.evaluate(() =&gt; { const canvas = document.createElement('canvas'); canvas.width = canvas.height = 3; const context = can |
-| 683:60 | canvas | const | module/anonymous@668/anonymous@683 | document.createElement('canvas') |
-| 683:143 | context | const | module/anonymous@668/anonymous@683 | canvas.getContext('2d') |
-| 685:32 | image | parameter | module/anonymous@668/anonymous@685 | image |
-| 686:11 | late | const | module/anonymous@668 | page.waitForResponse(response =&gt; response.url().endsWith('/photo-analyses')) |
-| 686:39 | response | parameter | module/anonymous@668/anonymous@686 | response |
-| 690:11 | saving | const | module/anonymous@668 | responseFor(page, '/api/patients/${patient.id}/meals') |
-| 692:11 | savedResponse | const | module/anonymous@668 | await saving |
-| 701:25 | dialog | parameter | module/anonymous@668/anonymous@701 | dialog |
-| 703:11 | closedLate | const | module/anonymous@668 | page.waitForResponse(response =&gt; response.url().endsWith('/photo-analyses')) |
-| 703:45 | response | parameter | module/anonymous@668/anonymous@703 | response |
-| 712:11 | page | const | module/anonymous@711 | await newPage() |
-| 713:9 | calls | let | module/anonymous@711 | 0 |
-| 714:64 | route | parameter | module/anonymous@711/anonymous@714 | route |
-| 716:13 | body | const | module/anonymous@711/anonymous@714 | route.request().postDataJSON() |
-| 717:13 | analysis | const | module/anonymous@711/anonymous@714 | draft(patient.id, 'medication', { medications: [{ name: '가상 OCR 이름', strength: '10 mg', labelText: '&lt;img src=x onerror="window.__o |
-| 736:16 | selector | const | module/anonymous@711 | 초기값 없음 |
-| 744:10 | error | catch | module |  |
-| 750:50 | resolve | parameter | module/anonymous@750 | resolve |
+| 47:16 | revealField | function | module |  |
+| 47:28 | page | parameter | module/revealField | page |
+| 47:34 | selector | parameter | module/revealField | selector |
+| 48:9 | disclosure | const | module/revealField | page.locator(selector).locator('xpath=ancestor::details[1]') |
+| 49:62 | element | parameter | module/revealField/anonymous@49 | element |
+| 51:16 | newPage | function | module |  |
+| 51:24 | mobile | parameter | module/newPage | mobile = false |
+| 52:9 | page | const | module/newPage | await browser.newPage(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width: 14 |
+| 54:24 | error | parameter | module/newPage/anonymous@54 | error |
+| 57:16 | patientPage | function | module |  |
+| 57:28 | page | parameter | module/patientPage | page |
+| 57:34 | id | parameter | module/patientPage | id |
+| 57:38 | suffix | parameter | module/patientPage | suffix = '' |
+| 61:16 | saveDaily | function | module |  |
+| 61:26 | page | parameter | module/saveDaily | page |
+| 61:32 | id | parameter | module/saveDaily | id |
+| 61:36 | expected | parameter | module/saveDaily | expected |
+| 62:9 | before | const | module/saveDaily | (await get('/api/patients/${id}/daily?date=${expected.date}')).record |
+| 63:9 | request | const | module/saveDaily | page.waitForRequest(request =&gt; request.url() === '${base}/api/patients/${id}/daily' &amp;&amp; request.method() === 'POST') |
+| 63:39 | request | parameter | module/saveDaily/anonymous@63 | request |
+| 65:11 | clientSubmissionId | const | module/saveDaily | (await request).postDataJSON() |
+| 65:31 | expectedRevision | const | module/saveDaily | (await request).postDataJSON() |
+| 65:52 | fields | const | module/saveDaily | (await request).postDataJSON() |
+| 71:16 | enableMockVision | function | module |  |
+| 71:33 | page | parameter | module/enableMockVision | page |
+| 72:9 | capabilities | const | module/enableMockVision | await get('/api/capabilities') |
+| 73:43 | route | parameter | module/enableMockVision/anonymous@73 | route |
+| 77:10 | draft | function | module |  |
+| 77:16 | patientId | parameter | module/draft | patientId |
+| 77:27 | kind | parameter | module/draft | kind |
+| 77:33 | proposal | parameter | module/draft | proposal |
+| 78:9 | createdAt | const | module/draft | new Date().toISOString() |
+| 85:10 | storeMockDraft | function | module |  |
+| 85:25 | analysis | parameter | module/storeMockDraft | analysis |
+| 85:35 | imageData | parameter | module/storeMockDraft | imageData |
+| 86:9 | hash | const | module/storeMockDraft | createHash('sha256').update(Buffer.from(imageData.split(',')[1], 'base64')).digest('hex') |
+| 93:12 | attempt | let | module | 0 |
+| 98:9 | today | const | module | (await get('/api/health')).today |
+| 102:9 | mobile | const | module | await newPage(true) |
+| 103:9 | desktop | const | module | await newPage() |
+| 104:9 | patients | const | module | [] |
+| 105:14 | name | const | module | 초기값 없음 |
+| 106:11 | response | const | module | await post('/api/patients', { name, age: 76, sex: 'female', conditions: ['합성 테스트'] }) |
+| 110:10 | patient | const | module | patients |
+| 110:19 | otherPatient | const | module | patients |
+| 113:18 | clinicianRoute | function | module |  |
+| 113:33 | page | parameter | module/clinicianRoute | page |
+| 113:39 | view | parameter | module/clinicianRoute | view |
+| 113:45 | id | parameter | module/clinicianRoute | id |
+| 113:49 | date | parameter | module/clinicianRoute | date = null |
+| 114:35 | view | parameter | module/clinicianRoute/anonymous@114 | { view, id, date } |
+| 114:41 | id | parameter | module/clinicianRoute/anonymous@114 | { view, id, date } |
+| 114:45 | date | parameter | module/clinicianRoute/anonymous@114 | { view, id, date } |
+| 115:13 | url | const | module/clinicianRoute/anonymous@114 | new URL(location.href) |
+| 124:11 | page | const | module/anonymous@123 | await newPage() |
+| 128:11 | id | const | module/anonymous@123 | new URL(page.url()).searchParams.get('patientId') |
+| 129:11 | views | const | module/anonymous@123 | ['overview', 'patients', 'medications', 'records', 'worklist', 'research', 'evidence', 'notices', 'messages', 'settings'] |
+| 130:16 | view | const | module/anonymous@123 | 초기값 없음 |
+| 134:11 | length | const | module/anonymous@123 | await page.evaluate(() =&gt; history.length) |
+| 139:11 | autoRefresh | const | module/anonymous@123 | page.waitForResponse(r =&gt; r.url() === '${base}/api/dashboard') |
+| 139:46 | r | parameter | module/anonymous@123/anonymous@139 | r |
+| 147:16 | view | const | module/anonymous@123 | 초기값 없음 |
+| 154:11 | page | const | module/anonymous@153 | await newPage() |
+| 158:32 | name | parameter | module/anonymous@153/anonymous@158 | name |
+| 160:32 | name | parameter | module/anonymous@153/anonymous@160 | name |
+| 165:11 | previous | const | module/anonymous@153 | new Date(Date.parse('${today}T12:00:00+09:00') - 86400000).toISOString().slice(0, 10) |
+| 180:11 | page | const | module/anonymous@179 | await newPage() |
+| 182:9 | release | let | module/anonymous@179 | 초기값 없음 |
+| 183:11 | gate | const | module/anonymous@179 | new Promise(resolve =&gt; { release = resolve; }) |
+| 183:30 | resolve | parameter | module/anonymous@179/anonymous@183 | resolve |
+| 184:9 | intercepted | let | module/anonymous@179 | false |
+| 185:74 | route | parameter | module/anonymous@179/anonymous@185 | route |
+| 194:11 | response | const | module/anonymous@179 | page.waitForResponse(r =&gt; r.url() === '${base}/api/patients/${otherPatient.id}/summary') |
+| 194:43 | r | parameter | module/anonymous@179/anonymous@194 | r |
+| 204:16 | width | const | module/anonymous@203 | 초기값 없음 |
+| 208:11 | closeBounds | let | module/anonymous@203 | 초기값 없음 |
+| 209:18 | view | const | module/anonymous@203 | 초기값 없음 |
+| 212:15 | close | const | module/anonymous@203 | mobile.getByRole('button', { name: '홈으로 돌아가기', exact: true }) |
+| 214:15 | bounds | const | module/anonymous@203 | await close.boundingBox() |
+| 231:11 | page | const | module/anonymous@230 | await newPage(true) |
+| 233:50 | route | parameter | module/anonymous@230/anonymous@233 | route |
+| 248:27 | dialog | parameter | module/anonymous@240/anonymous@248 | dialog |
+| 252:27 | dialog | parameter | module/anonymous@240/anonymous@252 | dialog |
+| 260:16 | action | const | module/anonymous@240 | 초기값 없음 |
+| 265:31 | dialog | parameter | module/anonymous@240/anonymous@265 | dialog |
+| 268:31 | dialog | parameter | module/anonymous@240/anonymous@268 | dialog |
+| 280:27 | dialog | parameter | module/anonymous@276/anonymous@280 | dialog |
+| 283:27 | dialog | parameter | module/anonymous@276/anonymous@283 | dialog |
+| 286:9 | release | let | module/anonymous@276 | 초기값 없음 |
+| 287:74 | route | parameter | module/anonymous@276/anonymous@287 | route |
+| 289:25 | resolve | parameter | module/anonymous@276/anonymous@287/anonymous@289 | resolve |
+| 308:11 | original | const | module/anonymous@307 | { date: today, steps: 1234, sleepHours: 6.5, medicationStatus: 'partial', appetite: 'poor', mood: 'poor', note: '다른 항목 보존', weight |
+| 318:9 | record | let | module/anonymous@307 | (await get('/api/patients/${patient.id}/daily?date=${today}')).record |
+| 320:16 | key | const | module/anonymous@307 | 초기값 없음 |
+| 338:11 | before | const | module/anonymous@337 | (await get('/api/patients/${patient.id}/daily?date=${today}')).record |
+| 343:11 | request | const | module/anonymous@337 | mobile.waitForRequest(request =&gt; request.url() === '${base}/api/patients/${otherPatient.id}/daily' &amp;&amp; request.method() === 'POST') |
+| 343:43 | request | parameter | module/anonymous@337/anonymous@343 | request |
+| 344:11 | prior | const | module/anonymous@337 | (await get('/api/patients/${otherPatient.id}/daily?date=${today}')).record |
+| 346:13 | clientSubmissionId | const | module/anonymous@337 | (await request).postDataJSON() |
+| 346:33 | expectedRevision | const | module/anonymous@337 | (await request).postDataJSON() |
+| 346:54 | fields | const | module/anonymous@337 | (await request).postDataJSON() |
+| 350:11 | record | const | module/anonymous@337 | (await get('/api/patients/${otherPatient.id}/daily?date=${today}')).record |
+| 352:16 | key | const | module/anonymous@337 | 초기값 없음 |
+| 385:34 | id | parameter | module/anonymous@362/anonymous@385 | id |
+| 404:11 | creating | const | module/anonymous@390 | responseFor(desktop, '/api/patients/${patient.id}/medication-orders') |
+| 416:9 | saving | let | module/anonymous@390 | responseFor(mobile, '/api/patients/${patient.id}/medication-events') |
+| 430:11 | schedule | const | module/anonymous@390 | await get('/api/patients/${patient.id}/medication-schedule?date=${today}') |
+| 435:11 | history | const | module/anonymous@390 | await desktop.locator('.medication-history-timeline').innerText() |
+| 454:27 | dialog | parameter | module/anonymous@442/anonymous@454 | dialog |
+| 457:11 | leavePrompt | const | module/anonymous@442 | mobile.waitForEvent('dialog') |
+| 461:11 | prompt | const | module/anonymous@442 | await leavePrompt |
+| 469:11 | schedule | const | module/anonymous@442 | await get('/api/patients/${patient.id}/medication-schedule?date=${today}') |
+| 477:11 | privateFields | const | module/anonymous@476 | ['connection-token-value', 'connection-server-origin', 'connection-patient-name', 'connection-patient-id'] |
+| 478:11 | assertConnectionIdentity | const | module/anonymous@476 | async () =&gt; { assert.equal(await mobile.locator('#connection-server-origin').textContent(), base); assert.equal(await mobile.locat |
+| 483:11 | assertCredentialsCleared | const | module/anonymous@476 | async () =&gt; { await assertHidden(mobile.locator('#connection-token')); for (const id of privateFields) assert.equal(await mobile.l |
+| 485:18 | id | const | module/anonymous@476/anonymous@483 | 초기값 없음 |
+| 495:11 | token | const | module/anonymous@476 | await mobile.locator('#connection-token-value').innerText() |
+| 498:40 | value | parameter | module/anonymous@476/anonymous@498 | value |
+| 498:82 | item | parameter | module/anonymous@476/anonymous@498/anonymous@498 | item |
+| 500:11 | connections | const | module/anonymous@476 | await get('/api/patients/${patient.id}/health-connections') |
+| 515:27 | dialog | parameter | module/anonymous@476/anonymous@515 | dialog |
+| 522:11 | created | const | module/anonymous@521 | await post('/api/patients', { name: '부분권한수신검증', age: 76, sex: 'female', conditions: ['합성 자료'] }) |
+| 523:11 | fixturePatient | const | module/anonymous@521 | (await created.json()).patient |
+| 524:11 | path | const | module/anonymous@521 | '/api/patients/${fixturePatient.id}' |
+| 525:11 | connection | const | module/anonymous@521 | await (await post('${path}/health-connections', { platform: 'health-connect' })).json() |
+| 526:11 | headers | const | module/anonymous@521 | { Authorization: 'Bearer ${connection.token}', 'Content-Type': 'application/json' } |
+| 527:11 | identity | const | module/anonymous@521 | await (await fetch(base + '/api/health-sync/connection', { headers })).json() |
+| 530:11 | send | const | module/anonymous@521 | (batchId, day) =&gt; fetch(base + '/api/health-sync', { method: 'POST', headers, body: JSON.stringify({ batchId, timeZone: 'Asia/Seou |
+| 530:19 | batchId | parameter | module/anonymous@521/anonymous@530 | batchId |
+| 530:28 | day | parameter | module/anonymous@521/anonymous@530 | day |
+| 533:9 | summary | let | module/anonymous@521 | await get('${path}/summary') |
+| 558:11 | page | const | module/anonymous@557 | await newPage(true) |
+| 559:11 | created | const | module/anonymous@557 | await post('/api/patients', { name: '아이폰합성수신', age: 75, sex: 'female' }) |
+| 560:11 | p | const | module/anonymous@557 | (await created.json()).patient |
+| 565:53 | el | parameter | module/anonymous@557/anonymous@565 | el |
+| 566:11 | connected | const | module/anonymous@557 | responseFor(page, '/api/patients/${p.id}/health-connections') |
+| 568:11 | connection | const | module/anonymous@557 | await (await connected).json() |
+| 570:11 | token | const | module/anonymous@557 | connection.token |
+| 571:11 | headers | const | module/anonymous@557 | { Authorization: 'Bearer ${token}', 'Content-Type': 'application/json' } |
+| 572:11 | identity | const | module/anonymous@557 | await (await fetch(base + '/api/health-sync/connection', { headers })).json() |
+| 575:11 | send | const | module/anonymous@557 | async (batchId, day) =&gt; { const response = await fetch(base + '/api/health-sync', { method: 'POST', headers, body: JSON.stringify( |
+| 575:25 | batchId | parameter | module/anonymous@557/anonymous@575 | batchId |
+| 575:34 | day | parameter | module/anonymous@557/anonymous@575 | day |
+| 576:13 | response | const | module/anonymous@557/anonymous@575 | await fetch(base + '/api/health-sync', { method: 'POST', headers, body: JSON.stringify({ batchId, timeZone: 'Asia/Seoul', days: [{ |
+| 581:11 | summary | const | module/anonymous@557 | await get('/api/patients/${p.id}/summary') |
+| 596:11 | page | const | module/anonymous@595 | await newPage() |
+| 597:11 | caps | const | module/anonymous@595 | await get('/api/capabilities') |
+| 598:9 | mode | let | module/anonymous@595 | 'missing' |
+| 598:27 | inferences | let | module/anonymous@595 | 0 |
+| 599:24 | request | parameter | module/anonymous@595/anonymous@599 | request |
+| 600:45 | route | parameter | module/anonymous@595/anonymous@600 | route |
+| 605:11 | length | const | module/anonymous@595 | await page.evaluate(() =&gt; history.length) |
+| 620:9 | analysisRequests | let | module/anonymous@618 | 0 |
+| 621:11 | listener | const | module/anonymous@618 | request =&gt; { if (request.url().endsWith('/photo-analyses')) analysisRequests++; } |
+| 621:22 | request | parameter | module/anonymous@618/anonymous@621 | request |
+| 631:11 | saving | const | module/anonymous@618 | responseFor(mobile, '/api/patients/${patient.id}/meals') |
+| 633:11 | response | const | module/anonymous@618 | await saving |
+| 634:11 | saved | const | module/anonymous@618 | (await response.json()).meal |
+| 644:11 | page | const | module/anonymous@643 | await newPage(true) |
+| 645:11 | proposal | const | module/anonymous@643 | { foodType: 'protein', foodLabel: '가상 제공자 두부 식사', foods: [{ name: '가상 두부' }], calories: 612, proteinGrams: 30.8, confidence: .7 } |
+| 646:9 | analysis | let | module/anonymous@643 | 초기값 없음 |
+| 647:9 | calls | let | module/anonymous@643 | 0 |
+| 648:64 | route | parameter | module/anonymous@643/anonymous@648 | route |
+| 650:13 | body | const | module/anonymous@643/anonymous@648 | route.request().postDataJSON() |
+| 667:11 | saving | const | module/anonymous@643 | responseFor(page, '/api/patients/${patient.id}/meals') |
+| 669:11 | response | const | module/anonymous@643 | await saving |
+| 670:11 | payload | const | module/anonymous@643 | response.request().postDataJSON() |
+| 673:11 | saved | const | module/anonymous@643 | (await response.json()).meal |
+| 678:11 | replay | const | module/anonymous@643 | await post('/api/patients/${patient.id}/meals', payload) |
+| 688:11 | page | const | module/anonymous@687 | await newPage(true) |
+| 689:11 | pending | const | module/anonymous@687 | [] |
+| 690:64 | route | parameter | module/anonymous@687/anonymous@690 | route |
+| 691:11 | release | let | module/anonymous@687/anonymous@690 | 초기값 없음 |
+| 692:13 | held | const | module/anonymous@687/anonymous@690 | new Promise(resolve =&gt; { release = resolve; }) |
+| 692:32 | resolve | parameter | module/anonymous@687/anonymous@690/anonymous@692 | resolve |
+| 702:11 | changedImage | const | module/anonymous@687 | await page.evaluate(() =&gt; { const canvas = document.createElement('canvas'); canvas.width = canvas.height = 3; const context = can |
+| 702:60 | canvas | const | module/anonymous@687/anonymous@702 | document.createElement('canvas') |
+| 702:143 | context | const | module/anonymous@687/anonymous@702 | canvas.getContext('2d') |
+| 704:32 | image | parameter | module/anonymous@687/anonymous@704 | image |
+| 705:11 | late | const | module/anonymous@687 | page.waitForResponse(response =&gt; response.url().endsWith('/photo-analyses')) |
+| 705:39 | response | parameter | module/anonymous@687/anonymous@705 | response |
+| 711:11 | saving | const | module/anonymous@687 | responseFor(page, '/api/patients/${patient.id}/meals') |
+| 713:11 | savedResponse | const | module/anonymous@687 | await saving |
+| 722:25 | dialog | parameter | module/anonymous@687/anonymous@722 | dialog |
+| 724:11 | closedLate | const | module/anonymous@687 | page.waitForResponse(response =&gt; response.url().endsWith('/photo-analyses')) |
+| 724:45 | response | parameter | module/anonymous@687/anonymous@724 | response |
+| 733:11 | page | const | module/anonymous@732 | await newPage() |
+| 734:9 | calls | let | module/anonymous@732 | 0 |
+| 735:64 | route | parameter | module/anonymous@732/anonymous@735 | route |
+| 737:13 | body | const | module/anonymous@732/anonymous@735 | route.request().postDataJSON() |
+| 738:13 | analysis | const | module/anonymous@732/anonymous@735 | draft(patient.id, 'medication', { medications: [{ name: '가상 OCR 이름', strength: '10 mg', labelText: '&lt;img src=x onerror="window.__o |
+| 757:16 | selector | const | module/anonymous@732 | 초기값 없음 |
+| 760:25 | dialog | parameter | module/anonymous@732/anonymous@760 | dialog |
+| 766:10 | error | catch | module |  |
+| 772:50 | resolve | parameter | module/anonymous@772 | resolve |
 
 ## test/browser.mjs
 
@@ -4326,9 +5770,175 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 99:11 | pastDate | const | module/anonymous@98 | new Date(today + 'T12:00:00Z') |
 | 100:11 | date | const | module/anonymous@98 | pastDate.toISOString().slice(0, 10) |
 | 109:11 | historical | const | module/anonymous@98 | (await get('/api/patients/${id}/daily?date=${date}')).record |
-| 130:11 | downloading | const | module/anonymous@118 | desktop.waitForEvent('download') |
-| 153:10 | error | catch | module |  |
-| 158:50 | resolve | parameter | module/anonymous@158 | resolve |
+| 134:11 | downloading | const | module/anonymous@118 | desktop.waitForEvent('download') |
+| 158:10 | error | catch | module |  |
+| 163:50 | resolve | parameter | module/anonymous@163 | resolve |
+
+## test/daily-submission.test.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:8 | assert | import | module | node:assert/strict |
+| 2:10 | before | import | module | node:test |
+| 2:18 | after | import | module | node:test |
+| 2:25 | test | import | module | node:test |
+| 3:10 | spawn | import | module | node:child_process |
+| 4:10 | randomUUID | import | module | node:crypto |
+| 5:10 | mkdtemp | import | module | node:fs/promises |
+| 5:19 | rm | import | module | node:fs/promises |
+| 6:10 | tmpdir | import | module | node:os |
+| 7:10 | join | import | module | node:path |
+| 8:10 | DatabaseSync | import | module | node:sqlite |
+| 9:8 | net | import | module | node:net |
+| 10:24 | delay | import | module | node:timers/promises |
+| 12:5 | dir | let | module | 초기값 없음 |
+| 12:10 | base | let | module | 초기값 없음 |
+| 12:16 | child | let | module | 초기값 없음 |
+| 12:23 | db | let | module | 초기값 없음 |
+| 12:27 | today | let | module | 초기값 없음 |
+| 13:16 | request | function | module |  |
+| 13:24 | path | parameter | module/request | path |
+| 13:30 | body | parameter | module/request | body |
+| 14:9 | response | const | module/request | await fetch(base + path, body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.s |
+| 19:16 | patient | function | module |  |
+| 19:24 | name | parameter | module/patient | name |
+| 20:9 | result | const | module/patient | await request('/api/patients', { name, age: 79, sex: 'female' }) |
+| 24:7 | counts | const | module | id =&gt; ({ audits: db.prepare('SELECT COUNT(*) n FROM daily_record_audit WHERE patient_id=?').get(id).n, submissions: db.prepare('SE |
+| 24:16 | id | parameter | module/anonymous@24 | id |
+| 31:9 | reservation | const | module/anonymous@29 | net.createServer() |
+| 32:21 | resolve | parameter | module/anonymous@29/anonymous@32 | resolve |
+| 33:9 | port | const | module/anonymous@29 | reservation.address().port |
+| 34:21 | resolve | parameter | module/anonymous@29/anonymous@34 | resolve |
+| 42:7 | output | let | module/anonymous@29 | '' |
+| 43:27 | chunk | parameter | module/anonymous@29/anonymous@43 | chunk |
+| 44:27 | chunk | parameter | module/anonymous@29/anonymous@44 | chunk |
+| 45:12 | i | let | module/anonymous@29 | 0 |
+| 47:13 | health | const | module/anonymous@29 | await request('/api/health') |
+| 61:59 | resolve | parameter | module/anonymous@59/anonymous@61 | resolve |
+| 66:9 | id | const | module/anonymous@65 | await patient('일일 재전송 합성 환자') |
+| 66:45 | path | const | module/anonymous@65 | '/api/patients/${id}/daily' |
+| 67:9 | body | const | module/anonymous@65 | { date: today, steps: 0, sleepHours: null, expectedRevision: 0, clientSubmissionId: randomUUID() } |
+| 68:9 | replies | const | module/anonymous@65 | await Promise.all([request(path, body), request(path, body)]) |
+| 69:19 | reply | parameter | module/anonymous@65/anonymous@69 | reply |
+| 73:9 | reordered | const | module/anonymous@65 | Object.fromEntries(Object.entries(body).reverse()) |
+| 77:9 | later | const | module/anonymous@65 | await request(path, { date: today, steps: 30, expectedRevision: 1, clientSubmissionId: randomUUID() }) |
+| 80:9 | current | const | module/anonymous@65 | await request(path + '?date=${today}') |
+| 83:9 | secondPatient | const | module/anonymous@65 | await patient('동일 키 다른 합성 환자') |
+| 89:9 | id | const | module/anonymous@88 | await patient('일일 요청 검증 합성 환자') |
+| 89:47 | path | const | module/anonymous@88 | '/api/patients/${id}/daily' |
+| 93:9 | oldClient | const | module/anonymous@88 | await request(path, { date: today, steps: 0 }) |
+| 95:9 | response | const | module/anonymous@88 | await request(path, { date: today, sleepHours: null, expectedRevision: 1, clientSubmissionId: randomUUID() }) |
+| 104:9 | id | const | module/anonymous@103 | await patient('일일 원자성 합성 환자') |
+| 104:45 | path | const | module/anonymous@103 | '/api/patients/${id}/daily' |
+| 105:9 | initial | const | module/anonymous@103 | await request(path, { date: today, steps: 10, clientSubmissionId: randomUUID() }) |
+| 107:9 | body | const | module/anonymous@103 | { date: today, steps: 20, expectedRevision: 1, clientSubmissionId: randomUUID() } |
+| 114:9 | retried | const | module/anonymous@103 | await request(path, body) |
+
+## test/evidence.test.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:8 | assert | import | module | node:assert/strict |
+| 2:10 | test | import | module | node:test |
+| 3:10 | DatabaseSync | import | module | node:sqlite |
+| 4:10 | createEvidenceService | import | module | ../lib/evidence.mjs |
+| 4:33 | ensureEvidenceSchema | import | module | ../lib/evidence.mjs |
+| 6:7 | clinician | const | module | { accountId: 'clinical-1', role: 'clinician', capabilities: ['evidence.read', 'evidence.review'] } |
+| 7:7 | support | const | module | { accountId: 'support-1', role: 'clinician', capabilities: ['evidence.read'] } |
+| 8:7 | administrator | const | module | { accountId: 'admin-1', role: 'clinician', capabilities: ['admin.reset'] } |
+| 9:7 | input | const | module | { query: 'older adults medication adherence', confirmNoPersonalData: true } |
+| 10:7 | status | const | module | expected =&gt; error =&gt; error.status === expected |
+| 10:16 | expected | parameter | module/anonymous@10 | expected |
+| 10:28 | error | parameter | module/anonymous@10/anonymous@10 | error |
+| 11:7 | article | const | module | (overrides = {}) =&gt; ({ id: '12345678', source: 'MED', pmid: '12345678', doi: '10.1234/HomeCare.Test', title: 'A synthetic older-ad |
+| 11:18 | overrides | parameter | module/anonymous@11 | overrides = {} |
+| 15:7 | payload | const | module | (results = [article()], overrides = {}) =&gt; ({ hitCount: results.length, resultList: { result: results }, ...overrides }) |
+| 15:18 | results | parameter | module/anonymous@15 | results = [article()] |
+| 15:41 | overrides | parameter | module/anonymous@15 | overrides = {} |
+| 17:10 | fixture | function | module |  |
+| 17:18 | t | parameter | module/fixture | t |
+| 17:21 | options | parameter | module/fixture | options = {} |
+| 18:9 | db | const | module/fixture | new DatabaseSync(':memory:') |
+| 20:14 | actor | const | module/fixture | 초기값 없음 |
+| 21:7 | clock | let | module/fixture | Date.parse('2026-10-23T05:00:00Z') |
+| 22:9 | calls | const | module/fixture | [] |
+| 23:9 | fetchImpl | const | module/fixture | options.fetchImpl \|\| (async (url, request) =&gt; { calls.push({ url, request }); return Response.json(payload()); }) |
+| 23:50 | url | parameter | module/fixture/anonymous@23 | url |
+| 23:55 | request | parameter | module/fixture/anonymous@23 | request |
+| 24:9 | service | const | module/fixture | createEvidenceService({ db, fetchImpl, now: () =&gt; clock, ...options }) |
+| 26:38 | milliseconds | parameter | module/fixture/anonymous@26 | milliseconds |
+| 29:129 | t | parameter | module/anonymous@29 | t |
+| 30:11 | service | const | module/anonymous@29 | fixture(t) |
+| 30:20 | calls | const | module/anonymous@29 | fixture(t) |
+| 31:9 | result | const | module/anonymous@29 | await service.search(clinician, { ...input, yearFrom: 2020, yearTo: 2026 }) |
+| 32:9 | url | const | module/anonymous@29 | new URL(calls[0].url) |
+| 48:126 | t | parameter | module/anonymous@48 | t |
+| 49:11 | service | const | module/anonymous@48 | fixture(t) |
+| 49:20 | calls | const | module/anonymous@48 | fixture(t) |
+| 50:14 | actor | const | module/anonymous@48 | 초기값 없음 |
+| 53:14 | body | const | module/anonymous@48 | 초기값 없음 |
+| 63:112 | t | parameter | module/anonymous@63 | t |
+| 64:11 | service | const | module/anonymous@63 | fixture(t, { fetchImpl: async () =&gt; Response.json(payload([])) }) |
+| 64:20 | db | const | module/anonymous@63 | fixture(t, { fetchImpl: async () =&gt; Response.json(payload([])) }) |
+| 65:9 | result | const | module/anonymous@63 | await service.search(clinician, input) |
+| 71:113 | t | parameter | module/anonymous@71 | t |
+| 72:11 | service | const | module/anonymous@71 | fixture(t) |
+| 72:20 | db | const | module/anonymous@71 | fixture(t) |
+| 72:24 | calls | const | module/anonymous@71 | fixture(t) |
+| 72:31 | tick | const | module/anonymous@71 | fixture(t) |
+| 73:9 | first | const | module/anonymous@71 | await service.search(clinician, input) |
+| 75:9 | cached | const | module/anonymous@71 | await service.search(support, input) |
+| 77:9 | stored | const | module/anonymous@71 | service.getSearch(clinician, first.id) |
+| 87:125 | t | parameter | module/anonymous@87 | t |
+| 88:11 | service | const | module/anonymous@87 | fixture(t, { fetchImpl: async () =&gt; Response.json(payload([ article(), article({ id: 'PMC1234', source: 'PMC' }), article({ id: '1 |
+| 93:9 | result | const | module/anonymous@87 | await service.search(clinician, input) |
+| 100:102 | t | parameter | module/anonymous@100 | t |
+| 101:11 | service | const | module/anonymous@100 | fixture(t, { fetchImpl: async () =&gt; Response.json(payload([ article({ isRetracted: true }), article({ id: '2', pmid: '2', doi: nul |
+| 106:9 | result | const | module/anonymous@100 | await service.search(clinician, input) |
+| 107:39 | a | parameter | module/anonymous@100/anonymous@107 | a |
+| 110:109 | t | parameter | module/anonymous@110 | t |
+| 111:15 | responseFactory | const | module/anonymous@110 | 초기값 없음 |
+| 111:32 | code | const | module/anonymous@110 | 초기값 없음 |
+| 119:13 | service | const | module/anonymous@110 | fixture(t, { fetchImpl: async () =&gt; responseFactory() }) |
+| 119:22 | db | const | module/anonymous@110 | fixture(t, { fetchImpl: async () =&gt; responseFactory() }) |
+| 120:60 | error | parameter | module/anonymous@110/anonymous@120 | error |
+| 125:72 | t | parameter | module/anonymous@125 | t |
+| 126:14 | withHeader | const | module/anonymous@125 | 초기값 없음 |
+| 127:13 | service | const | module/anonymous@125 | fixture(t, { fetchImpl: async () =&gt; new Response('x'.repeat(1024 * 1024 + 1), withHeader ? { headers: { 'content-length': String(1 |
+| 127:22 | db | const | module/anonymous@125 | fixture(t, { fetchImpl: async () =&gt; new Response('x'.repeat(1024 * 1024 + 1), withHeader ? { headers: { 'content-length': String(1 |
+| 133:81 | t | parameter | module/anonymous@133 | t |
+| 134:7 | requestSignal | let | module/anonymous@133 | 초기값 없음 |
+| 135:11 | service | const | module/anonymous@133 | fixture(t, { timeoutMs: 15, fetchImpl: async (_url, options) =&gt; { requestSignal = options.signal; return new Promise(() =&gt; {}); }  |
+| 135:20 | db | const | module/anonymous@133 | fixture(t, { timeoutMs: 15, fetchImpl: async (_url, options) =&gt; { requestSignal = options.signal; return new Promise(() =&gt; {}); }  |
+| 135:73 | _url | parameter | module/anonymous@133/anonymous@135 | _url |
+| 135:79 | options | parameter | module/anonymous@133/anonymous@135 | options |
+| 141:109 | t | parameter | module/anonymous@141 | t |
+| 142:11 | service | const | module/anonymous@141 | fixture(t) |
+| 142:20 | db | const | module/anonymous@141 | fixture(t) |
+| 143:9 | result | const | module/anonymous@141 | await service.search(clinician, input) |
+| 143:58 | selection | const | module/anonymous@141 | { searchId: result.id, articleKey: result.results[0].articleKey } |
+| 146:9 | first | const | module/anonymous@141 | service.createBookmark(support, selection) |
+| 146:61 | duplicate | const | module/anonymous@141 | service.createBookmark(clinician, selection) |
+| 154:130 | t | parameter | module/anonymous@154 | t |
+| 155:11 | service | const | module/anonymous@154 | fixture(t) |
+| 155:20 | db | const | module/anonymous@154 | fixture(t) |
+| 156:9 | result | const | module/anonymous@154 | await service.search(clinician, input) |
+| 157:9 | initial | const | module/anonymous@154 | service.createBookmark(clinician, { searchId: result.id, articleKey: result.results[0].articleKey }).bookmark |
+| 158:9 | review | const | module/anonymous@154 | { version: 1, status: 'reviewed', note: '합성 과제 검토', evidenceText: 'fictional abstract', locator: '초록', reviewBasis: 'abstract' } |
+| 162:9 | reviewed | const | module/anonymous@154 | service.updateBookmark(clinician, initial.id, review).bookmark |
+| 166:9 | duplicate | const | module/anonymous@154 | service.updateBookmark(clinician, initial.id, { ...review, version: 2 }) |
+| 168:9 | history | const | module/anonymous@154 | db.prepare('SELECT * FROM evidence_reviews WHERE bookmark_id=? ORDER BY version').all(initial.id) |
+| 173:134 | t | parameter | module/anonymous@173 | t |
+| 174:11 | service | const | module/anonymous@173 | fixture(t, { fetchImpl: async () =&gt; Response.json(payload([article({ abstractText: '' })])) }) |
+| 175:9 | result | const | module/anonymous@173 | await service.search(clinician, input) |
+| 176:9 | initial | const | module/anonymous@173 | service.createBookmark(clinician, { searchId: result.id, articleKey: result.results[0].articleKey }).bookmark |
+| 177:9 | inputReview | const | module/anonymous@173 | { version: 1, status: 'reviewed', note: '별도 확인', evidenceText: '직접 읽은 가상 근거', locator: '별도 원문 3쪽', reviewBasis: 'abstract' } |
+| 179:9 | reviewed | const | module/anonymous@173 | service.updateBookmark(clinician, initial.id, { ...inputReview, reviewBasis: 'external-fulltext' }).bookmark |
+| 184:103 | t | parameter | module/anonymous@184 | t |
+| 185:11 | service | const | module/anonymous@184 | fixture(t) |
+| 185:20 | db | const | module/anonymous@184 | fixture(t) |
+| 186:9 | result | const | module/anonymous@184 | await service.search(clinician, input) |
+| 187:9 | initial | const | module/anonymous@184 | service.createBookmark(clinician, { searchId: result.id, articleKey: result.results[0].articleKey }).bookmark |
 
 ## test/health-sync.test.mjs
 
@@ -4481,6 +6091,57 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 6:9 | body | const | module/anonymous@4 | JSON.parse(options.body) |
 | 8:9 | proposal | const | module/anonymous@4 | { medications: [ { name: '가상약A', strength: '5mg', labelText: '가상약A 5mg · 데모용 포장 글자' }, { name: '미등록약 &lt;script&gt;window.xss=1&lt;/script&gt; |
 
+## test/meals-usability.test.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:10 | test | import | module | node:test |
+| 2:8 | assert | import | module | node:assert/strict |
+| 3:10 | randomUUID | import | module | node:crypto |
+| 4:10 | mkdtempSync | import | module | node:fs |
+| 4:23 | rmSync | import | module | node:fs |
+| 4:31 | readdirSync | import | module | node:fs |
+| 5:10 | tmpdir | import | module | node:os |
+| 6:10 | join | import | module | node:path |
+| 7:10 | openDatabase | import | module | ../lib/db.mjs |
+| 7:24 | todayKorea | import | module | ../lib/db.mjs |
+| 8:10 | ensureVisionSchema | import | module | ../lib/vision.mjs |
+| 9:10 | ensureMealSchema | import | module | ../lib/meals.mjs |
+| 9:28 | saveMeal | import | module | ../lib/meals.mjs |
+| 11:10 | fixture | function | module |  |
+| 11:18 | fn | parameter | module/fixture | fn |
+| 12:9 | dir | const | module/fixture | mkdtempSync(join(tmpdir(), 'homecare-meals-usability-')) |
+| 13:10 | db | const | module/fixture | openDatabase(dir) |
+| 13:13 | uploadDir | const | module/fixture | openDatabase(dir) |
+| 16:7 | png | const | module | 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6WlEAAAAASUVORK5CYII=' |
+| 17:7 | meal | const | module | (portion,extra={}) =&gt; ({ date:todayKorea(),mealType:'lunch',foodType:'balanced',portion,...extra }) |
+| 17:15 | portion | parameter | module/anonymous@17 | portion |
+| 17:23 | extra | parameter | module/anonymous@17 | extra={} |
+| 19:94 | db | parameter | module/anonymous@19/anonymous@19 | db |
+| 21:9 | id | const | module/anonymous@19/anonymous@19 | db.prepare('SELECT id FROM meals LIMIT 1').get().id |
+| 23:9 | before | const | module/anonymous@19/anonymous@19 | db.prepare('SELECT * FROM meals ORDER BY id').all() |
+| 28:66 | c | parameter | module/anonymous@19/anonymous@19/anonymous@28 | c |
+| 32:113 | db | parameter | module/anonymous@32/anonymous@32 | db |
+| 32:116 | uploads | parameter | module/anonymous@32/anonymous@32 | uploads |
+| 34:9 | unknown | const | module/anonymous@32/anonymous@32 | saveMeal(db,uploads,'p001',meal(null)) |
+| 37:9 | none | const | module/anonymous@32/anonymous@32 | saveMeal(db,uploads,'p001',meal(0)) |
+| 39:77 | e | parameter | module/anonymous@32/anonymous@32/anonymous@39 | e |
+| 40:9 | missing | const | module/anonymous@32/anonymous@32 | meal(1) |
+| 41:57 | e | parameter | module/anonymous@32/anonymous@32/anonymous@41 | e |
+| 42:13 | portion | const | module/anonymous@32/anonymous@32 | 초기값 없음 |
+| 42:114 | e | parameter | module/anonymous@32/anonymous@32/anonymous@42 | e |
+| 45:115 | db | parameter | module/anonymous@45/anonymous@45 | db |
+| 45:118 | uploads | parameter | module/anonymous@45/anonymous@45 | uploads |
+| 47:9 | clientSubmissionId | const | module/anonymous@45/anonymous@45 | randomUUID() |
+| 48:9 | body | const | module/anonymous@45/anonymous@45 | meal(.5,{imageData:png,clientSubmissionId}) |
+| 49:9 | first | const | module/anonymous@45/anonymous@45 | saveMeal(db,uploads,'p001',body) |
+| 50:9 | second | const | module/anonymous@45/anonymous@45 | saveMeal(db,uploads,'p001',{...body}) |
+| 52:69 | e | parameter | module/anonymous@45/anonymous@45/anonymous@52 | e |
+| 53:9 | other | const | module/anonymous@45/anonymous@45 | saveMeal(db,uploads,'p002',body) |
+| 55:54 | e | parameter | module/anonymous@45/anonymous@45/anonymous@55 | e |
+| 58:80 | db | parameter | module/anonymous@58/anonymous@58 | db |
+| 63:66 | c | parameter | module/anonymous@58/anonymous@58/anonymous@63 | c |
+
 ## test/medication-photo-browser.mjs
 
 | 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
@@ -4518,47 +6179,52 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 19:16 | until | function | module |  |
 | 19:22 | action | parameter | module/until | action |
 | 19:38 | i | let | module/until | 0 |
-| 22:8 | date | const | module | (await get('/api/health')).today |
-| 24:8 | context | const | module | await browser.newContext({viewport:{width:390,height:844}}) |
-| 24:76 | page | const | module | await context.newPage() |
-| 24:125 | e | parameter | module/anonymous@24 | e |
-| 26:9 | order | const | module | await write('/api/patients/p001/medication-orders',{name:'가상약A',strength:'5 mg',dose:'1정',times:['08:00','20:00'],startDate:date}) |
-| 29:123 | d | parameter | module/anonymous@29 | d |
-| 29:305 | d | parameter | module/anonymous@29 | d |
-| 31:17 | analyze | function | module |  |
-| 36:12 | index | const | module | 초기값 없음 |
-| 38:6 | lose | let | module | true |
-| 38:16 | release | let | module | 초기값 없음 |
-| 38:24 | started | let | module | 초기값 없음 |
-| 38:36 | gate | let | module | new Promise(r=&gt;release=r) |
-| 38:53 | r | parameter | module/anonymous@38 | r |
-| 38:67 | waiting | let | module | new Promise(r=&gt;started=r) |
-| 38:87 | r | parameter | module/anonymous@38 | r |
-| 39:55 | route | parameter | module/anonymous@39 | route |
-| 40:64 | response | const | module/anonymous@39 | await route.fetch() |
-| 44:8 | reports | const | module | await get('/api/patients/p001/medication-photo-reports?date=${date}') |
-| 44:180 | report | const | module | reports.reports[0] |
-| 45:8 | image | const | module | await fetch(base+report.imageUrl) |
-| 51:21 | d | parameter | module/anonymous@51 | d |
-| 54:6 | releaseAnalysis | let | module | 초기값 없음 |
-| 54:22 | startAnalysis | let | module | 초기값 없음 |
-| 54:42 | analyzeGate | const | module | new Promise(r=&gt;releaseAnalysis=r) |
-| 54:66 | r | parameter | module/anonymous@54 | r |
-| 54:88 | analysisWaiting | const | module | new Promise(r=&gt;startAnalysis=r) |
-| 54:116 | r | parameter | module/anonymous@54 | r |
-| 55:45 | route | parameter | module/anonymous@55 | route |
-| 55:59 | response | const | module/anonymous@55 | await route.fetch() |
-| 57:21 | d | parameter | module/anonymous@57 | d |
-| 59:8 | desktop | const | module | await browser.newContext({viewport:{width:1440,height:1000}}) |
-| 59:78 | clinician | const | module | await desktop.newPage() |
-| 59:137 | e | parameter | module/anonymous@59 | e |
-| 61:8 | text | const | module | await clinician.locator('.medication-photo-report').innerText() |
-| 62:82 | img | parameter | module/anonymous@62/anonymous@62 | img |
-| 64:65 | width | const | module | 초기값 없음 |
-| 64:223 | bounds | const | module | await page.locator('#medication-photo-dialog').boundingBox() |
-| 64:350 | close | const | module | await page.locator('#medication-photo-dialog .close-dialog').boundingBox() |
-| 67:9 | error | catch | module |  |
-| 68:72 | r | parameter | module/anonymous@68 | r |
+| 20:16 | revealField | function | module |  |
+| 20:28 | page | parameter | module/revealField | page |
+| 20:33 | selector | parameter | module/revealField | selector |
+| 20:49 | disclosure | const | module/revealField | page.locator(selector).locator('xpath=ancestor::details[1]') |
+| 20:177 | element | parameter | module/revealField/anonymous@20 | element |
+| 23:8 | date | const | module | (await get('/api/health')).today |
+| 25:8 | context | const | module | await browser.newContext({viewport:{width:390,height:844}}) |
+| 25:76 | page | const | module | await context.newPage() |
+| 25:125 | e | parameter | module/anonymous@25 | e |
+| 27:9 | order | const | module | await write('/api/patients/p001/medication-orders',{name:'가상약A',strength:'5 mg',dose:'1정',times:['08:00','20:00'],startDate:date}) |
+| 30:123 | d | parameter | module/anonymous@30 | d |
+| 30:305 | d | parameter | module/anonymous@30 | d |
+| 32:17 | analyze | function | module |  |
+| 37:12 | index | const | module | 초기값 없음 |
+| 39:6 | lose | let | module | true |
+| 39:16 | release | let | module | 초기값 없음 |
+| 39:24 | started | let | module | 초기값 없음 |
+| 39:36 | gate | let | module | new Promise(r=&gt;release=r) |
+| 39:53 | r | parameter | module/anonymous@39 | r |
+| 39:67 | waiting | let | module | new Promise(r=&gt;started=r) |
+| 39:87 | r | parameter | module/anonymous@39 | r |
+| 40:55 | route | parameter | module/anonymous@40 | route |
+| 41:64 | response | const | module/anonymous@40 | await route.fetch() |
+| 45:8 | reports | const | module | await get('/api/patients/p001/medication-photo-reports?date=${date}') |
+| 45:180 | report | const | module | reports.reports[0] |
+| 46:8 | image | const | module | await fetch(base+report.imageUrl) |
+| 52:21 | d | parameter | module/anonymous@52 | d |
+| 55:6 | releaseAnalysis | let | module | 초기값 없음 |
+| 55:22 | startAnalysis | let | module | 초기값 없음 |
+| 55:42 | analyzeGate | const | module | new Promise(r=&gt;releaseAnalysis=r) |
+| 55:66 | r | parameter | module/anonymous@55 | r |
+| 55:88 | analysisWaiting | const | module | new Promise(r=&gt;startAnalysis=r) |
+| 55:116 | r | parameter | module/anonymous@55 | r |
+| 56:45 | route | parameter | module/anonymous@56 | route |
+| 56:59 | response | const | module/anonymous@56 | await route.fetch() |
+| 58:21 | d | parameter | module/anonymous@58 | d |
+| 60:8 | desktop | const | module | await browser.newContext({viewport:{width:1440,height:1000}}) |
+| 60:78 | clinician | const | module | await desktop.newPage() |
+| 60:137 | e | parameter | module/anonymous@60 | e |
+| 62:8 | text | const | module | await clinician.locator('.medication-photo-report').innerText() |
+| 63:82 | img | parameter | module/anonymous@63/anonymous@63 | img |
+| 65:65 | width | const | module | 초기값 없음 |
+| 65:223 | bounds | const | module | await page.locator('#medication-photo-dialog').boundingBox() |
+| 65:350 | close | const | module | await page.locator('#medication-photo-dialog .close-dialog').boundingBox() |
+| 68:9 | error | catch | module |  |
+| 69:72 | r | parameter | module/anonymous@69 | r |
 
 ## test/medication-photos.test.mjs
 
@@ -4645,82 +6311,557 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 |---|---|---|---|---|
 | 1:8 | test | import | module | node:test |
 | 2:8 | assert | import | module | node:assert/strict |
-| 3:10 | mkdtempSync | import | module | node:fs |
-| 3:23 | rmSync | import | module | node:fs |
-| 4:10 | join | import | module | node:path |
-| 5:10 | tmpdir | import | module | node:os |
-| 6:10 | dateOffset | import | module | ../lib/db.mjs |
-| 6:22 | openDatabase | import | module | ../lib/db.mjs |
-| 6:36 | seedDatabase | import | module | ../lib/db.mjs |
-| 6:50 | todayKorea | import | module | ../lib/db.mjs |
-| 8:3 | createMedicationOrder | import | module | ../lib/medications.mjs |
-| 8:26 | endMedicationOrder | import | module | ../lib/medications.mjs |
-| 8:46 | ensureMedicationSchema | import | module | ../lib/medications.mjs |
-| 8:70 | getMedicationEvents | import | module | ../lib/medications.mjs |
-| 9:3 | getMedicationOrders | import | module | ../lib/medications.mjs |
-| 9:24 | medicationSchedule | import | module | ../lib/medications.mjs |
-| 9:44 | saveMedicationEvent | import | module | ../lib/medications.mjs |
-| 12:7 | today | const | module | todayKorea() |
-| 13:7 | yesterday | const | module | dateOffset(today, -1) |
-| 14:7 | tomorrow | const | module | dateOffset(today, 1) |
-| 16:10 | fixture | function | module |  |
-| 16:18 | t | parameter | module/fixture | t |
-| 17:9 | dir | const | module/fixture | mkdtempSync(join(tmpdir(), 'homecare-medication-test-')) |
-| 18:11 | db | const | module/fixture | openDatabase(dir) |
-| 24:10 | makeOrder | function | module |  |
-| 24:20 | db | parameter | module/makeOrder | db |
-| 24:24 | extra | parameter | module/makeOrder | extra = {} |
-| 32:10 | isStatus | function | module |  |
-| 32:19 | status | parameter | module/isStatus | status |
-| 32:36 | error | parameter | module/isStatus/anonymous@32 | error |
-| 34:96 | t | parameter | module/anonymous@34 | t |
-| 35:11 | db | const | module/anonymous@34 | fixture(t) |
-| 36:9 | before | const | module/anonymous@34 | db.prepare('SELECT COUNT(*) AS count FROM daily_records').get().count |
-| 37:9 | legacy | const | module/anonymous@34 | db.prepare('SELECT medications FROM patients WHERE id=?').get('p001').medications |
-| 45:85 | t | parameter | module/anonymous@45 | t |
-| 46:11 | db | const | module/anonymous@45 | fixture(t) |
-| 47:9 | order | const | module/anonymous@45 | makeOrder(db, { endDate: today }) |
-| 51:9 | schedule | const | module/anonymous@45 | medicationSchedule(db, 'p001', today) |
-| 53:39 | slot | parameter | module/anonymous@45/anonymous@53 | slot |
-| 54:34 | slot | parameter | module/anonymous@45/anonymous@54 | slot |
-| 59:91 | t | parameter | module/anonymous@59 | t |
-| 60:11 | db | const | module/anonymous@59 | fixture(t) |
-| 61:9 | order | const | module/anonymous@59 | makeOrder(db) |
-| 62:9 | input | const | module/anonymous@59 | { orderId: order.id, date: today, time: '08:00', status: 'missed', reason: '잊어버림', note: '전화로 확인 예정' } |
-| 63:9 | first | const | module/anonymous@59 | saveMedicationEvent(db, 'p001', input) |
-| 64:9 | repeated | const | module/anonymous@59 | saveMedicationEvent(db, 'p001', input) |
-| 68:9 | corrected | const | module/anonymous@59 | saveMedicationEvent(db, 'p001', { ...input, status: 'taken', reason: '', note: '다시 확인하여 수정' }) |
-| 71:9 | history | const | module/anonymous@59 | getMedicationEvents(db, 'p001', today) |
-| 80:9 | schedule | const | module/anonymous@59 | medicationSchedule(db, 'p001', today) |
-| 86:89 | t | parameter | module/anonymous@86 | t |
-| 87:11 | db | const | module/anonymous@86 | fixture(t) |
-| 88:9 | order | const | module/anonymous@86 | makeOrder(db) |
-| 89:9 | unknown | const | module/anonymous@86 | saveMedicationEvent(db, 'p001', { orderId: order.id, date: yesterday, time: '08:00', status: 'unknown' }) |
-| 93:9 | revised | const | module/anonymous@86 | saveMedicationEvent(db, 'p001', { orderId: order.id, date: yesterday, time: '08:00', status: 'unknown', note: '기억이 나지 않음' }) |
-| 97:82 | t | parameter | module/anonymous@97 | t |
-| 98:11 | db | const | module/anonymous@97 | fixture(t) |
-| 99:9 | order | const | module/anonymous@97 | makeOrder(db, { startDate: today, endDate: today }) |
-| 100:9 | body | const | module/anonymous@97 | { orderId: order.id, date: today, time: '08:00', status: 'taken' } |
-| 104:14 | extra | const | module/anonymous@97 | 초기값 없음 |
-| 110:83 | t | parameter | module/anonymous@110 | t |
-| 111:11 | db | const | module/anonymous@110 | fixture(t) |
-| 112:14 | extra | const | module/anonymous@110 | 초기값 없음 |
-| 115:9 | minimal | const | module/anonymous@110 | createMedicationOrder(db, 'p001', { name: '확정 이름', dose: '입력된 1회량', times: ['08:00'], startDate: today }) |
-| 122:84 | t | parameter | module/anonymous@122 | t |
-| 123:11 | db | const | module/anonymous@122 | fixture(t) |
-| 124:9 | order | const | module/anonymous@122 | makeOrder(db) |
-| 125:9 | body | const | module/anonymous@122 | { orderId: order.id, date: yesterday, time: '08:00', status: 'missed', reason: '잊어버림' } |
-| 127:9 | ended | const | module/anonymous@122 | endMedicationOrder(db, order.id, { endDate: today }) |
-| 133:9 | corrected | const | module/anonymous@122 | saveMedicationEvent(db, 'p001', { ...body, status: 'taken' }) |
-| 142:76 | t | parameter | module/anonymous@142 | t |
-| 143:11 | db | const | module/anonymous@142 | fixture(t) |
-| 144:9 | order | const | module/anonymous@142 | makeOrder(db) |
-| 152:87 | t | parameter | module/anonymous@152 | t |
-| 153:11 | db | const | module/anonymous@152 | fixture(t) |
-| 153:15 | dir | const | module/anonymous@152 | fixture(t) |
-| 154:9 | order | const | module/anonymous@152 | makeOrder(db) |
-| 156:9 | reopened | const | module/anonymous@152 | openDatabase(dir).db |
-| 163:14 | table | const | module/anonymous@152 | 초기값 없음 |
+| 3:10 | randomUUID | import | module | node:crypto |
+| 4:10 | mkdtempSync | import | module | node:fs |
+| 4:23 | rmSync | import | module | node:fs |
+| 5:10 | join | import | module | node:path |
+| 6:10 | tmpdir | import | module | node:os |
+| 7:10 | dateOffset | import | module | ../lib/db.mjs |
+| 7:22 | openDatabase | import | module | ../lib/db.mjs |
+| 7:36 | seedDatabase | import | module | ../lib/db.mjs |
+| 7:50 | todayKorea | import | module | ../lib/db.mjs |
+| 9:3 | createMedicationOrder | import | module | ../lib/medications.mjs |
+| 9:26 | endMedicationOrder | import | module | ../lib/medications.mjs |
+| 9:46 | ensureMedicationSchema | import | module | ../lib/medications.mjs |
+| 9:70 | getMedicationEvents | import | module | ../lib/medications.mjs |
+| 10:3 | getMedicationOrders | import | module | ../lib/medications.mjs |
+| 10:24 | medicationSchedule | import | module | ../lib/medications.mjs |
+| 10:44 | saveMedicationEvent | import | module | ../lib/medications.mjs |
+| 13:7 | today | const | module | todayKorea() |
+| 14:7 | yesterday | const | module | dateOffset(today, -1) |
+| 15:7 | tomorrow | const | module | dateOffset(today, 1) |
+| 17:10 | fixture | function | module |  |
+| 17:18 | t | parameter | module/fixture | t |
+| 18:9 | dir | const | module/fixture | mkdtempSync(join(tmpdir(), 'homecare-medication-test-')) |
+| 19:11 | db | const | module/fixture | openDatabase(dir) |
+| 25:10 | makeOrder | function | module |  |
+| 25:20 | db | parameter | module/makeOrder | db |
+| 25:24 | extra | parameter | module/makeOrder | extra = {} |
+| 33:10 | isStatus | function | module |  |
+| 33:19 | status | parameter | module/isStatus | status |
+| 33:36 | error | parameter | module/isStatus/anonymous@33 | error |
+| 35:83 | t | parameter | module/anonymous@35 | t |
+| 36:11 | db | const | module/anonymous@35 | fixture(t) |
+| 37:9 | clientRequestId | const | module/anonymous@35 | randomUUID() |
+| 38:9 | first | const | module/anonymous@35 | makeOrder(db,{clientRequestId}) |
+| 43:9 | other | const | module/anonymous@35 | createMedicationOrder(db,'p002',{clientRequestId,name:'다른 환자 계획',dose:'1정',times:['08:00'],startDate:today}) |
+| 50:96 | t | parameter | module/anonymous@50 | t |
+| 51:11 | db | const | module/anonymous@50 | fixture(t) |
+| 52:9 | before | const | module/anonymous@50 | db.prepare('SELECT COUNT(*) AS count FROM daily_records').get().count |
+| 53:9 | legacy | const | module/anonymous@50 | db.prepare('SELECT medications FROM patients WHERE id=?').get('p001').medications |
+| 61:85 | t | parameter | module/anonymous@61 | t |
+| 62:11 | db | const | module/anonymous@61 | fixture(t) |
+| 63:9 | order | const | module/anonymous@61 | makeOrder(db, { endDate: today }) |
+| 67:9 | schedule | const | module/anonymous@61 | medicationSchedule(db, 'p001', today) |
+| 69:39 | slot | parameter | module/anonymous@61/anonymous@69 | slot |
+| 70:34 | slot | parameter | module/anonymous@61/anonymous@70 | slot |
+| 75:91 | t | parameter | module/anonymous@75 | t |
+| 76:11 | db | const | module/anonymous@75 | fixture(t) |
+| 77:9 | order | const | module/anonymous@75 | makeOrder(db) |
+| 78:9 | input | const | module/anonymous@75 | { orderId: order.id, date: today, time: '08:00', status: 'missed', reason: '잊어버림', note: '전화로 확인 예정' } |
+| 79:9 | first | const | module/anonymous@75 | saveMedicationEvent(db, 'p001', input) |
+| 80:9 | repeated | const | module/anonymous@75 | saveMedicationEvent(db, 'p001', input) |
+| 84:9 | corrected | const | module/anonymous@75 | saveMedicationEvent(db, 'p001', { ...input, status: 'taken', reason: '', note: '다시 확인하여 수정' }) |
+| 87:9 | history | const | module/anonymous@75 | getMedicationEvents(db, 'p001', today) |
+| 96:9 | schedule | const | module/anonymous@75 | medicationSchedule(db, 'p001', today) |
+| 102:89 | t | parameter | module/anonymous@102 | t |
+| 103:11 | db | const | module/anonymous@102 | fixture(t) |
+| 104:9 | order | const | module/anonymous@102 | makeOrder(db) |
+| 105:9 | unknown | const | module/anonymous@102 | saveMedicationEvent(db, 'p001', { orderId: order.id, date: yesterday, time: '08:00', status: 'unknown' }) |
+| 109:9 | revised | const | module/anonymous@102 | saveMedicationEvent(db, 'p001', { orderId: order.id, date: yesterday, time: '08:00', status: 'unknown', note: '기억이 나지 않음' }) |
+| 113:82 | t | parameter | module/anonymous@113 | t |
+| 114:11 | db | const | module/anonymous@113 | fixture(t) |
+| 115:9 | order | const | module/anonymous@113 | makeOrder(db, { startDate: today, endDate: today }) |
+| 116:9 | body | const | module/anonymous@113 | { orderId: order.id, date: today, time: '08:00', status: 'taken' } |
+| 120:14 | extra | const | module/anonymous@113 | 초기값 없음 |
+| 126:83 | t | parameter | module/anonymous@126 | t |
+| 127:11 | db | const | module/anonymous@126 | fixture(t) |
+| 128:14 | extra | const | module/anonymous@126 | 초기값 없음 |
+| 131:9 | minimal | const | module/anonymous@126 | createMedicationOrder(db, 'p001', { name: '확정 이름', dose: '입력된 1회량', times: ['08:00'], startDate: today }) |
+| 138:84 | t | parameter | module/anonymous@138 | t |
+| 139:11 | db | const | module/anonymous@138 | fixture(t) |
+| 140:9 | order | const | module/anonymous@138 | makeOrder(db) |
+| 141:9 | body | const | module/anonymous@138 | { orderId: order.id, date: yesterday, time: '08:00', status: 'missed', reason: '잊어버림' } |
+| 143:9 | ended | const | module/anonymous@138 | endMedicationOrder(db, order.id, { endDate: today }) |
+| 149:9 | corrected | const | module/anonymous@138 | saveMedicationEvent(db, 'p001', { ...body, status: 'taken' }) |
+| 158:76 | t | parameter | module/anonymous@158 | t |
+| 159:11 | db | const | module/anonymous@158 | fixture(t) |
+| 160:9 | order | const | module/anonymous@158 | makeOrder(db) |
+| 168:87 | t | parameter | module/anonymous@168 | t |
+| 169:11 | db | const | module/anonymous@168 | fixture(t) |
+| 169:15 | dir | const | module/anonymous@168 | fixture(t) |
+| 170:9 | order | const | module/anonymous@168 | makeOrder(db) |
+| 172:9 | reopened | const | module/anonymous@168 | openDatabase(dir).db |
+| 179:14 | table | const | module/anonymous@168 | 초기값 없음 |
+
+## test/research.test.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:8 | test | import | module | node:test |
+| 2:8 | assert | import | module | node:assert/strict |
+| 3:10 | DatabaseSync | import | module | node:sqlite |
+| 4:10 | createHash | import | module | node:crypto |
+| 4:22 | randomUUID | import | module | node:crypto |
+| 5:10 | dateOffset | import | module | ../lib/db.mjs |
+| 5:22 | todayKorea | import | module | ../lib/db.mjs |
+| 6:10 | dashboard | import | module | ../lib/analysis.mjs |
+| 6:21 | patientSummary | import | module | ../lib/analysis.mjs |
+| 7:10 | ensureMedicationSchema | import | module | ../lib/medications.mjs |
+| 7:34 | createMedicationOrder | import | module | ../lib/medications.mjs |
+| 7:57 | saveMedicationEvent | import | module | ../lib/medications.mjs |
+| 8:10 | ensureHealthSchema | import | module | ../lib/health-sync.mjs |
+| 8:30 | createHealthConnection | import | module | ../lib/health-sync.mjs |
+| 8:54 | receiveHealthBatch | import | module | ../lib/health-sync.mjs |
+| 9:10 | createResearchSnapshot | import | module | ../lib/research.mjs |
+| 9:34 | describeNumbers | import | module | ../lib/research.mjs |
+| 9:51 | ensureResearchSchema | import | module | ../lib/research.mjs |
+| 9:73 | exportResearchSnapshot | import | module | ../lib/research.mjs |
+| 9:97 | getResearchSnapshot | import | module | ../lib/research.mjs |
+| 9:118 | researchPreview | import | module | ../lib/research.mjs |
+| 11:10 | fixture | function | module |  |
+| 11:18 | t | parameter | module/fixture | t |
+| 12:9 | db | const | module/fixture | new DatabaseSync(':memory:') |
+| 23:9 | now | const | module/fixture | new Date().toISOString() |
+| 24:15 | id | const | module/fixture | 초기값 없음 |
+| 24:19 | name | const | module/fixture | 초기값 없음 |
+| 25:9 | dates | const | module/fixture | [-2,-1,0].map(offset =&gt; dateOffset(todayKorea(), offset)) |
+| 25:31 | offset | parameter | module/fixture/anonymous@25 | offset |
+| 26:9 | options | const | module/fixture | { startDate: dates[0], endDate: dates[2], patientIds: ['a','b'], source: 'all' } |
+| 27:12 | daily | function | module/fixture |  |
+| 27:18 | id | parameter | module/fixture/daily | id |
+| 27:21 | date | parameter | module/fixture/daily | date |
+| 27:26 | values | parameter | module/fixture/daily | values={} |
+| 31:12 | meal | function | module/fixture |  |
+| 31:17 | id | parameter | module/fixture/meal | id |
+| 31:20 | date | parameter | module/fixture/meal | date |
+| 31:26 | calories | parameter | module/fixture/meal | {calories,proteinGrams,portion=1,source='demo-food-table-v1'}={} |
+| 31:35 | proteinGrams | parameter | module/fixture/meal | {calories,proteinGrams,portion=1,source='demo-food-table-v1'}={} |
+| 31:48 | portion | parameter | module/fixture/meal | {calories,proteinGrams,portion=1,source='demo-food-table-v1'}={} |
+| 31:58 | source | parameter | module/fixture/meal | {calories,proteinGrams,portion=1,source='demo-food-table-v1'}={} |
+| 34:12 | order | function | module/fixture |  |
+| 34:18 | id | parameter | module/fixture/order | id='a' |
+| 34:25 | times | parameter | module/fixture/order | times=['08:00'] |
+| 35:12 | report | function | module/fixture |  |
+| 35:19 | plan | parameter | module/fixture/report | plan |
+| 35:24 | date | parameter | module/fixture/report | date |
+| 35:29 | status | parameter | module/fixture/report | status |
+| 35:36 | time | parameter | module/fixture/report | time='08:00' |
+| 46:98 | t | parameter | module/anonymous@46 | t |
+| 47:9 | f | const | module/anonymous@46 | fixture(t) |
+| 49:9 | result | const | module/anonymous@46 | researchPreview(f.db,f.options) |
+| 62:39 | p | parameter | module/anonymous@46/anonymous@62 | p |
+| 66:93 | t | parameter | module/anonymous@66 | t |
+| 67:9 | f | const | module/anonymous@66 | fixture(t) |
+| 69:7 | result | let | module/anonymous@66 | patientSummary(f.db,'a') |
+| 72:35 | r | parameter | module/anonymous@66/anonymous@72 | r |
+| 82:9 | summary | const | module/anonymous@66 | patientSummary(f.db,'a') |
+| 87:110 | t | parameter | module/anonymous@87 | t |
+| 88:9 | f | const | module/anonymous@87 | fixture(t) |
+| 88:28 | plan | const | module/anonymous@87 | f.order() |
+| 89:9 | result | const | module/anonymous@87 | patientSummary(f.db,'a') |
+| 96:9 | board | const | module/anonymous@87 | dashboard(f.db) |
+| 105:101 | t | parameter | module/anonymous@105 | t |
+| 106:9 | f | const | module/anonymous@105 | fixture(t) |
+| 110:9 | result | const | module/anonymous@105 | patientSummary(f.db,'a',{startDate:f.dates[0],endDate:f.dates[2]}) |
+| 116:9 | long | const | module/anonymous@105 | patientSummary(f.db,'a',{startDate:dateOffset(f.dates[0],-12),endDate:f.dates[2]}) |
+| 119:88 | e | parameter | module/anonymous@105/anonymous@119 | e |
+| 120:91 | e | parameter | module/anonymous@105/anonymous@120 | e |
+| 123:82 | t | parameter | module/anonymous@123 | t |
+| 124:9 | f | const | module/anonymous@123 | fixture(t) |
+| 124:28 | plan | const | module/anonymous@123 | f.order() |
+| 128:9 | options | const | module/anonymous@123 | {startDate:f.dates[0],endDate:f.dates[1]} |
+| 129:9 | board | const | module/anonymous@123 | dashboard(f.db,options) |
+| 134:36 | p | parameter | module/anonymous@123/anonymous@134 | p |
+| 135:36 | p | parameter | module/anonymous@123/anonymous@135 | p |
+| 136:36 | p | parameter | module/anonymous@123/anonymous@136 | p |
+| 142:99 | t | parameter | module/anonymous@142 | t |
+| 143:9 | f | const | module/anonymous@142 | fixture(t) |
+| 144:9 | connection | const | module/anonymous@142 | createHealthConnection(f.db,'a',{platform:'apple-health',label:'Fixture device'}) |
+| 150:9 | result | const | module/anonymous@142 | researchPreview(f.db,{...f.options,source:'apple-health'}) |
+| 156:9 | manual | const | module/anonymous@142 | researchPreview(f.db,{...f.options,source:'patient-self-report'}) |
+| 161:93 | t | parameter | module/anonymous@161 | t |
+| 162:9 | f | const | module/anonymous@161 | fixture(t) |
+| 162:28 | plan | const | module/anonymous@161 | f.order('a',['08:00','20:00']) |
+| 165:9 | result | const | module/anonymous@161 | researchPreview(f.db,{...f.options,endDate:f.dates[1]}) |
+| 178:92 | t | parameter | module/anonymous@178 | t |
+| 180:9 | f | const | module/anonymous@178 | fixture(t) |
+| 180:28 | plan | const | module/anonymous@178 | f.order('a',['08:00','20:00']) |
+| 183:9 | result | const | module/anonymous@178 | researchPreview(f.db,{...f.options,startDate:f.dates[2],patientIds:['a']}) |
+| 194:96 | t | parameter | module/anonymous@194 | t |
+| 195:9 | f | const | module/anonymous@194 | fixture(t) |
+| 195:28 | today | const | module/anonymous@194 | f.dates[2] |
+| 195:51 | tomorrow | const | module/anonymous@194 | dateOffset(today,1) |
+| 198:9 | plan | const | module/anonymous@194 | f.order() |
+| 201:9 | summary | const | module/anonymous@194 | patientSummary(f.db,'a') |
+| 206:41 | row | parameter | module/anonymous@194/anonymous@206 | row |
+| 207:39 | row | parameter | module/anonymous@194/anonymous@207 | row |
+| 208:9 | research | const | module/anonymous@194 | researchPreview(f.db,f.options) |
+| 214:97 | t | parameter | module/anonymous@214 | t |
+| 215:9 | f | const | module/anonymous@214 | fixture(t) |
+| 216:9 | request | const | module/anonymous@214 | {...f.options,clientRequestId:randomUUID()} |
+| 217:9 | first | const | module/anonymous@214 | createResearchSnapshot(f.db,request,{accountId:'test-researcher'},['a','b']) |
+| 219:9 | reread | const | module/anonymous@214 | getResearchSnapshot(f.db,first.id,['a','b']) |
+| 224:103 | e | parameter | module/anonymous@214/anonymous@224 | e |
+| 225:9 | exported | const | module/anonymous@214 | exportResearchSnapshot(f.db,first.id,['a','b']) |
+| 235:116 | t | parameter | module/anonymous@235 | t |
+| 236:9 | f | const | module/anonymous@235 | fixture(t) |
+| 237:9 | preview | const | module/anonymous@235 | researchPreview(f.db,f.options) |
+| 238:9 | request | const | module/anonymous@235 | {...f.options,clientRequestId:randomUUID(),expectedInputHash:preview.inputHash} |
+| 240:66 | e | parameter | module/anonymous@235/anonymous@240 | e |
+| 242:9 | current | const | module/anonymous@235 | researchPreview(f.db,f.options) |
+| 243:9 | reviewedRequest | const | module/anonymous@235 | {...request,expectedInputHash:current.inputHash} |
+| 244:9 | snapshot | const | module/anonymous@235 | createResearchSnapshot(f.db,reviewedRequest,'actor') |
+| 250:139 | e | parameter | module/anonymous@235/anonymous@250 | e |
+| 251:129 | e | parameter | module/anonymous@235/anonymous@251 | e |
+| 254:107 | t | parameter | module/anonymous@254 | t |
+| 255:9 | f | const | module/anonymous@254 | fixture(t) |
+| 256:59 | e | parameter | module/anonymous@254/anonymous@256 | e |
+| 259:56 | e | parameter | module/anonymous@254/anonymous@259 | e |
+| 262:94 | t | parameter | module/anonymous@262 | t |
+| 263:9 | f | const | module/anonymous@262 | fixture(t) |
+| 264:9 | empty | const | module/anonymous@262 | researchPreview(f.db,{...f.options,patientIds:[]}) |
+| 266:116 | e | parameter | module/anonymous@262/anonymous@266 | e |
+| 267:9 | snapshot | const | module/anonymous@262 | createResearchSnapshot(f.db,{...f.options,clientRequestId:randomUUID()},'actor') |
+| 268:65 | e | parameter | module/anonymous@262/anonymous@268 | e |
+| 269:68 | e | parameter | module/anonymous@262/anonymous@269 | e |
+| 270:9 | before | const | module/anonymous@262 | researchPreview(f.db,f.options).participants.map(p=&gt;p.participantId) |
+| 270:65 | p | parameter | module/anonymous@262/anonymous@270 | p |
+| 271:9 | secret | const | module/anonymous@262 | f.db.prepare("SELECT value FROM metadata WHERE key='research_pseudonym_secret'").get().value |
+| 275:72 | p | parameter | module/anonymous@262/anonymous@275 | p |
+| 276:59 | e | parameter | module/anonymous@262/anonymous@276 | e |
+
+## test/usability-browser.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 3:8 | assert | import | module | node:assert/strict |
+| 4:10 | chromium | import | module | playwright |
+| 5:10 | createHash | import | module | node:crypto |
+| 6:10 | spawn | import | module | node:child_process |
+| 7:10 | existsSync | import | module | node:fs |
+| 8:10 | mkdtemp | import | module | node:fs/promises |
+| 8:19 | mkdir | import | module | node:fs/promises |
+| 8:26 | rm | import | module | node:fs/promises |
+| 8:30 | writeFile | import | module | node:fs/promises |
+| 8:41 | readFile | import | module | node:fs/promises |
+| 9:10 | tmpdir | import | module | node:os |
+| 10:10 | join | import | module | node:path |
+| 11:8 | net | import | module | node:net |
+| 12:24 | delay | import | module | node:timers/promises |
+| 14:7 | temp | const | module | await mkdtemp(join(tmpdir(), 'homecare-usability-browser-')) |
+| 15:7 | listener | const | module | net.createServer() |
+| 15:56 | resolve | parameter | module/anonymous@15 | resolve |
+| 16:7 | port | const | module | listener.address().port |
+| 16:57 | resolve | parameter | module/anonymous@16 | resolve |
+| 17:7 | base | const | module | 'http://127.0.0.1:${port}' |
+| 18:7 | fixture | const | module | 'const original=globalThis.fetch;globalThis.fetch=async(url,options)=&gt;{const u=new URL(String(url));if(u.origin==='https://www.ebi |
+| 19:7 | child | const | module | spawn(process.execPath, ['--disable-warning=ExperimentalWarning', '--import', 'data:text/javascript,' + encodeURIComponent(fixture |
+| 25:5 | output | let | module | '' |
+| 25:18 | browser | let | module | 초기값 없음 |
+| 25:27 | count | let | module | 0 |
+| 25:44 | errors | const | module | [] |
+| 25:57 | measurements | const | module | [] |
+| 26:25 | chunk | parameter | module/anonymous@26 | chunk |
+| 26:81 | chunk | parameter | module/anonymous@26 | chunk |
+| 27:16 | check | function | module |  |
+| 27:22 | name | parameter | module/check | name |
+| 27:28 | action | parameter | module/check | action |
+| 28:16 | until | function | module |  |
+| 28:22 | predicate | parameter | module/until | predicate |
+| 28:33 | label | parameter | module/until | label = 'condition' |
+| 29:12 | i | let | module/until | 0 |
+| 32:16 | get | function | module |  |
+| 32:20 | path | parameter | module/get | path |
+| 32:34 | response | const | module/get | await fetch(base + path) |
+| 33:16 | write | function | module |  |
+| 33:22 | path | parameter | module/write | path |
+| 33:28 | body | parameter | module/write | body |
+| 33:34 | context | parameter | module/write | context |
+| 33:43 | method | parameter | module/write | method = 'POST' |
+| 35:11 | session | const | module/write | await (await context.request.get(base + '/api/auth/session')).json() |
+| 40:16 | newPage | function | module |  |
+| 40:24 | viewport | parameter | module/newPage | viewport |
+| 41:9 | context | const | module/newPage | await browser.newContext({ viewport }) |
+| 41:65 | page | const | module/newPage | await context.newPage() |
+| 42:55 | error | parameter | module/newPage/anonymous@42 | error |
+| 44:16 | patientPage | function | module |  |
+| 44:28 | page | parameter | module/patientPage | page |
+| 44:34 | id | parameter | module/patientPage | id |
+| 44:38 | view | parameter | module/patientPage | view = '' |
+| 48:16 | textMeasures | function | module |  |
+| 48:29 | page | parameter | module/textMeasures | page |
+| 48:35 | selectors | parameter | module/textMeasures | selectors |
+| 49:24 | selectors | parameter | module/textMeasures/anonymous@49 | selectors |
+| 50:11 | rgb | const | module/textMeasures/anonymous@49 | value =&gt; (value.match(/[\d.]+/g) \|\| []).map(Number) |
+| 50:17 | value | parameter | module/textMeasures/anonymous@49/anonymous@50 | value |
+| 51:11 | luminance | const | module/textMeasures/anonymous@49 | color =&gt; color.slice(0, 3).map(value =&gt; { const v = value / 255; return v &lt;= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }). |
+| 51:23 | color | parameter | module/textMeasures/anonymous@49/anonymous@51 | color |
+| 51:54 | value | parameter | module/textMeasures/anonymous@49/anonymous@51/anonymous@51 | value |
+| 51:71 | v | const | module/textMeasures/anonymous@49/anonymous@51/anonymous@51 | value / 255 |
+| 51:161 | sum | parameter | module/textMeasures/anonymous@49/anonymous@51/anonymous@51 | sum |
+| 51:166 | v | parameter | module/textMeasures/anonymous@49/anonymous@51/anonymous@51 | v |
+| 51:169 | i | parameter | module/textMeasures/anonymous@49/anonymous@51/anonymous@51 | i |
+| 52:11 | background | const | module/textMeasures/anonymous@49 | element =&gt; { const layers = []; for (let current = element; current; current = current.parentElement) layers.push(rgb(getComputedS |
+| 52:24 | element | parameter | module/textMeasures/anonymous@49/anonymous@52 | element |
+| 53:13 | layers | const | module/textMeasures/anonymous@49/anonymous@52 | [] |
+| 53:35 | current | let | module/textMeasures/anonymous@49/anonymous@52 | element |
+| 54:39 | result | parameter | module/textMeasures/anonymous@49/anonymous@52/anonymous@54 | result |
+| 54:47 | layer | parameter | module/textMeasures/anonymous@49/anonymous@52/anonymous@54 | layer |
+| 54:69 | channel | parameter | module/textMeasures/anonymous@49/anonymous@52/anonymous@54/anonymous@54 | channel |
+| 54:78 | i | parameter | module/textMeasures/anonymous@49/anonymous@52/anonymous@54/anonymous@54 | i |
+| 56:30 | selector | parameter | module/textMeasures/anonymous@49/anonymous@56 | selector |
+| 56:90 | element | parameter | module/textMeasures/anonymous@49/anonymous@56/anonymous@56 | element |
+| 56:166 | element | parameter | module/textMeasures/anonymous@49/anonymous@56/anonymous@56 | element |
+| 57:13 | style | const | module/textMeasures/anonymous@49/anonymous@56/anonymous@56 | getComputedStyle(element) |
+| 57:48 | box | const | module/textMeasures/anonymous@49/anonymous@56/anonymous@56 | element.getBoundingClientRect() |
+| 57:87 | bg | const | module/textMeasures/anonymous@49/anonymous@56/anonymous@56 | background(element) |
+| 57:113 | rawFg | const | module/textMeasures/anonymous@49/anonymous@56/anonymous@56 | rgb(style.color) |
+| 58:13 | fg | const | module/textMeasures/anonymous@49/anonymous@56/anonymous@56 | bg.map((value, i) =&gt; value * (1 - (rawFg[3] ?? 1)) + rawFg[i] * (rawFg[3] ?? 1)) |
+| 58:26 | value | parameter | module/textMeasures/anonymous@49/anonymous@56/anonymous@56/anonymous@58 | value |
+| 58:33 | i | parameter | module/textMeasures/anonymous@49/anonymous@56/anonymous@56/anonymous@58 | i |
+| 59:13 | ratio | const | module/textMeasures/anonymous@49/anonymous@56/anonymous@56 | (Math.max(luminance(fg), luminance(bg)) + .05) / (Math.min(luminance(fg), luminance(bg)) + .05) |
+| 67:9 | today | const | module | (await get('/api/health')).today |
+| 69:9 | mobile | const | module | await newPage({ width: 390, height: 844 }) |
+| 70:9 | desktop | const | module | await newPage({ width: 1440, height: 1000 }) |
+| 71:9 | result | const | module | await write('/api/patients', { name: '사용성 검증 가상환자', age: 81, sex: 'female', conditions: ['합성자료'] }) |
+| 72:43 | patient | const | module | (await result.json()).patient |
+| 75:9 | staff | const | module | desktop.context() |
+| 79:16 | width | const | module/anonymous@78 | 초기값 없음 |
+| 81:13 | values | const | module/anonymous@78 | await textMeasures(mobile, ['.bottom-nav .nav-item span', '.source-caption', '#view-home .small-label', '#view-home .metric-value. |
+| 83:18 | value | const | module/anonymous@78 | 초기값 없음 |
+| 84:13 | boxes | const | module/anonymous@78 | await mobile.locator('.bottom-nav .nav-item').evaluateAll(elements =&gt; elements.map(el =&gt; { const b = el.getBoundingClientRect(); r |
+| 84:79 | elements | parameter | module/anonymous@78/anonymous@84 | elements |
+| 84:104 | el | parameter | module/anonymous@78/anonymous@84/anonymous@84 | el |
+| 84:118 | b | const | module/anonymous@78/anonymous@84/anonymous@84 | el.getBoundingClientRect() |
+| 85:60 | box | parameter | module/anonymous@78/anonymous@85 | box |
+| 91:11 | before | const | module/anonymous@90 | await mobile.locator('#open-meal').boundingBox() |
+| 92:14 | i | let | module/anonymous@90 | 0 |
+| 93:13 | response | const | module/anonymous@90 | await write('/api/clinician/notices', { title: '합성 공지 ${i + 1}', body: '화면 검증용 안내입니다.', status: 'published', pinned: i === 0 }, st |
+| 97:11 | after | const | module/anonymous@90 | await mobile.locator('#open-meal').boundingBox() |
+| 100:64 | element | parameter | module/anonymous@90/anonymous@100 | element |
+| 111:9 | prematureWrites | let | module/anonymous@107 | 0 |
+| 112:11 | countPremature | const | module/anonymous@107 | request =&gt; { if (request.method() === 'POST' &amp;&amp; request.url().endsWith('/meals')) prematureWrites++; } |
+| 112:28 | request | parameter | module/anonymous@107/anonymous@112 | request |
+| 119:11 | saving | const | module/anonymous@107 | mobile.waitForResponse(response =&gt; response.url().includes('/api/patients/${patient.id}/meals') &amp;&amp; response.request().method() === |
+| 119:43 | response | parameter | module/anonymous@107/anonymous@119 | response |
+| 120:57 | response | const | module/anonymous@107 | await saving |
+| 121:11 | meal | const | module/anonymous@107 | (await response.json()).meal |
+| 130:11 | summary | const | module/anonymous@107 | await get('/api/patients/${patient.id}/summary') |
+| 131:83 | entry | parameter | module/anonymous@107/anonymous@131 | entry |
+| 137:11 | body | const | module/anonymous@134 | await mobile.locator('#patient-message-body').inputValue() |
+| 145:28 | dialog | parameter | module/anonymous@143/anonymous@145 | dialog |
+| 147:28 | dialog | parameter | module/anonymous@143/anonymous@147 | dialog |
+| 149:28 | dialog | parameter | module/anonymous@143/anonymous@149 | dialog |
+| 152:11 | dialog | const | module/anonymous@143 | desktop.waitForEvent('dialog') |
+| 155:28 | item | parameter | module/anonymous@143/anonymous@155 | item |
+| 162:9 | release | let | module/anonymous@158 | 초기값 없음 |
+| 162:18 | started | let | module/anonymous@158 | 초기값 없음 |
+| 162:33 | gate | const | module/anonymous@158 | new Promise(resolve =&gt; { release = resolve; }) |
+| 162:52 | resolve | parameter | module/anonymous@158/anonymous@162 | resolve |
+| 162:94 | waiting | const | module/anonymous@158 | new Promise(resolve =&gt; { started = resolve; }) |
+| 162:116 | resolve | parameter | module/anonymous@158/anonymous@162 | resolve |
+| 163:82 | route | parameter | module/anonymous@158/anonymous@163 | route |
+| 165:13 | response | const | module/anonymous@158/anonymous@163 | await route.fetch() |
+| 186:11 | save | const | module/anonymous@174 | mobile.waitForResponse(item =&gt; item.url().endsWith('/medication-events') &amp;&amp; item.request().method() === 'POST') |
+| 186:41 | item | parameter | module/anonymous@174/anonymous@186 | item |
+| 188:11 | events | const | module/anonymous@174 | await get('/api/patients/${patient.id}/medication-events?date=${today}') |
+| 199:11 | submissions | const | module/anonymous@193 | [] |
+| 199:33 | loseOnce | let | module/anonymous@193 | true |
+| 200:69 | route | parameter | module/anonymous@193/anonymous@200 | route |
+| 203:47 | response | const | module/anonymous@193/anonymous@200 | await route.fetch() |
+| 210:13 | record | const | module/anonymous@193 | await get('/api/patients/${patient.id}/daily?date=${today}') |
+| 217:11 | disclosure | const | module/anonymous@215 | desktop.locator('details.chart-data').first() |
+| 219:11 | key | const | module/anonymous@215 | await disclosure.getAttribute('data-preserve-key') |
+| 221:88 | element | parameter | module/anonymous@215/anonymous@221 | element |
+| 222:11 | sizes | const | module/anonymous@215 | await textMeasures(desktop, ['#app-content p', '#app-content td', '#app-content th', '#app-content small']) |
+| 223:52 | value | parameter | module/anonymous@215/anonymous@223 | value |
+| 223:112 | value | parameter | module/anonymous@215/anonymous@223 | value |
+| 224:16 | value | const | module/anonymous@215 | 초기값 없음 |
+| 235:28 | dialog | parameter | module/anonymous@228/anonymous@235 | dialog |
+| 247:9 | tasks | let | module/anonymous@238 | await (await staff.request.get(base + '/api/clinician/tasks?patientId=' + patient.id)).json() |
+| 264:11 | downloads | const | module/anonymous@257 | [] |
+| 264:33 | collect | const | module/anonymous@257 | download =&gt; downloads.push(download) |
+| 264:43 | download | parameter | module/anonymous@257/anonymous@264 | download |
+| 267:11 | csvDownload | const | module/anonymous@257 | downloads.find(item =&gt; item.suggestedFilename().endsWith('.csv')) |
+| 267:40 | item | parameter | module/anonymous@257/anonymous@267 | item |
+| 268:11 | manifestDownload | const | module/anonymous@257 | downloads.find(item =&gt; item.suggestedFilename().endsWith('-manifest.json')) |
+| 268:45 | item | parameter | module/anonymous@257/anonymous@268 | item |
+| 270:11 | csvBytes | const | module/anonymous@257 | await readFile(await csvDownload.path()) |
+| 270:70 | manifest | const | module/anonymous@257 | JSON.parse(await readFile(await manifestDownload.path(), 'utf8')) |
+| 277:16 | view | const | module/anonymous@276 | 초기값 없음 |
+| 291:11 | response | const | module/anonymous@287 | desktop.waitForResponse(item =&gt; item.url().endsWith('/api/clinician/evidence/search') &amp;&amp; item.request().method() === 'POST') |
+| 291:46 | item | parameter | module/anonymous@287/anonymous@291 | item |
+| 292:69 | result | const | module/anonymous@287 | await response |
+| 294:11 | text | const | module/anonymous@287 | await desktop.locator('#evidence-results').innerText() |
+| 304:11 | saving | const | module/anonymous@287 | desktop.waitForResponse(item =&gt; item.url().includes('/api/clinician/evidence/bookmarks/') &amp;&amp; item.request().method() === 'PATCH') |
+| 304:44 | item | parameter | module/anonymous@287/anonymous@304 | item |
+| 307:11 | library | const | module/anonymous@287 | await (await staff.request.get(base + '/api/clinician/evidence')).json() |
+| 315:10 | error | catch | module |  |
+| 318:50 | resolve | parameter | module/anonymous@318 | resolve |
+
+## test/usability-integration.test.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 3:8 | assert | import | module | node:assert/strict |
+| 4:10 | before | import | module | node:test |
+| 4:18 | after | import | module | node:test |
+| 4:25 | test | import | module | node:test |
+| 5:10 | spawn | import | module | node:child_process |
+| 6:10 | createHash | import | module | node:crypto |
+| 6:22 | randomUUID | import | module | node:crypto |
+| 7:10 | mkdtemp | import | module | node:fs/promises |
+| 7:19 | rm | import | module | node:fs/promises |
+| 8:10 | tmpdir | import | module | node:os |
+| 9:10 | join | import | module | node:path |
+| 10:8 | net | import | module | node:net |
+| 11:24 | delay | import | module | node:timers/promises |
+| 13:7 | servers | const | module | [] |
+| 14:5 | demo | let | module | 초기값 없음 |
+| 14:11 | today | let | module | 초기값 없음 |
+| 14:18 | clinician | let | module | 초기값 없음 |
+| 14:29 | patientActor | let | module | 초기값 없음 |
+| 15:16 | start | function | module |  |
+| 15:22 | mode | parameter | module/start | mode |
+| 15:28 | extra | parameter | module/start | extra = {} |
+| 16:9 | reservation | const | module/start | net.createServer() |
+| 17:21 | resolve | parameter | module/start/anonymous@17 | resolve |
+| 18:9 | port | const | module/start | reservation.address().port |
+| 19:21 | resolve | parameter | module/start/anonymous@19 | resolve |
+| 20:9 | dir | const | module/start | await mkdtemp(join(tmpdir(), 'homecare-usability-api-')) |
+| 21:9 | base | const | module/start | 'http://127.0.0.1:${port}' |
+| 22:9 | args | const | module/start | ['--disable-warning=ExperimentalWarning'] |
+| 25:9 | child | const | module/start | spawn(process.execPath, args, { cwd: new URL('..', import.meta.url), env: { ...process.env, NODE_ENV: 'test', AUTH_MODE: mode, APP |
+| 32:7 | output | let | module/start | '' |
+| 32:44 | chunk | parameter | module/start/anonymous@32 | chunk |
+| 32:100 | chunk | parameter | module/start/anonymous@32 | chunk |
+| 33:9 | server | const | module/start | { child, base, dir } |
+| 34:12 | i | let | module/start | 0 |
+| 41:16 | call | function | module |  |
+| 41:21 | server | parameter | module/call | server |
+| 41:29 | path | parameter | module/call | path |
+| 41:37 | method | parameter | module/call | { method = 'GET', body, actor, csrf = true } = {} |
+| 41:53 | body | parameter | module/call | { method = 'GET', body, actor, csrf = true } = {} |
+| 41:59 | actor | parameter | module/call | { method = 'GET', body, actor, csrf = true } = {} |
+| 41:66 | csrf | parameter | module/call | { method = 'GET', body, actor, csrf = true } = {} |
+| 46:16 | json | function | module |  |
+| 46:21 | server | parameter | module/json | server |
+| 46:29 | path | parameter | module/json | path |
+| 46:35 | options | parameter | module/json | options |
+| 47:9 | response | const | module/json | await call(server, path, options) |
+| 51:16 | demoLogin | function | module |  |
+| 51:26 | role | parameter | module/demoLogin | role |
+| 51:32 | patientId | parameter | module/demoLogin | patientId |
+| 52:9 | response | const | module/demoLogin | await fetch(demo.base + '/api/auth/demo', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-HomeCare-Demo': '1'  |
+| 55:9 | cookie | const | module/demoLogin | response.headers.getSetCookie()[0].split(';')[0] |
+| 56:9 | session | const | module/demoLogin | await json(demo, '/api/auth/session', { actor: { cookie } }) |
+| 59:16 | kakaoLogin | function | module |  |
+| 59:27 | server | parameter | module/kakaoLogin | server |
+| 59:35 | id | parameter | module/kakaoLogin | id |
+| 60:9 | start | const | module/kakaoLogin | await fetch(server.base + '/auth/kakao?next=%2Fclinician', { redirect: 'manual' }) |
+| 62:9 | state | const | module/kakaoLogin | new URL(start.headers.get('location')).searchParams.get('state') |
+| 63:9 | nonce | const | module/kakaoLogin | start.headers.getSetCookie()[0].split(';')[0] |
+| 64:9 | finish | const | module/kakaoLogin | await fetch(server.base + '/auth/kakao/callback?state=${encodeURIComponent(state)}&amp;code=fixture-${id}', { headers: { Cookie: nonce |
+| 66:9 | cookie | const | module/kakaoLogin | finish.headers.getSetCookie().map(value =&gt; value.split(';')[0]).find(value =&gt; /hc_session=/.test(value)) |
+| 66:52 | value | parameter | module/kakaoLogin/anonymous@66 | value |
+| 66:87 | value | parameter | module/kakaoLogin/anonymous@66 | value |
+| 68:9 | session | const | module/kakaoLogin | await json(server, '/api/auth/session', { actor: { cookie } }) |
+| 71:16 | newPatient | function | module |  |
+| 71:27 | name | parameter | module/newPatient | name |
+| 72:9 | response | const | module/newPatient | await call(demo, '/api/patients', { method: 'POST', body: { name, age: 79, sex: 'female', conditions: ['합성 검증'] } }) |
+| 81:14 | server | const | module/anonymous@80 | 초기값 없음 |
+| 82:59 | resolve | parameter | module/anonymous@80/anonymous@82 | resolve |
+| 88:9 | patient | const | module/anonymous@87 | await newPatient('섭취량 구분 검증') |
+| 89:9 | path | const | module/anonymous@87 | '/api/patients/${patient.id}/meals' |
+| 90:9 | base | const | module/anonymous@87 | { date: today, mealType: 'lunch', foodType: 'balanced' } |
+| 92:9 | unknownBody | const | module/anonymous@87 | { ...base, portion: null, clientSubmissionId: randomUUID() } |
+| 93:9 | first | const | module/anonymous@87 | await call(demo, path, { method: 'POST', body: unknownBody }) |
+| 95:9 | unknown | const | module/anonymous@87 | (await first.json()).meal |
+| 97:9 | repeat | const | module/anonymous@87 | await call(demo, path, { method: 'POST', body: unknownBody }) |
+| 100:9 | zeroResponse | const | module/anonymous@87 | await call(demo, path, { method: 'POST', body: { ...base, portion: 0, clientSubmissionId: randomUUID() } }) |
+| 101:49 | zero | const | module/anonymous@87 | (await zeroResponse.json()).meal |
+| 103:9 | summary | const | module/anonymous@87 | await json(demo, '/api/patients/${patient.id}/summary') |
+| 109:9 | patient | const | module/anonymous@108 | await newPatient('재전송 검증') |
+| 110:9 | body | const | module/anonymous@108 | { date: today, mealType: 'breakfast', foodType: 'protein', portion: .5, clientSubmissionId: randomUUID() } |
+| 111:9 | responses | const | module/anonymous@108 | await Promise.all([1, 2].map(() =&gt; call(demo, '/api/patients/${patient.id}/meals', { method: 'POST', body }))) |
+| 112:29 | response | parameter | module/anonymous@108/anonymous@112 | response |
+| 113:9 | meals | const | module/anonymous@108 | await Promise.all(responses.map(async response =&gt; (await response.json()).meal)) |
+| 113:55 | response | parameter | module/anonymous@108/anonymous@113 | response |
+| 119:9 | patient | const | module/anonymous@118 | await newPatient('약별 보고 검증') |
+| 120:9 | response | const | module/anonymous@118 | await call(demo, '/api/patients/${patient.id}/medication-orders', { method: 'POST', body: { name: '가상 약', dose: '1정', times: ['00: |
+| 121:45 | order | const | module/anonymous@118 | (await response.json()).order |
+| 122:9 | saved | const | module/anonymous@118 | await call(demo, '/api/patients/${patient.id}/medication-events', { method: 'POST', body: { orderId: order.id, date: today, time:  |
+| 124:9 | summary | const | module/anonymous@118 | await json(demo, '/api/patients/${patient.id}/summary') |
+| 129:33 | day | parameter | module/anonymous@118/anonymous@129 | day |
+| 133:9 | patient | const | module/anonymous@132 | await newPatient('수정 충돌 검증') |
+| 134:9 | path | const | module/anonymous@132 | '/api/patients/${patient.id}/daily' |
+| 135:7 | response | let | module/anonymous@132 | await call(demo, path, { method: 'POST', body: { date: today, steps: 0, note: '원래 메모', expectedRevision: 0 } }) |
+| 137:9 | initial | const | module/anonymous@132 | (await json(demo, path + '?date=' + today)).record |
+| 143:9 | current | const | module/anonymous@132 | (await json(demo, path + '?date=' + today)).record |
+| 148:14 | path | const | module/anonymous@147 | 초기값 없음 |
+| 158:9 | server | const | module/anonymous@157 | await start('kakao', { STAFF_ACCESS_JSON: JSON.stringify({ '301': { roles: ['support'], patientIds: ['p001'] }, '401': { roles: [' |
+| 159:9 | support | const | module/anonymous@157 | await kakaoLogin(server, '301') |
+| 161:9 | dashboard | const | module/anonymous@157 | await json(server, '/api/dashboard', { actor: support }) |
+| 162:43 | patient | parameter | module/anonymous@157/anonymous@162 | patient |
+| 163:79 | day | parameter | module/anonymous@157/anonymous@163 | day |
+| 164:9 | selectedDashboard | const | module/anonymous@157 | await json(server, '/api/dashboard?patientIds=p001', { actor: support }) |
+| 165:51 | patient | parameter | module/anonymous@157/anonymous@165 | patient |
+| 168:9 | patients | const | module/anonymous@157 | await json(server, '/api/patients', { actor: support }) |
+| 169:42 | patient | parameter | module/anonymous@157/anonymous@169 | patient |
+| 171:14 | path | const | module/anonymous@157 | 초기값 없음 |
+| 179:9 | work | const | module/anonymous@157 | await call(server, '/api/clinician/tasks', { actor: support, method: 'POST', body: { patientId: 'p001', type: 'clinical_review', t |
+| 180:43 | task | const | module/anonymous@157 | await work.json() |
+| 182:9 | admin | const | module/anonymous@157 | await kakaoLogin(server, '101') |
+| 183:9 | outside | const | module/anonymous@157 | await call(server, '/api/research/snapshots', { actor: admin, method: 'POST', body: { patientIds: ['p002'], startDate: today, endD |
+| 184:44 | snapshotId | const | module/anonymous@157 | (await outside.json()).snapshot.id |
+| 185:9 | researcher | const | module/anonymous@157 | await kakaoLogin(server, '401') |
+| 186:9 | own | const | module/anonymous@157 | await json(server, '/api/research/preview?startDate=${today}&amp;endDate=${today}', { actor: researcher }) |
+| 189:14 | suffix | const | module/anonymous@157 | 초기값 없음 |
+| 196:10 | csvRows | function | module |  |
+| 196:18 | csv | parameter | module/csvRows | csv |
+| 197:9 | rows | const | module/csvRows | [] |
+| 197:20 | text | const | module/csvRows | csv.replace(/^\uFEFF/, '') |
+| 197:59 | row | let | module/csvRows | [] |
+| 197:69 | field | let | module/csvRows | '' |
+| 197:81 | quoted | let | module/csvRows | false |
+| 198:12 | i | let | module/csvRows | 0 |
+| 199:11 | char | const | module/csvRows | text[i] |
+| 210:9 | patient | const | module/anonymous@209 | await newPatient('내보내기 범위 검증') |
+| 211:9 | yesterday | const | module/anonymous@209 | new Date(Date.parse(today + 'T00:00:00Z') - 86400000).toISOString().slice(0, 10) |
+| 215:9 | query | const | module/anonymous@209 | '?patientId=${patient.id}&amp;startDate=${today}&amp;endDate=${today}' |
+| 216:9 | preview | const | module/anonymous@209 | await json(demo, '/api/export-preview' + query, { actor: clinician }) |
+| 219:9 | response | const | module/anonymous@209 | await call(demo, '/api/export.csv' + query, { actor: clinician }) |
+| 221:9 | rows | const | module/anonymous@209 | csvRows(await response.text()) |
+| 223:9 | patientColumn | const | module/anonymous@209 | preview.columns.indexOf('patientId') |
+| 223:63 | dateColumn | const | module/anonymous@209 | preview.columns.indexOf('date') |
+| 224:24 | row | parameter | module/anonymous@209/anonymous@224 | row |
+| 225:23 | row | parameter | module/anonymous@209/anonymous@225 | row |
+| 230:9 | patient | const | module/anonymous@229 | await newPatient('연구추출 비공개 이름') |
+| 232:9 | initial | const | module/anonymous@229 | await json(demo, '/api/research/preview?startDate=${today}&amp;endDate=${today}&amp;patientIds=${patient.id}', { actor: clinician }) |
+| 233:9 | body | const | module/anonymous@229 | { startDate: today, endDate: today, patientIds: [patient.id], source: 'all', clientRequestId: randomUUID(), expectedInputHash: ini |
+| 234:9 | response | const | module/anonymous@229 | await call(demo, '/api/research/snapshots', { method: 'POST', actor: clinician, body }) |
+| 235:47 | snapshot | const | module/anonymous@229 | await response.json() |
+| 237:9 | replay | const | module/anonymous@229 | await call(demo, '/api/research/snapshots', { method: 'POST', actor: clinician, body }) |
+| 240:9 | live | const | module/anonymous@229 | await json(demo, '/api/research/preview?startDate=${today}&amp;endDate=${today}&amp;patientIds=${patient.id}', { actor: clinician }) |
+| 242:9 | stale | const | module/anonymous@229 | await call(demo, '/api/research/snapshots', { method: 'POST', actor: clinician, body: { ...body, clientRequestId: randomUUID() } } |
+| 244:9 | retry | const | module/anonymous@229 | await call(demo, '/api/research/snapshots', { method: 'POST', actor: clinician, body }) |
+| 246:9 | frozen | const | module/anonymous@229 | await json(demo, '/api/research/snapshots/${snapshot.id}', { actor: clinician }) |
+| 248:9 | exported | const | module/anonymous@229 | await json(demo, '/api/research/snapshots/${snapshot.id}/export', { actor: clinician }) |
+| 251:14 | privateValue | const | module/anonymous@229 | 초기값 없음 |
+| 256:9 | body | const | module/anonymous@255 | { patientId: 'p001', type: 'contact', title: '합성 연락 확인', note: '전화 연결 여부 확인', clientRequestId: randomUUID() } |
+| 257:9 | response | const | module/anonymous@255 | await call(demo, '/api/clinician/tasks', { method: 'POST', actor: clinician, body }) |
+| 258:47 | task | const | module/anonymous@255 | await response.json() |
+| 259:9 | replay | const | module/anonymous@255 | await call(demo, '/api/clinician/tasks', { method: 'POST', actor: clinician, body }) |
+| 261:9 | update | const | module/anonymous@255 | await call(demo, '/api/clinician/tasks/${task.id}', { method: 'PATCH', actor: clinician, body: { version: task.version, status: 'i |
+| 263:9 | stale | const | module/anonymous@255 | await call(demo, '/api/clinician/tasks/${task.id}', { method: 'PATCH', actor: clinician, body: { version: task.version, status: 'c |
+| 265:9 | current | const | module/anonymous@255 | await json(demo, '/api/clinician/tasks?patientId=p001', { actor: clinician }) |
+| 266:35 | item | parameter | module/anonymous@255/anonymous@266 | item |
+| 270:9 | patient | const | module/anonymous@269 | await newPatient('정정 제안 검증') |
+| 272:9 | proposed | const | module/anonymous@269 | await call(demo, '/api/patients/${patient.id}/corrections', { method: 'POST', actor: clinician, body: { date: today, expectedRevis |
+| 273:47 | correction | const | module/anonymous@269 | await proposed.json() |
+| 275:9 | approve | const | module/anonymous@269 | await call(demo, '/api/clinician/corrections/${correction.id}', { method: 'PATCH', actor: clinician, body: { version: correction.v |
+| 277:11 | record | const | module/anonymous@269 | await json(demo, '/api/patients/${patient.id}/daily?date=${today}') |
 
 ## test/vision.test.mjs
 
@@ -4900,3 +7041,111 @@ Kotlin/Java/Swift 소스 선언 참고 목록(정규식 인덱스, 컴파일러 
 | 440:23 | text | const | module/anonymous@439 | 초기값 없음 |
 | 441:11 | db | const | module/anonymous@439 | database(t) |
 | 442:126 | error | parameter | module/anonymous@439/anonymous@442 | error |
+
+## test/workflow.test.mjs
+
+| 위치 | 이름 | 종류 | 범위 | 정의/기본값/자료형 참고 |
+|---|---|---|---|---|
+| 1:8 | assert | import | module | node:assert/strict |
+| 2:8 | test | import | module | node:test |
+| 3:10 | mkdtempSync | import | module | node:fs |
+| 3:23 | rmSync | import | module | node:fs |
+| 4:10 | tmpdir | import | module | node:os |
+| 5:10 | join | import | module | node:path |
+| 6:10 | randomUUID | import | module | node:crypto |
+| 7:10 | openDatabase | import | module | ../lib/db.mjs |
+| 7:24 | seedDatabase | import | module | ../lib/db.mjs |
+| 7:38 | recordFromRow | import | module | ../lib/db.mjs |
+| 7:53 | todayKorea | import | module | ../lib/db.mjs |
+| 7:65 | dateOffset | import | module | ../lib/db.mjs |
+| 8:10 | createAuthService | import | module | ../lib/auth.mjs |
+| 9:10 | staffAccessFor | import | module | ../lib/staff-access.mjs |
+| 9:26 | assertStaffCapability | import | module | ../lib/staff-access.mjs |
+| 10:10 | ensureMedicationSchema | import | module | ../lib/medications.mjs |
+| 11:10 | ensureVisionSchema | import | module | ../lib/vision.mjs |
+| 12:10 | ensureMedicationPhotoSchema | import | module | ../lib/medication-photos.mjs |
+| 13:13 | workflow | import | module | ../lib/workflow.mjs |
+| 15:7 | status | const | module | code =&gt; error =&gt; error.status === code |
+| 15:16 | code | parameter | module/anonymous@15 | code |
+| 15:24 | error | parameter | module/anonymous@15/anonymous@15 | error |
+| 16:7 | requestId | const | module | () =&gt; randomUUID() |
+| 17:7 | today | const | module | todayKorea() |
+| 18:10 | fixture | function | module |  |
+| 18:18 | t | parameter | module/fixture | t |
+| 19:9 | dir | const | module/fixture | mkdtempSync(join(tmpdir(), 'homecare-workflow-')) |
+| 20:11 | db | const | module/fixture | openDatabase(dir) |
+| 21:9 | auth | const | module/fixture | createAuthService({ db, env: { AUTH_MODE: 'demo' } }) |
+| 24:9 | clinician | const | module/fixture | { accountId: 'test-clinician', role: 'clinician', provider: 'kakao', ...staffAccessFor({ provider: 'kakao', providerId: '101' }, { |
+| 25:9 | support | const | module/fixture | { accountId: 'test-support', role: 'clinician', provider: 'kakao', ...staffAccessFor({ provider: 'kakao', providerId: '202' }, { S |
+| 29:10 | photo | function | module |  |
+| 29:16 | db | parameter | module/photo | db |
+| 29:20 | patientId | parameter | module/photo | patientId = 'p001' |
+| 30:9 | analysisId | const | module/photo | randomUUID() |
+| 30:36 | id | const | module/photo | randomUUID() |
+| 30:55 | time | const | module/photo | new Date().toISOString() |
+| 39:9 | env | const | module/anonymous@38 | { CLINICIAN_KAKAO_IDS: '101', STAFF_ACCESS_JSON: JSON.stringify({ 202: { roles: ['support'], patientIds: ['p001'] }, 303: { roles: |
+| 40:9 | actor | const | module/anonymous@38 | id =&gt; ({ accountId: id, role: 'clinician', ...staffAccessFor({ provider: 'kakao', providerId: id }, env) }) |
+| 40:17 | id | parameter | module/anonymous@38/anonymous@40 | id |
+| 56:117 | t | parameter | module/anonymous@56 | t |
+| 57:11 | auth | const | module/anonymous@56 | fixture(t) |
+| 60:9 | login | const | module/anonymous@56 | auth.demoLogin({ headers: { 'x-homecare-demo': '1' } }, { role: 'clinician' }) |
+| 61:9 | req | const | module/anonymous@56 | { headers: { cookie: login.cookie.split(';')[0] } } |
+| 69:87 | t | parameter | module/anonymous@69 | t |
+| 70:11 | db | const | module/anonymous@69 | fixture(t) |
+| 71:9 | env | const | module/anonymous@69 | { AUTH_MODE: 'kakao', STAFF_ACCESS_JSON: JSON.stringify({ 202: { roles: ['support'], patientIds: ['p001'] } }) } |
+| 72:9 | auth | const | module/anonymous@69 | createAuthService({ db, env }) |
+| 83:113 | t | parameter | module/anonymous@83 | t |
+| 84:11 | db | const | module/anonymous@83 | fixture(t) |
+| 84:15 | clinician | const | module/anonymous@83 | fixture(t) |
+| 84:26 | support | const | module/anonymous@83 | fixture(t) |
+| 85:9 | input | const | module/anonymous@83 | { patientId: 'p001', type: 'clinical_review', title: '복약 기록 검토 요청', note: '합성 자료 확인 요청', clientRequestId: requestId() } |
+| 86:9 | first | const | module/anonymous@83 | workflow.createTask(db, support, input) |
+| 92:9 | update | const | module/anonymous@83 | { version: 1, status: 'review_requested', assignee: '임상 검토자', clientRequestId: requestId() } |
+| 93:9 | pending | const | module/anonymous@83 | workflow.updateTask(db, support, first.task.id, update) |
+| 97:9 | done | const | module/anonymous@83 | workflow.updateTask(db, clinician, first.task.id, { version: 2, status: 'completed', note: '확인 완료', clientRequestId: requestId() } |
+| 101:9 | list | const | module/anonymous@83 | workflow.listTasks(db, support) |
+| 106:104 | t | parameter | module/anonymous@106 | t |
+| 107:11 | db | const | module/anonymous@106 | fixture(t) |
+| 107:15 | clinician | const | module/anonymous@106 | fixture(t) |
+| 107:26 | support | const | module/anonymous@106 | fixture(t) |
+| 107:50 | reportId | const | module/anonymous@106 | photo(db) |
+| 108:9 | original | const | module/anonymous@106 | db.prepare('SELECT * FROM medication_photo_reports WHERE id=?').get(reportId) |
+| 109:9 | first | const | module/anonymous@106 | workflow.reviewPhoto(db, support, 'p001', reportId, { reportId, version: 0, status: 'needs_information', note: '함량을 다시 확인해 주세요.',  |
+| 112:9 | input | const | module/anonymous@106 | { version: 1, status: 'reviewed', note: '포장 글자를 확인함. 실제 복용 증명은 아님.', clientRequestId: requestId() } |
+| 120:12 | i | let | module/anonymous@106 | 0 |
+| 121:9 | page1 | const | module/anonymous@106 | workflow.listPhotoReviews(db, clinician, 'p001', { limit: 20 }) |
+| 122:9 | page2 | const | module/anonymous@106 | workflow.listPhotoReviews(db, clinician, 'p001', { limit: 20, offset: 20 }) |
+| 124:65 | report | parameter | module/anonymous@106/anonymous@124 | report |
+| 127:126 | t | parameter | module/anonymous@127 | t |
+| 128:11 | db | const | module/anonymous@127 | fixture(t) |
+| 128:15 | clinician | const | module/anonymous@127 | fixture(t) |
+| 128:26 | support | const | module/anonymous@127 | fixture(t) |
+| 129:9 | old | const | module/anonymous@127 | recordFromRow(db.prepare('SELECT * FROM daily_records WHERE patient_id=? AND date=?').get('p001', today)) |
+| 130:9 | input | const | module/anonymous@127 | { date: today, expectedRevision: old.revision, patch: { steps: 0, sleepHours: null }, reason: '전화로 수치 입력 오류 확인', clientRequestId:  |
+| 131:9 | proposed | const | module/anonymous@127 | workflow.proposeCorrection(db, support, 'p001', input).correction |
+| 135:9 | review | const | module/anonymous@127 | { version: 1, status: 'approved', reason: '원 보고 내용을 확인해 정정', clientRequestId: requestId() } |
+| 136:9 | approved | const | module/anonymous@127 | workflow.reviewCorrection(db, clinician, proposed.id, review) |
+| 139:9 | next | const | module/anonymous@127 | recordFromRow(db.prepare('SELECT * FROM daily_records WHERE patient_id=? AND date=?').get('p001', today)) |
+| 141:9 | audit | const | module/anonymous@127 | db.prepare('SELECT * FROM daily_record_audit').get() |
+| 144:9 | stale | const | module/anonymous@127 | workflow.proposeCorrection(db, support, 'p001', { ...input, expectedRevision: 2, patch: { steps: 120 }, clientRequestId: requestId |
+| 151:102 | t | parameter | module/anonymous@151 | t |
+| 152:11 | db | const | module/anonymous@151 | fixture(t) |
+| 152:15 | clinician | const | module/anonymous@151 | fixture(t) |
+| 152:26 | support | const | module/anonymous@151 | fixture(t) |
+| 154:9 | body | const | module/anonymous@151 | { version: 0, studyId: 'demo-study', status: 'active', startDate: dateOffset(today, -7), endDate: null, consentVersion: 'demo-draf |
+| 156:9 | initial | const | module/anonymous@151 | workflow.saveParticipation(db, clinician, 'p001', body) |
+| 162:9 | stored | const | module/anonymous@151 | workflow.getParticipation(db, clinician, 'p001') |
+| 167:103 | t | parameter | module/anonymous@167 | t |
+| 168:11 | db | const | module/anonymous@167 | fixture(t) |
+| 168:15 | auth | const | module/anonymous@167 | fixture(t) |
+| 168:21 | clinician | const | module/anonymous@167 | fixture(t) |
+| 169:9 | login | const | module/anonymous@167 | auth.demoLogin({ headers: { 'x-homecare-demo': '1' } }, { role: 'patient', patientId: 'p002' }) |
+| 170:9 | req | const | module/anonymous@167 | { headers: { cookie: login.cookie.split(';')[0] } } |
+| 171:9 | caregiver | const | module/anonymous@167 | auth.actor(req) |
+| 172:9 | input | const | module/anonymous@167 | { accountId: caregiver.accountId, scopes: ['record.read', 'record.propose'], startDate: today, endDate: dateOffset(today, 7), reas |
+| 173:9 | created | const | module/anonymous@167 | workflow.saveDelegation(db, clinician, 'p001', input).delegation |
+| 176:9 | revoked | const | module/anonymous@167 | workflow.revokeDelegation(db, clinician, 'p001', created.id, { version: 1, reason: '지원 종료', clientRequestId: requestId() }).delega |
+| 182:106 | t | parameter | module/anonymous@182 | t |
+| 183:11 | db | const | module/anonymous@182 | fixture(t) |
+| 183:15 | clinician | const | module/anonymous@182 | fixture(t) |
+| 184:9 | before | const | module/anonymous@182 | db.prepare('SELECT id,steps,date FROM daily_records ORDER BY id').all() |

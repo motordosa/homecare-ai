@@ -1,0 +1,92 @@
+[
+  {
+    "repo": "EuropePMC/epmc-tools",
+    "path": "README.md",
+    "blobSha": "46879c1f7d0308232d8435f2fab762ecb6b985f6",
+    "htmlUrl": "https://github.com/EuropePMC/epmc-tools/blob/main/README.md",
+    "local": "EUROPEPMC-TOOLS-README.md",
+    "checkedDate": "2026-10-23",
+    "access": "official independently published GitHub source, read successfully",
+    "apiRuntimeVerified": false
+  },
+  {
+    "repo": "ourresearch/openalex-help",
+    "path": "README.md",
+    "blobSha": "ec83e60d369ba7920756d6296133b7c951f34bc8",
+    "htmlUrl": "https://github.com/ourresearch/openalex-help/blob/main/README.md",
+    "local": "OPENALEX-HELP-README.md",
+    "checkedDate": "2026-10-23",
+    "access": "official independently published GitHub source, read successfully",
+    "apiRuntimeVerified": false
+  },
+  {
+    "repo": "ourresearch/openalex-help",
+    "path": "content/api/authentication.md",
+    "blobSha": "28dc1394e32e781ff83459553b1c4e5f8113054f",
+    "htmlUrl": "https://github.com/ourresearch/openalex-help/blob/main/content/api/authentication.md",
+    "local": "OPENALEX-AUTH.md",
+    "checkedDate": "2026-10-23",
+    "access": "official independently published GitHub source, read successfully",
+    "apiRuntimeVerified": false
+  },
+  {
+    "repo": "ourresearch/openalex-help",
+    "path": "content/api/searching.md",
+    "blobSha": "d086e9303c5378442f452ab38ccb6f8bc4a17f2f",
+    "htmlUrl": "https://github.com/ourresearch/openalex-help/blob/main/content/api/searching.md",
+    "local": "OPENALEX-SEARCH.md",
+    "checkedDate": "2026-10-23",
+    "access": "official independently published GitHub source, read successfully",
+    "apiRuntimeVerified": false
+  },
+  {
+    "repo": "ourresearch/openalex-help",
+    "path": "content/access/fulltext.md",
+    "blobSha": "685774f0ff4349a2d4cdcb5eb7a86c2e70c1b5ea",
+    "htmlUrl": "https://github.com/ourresearch/openalex-help/blob/main/content/access/fulltext.md",
+    "local": "OPENALEX-FULLTEXT.md",
+    "checkedDate": "2026-10-23",
+    "access": "official independently published GitHub source, read successfully",
+    "apiRuntimeVerified": false
+  },
+  {
+    "repo": "ourresearch/openalex-help",
+    "path": "content/data/works/attributes.md",
+    "blobSha": "4be01dbc8c8cf8b83fd6d61b1e8cc9080b65893d",
+    "htmlUrl": "https://github.com/ourresearch/openalex-help/blob/main/content/data/works/attributes.md",
+    "local": "OPENALEX-WORK-ATTRIBUTES.md",
+    "checkedDate": "2026-10-23",
+    "access": "official independently published GitHub source, read successfully",
+    "apiRuntimeVerified": false
+  },
+  {
+    "repo": "lme4/lme4",
+    "path": "README.md",
+    "blobSha": "93e2692296bb5aac37392673f4cbb1692abd3351",
+    "htmlUrl": "https://github.com/lme4/lme4/blob/master/README.md",
+    "local": "LME4-README.md",
+    "checkedDate": "2026-10-23",
+    "access": "official independently published GitHub source, read successfully",
+    "apiRuntimeVerified": false
+  },
+  {
+    "repo": "amices/mice",
+    "path": "README.md",
+    "blobSha": "dcc17160aa93f9589ee1bce2f1b205206a8b056a",
+    "htmlUrl": "https://github.com/amices/mice/blob/master/README.md",
+    "local": "MICE-README.md",
+    "checkedDate": "2026-10-23",
+    "access": "official independently published GitHub source, read successfully",
+    "apiRuntimeVerified": false
+  },
+  {
+    "repo": "statsmodels/statsmodels",
+    "path": "docs/source/gee.rst",
+    "blobSha": "f61583dd55150c50cc04c477648de17a84361315",
+    "htmlUrl": "https://github.com/statsmodels/statsmodels/blob/main/docs/source/gee.rst",
+    "local": "STATSMODELS-GEE.rst",
+    "checkedDate": "2026-10-23",
+    "access": "official independently published GitHub source, read successfully",
+    "apiRuntimeVerified": false
+  }
+]

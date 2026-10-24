@@ -1,0 +1,1626 @@
+{
+  "scope": "temporary synthetic local browser; mocked literature provider; no actual older users",
+  "scenarios": 14,
+  "measurements": [
+    {
+      "width": 320,
+      "values": [
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "홈",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 5.801,
+          "box": {
+            "width": 14.734375,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "내 기록",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.897,
+          "box": {
+            "width": 48.640625,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "복약",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.897,
+          "box": {
+            "width": 29.453125,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "메시지",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.897,
+          "box": {
+            "width": 44.171875,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "건강 연결",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.897,
+          "box": {
+            "width": 63.375,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "이용 안내",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.897,
+          "box": {
+            "width": 63.375,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".source-caption",
+          "text": "활동: 미보고 · 수면: 미보고",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.599,
+          "box": {
+            "width": 284,
+            "height": 24.796875
+          }
+        },
+        {
+          "selector": "#view-home .small-label",
+          "text": "오늘의 기록",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.917,
+          "box": {
+            "width": 78.09375,
+            "height": 24
+          }
+        },
+        {
+          "selector": "#view-home .metric-value.empty",
+          "text": "아직 기록 전",
+          "fontSize": 18,
+          "fontWeight": 650,
+          "contrast": 6.917,
+          "box": {
+            "width": 258,
+            "height": 32.09375
+          }
+        },
+        {
+          "selector": "#view-home .metric-value.empty",
+          "text": "아직 기록 전",
+          "fontSize": 18,
+          "fontWeight": 650,
+          "contrast": 6.917,
+          "box": {
+            "width": 258,
+            "height": 32.09375
+          }
+        },
+        {
+          "selector": "#view-home .metric-value.empty",
+          "text": "아직 기록 전",
+          "fontSize": 18,
+          "fontWeight": 650,
+          "contrast": 6.917,
+          "box": {
+            "width": 258,
+            "height": 32.09375
+          }
+        },
+        {
+          "selector": "#view-home .metric-value.empty",
+          "text": "아직 기록 전",
+          "fontSize": 18,
+          "fontWeight": 650,
+          "contrast": 6.917,
+          "box": {
+            "width": 258,
+            "height": 32.09375
+          }
+        },
+        {
+          "selector": "#view-home .empty-card p",
+          "text": "아직 식사 기록이 없어요.",
+          "fontSize": 18,
+          "fontWeight": 400,
+          "contrast": 6.578,
+          "box": {
+            "width": 252,
+            "height": 28.796875
+          }
+        },
+        {
+          "selector": "#view-home .empty-card p",
+          "text": "오늘의 첫 번째 식사를 남겨보세요.",
+          "fontSize": 18,
+          "fontWeight": 400,
+          "contrast": 6.578,
+          "box": {
+            "width": 252,
+            "height": 57.59375
+          }
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "values": [
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "홈",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 5.801,
+          "box": {
+            "width": 14.734375,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "내 기록",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.897,
+          "box": {
+            "width": 48.640625,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "복약",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.897,
+          "box": {
+            "width": 29.453125,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "메시지",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.897,
+          "box": {
+            "width": 44.171875,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "건강 연결",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.897,
+          "box": {
+            "width": 63.375,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "이용 안내",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.897,
+          "box": {
+            "width": 63.375,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": ".source-caption",
+          "text": "활동: 미보고 · 수면: 미보고",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.599,
+          "box": {
+            "width": 354,
+            "height": 24.796875
+          }
+        },
+        {
+          "selector": "#view-home .small-label",
+          "text": "오늘의 기록",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "contrast": 6.917,
+          "box": {
+            "width": 78.09375,
+            "height": 24
+          }
+        },
+        {
+          "selector": "#view-home .metric-value.empty",
+          "text": "아직 기록 전",
+          "fontSize": 18,
+          "fontWeight": 650,
+          "contrast": 6.917,
+          "box": {
+            "width": 145,
+            "height": 32.09375
+          }
+        },
+        {
+          "selector": "#view-home .metric-value.empty",
+          "text": "아직 기록 전",
+          "fontSize": 18,
+          "fontWeight": 650,
+          "contrast": 6.917,
+          "box": {
+            "width": 145,
+            "height": 32.09375
+          }
+        },
+        {
+          "selector": "#view-home .metric-value.empty",
+          "text": "아직 기록 전",
+          "fontSize": 18,
+          "fontWeight": 650,
+          "contrast": 6.917,
+          "box": {
+            "width": 145,
+            "height": 32.09375
+          }
+        },
+        {
+          "selector": "#view-home .metric-value.empty",
+          "text": "아직 기록 전",
+          "fontSize": 18,
+          "fontWeight": 650,
+          "contrast": 6.917,
+          "box": {
+            "width": 145,
+            "height": 32.09375
+          }
+        },
+        {
+          "selector": "#view-home .empty-card p",
+          "text": "아직 식사 기록이 없어요.",
+          "fontSize": 18,
+          "fontWeight": 400,
+          "contrast": 6.578,
+          "box": {
+            "width": 322,
+            "height": 28.796875
+          }
+        },
+        {
+          "selector": "#view-home .empty-card p",
+          "text": "오늘의 첫 번째 식사를 남겨보세요.",
+          "fontSize": 18,
+          "fontWeight": 400,
+          "contrast": 6.578,
+          "box": {
+            "width": 322,
+            "height": 28.796875
+          }
+        }
+      ]
+    },
+    {
+      "clinician": [
+        {
+          "selector": "#app-content p",
+          "text": "기록에 따른 확인 우선순위와 최근 변화를 살펴보세요.",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 310.796875,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "최근 14일 · 약별·일일·기기·식사 기록이 있는 환자",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 301.53125,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "합성자료",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 181.5625,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "최근 기록의 변화를 확인하고, 방문 시 환자의 생활 상태와 함께 살펴보세요.",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.155,
+          "box": {
+            "width": 380,
+            "height": 50.375
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "최근 7일 활동 보고일 평균 1,234걸음 (1일), 수면 보고일 평균 7.5시간 (1일)입니다.",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 392,
+            "height": 46.1875
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "최근 7일에 기존 일일 복약 자기보고는 없습니다. 약별 회차 보고는 1일 1건이며 복약 계획에서 확인합니다.",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 392,
+            "height": 69.28125
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "1일에 식사 2건을 기록했습니다. 산출 가능한 기록일별 추정 합계 평균은 0 kcal, 단백질 0 g입니다.",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 392,
+            "height": 69.28125
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "최근 7일 중 일일 또는 약별 회차의 미복용 보고 4일",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 340,
+            "height": 23.796875
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "보고된 7일의 평균 활동 968걸음",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 340,
+            "height": 23.796875
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "보고된 7일의 평균 수면 5시간",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 340,
+            "height": 23.796875
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "최근 7일 요약 · 기록된 날의 평균과 자료수를 함께 확인하세요. 확인 규칙: 최근 7일",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.05,
+          "box": {
+            "width": 480.671875,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "최근 7일 중 영역별 기록이 있는 날입니다.\n미기록은 0 또는 정상으로 처리하지 않습니다.",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 1104,
+            "height": 50.375
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "확인 우선순위는 기록 기반 데모 규칙입니다. 임상적으로 검증된 위험예측이나 진단이 아닙니다.",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 1104,
+            "height": 38.1875
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "최근 식사 · AI 사진 또는 음식 선택에 따른 영양 추정",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 300.453125,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "0 kcal · 단백질 0 g",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "영양 산출 불가 · 단백질 산출 불가",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 46.1875
+          }
+        },
+        {
+          "selector": "#app-content p",
+          "text": "사용성 검증 가상환자 님 · 항목별 출처 표시",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 253.484375,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "김\n김하늘\nP001",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 221.453125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "78세 · 여",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 96.875,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "규칙 미해당",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 120.328125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "86%",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "10.23 오늘",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 113.203125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "박\n박새봄\nP002",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 221.453125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "82세 · 여",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 96.875,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "확인 우선",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 120.328125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "100%",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "10.23 오늘",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 113.203125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "이\n이도담\nP003",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 221.453125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "75세 · 남",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 96.875,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "규칙 미해당",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 120.328125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "86%",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "10.22",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 113.203125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "최\n최가온\nP004",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 221.453125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "86세 · 남",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 96.875,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "확인 우선",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 120.328125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "71%",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "10.22",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 113.203125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "정\n정나래\nP005",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 221.453125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "73세 · 여",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 96.875,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "규칙 미해당",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 120.328125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "71%",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "10.22",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 113.203125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "윤\n윤다온\nP006",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 221.453125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "80세 · 남",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 96.875,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "규칙 미해당",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 120.328125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "86%",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "10.22",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 113.203125,
+            "height": 78.484375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "사\n사용성 검증 가상환자\n신규 데모 환자",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.225,
+          "box": {
+            "width": 221.453125,
+            "height": 77.984375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "81세 · 여",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.225,
+          "box": {
+            "width": 96.875,
+            "height": 77.984375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "자료 부족",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.225,
+          "box": {
+            "width": 120.328125,
+            "height": 77.984375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "14%",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.225,
+          "box": {
+            "width": 130,
+            "height": 77.984375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "10.23 오늘",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.225,
+          "box": {
+            "width": 113.203125,
+            "height": 77.984375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-10",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "6",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-11",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "6",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-12",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "5",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-13",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "6",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-14",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "5",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-15",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "5",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-16",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "6",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-17",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "5",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-18",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "5",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-19",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "6",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-20",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "5",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-21",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "6",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-22",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "6",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "2026-10-23",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 400.90625,
+            "height": 39.59375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "3",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 239.09375,
+            "height": 39.59375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "10.23",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 91.21875,
+            "height": 67.984375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "1,234 걸음\n수동 자기보고",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 143.828125,
+            "height": 67.984375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "7.5 h\n수동 자기보고",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 143.828125,
+            "height": 67.984375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "미기록",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 109.265625,
+            "height": 67.984375
+          }
+        },
+        {
+          "selector": "#app-content td",
+          "text": "—",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 187.859375,
+            "height": 67.984375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "환자",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 221.453125,
+            "height": 44.09375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "나이 / 성별",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 96.875,
+            "height": 44.09375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "확인 우선순위",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 120.328125,
+            "height": 44.09375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "기간 기록일 비율",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 130,
+            "height": 44.09375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "마지막 기록일",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 113.203125,
+            "height": 44.09375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "날짜",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 400.90625,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "값 (명)",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 239.09375,
+            "height": 40.09375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "날짜",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 91.21875,
+            "height": 44.09375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "활동",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 143.828125,
+            "height": 44.09375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "수면",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 143.828125,
+            "height": 44.09375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "복약 보고",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 109.265625,
+            "height": 44.09375
+          }
+        },
+        {
+          "selector": "#app-content th",
+          "text": "메모",
+          "fontSize": 14,
+          "fontWeight": 500,
+          "contrast": 6.216,
+          "box": {
+            "width": 187.859375,
+            "height": 44.09375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "명",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 12.890625,
+            "height": 20
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "명",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 12.890625,
+            "height": 20
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "명",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 12.890625,
+            "height": 20
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "%",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 12.90625,
+            "height": 20
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "P001",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 44.171875,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "P002",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 44.171875,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "P003",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 44.171875,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "P004",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 44.171875,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "P005",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 44.171875,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "P006",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 44.171875,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "신규 데모 환자",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.225,
+          "box": {
+            "width": 141.453125,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "걸음",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 24.765625,
+            "height": 20
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "시간",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 24.765625,
+            "height": 20
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "%",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 12.40625,
+            "height": 20
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "kcal",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 24.296875,
+            "height": 20
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "섭취 비율 0%",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "음식 선택·비율 예시 추정",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 47.59375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "섭취 비율 모름",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 23.09375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "음식 선택·비율 예시 추정",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 130,
+            "height": 47.59375
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "수동 자기보고",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 117.828125,
+            "height": 22.390625
+          }
+        },
+        {
+          "selector": "#app-content small",
+          "text": "수동 자기보고",
+          "fontSize": 14,
+          "fontWeight": 400,
+          "contrast": 6.452,
+          "box": {
+            "width": 117.828125,
+            "height": 22.390625
+          }
+        }
+      ]
+    }
+  ]
+}

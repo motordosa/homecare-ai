@@ -1,0 +1,1234 @@
+{
+  "scope": "temporary local SQLite and synthetic records only",
+  "head": "4068c3c",
+  "measurements": [
+    {
+      "label": "home390",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "values": [
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "홈",
+          "font": "11px",
+          "lineHeight": "14.85px",
+          "color": "rgb(37, 152, 120)",
+          "background": [
+            241,
+            248,
+            243
+          ],
+          "contrast": 3.33,
+          "box": {
+            "x": 8,
+            "y": 778,
+            "width": 60.65625,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "내 기록",
+          "font": "11px",
+          "lineHeight": "14.85px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 70.65625,
+            "y": 778,
+            "width": 60.671875,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "복약",
+          "font": "11px",
+          "lineHeight": "14.85px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 133.328125,
+            "y": 778,
+            "width": 60.671875,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "메시지",
+          "font": "11px",
+          "lineHeight": "14.85px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 196,
+            "y": 778,
+            "width": 60.65625,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "건강 연결",
+          "font": "11px",
+          "lineHeight": "14.85px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 258.65625,
+            "y": 778,
+            "width": 60.671875,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "이용 안내",
+          "font": "11px",
+          "lineHeight": "14.85px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 321.328125,
+            "y": 778,
+            "width": 60.671875,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "홈",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(37, 152, 120)",
+          "background": [
+            241,
+            248,
+            243
+          ],
+          "contrast": 3.33,
+          "box": {
+            "x": 33.71875,
+            "y": 809,
+            "width": 9.203125,
+            "height": 13.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "내 기록",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 85.78125,
+            "y": 809,
+            "width": 30.40625,
+            "height": 13.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "복약",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 154.453125,
+            "y": 809,
+            "width": 18.40625,
+            "height": 13.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "메시지",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 212.515625,
+            "y": 809,
+            "width": 27.609375,
+            "height": 13.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "건강 연결",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 269.1875,
+            "y": 809,
+            "width": 39.609375,
+            "height": 13.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "이용 안내",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 331.859375,
+            "y": 809,
+            "width": 39.609375,
+            "height": 13.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".small-label",
+          "text": "오늘의 기록",
+          "font": "12px",
+          "lineHeight": "18px",
+          "color": "rgb(113, 133, 121)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 3.94,
+          "box": {
+            "x": 45,
+            "y": 513.6875,
+            "width": 58.5625,
+            "height": 17
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".source-caption",
+          "text": "활동: 직접 입력 · 수면: 직접 입력",
+          "font": "10px",
+          "lineHeight": "15px",
+          "color": "rgb(126, 144, 131)",
+          "background": [
+            248,
+            250,
+            249
+          ],
+          "contrast": 3.23,
+          "box": {
+            "x": 24,
+            "y": 1159.1875,
+            "width": 342,
+            "height": 15
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".metric-heading",
+          "text": "걸음 수",
+          "font": "12px",
+          "lineHeight": "18px",
+          "color": "rgb(113, 133, 121)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 3.94,
+          "box": {
+            "x": 40,
+            "y": 910.6875,
+            "width": 134,
+            "height": 18
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".metric-heading",
+          "text": "수면",
+          "font": "12px",
+          "lineHeight": "18px",
+          "color": "rgb(113, 133, 121)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 3.94,
+          "box": {
+            "x": 216,
+            "y": 910.6875,
+            "width": 134,
+            "height": 18
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".metric-heading",
+          "text": "복약",
+          "font": "12px",
+          "lineHeight": "18px",
+          "color": "rgb(113, 133, 121)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 3.94,
+          "box": {
+            "x": 40,
+            "y": 1044.6875,
+            "width": 134,
+            "height": 18
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".metric-heading",
+          "text": "단백질",
+          "font": "12px",
+          "lineHeight": "18px",
+          "color": "rgb(113, 133, 121)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 3.94,
+          "box": {
+            "x": 216,
+            "y": 1044.6875,
+            "width": 134,
+            "height": 18
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".metric-status",
+          "text": "직접 입력",
+          "font": "11px",
+          "lineHeight": "16.5px",
+          "color": "rgb(123, 143, 126)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 3.46,
+          "box": {
+            "x": 40,
+            "y": 979.1875,
+            "width": 134,
+            "height": 16.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".metric-status",
+          "text": "직접 입력",
+          "font": "11px",
+          "lineHeight": "16.5px",
+          "color": "rgb(123, 143, 126)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 3.46,
+          "box": {
+            "x": 216,
+            "y": 979.1875,
+            "width": 134,
+            "height": 16.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".metric-status",
+          "text": "하루 전체 자기보고",
+          "font": "11px",
+          "lineHeight": "16.5px",
+          "color": "rgb(123, 143, 126)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 3.46,
+          "box": {
+            "x": 40,
+            "y": 1113.1875,
+            "width": 134,
+            "height": 16.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".metric-status",
+          "text": "식사 2회 · 데모 추정",
+          "font": "11px",
+          "lineHeight": "16.5px",
+          "color": "rgb(123, 143, 126)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 3.46,
+          "box": {
+            "x": 216,
+            "y": 1113.1875,
+            "width": 134,
+            "height": 16.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".greeting>p:last-of-type",
+          "text": "오늘의 작은 기록이 진료에 도움이 돼요.",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(113, 133, 121)",
+          "background": [
+            248,
+            250,
+            249
+          ],
+          "contrast": 3.76,
+          "box": {
+            "x": 24,
+            "y": 445.1875,
+            "width": 342,
+            "height": 19.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#open-daily",
+          "text": "기록하기\n＋",
+          "font": "12px",
+          "lineHeight": "18px",
+          "color": "rgb(123, 147, 134)",
+          "background": [
+            248,
+            250,
+            249
+          ],
+          "contrast": 3.15,
+          "box": {
+            "x": 300.8125,
+            "y": 840.1875,
+            "width": 65.1875,
+            "height": 38
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".auth-strip a",
+          "text": "계정",
+          "font": "12px",
+          "lineHeight": "18px",
+          "color": "rgb(53, 86, 75)",
+          "background": [
+            238,
+            245,
+            242
+          ],
+          "contrast": 7.34,
+          "box": {
+            "x": 209.171875,
+            "y": 84,
+            "width": 22.09375,
+            "height": 44
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".auth-strip a",
+          "text": "로그인 안내",
+          "font": "12px",
+          "lineHeight": "18px",
+          "color": "rgb(53, 86, 75)",
+          "background": [
+            238,
+            245,
+            242
+          ],
+          "contrast": 7.34,
+          "box": {
+            "x": 241.265625,
+            "y": 84,
+            "width": 58.5625,
+            "height": 44
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".auth-strip button",
+          "text": "로그아웃",
+          "font": "12px",
+          "lineHeight": "18px",
+          "color": "rgb(53, 86, 75)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 8.13,
+          "box": {
+            "x": 309.828125,
+            "y": 84,
+            "width": 66.171875,
+            "height": 44
+          },
+          "opacity": "1"
+        }
+      ]
+    },
+    {
+      "label": "meal390",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "values": [
+        {
+          "selector": "#meal-dialog .field-hint",
+          "text": "아이폰 HEIC 사진이 선택되지 않으면 JPEG/PNG로 저장해 선택해 주세요. 남은 음식 사진은 음식과 드신 양을 ",
+          "font": "11px",
+          "lineHeight": "18.7px",
+          "color": "rgb(127, 144, 123)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 3.4,
+          "box": {
+            "x": 23,
+            "y": 465.5,
+            "width": 344,
+            "height": 37.375
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .section-description",
+          "text": "현재 사진 AI가 설정되지 않았어요. 아래에서 음식 유형과 드신 양을 직접 선택해 기록할 수 있어요.",
+          "font": "12px",
+          "lineHeight": "21.6px",
+          "color": "rgb(115, 134, 107)",
+          "background": [
+            245,
+            248,
+            243
+          ],
+          "contrast": 3.66,
+          "box": {
+            "x": 39,
+            "y": 571.375,
+            "width": 312,
+            "height": 43.1875
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "아침",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(138, 156, 142)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 2.91,
+          "box": {
+            "x": 23,
+            "y": 231.5,
+            "width": 80.75,
+            "height": 48
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "점심",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(138, 156, 142)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 2.91,
+          "box": {
+            "x": 110.75,
+            "y": 231.5,
+            "width": 80.75,
+            "height": 48
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "저녁",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(71, 126, 86)",
+          "background": [
+            237,
+            247,
+            238
+          ],
+          "contrast": 4.36,
+          "box": {
+            "x": 198.5,
+            "y": 231.5,
+            "width": 80.75,
+            "height": 48
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "간식",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(138, 156, 142)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 2.91,
+          "box": {
+            "x": 286.25,
+            "y": 231.5,
+            "width": 80.75,
+            "height": 48
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "밥과 반찬\n균형 잡힌 일반식",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(71, 126, 86)",
+          "background": [
+            237,
+            247,
+            238
+          ],
+          "contrast": 4.36,
+          "box": {
+            "x": 23,
+            "y": 811.75,
+            "width": 168.5,
+            "height": 69
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "죽·부드러운 식사\n부담 없는 가벼운 한 끼",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(138, 156, 142)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 2.91,
+          "box": {
+            "x": 198.5,
+            "y": 811.75,
+            "width": 168.5,
+            "height": 69
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "고기·생선·두부\n단백질 중심 식사",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(138, 156, 142)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 2.91,
+          "box": {
+            "x": 23,
+            "y": 887.75,
+            "width": 168.5,
+            "height": 69
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "면·빵\n간편한 식사",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(138, 156, 142)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 2.91,
+          "box": {
+            "x": 198.5,
+            "y": 887.75,
+            "width": 168.5,
+            "height": 69
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "¼",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(138, 156, 142)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 2.91,
+          "box": {
+            "x": 23,
+            "y": 1010.75,
+            "width": 80.75,
+            "height": 48
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "절반",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(138, 156, 142)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 2.91,
+          "box": {
+            "x": 110.75,
+            "y": 1010.75,
+            "width": 80.75,
+            "height": 48
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "¾",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(138, 156, 142)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 2.91,
+          "box": {
+            "x": 198.5,
+            "y": 1010.75,
+            "width": 80.75,
+            "height": 48
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .choice>span",
+          "text": "모두",
+          "font": "13px",
+          "lineHeight": "19.5px",
+          "color": "rgb(71, 126, 86)",
+          "background": [
+            237,
+            247,
+            238
+          ],
+          "contrast": 4.36,
+          "box": {
+            "x": 286.25,
+            "y": 1010.75,
+            "width": 80.75,
+            "height": 48
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .close-dialog",
+          "text": "",
+          "font": "15px",
+          "lineHeight": "22.5px",
+          "color": "rgb(68, 105, 81)",
+          "background": [
+            244,
+            247,
+            243
+          ],
+          "contrast": 5.74,
+          "box": {
+            "x": 328,
+            "y": 16.25,
+            "width": 44,
+            "height": 44
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#meal-dialog .analysis-consent",
+          "text": "먹기 전 전체 음식 사진을 외부 AI 서비스로 보내 분석하는 데 동의해요.",
+          "font": "12px",
+          "lineHeight": "21.6px",
+          "color": "rgb(112, 132, 102)",
+          "background": [
+            245,
+            248,
+            243
+          ],
+          "contrast": 3.78,
+          "box": {
+            "x": 39,
+            "y": 626.5625,
+            "width": 312,
+            "height": 43.1875
+          },
+          "opacity": "1"
+        }
+      ]
+    },
+    {
+      "label": "medication390",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "values": [
+        {
+          "selector": ".inline-notice",
+          "text": "아래 기록은 자기보고예요. 약의 용량이나 복용 일정은 의료진과 상의해 주세요.",
+          "font": "12px",
+          "lineHeight": "21.6px",
+          "color": "rgb(102, 129, 110)",
+          "background": [
+            241,
+            246,
+            243
+          ],
+          "contrast": 3.9,
+          "box": {
+            "x": 24,
+            "y": 539.5,
+            "width": 342,
+            "height": 71.1875
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#view-medication .section-description",
+          "text": "약봉투·포장 글자와 기존 계획을 대조해요. 등록된 약별 일정이 있어야 사용할 수 있어요.",
+          "font": "13px",
+          "lineHeight": "23.4px",
+          "color": "rgb(116, 136, 123)",
+          "background": [
+            248,
+            250,
+            249
+          ],
+          "contrast": 3.61,
+          "box": {
+            "x": 24,
+            "y": 680.6875,
+            "width": 342,
+            "height": 46.78125
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#view-medication .section-description",
+          "text": "이 날짜에는 등록된 약별 일정이 없어요. 하루 전체의 복약 상태만 남길 수 있어요. 약별 회차 기록과 구분해서 보관해",
+          "font": "13px",
+          "lineHeight": "23.4px",
+          "color": "rgb(116, 136, 123)",
+          "background": [
+            255,
+            255,
+            255
+          ],
+          "contrast": 3.78,
+          "box": {
+            "x": 43,
+            "y": 901.203125,
+            "width": 304,
+            "height": 70.171875
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": "#view-medication .text-button",
+          "text": "복약 목록 새로고침",
+          "font": "12px",
+          "lineHeight": "18px",
+          "color": "rgb(123, 147, 134)",
+          "background": [
+            248,
+            250,
+            249
+          ],
+          "contrast": 3.15,
+          "box": {
+            "x": 24,
+            "y": 727.46875,
+            "width": 95.046875,
+            "height": 38
+          },
+          "opacity": "1"
+        }
+      ]
+    },
+    {
+      "label": "home320",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "values": [
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "홈",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(37, 152, 120)",
+          "background": [
+            241,
+            248,
+            243
+          ],
+          "contrast": 3.33,
+          "box": {
+            "x": 4,
+            "y": 778,
+            "width": 52,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "내 기록",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 56,
+            "y": 778,
+            "width": 52,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "복약",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 108,
+            "y": 778,
+            "width": 52,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "메시지",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 160,
+            "y": 778,
+            "width": 52,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "건강 연결",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 212,
+            "y": 778,
+            "width": 52,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item",
+          "text": "이용 안내",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 264,
+            "y": 778,
+            "width": 52,
+            "height": 54
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "홈",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(37, 152, 120)",
+          "background": [
+            241,
+            248,
+            243
+          ],
+          "contrast": 3.33,
+          "box": {
+            "x": 25.390625,
+            "y": 809,
+            "width": 9.203125,
+            "height": 13.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "내 기록",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 66.796875,
+            "y": 809,
+            "width": 30.40625,
+            "height": 13.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "복약",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 124.796875,
+            "y": 809,
+            "width": 18.40625,
+            "height": 13.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "메시지",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 172.1875,
+            "y": 809,
+            "width": 27.609375,
+            "height": 13.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "건강 연결",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 218.1875,
+            "y": 809,
+            "width": 39.609375,
+            "height": 13.5
+          },
+          "opacity": "1"
+        },
+        {
+          "selector": ".bottom-nav .nav-item span",
+          "text": "이용 안내",
+          "font": "10px",
+          "lineHeight": "13.5px",
+          "color": "rgb(168, 180, 172)",
+          "background": [
+            254.559,
+            254.685,
+            254.62199999999999
+          ],
+          "contrast": 2.14,
+          "box": {
+            "x": 270.1875,
+            "y": 809,
+            "width": 39.609375,
+            "height": 13.5
+          },
+          "opacity": "1"
+        }
+      ]
+    }
+  ],
+  "homeWithoutNotices": {
+    "x": 24,
+    "y": 657.1875,
+    "width": 165,
+    "height": 154
+  },
+  "homeWithFiveNotices": {
+    "x": 24,
+    "y": 972.1875,
+    "width": 165,
+    "height": 154
+  }
+}

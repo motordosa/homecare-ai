@@ -1,0 +1,15 @@
+{
+  "localTemporaryDatabase": true,
+  "sourceCommit": "4068c3c",
+  "observedAt": "2026-10-23T07:22:35.072Z",
+  "unsavedMedicationModal": {
+    "closedAfterEscape": true,
+    "confirmationCount": 0,
+    "reopenedNameEmpty": true
+  },
+  "visibleClinicianText": {
+    "count": 123,
+    "under12px": 123,
+    "minPx": 7
+  }
+}

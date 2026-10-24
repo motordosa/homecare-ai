@@ -1,0 +1,218 @@
+[
+  {
+    "key": "wcag22",
+    "url": "https://www.w3.org/TR/WCAG22/",
+    "accessed": "2026-10-23",
+    "status": "unread",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "errorType": "URLError"
+  },
+  {
+    "key": "ahrq_toolkit",
+    "url": "https://www.ahrq.gov/health-literacy/improve/precautions/index.html",
+    "accessed": "2026-10-23",
+    "status": "unread",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "errorType": "URLError"
+  },
+  {
+    "key": "nia_healthinfo",
+    "url": "https://www.nia.nih.gov/health/healthy-aging/how-find-reliable-health-information-online",
+    "accessed": "2026-10-23",
+    "status": "unread",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "errorType": "URLError"
+  },
+  {
+    "key": "kwcag_nia",
+    "url": "https://www.wah.or.kr:444/Participation/guide.asp",
+    "accessed": "2026-10-23",
+    "status": "unread",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "errorType": "URLError"
+  },
+  {
+    "key": "cdc_clear",
+    "url": "https://www.cdc.gov/ccindex/index.html",
+    "accessed": "2026-10-23",
+    "status": "unread",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "errorType": "URLError"
+  },
+  {
+    "key": "healthgov_literacy",
+    "url": "https://odphp.health.gov/healthliteracyonline/",
+    "accessed": "2026-10-23",
+    "status": "unread",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "errorType": "URLError"
+  },
+  {
+    "key": "pubmed",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/?term=older+adults+mobile+health+usability+systematic+review",
+    "accessed": "2026-10-23",
+    "status": "unread",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "errorType": "URLError"
+  },
+  {
+    "key": "apple_accessibility",
+    "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+    "accessed": "2026-10-23",
+    "status": "read",
+    "httpStatus": 200,
+    "finalUrl": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+    "bytes": 18008,
+    "contentType": "text/html"
+  },
+  {
+    "key": "apple_hig_accessibility_data",
+    "url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/accessibility.json",
+    "accessed": "2026-10-23",
+    "status": "read",
+    "httpStatus": 200,
+    "finalUrl": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/accessibility.json",
+    "bytes": 85010,
+    "contentType": "application/json"
+  },
+  {
+    "key": "android_accessibility_principles",
+    "url": "https://developer.android.com/guide/topics/ui/accessibility/principles",
+    "accessed": "2026-10-23",
+    "status": "unread",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "errorType": "URLError"
+  },
+  {
+    "key": "microsoft_accessibility",
+    "url": "https://learn.microsoft.com/en-us/windows/apps/design/accessibility/accessibility",
+    "accessed": "2026-10-23",
+    "status": "unread",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "errorType": "URLError"
+  },
+  {
+    "key": "nng_seniors",
+    "url": "https://www.nngroup.com/articles/usability-for-senior-citizens/",
+    "accessed": "2026-10-23",
+    "status": "unread",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "errorType": "URLError"
+  },
+  {
+    "key": "apple_typography",
+    "url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/typography.json",
+    "canonicalUrl": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "accessed": "2026-10-23",
+    "status": "read",
+    "httpStatus": 200,
+    "bytes": 281141,
+    "title": "Typography",
+    "metadata": {
+      "alert-date": "2025-12-16",
+      "alert-text": "Added emphasized weights to the Dynamic Type style specifications for each platform.",
+      "supported-platforms": "ios,ipados,macos,tvos,visionos,watchos"
+    }
+  },
+  {
+    "key": "apple_inclusion",
+    "url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/inclusion.json",
+    "canonicalUrl": "https://developer.apple.com/design/human-interface-guidelines/inclusion",
+    "accessed": "2026-10-23",
+    "status": "read",
+    "httpStatus": 200,
+    "bytes": 51352,
+    "title": "Inclusion",
+    "metadata": {
+      "supported-platforms": "ios,ipados,macos,tvos,visionos,watchos"
+    }
+  },
+  {
+    "key": "apple_voiceover",
+    "url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/voiceover.json",
+    "canonicalUrl": "https://developer.apple.com/design/human-interface-guidelines/voiceover",
+    "accessed": "2026-10-23",
+    "status": "read",
+    "httpStatus": 200,
+    "bytes": 36439,
+    "title": "VoiceOver",
+    "metadata": {
+      "alert-date": "2025-03-07",
+      "alert-text": "New page.",
+      "supported-platforms": "ios,ipados,macos,tvos,visionos,watchos"
+    }
+  },
+  {
+    "key": "apple_entering-data",
+    "url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/entering-data.json",
+    "canonicalUrl": "https://developer.apple.com/design/human-interface-guidelines/entering-data",
+    "accessed": "2026-10-23",
+    "status": "read",
+    "httpStatus": 200,
+    "bytes": 21929,
+    "title": "Entering data",
+    "metadata": {
+      "alert-date": "2023-06-21",
+      "alert-text": "Updated to include guidance for visionOS.",
+      "supported-platforms": "ios,ipados,macos,tvos,visionos,watchos"
+    }
+  },
+  {
+    "key": "apple_feedback",
+    "url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/feedback.json",
+    "canonicalUrl": "https://developer.apple.com/design/human-interface-guidelines/feedback",
+    "accessed": "2026-10-23",
+    "status": "read",
+    "httpStatus": 200,
+    "bytes": 19462,
+    "title": "Feedback",
+    "metadata": {
+      "supported-platforms": "ios,ipados,macos,tvos,visionos,watchos"
+    }
+  },
+  {
+    "key": "apple_writing",
+    "url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/writing.json",
+    "canonicalUrl": "https://developer.apple.com/design/human-interface-guidelines/writing",
+    "accessed": "2026-10-23",
+    "status": "read",
+    "httpStatus": 200,
+    "bytes": 37074,
+    "title": "Writing",
+    "metadata": {
+      "alert-date": "2025-12-16",
+      "alert-text": "Clarified guidance on language patterns, and added guidance for possessive pronouns.",
+      "supported-platforms": "ios,ipados,macos,tvos,visionos,watchos"
+    }
+  },
+  {
+    "key": "apple_progress-indicators",
+    "url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/progress-indicators.json",
+    "canonicalUrl": "https://developer.apple.com/design/human-interface-guidelines/progress-indicators",
+    "accessed": "2026-10-23",
+    "status": "read",
+    "httpStatus": 200,
+    "bytes": 27214,
+    "title": "Progress indicators",
+    "metadata": {
+      "alert-date": "2023-09-12",
+      "alert-text": "Combined guidance common to all platforms.",
+      "supported-platforms": "ios,ipados,macos,tvos,visionos,watchos"
+    }
+  },
+  {
+    "key": "apple_onboarding",
+    "url": "https://developer.apple.com/tutorials/data/design/human-interface-guidelines/onboarding.json",
+    "canonicalUrl": "https://developer.apple.com/design/human-interface-guidelines/onboarding",
+    "accessed": "2026-10-23",
+    "status": "read",
+    "httpStatus": 200,
+    "bytes": 21786,
+    "title": "Onboarding",
+    "metadata": {
+      "alert-date": "2024-06-10",
+      "alert-text": "Clarified different approaches to onboarding and added a guideline on displaying a splash screen.",
+      "supported-platforms": "ios,ipados,macos,tvos,visionos,watchos"
+    }
+  }
+]

@@ -1,8 +1,9 @@
 "use strict";
 
-import { bootstrapSession, sessionState, sessionHeaders, sessionExpired, demoPatient } from './session.js';
+import { bootstrapSession, sessionState, sessionHeaders, sessionExpired, demoPatient, assertSessionActive } from './session.js';
 import { createMedicationPhoto } from './patient-medication-photo.js';
 import { createPatientCommunications } from './patient-communications.js';
+import { preparePatientImage } from './patient-image.js';
 
 import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
@@ -12,7 +13,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   const views = Object.keys(PATIENT_SCREENS);
   const metrics = ["steps", "sleepHours", "proteinGrams"];
   const dailyModes = { all: { fields: ["steps", "sleepHours", "weightKg", "medicationStatus", "appetite", "mood", "note"], hint: "입력하거나 바꾼 항목만 저장해요. 답하지 않은 항목은 미보고로 남아요." }, steps: { fields: ["steps"], hint: "이 날짜의 걸음 수만 저장해요. 수면이나 복약 기록은 바뀌지 않아요." }, sleep: { fields: ["sleepHours"], hint: "이 날짜의 수면 시간만 저장해요. 활동이나 복약 기록은 바뀌지 않아요." } };
-  const state = { patients: [], patientId: null, summary: null, view: "home", metric: "steps", section: null, imageData: null, loading: false, saving: null, photoLoading: false, requestId: 0, dateRequestId: 0, photoRequestId: 0, dailyMode: "all", dailyBaseline: {}, capabilities: null, analysis: null, analysisBusy: false, analysisRequestId: 0, medicationDate: null, medicationSchedule: null, todayMedication: null, medicationRequestId: 0, medicationBusy: false, connectionRequestId: 0, connections: null, connectionBusy: false };
+  const state = { patients: [], patientId: null, summary: null, view: "home", metric: "steps", section: null, imageData: null, loading: false, saving: null, photoLoading: false, requestId: 0, dateRequestId: 0, photoRequestId: 0, dailyMode: "all", dailyBaseline: {}, dailyRevision: 0, dailySubmissionKey: null, dailySubmissionPayload: null, legacyDailyRevision: 0, legacySubmissionKey: null, legacySubmissionPayload: null, mealSubmissionKey: null, mealSubmissionPayload: null, capabilities: null, analysis: null, analysisBusy: false, analysisRequestId: 0, medicationDate: null, medicationSchedule: null, todayMedication: null, medicationRequestId: 0, medicationBusy: false, connectionRequestId: 0, connections: null, connectionBusy: false };
   const communication = createPatientCommunications({api,getView:()=>state.view,isBusy:()=>Boolean(state.saving||state.loading),setBusy:value=>{state.saving=value?'message':null;renderNavigation();},toast});
   const labels = { meal: { breakfast: "아침", lunch: "점심", dinner: "저녁", snack: "간식" }, food: { balanced: "밥과 반찬", porridge: "죽·부드러운 식사", protein: "고기·생선·두부", noodles: "면·빵" }, medication: { taken: "모두 복용", partial: "일부 복용", missed: "미복용", unknown: "기억나지 않음" }, appetite: { good: "좋음", normal: "보통", poor: "적음" }, mood: { good: "좋음", normal: "보통", poor: "가라앉음" } };
   const icons = {
@@ -28,7 +29,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     getContext: () => ({ patientId: state.patientId, date: state.medicationDate, schedule: state.medicationSchedule, name: state.summary?.patient.name || '', vision: state.capabilities?.vision, busy: Boolean(state.saving || state.loading) }),
     openDialog: openRecordDialog, setBusy: value => { state.saving = value ? 'medication-photo' : null; renderNavigation(); },
     onSaved: async () => {
-      toast('사진과 복약 자기보고를 저장했어요.');
+      savedFeedback('사진 복약 자기보고', state.medicationDate);
       try { await loadMedicationSchedule(); await loadPatient(state.patientId, { preserveMedicationInputs: true }); }
       catch { formError('#medication-error', '저장은 완료했지만 목록을 다시 불러오지 못했어요. 새로고침해 주세요.'); }
     },
@@ -96,13 +97,14 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   }
 
   async function api(path, options = {}) {
+    assertSessionActive();
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), path.endsWith("/photo-analyses") ? 65000 : 20000);
     try {
       const response = await fetch(path, { ...options, headers: { "Content-Type": "application/json", ...sessionHeaders(), ...(options.headers || {}) }, signal: controller.signal });
       const payload = await response.json().catch(() => ({}));
       if(response.status===401)sessionExpired();
-      if (!response.ok) throw new Error(payload.error || "기록을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.");
+      if (!response.ok) { const issue = new Error(payload.error || "기록을 처리하지 못했어요. 잠시 후 다시 시도해 주세요."); issue.status = response.status; throw issue; }
       return payload;
     } catch (error) {
       if (error.name === "AbortError") throw new Error("응답이 지연되고 있어요. 연결 상태를 확인하고 다시 시도해 주세요.");
@@ -119,6 +121,24 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     toastTimer = setTimeout(() => { element.hidden = true; }, 4000);
   }
 
+  function savedFeedback(item, date, detail = '저장한 내용은 내 기록에서 다시 확인할 수 있어요.') {
+    $('#save-confirmation-title').textContent = `${state.summary?.patient?.name || '환자'}님 · ${date} · ${item} 저장 완료`;
+    $('#save-confirmation-detail').textContent = detail;
+    $('#save-confirmation').hidden = false;
+    toast(`${item}을 저장했어요.`);
+  }
+
+  function savedRefreshFailed() {
+    $('#save-confirmation-detail').textContent = '저장은 완료했어요. 최신 목록을 불러오지 못했으니 다시 불러오기를 눌러 주세요.';
+    $('#save-confirmation').hidden = false;
+  }
+
+  function networkNotice() {
+    const notice = $('#connection-status-notice');
+    notice.hidden = false;
+    notice.textContent = navigator.onLine ? '인터넷 연결이 돌아왔어요. 입력 내용을 확인한 뒤 저장 버튼을 눌러 주세요. 자동으로 다시 저장하지 않아요.' : '인터넷 연결이 끊겼어요. 입력은 현재 화면에만 남아 있어요. 창을 닫거나 새로고침하지 말고 연결 후 저장해 주세요.';
+  }
+
   function showError(message) {
     $("#load-error-message").textContent = message;
     $("#load-error").hidden = false;
@@ -132,6 +152,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
   function invalidateAnalysis() {
     ++state.analysisRequestId;
+    if (state.analysis) $$('#meal-form input[name="foodType"]').forEach(input => { input.checked = false; });
     state.analysis = null;
     state.analysisBusy = false;
     $("#meal-analysis-review").replaceChildren();
@@ -155,6 +176,8 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       ++state.dateRequestId;
       invalidateAnalysis();
       clearConnectionToken();
+      $("#save-confirmation").hidden = true;
+      state.mealSubmissionKey = null; state.mealSubmissionPayload = null;
       state.medicationSchedule = null;
       state.connections = null;
       if (!state.saving) $$("dialog[open]").forEach(dialog => dialog.close());
@@ -225,16 +248,17 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       { label: "수면", done: numeric(record?.sleepHours) },
     ];
     const count = tasks.filter((task) => task.done).length;
-    $("#progress-count").innerHTML = `${count}<span> / 4</span>`;
+    $("#progress-count").innerHTML = `${count}<span>종류</span>`;
     $("#progress-fill").style.width = `${count * 25}%`;
-    $("#progress-heading").textContent = count === 4 ? "오늘의 기록을 모두 채웠어요" : count === 0 ? "차근차근 채워보세요" : "잘하고 있어요, 조금만 더!";
+    $("#progress-heading").textContent = count ? "오늘 남긴 기록이에요" : "필요한 기록부터 남겨요";
     $("#task-chips").innerHTML = tasks.map((task) => `<span class="task-chip${task.done ? " done" : ""}"><span class="check-dot" aria-hidden="true">${task.done ? "✓" : ""}</span>${task.label}<span class="sr-only">${task.done ? "기록 완료" : "미기록"}</span></span>`).join("");
-    const protein = meals.reduce((sum, meal) => sum + (Number(meal.proteinGrams) || 0), 0);
+    const knownMeals = meals.filter(meal => numeric(meal.proteinGrams));
+    const protein = knownMeals.reduce((sum, meal) => sum + Number(meal.proteinGrams), 0);
     const cards = [
       { icon: "steps", label: "걸음 수", value: numeric(record?.steps) ? number(record.steps) : null, unit: "걸음", status: numeric(record?.steps) ? sourceLabel(record.stepsSource, record.steps) : "오늘의 활동을 남겨요", target: "steps" },
       { icon: "sleep", label: "수면", value: numeric(record?.sleepHours) ? number(record.sleepHours, 1) : null, unit: "시간", status: numeric(record?.sleepHours) ? sourceLabel(record.sleepSource, record.sleepHours) : "어젯밤 얼마나 주무셨나요?", target: "sleep" },
       { icon: "medication", label: "복약", value: !schedule ? "일정 확인 필요" : scheduled ? `${reported}/${slots.length}회 보고` : record?.medicationStatus ? labels.medication[record.medicationStatus] : null, unit: "", status: !schedule ? "목록을 다시 불러와 주세요" : scheduled ? `${taken}회 복용 보고 · ${slots.length - reported}회 미보고` : record?.medicationStatus ? "하루 전체 자기보고" : "오늘의 복약을 남겨요", target: "medication" },
-      { icon: "nutrition", label: "단백질", value: meals.length ? number(protein, 1) : null, unit: "g", status: meals.length ? `식사 ${meals.length}회 · 데모 추정` : "식사를 기록하면 보여요", target: "nutrition" },
+      { icon: "nutrition", label: "단백질", value: knownMeals.length ? number(protein, 1) : meals.length ? "양 미상" : null, unit: knownMeals.length ? "g" : "", status: meals.length ? `기록한 식사 추정 합계 · ${meals.length - knownMeals.length}회 양 미상` : "식사를 기록하면 보여요", target: "nutrition" },
     ];
     $("#today-metrics").innerHTML = cards.map((card) => `<button class="health-card" type="button" data-action="${card.target}" aria-label="${escape(card.label)} ${card.value === null ? "미기록" : escape(card.value + " " + card.unit)}. ${card.target === "nutrition" ? "식사 기록 보기" : card.target === "medication" ? "복약 목록 보기" : "기록하기"}"><span class="metric-heading">${svg(card.icon)}${card.label}</span><span class="metric-value${card.value === null ? " empty" : ""}">${card.value === null ? "아직 기록 전" : escape(card.value)}${card.value !== null && card.unit ? `<small>${card.unit}</small>` : ""}</span><span class="metric-status">${escape(card.status)}</span></button>`).join("");
     $("#health-source-caption").textContent = `활동: ${sourceLabel(record?.stepsSource, record?.steps)} · 수면: ${sourceLabel(record?.sleepSource, record?.sleepHours)}`;
@@ -255,8 +279,8 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     }
     container.innerHTML = `<div class="meal-list">${meals.map((meal) => {
       const imageUrl = safeImageUrl(meal.imageUrl);
-      const portion = Number(meal.portion) === 1 ? "모두" : `${number(Number(meal.portion) * 100)}%`;
-      return `<article class="meal-item">${imageUrl ? `<img class="meal-thumb" src="${escape(imageUrl)}" alt="${escape(labels.meal[meal.mealType] || "식사")} 기록 사진" loading="lazy">` : `<span class="meal-thumb meal-placeholder" aria-hidden="true">${svg("meal")}</span>`}<div class="meal-details"><h3 class="meal-title">${escape(meal.foodLabel || labels.food[meal.foodType] || "식사 기록")}</h3><p class="meal-meta">${escape(shortDate(meal.date))} · ${escape(labels.meal[meal.mealType] || meal.mealType)} · ${escape(portion)}</p></div><p class="meal-nutrition">${number(meal.calories)} <span>kcal</span><small>단백질 ${number(meal.proteinGrams, 1)}g · 추정</small><small class="record-source">${meal.source?.includes("vision") || meal.analysisId ? "AI 초안 확인 기록" : "수동 선택 예시"}</small></p></article>`;
+      const portion = !numeric(meal.portion) ? "드신 양 모름" : Number(meal.portion) === 0 ? "안 먹었어요" : Number(meal.portion) === 1 ? "모두" : `${number(Number(meal.portion) * 100)}%`;
+      return `<article class="meal-item">${imageUrl ? `<img class="meal-thumb" src="${escape(imageUrl)}" alt="${escape(labels.meal[meal.mealType] || "식사")} 기록 사진" loading="lazy">` : `<span class="meal-thumb meal-placeholder" aria-hidden="true">${svg("meal")}</span>`}<div class="meal-details"><h3 class="meal-title">${escape(meal.foodLabel || labels.food[meal.foodType] || "식사 기록")}</h3><p class="meal-meta">${escape(shortDate(meal.date))} · ${escape(labels.meal[meal.mealType] || meal.mealType)} · ${escape(portion)}</p></div><p class="meal-nutrition">${numeric(meal.calories) ? `${number(meal.calories)} <span>kcal</span>` : "영양량 미상"}<small>${numeric(meal.proteinGrams) ? `단백질 ${number(meal.proteinGrams, 1)}g · 추정` : "드신 양을 몰라 계산하지 않았어요"}</small><small class="record-source">${meal.source?.includes("vision") || meal.analysisId ? "AI 초안 확인 기록" : "수동 선택 예시"}</small></p></article>`;
     }).join("")}</div>`;
   }
 
@@ -264,9 +288,9 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     renderChart();
     const trends = [...(state.summary.trends || [])].slice(-7).reverse();
     $("#daily-history").innerHTML = trends.length ? trends.map((entry) => {
-      const hasDaily = entry.hasDaily || numeric(entry.steps) || numeric(entry.sleepHours) || Boolean(entry.medicationStatus);
+      const hasDaily = entry.hasDaily || entry.hasDoseReport || numeric(entry.steps) || numeric(entry.sleepHours) || Boolean(entry.medicationStatus);
       const values = [numeric(entry.steps) ? `${number(entry.steps)}걸음` : "활동 미기록", numeric(entry.sleepHours) ? `수면 ${number(entry.sleepHours, 1)}시간` : "수면 미기록"];
-      return `<div class="history-row"><div class="history-date"><strong>${escape(shortDate(entry.date).replace(/\.\s*$/, ""))}</strong><span>${escape(weekday(entry.date))}요일</span></div><p class="history-values">${hasDaily ? values.join("<br>") : "아직 남긴 기록이 없어요"}${hasDaily ? `<small class="record-source">활동 ${escape(sourceLabel(entry.stepsSource, entry.steps))} · 수면 ${escape(sourceLabel(entry.sleepSource, entry.sleepHours))}</small>` : ""}</p><span class="history-med${!entry.medicationStatus || entry.medicationStatus === "unknown" ? " missing" : ""}">${escape(labels.medication[entry.medicationStatus] || "일일 복약 미기록")}</span><button type="button" class="history-edit text-button" data-action="edit-daily" data-date="${escape(entry.date)}" aria-label="${escape(shortDate(entry.date))} 건강 기록 수정">수정</button></div>`;
+      return `<div class="history-row"><div class="history-date"><strong>${escape(shortDate(entry.date).replace(/\.\s*$/, ""))}</strong><span>${escape(weekday(entry.date))}요일</span></div><p class="history-values">${hasDaily ? values.join("<br>") : "아직 남긴 기록이 없어요"}${hasDaily ? `<small class="record-source">활동 ${escape(sourceLabel(entry.stepsSource, entry.steps))} · 수면 ${escape(sourceLabel(entry.sleepSource, entry.sleepHours))}</small>` : ""}</p><span class="history-med${!entry.medicationStatus || entry.medicationStatus === "unknown" ? " missing" : ""}">${entry.hasDoseReport ? `${number(entry.doseReportedSlots)}회차 보고 · ` : ""}${escape(labels.medication[entry.medicationStatus] || "일일 복약 미기록")}</span><button type="button" class="history-edit text-button" data-action="edit-daily" data-date="${escape(entry.date)}" aria-label="${escape(shortDate(entry.date))} 건강 기록 수정">수정</button></div>`;
     }).join("") : '<p class="history-empty">아직 건강 기록이 없어요.</p>';
     const meals = state.summary.recentMeals || [];
     renderMeals($("#all-meals"), meals);
@@ -277,22 +301,24 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     const config = {
       steps: { unit: "걸음", label: "걸음 수", digits: 0, note: "기록이 있는 날의 하루 평균 걸음 수예요." },
       sleepHours: { unit: "시간", label: "수면 시간", digits: 1, note: "기록이 있는 날의 하루 평균 수면 시간이에요." },
-      proteinGrams: { unit: "g", label: "단백질", digits: 1, note: "식사를 기록한 날의 하루 평균 영양 추정량이에요. 사진 초안 또는 직접 선택한 음식과 섭취 비율로 계산해요." },
+      proteinGrams: { unit: "g", label: "단백질", digits: 1, note: "기록된 식사 추정 합계의 기록일 평균이에요. 전체 섭취량을 뜻하지 않아요. 사진 초안 또는 직접 선택한 음식과 섭취 비율로 계산해요." },
     }[state.metric];
     const trends = [...(state.summary.trends || [])].slice(-7);
     const entries = trends.map((entry) => {
-      const hasValue = state.metric === "proteinGrams" ? numeric(entry.proteinGrams) && (Number(entry.calories) > 0 || Number(entry.proteinGrams) > 0) : numeric(entry[state.metric]);
+      const hasValue = numeric(entry[state.metric]);
       return { ...entry, value: hasValue ? Number(entry[state.metric]) : null };
     });
     const values = entries.filter((entry) => entry.value !== null).map((entry) => entry.value);
     const average = values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
     $("#trend-value").textContent = average === null ? "—" : number(average, config.digits);
     $("#trend-unit").textContent = config.unit;
-    $("#trend-description").textContent = values.length ? `기록한 ${values.length}일의 하루 평균` : "기록을 남기면 변화가 보여요";
+    $("#trend-description").textContent = values.length ? `기록한 ${values.length}일의 하루 평균` : state.metric === "proteinGrams" && trends.some(entry => entry.mealCount > 0) ? "식사는 기록했지만 영양량을 산출하지 못했어요" : "기록을 남기면 변화가 보여요";
     $("#trend-range").textContent = trends.length ? `${shortDate(trends[0].date)} – ${shortDate(trends[trends.length - 1].date)}` : "";
     const sourceKey = state.metric === "steps" ? "stepsSource" : "sleepSource";
     const chartSources = state.metric === "proteinGrams" ? [] : [...new Set(entries.filter(entry => numeric(entry.value)).map(entry => sourceLabel(entry[sourceKey], entry.value)))];
-    $("#chart-note").textContent = `${config.note} ${chartSources.length ? `출처: ${chartSources.join(" / ")}. ` : ""}빈 날은 미기록이에요.`;
+    const unknownMeals = trends.reduce((sum, entry) => sum + (Number(entry.unknownMealCount) || 0), 0);
+    $("#chart-note").textContent = `${config.note} ${chartSources.length ? `출처: ${chartSources.join(" / ")}. ` : ""}빈 날은 미기록·미상이에요.${state.metric === "proteinGrams" && unknownMeals ? ` 양을 모르는 식사 ${unknownMeals}건은 합계에서 제외했어요.` : ""}`;
+    $("#chart-data-table").innerHTML = `<table><caption>${escape(config.label)} · 기록한 값과 미기록 구분</caption><thead><tr><th scope="col">날짜</th><th scope="col">${escape(config.label)}</th></tr></thead><tbody>${entries.map(entry => `<tr><th scope="row">${escape(shortDate(entry.date))}</th><td>${entry.value === null ? "미기록·미상" : escape(number(entry.value, config.digits) + config.unit)}</td></tr>`).join("")}</tbody></table>`;
     const chart = $("#trend-chart");
     const max = Math.max(...values, state.metric === "sleepHours" ? 10 : 1);
     chart.innerHTML = entries.map((entry) => `<span class="chart-column${entry.value === null ? " missing" : ""}" title="${escape(shortDate(entry.date))}: ${entry.value === null ? "미기록" : escape(number(entry.value, config.digits) + config.unit)}"><span class="chart-bar" style="height:${entry.value === null ? 0 : Math.max(3, (entry.value / max) * 100)}%"></span><span class="chart-label">${entry.date === today() ? "오늘" : escape(weekday(entry.date))}</span></span>`).join("");
@@ -360,6 +386,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   function openMeal() {
     if (!state.summary || state.loading || state.saving) return;
     $("#meal-form").reset();
+    state.mealSubmissionKey = null; state.mealSubmissionPayload = null;
     $("#meal-dialog-title").textContent = PATIENT_INPUT_SCREENS.meal.title;
     invalidateAnalysis();
     $("#meal-date").value = today();
@@ -379,6 +406,9 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
   function applyDailyRecord(record) {
     state.dailyBaseline = {};
+    state.dailyRevision = record?.revision ?? 0;
+    state.dailySubmissionKey = null; state.dailySubmissionPayload = null;
+    $("#sleep-helper-hours").value = ""; $("#sleep-helper-minutes").value = ""; $("#sleep-helper-status").textContent = "";
     for (const name of ["steps", "sleepHours", "weightKg", "note"]) {
       $(`#daily-form [name="${name}"]`).value = record?.[name] ?? "";
       state.dailyBaseline[name] = fieldValue(name, record);
@@ -410,6 +440,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#daily-date").max = today();
     applyDailyRecord(null);
     $("#daily-error").hidden = true;
+    $("#daily-reload-record").hidden = true;
     openRecordDialog(PATIENT_INPUT_SCREENS[mode].dialog);
     selectDailyDate();
   }
@@ -420,6 +451,8 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     state.photoLoading = false;
     state.imageData = null;
     $("#meal-photo").value = "";
+    $("#meal-camera").value = "";
+    $("#meal-photo-preparation").textContent = "";
     $("#photo-preview").hidden = true;
     $("#photo-preview").removeAttribute("src");
     $("#photo-placeholder").hidden = false;
@@ -428,29 +461,33 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   }
 
   function updateEstimate() {
-    const data = new FormData($("#meal-form"));
-    const portion = Number(data.get("portion"));
-    const portionLabel = portion === 1 ? "모두" : portion === .5 ? "절반" : `${portion * 100}%`;
+    const data = new FormData($('#meal-form'));
+    const raw = data.get('portion');
+    const portion = raw === null || raw === 'unknown' ? null : Number(raw);
+    const portionLabel = raw === null ? '드신 양을 골라 주세요' : portion === null ? '드신 양 모름' : portion === 0 ? '안 먹었어요' : portion === 1 ? '모두' : portion === .5 ? '절반' : `${portion * 100}%`;
     const proposal = state.analysis?.proposal;
-    $("#estimate-selection").textContent = `${proposal?.foodLabel || labels.food[data.get("foodType")]} · ${portionLabel}`;
-    $("#meal-estimate-badge").textContent = proposal ? "AI 초안 · 섭취 비율 적용" : "수동 선택 · 데모 추정";
-    $("#meal-estimate-note").textContent = proposal ? `저장 시 약 ${number(proposal.calories * portion)} kcal, 단백질 ${number(proposal.proteinGrams * portion, 1)}g으로 추정해요. 실제 섭취량을 확정하지 않아요.` : "사진 분석을 사용하지 않으면 선택한 음식 유형의 예시 영양값을 저장해요.";
+    $('#estimate-selection').textContent = `${proposal?.foodLabel || labels.food[data.get('foodType')] || '음식을 골라 주세요'} · ${portionLabel}`;
+    $('#meal-estimate-badge').textContent = proposal ? 'AI 초안 · 직접 확인 필요' : '수동 선택 · 예시 영양 추정';
+    $('#meal-estimate-note').textContent = raw === null ? '음식과 실제 드신 양을 직접 선택해야 저장할 수 있어요.' : portion === null ? '양을 모르는 기록은 영양량도 미상으로 저장해요. 0으로 계산하지 않아요.' : proposal ? `저장 시 약 ${number(proposal.calories * portion)} kcal, 단백질 ${number(proposal.proteinGrams * portion, 1)}g으로 추정해요. 실제 섭취량을 확정하지 않아요.` : '직접 선택한 음식 유형의 예시 영양값으로 추정해요. 안 먹었어요는 0으로 저장해요.';
   }
 
   function formError(id, message) {
     const element = $(id);
     element.textContent = message;
     element.hidden = false;
+    element.setAttribute("tabindex", "-1");
     element.scrollIntoView({ block: "nearest" });
+    element.focus({ preventScroll: true });
   }
 
   function setFormBusy(formId, busy) {
-    $$('input, textarea, button', $(formId)).forEach((element) => { element.disabled = busy; });
+    $$('input, textarea, select, button', $(formId)).forEach((element) => { element.disabled = busy; });
     renderNavigation();
   }
 
   function setDailyFieldsDisabled(disabled) {
     $$('#daily-form input:not([name="date"]), #daily-form textarea').forEach(element => { element.disabled = disabled || !dailyModes[state.dailyMode].fields.includes(element.name); });
+    $$("#sleep-helper-hours, #sleep-helper-minutes, #sleep-helper-apply").forEach(element => { element.disabled = disabled || !dailyModes[state.dailyMode].fields.includes("sleepHours"); });
     $("#daily-submit").disabled = disabled;
   }
 
@@ -460,13 +497,18 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     if (button.disabled || state.saving || state.photoLoading || state.analysisBusy) return;
     const data = new FormData(event.currentTarget);
     const patientId = state.patientId;
-    const payload = { date: data.get("date"), mealType: data.get("mealType"), foodType: data.get("foodType"), portion: Number(data.get("portion")) };
+    if (!data.has('foodType')) { formError('#meal-error', '가장 가까운 식사 종류를 하나 골라 주세요.'); return; }
+    if (!data.has('portion')) { formError('#meal-error', '실제로 드신 양을 하나 골라 주세요. 기억나지 않으면 모르겠어요를 고를 수 있어요.'); return; }
+    const payload = { date: data.get("date"), mealType: data.get("mealType"), foodType: data.get("foodType"), portion: data.get('portion') === 'unknown' ? null : Number(data.get("portion")) };
     if (state.imageData) payload.imageData = state.imageData;
     if (state.analysis) {
       if (!$("#meal-analysis-confirm")?.checked) { formError("#meal-error", "먹기 전 전체 음식 사진인지와 식후 실제 드신 비율을 확인한 뒤 체크해 주세요."); return; }
       payload.analysisId = state.analysis.id;
       payload.patientConfirmed = true;
     }
+    const signature = JSON.stringify(payload);
+    if (signature !== state.mealSubmissionPayload) { state.mealSubmissionPayload = signature; state.mealSubmissionKey = crypto.randomUUID(); }
+    payload.clientSubmissionId = state.mealSubmissionKey;
     state.saving = "meal";
     setFormBusy("#meal-form", true);
     button.textContent = "저장하고 있어요…";
@@ -474,11 +516,11 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     try {
       await api(`/api/patients/${encodeURIComponent(patientId)}/meals`, { method: "POST", body: JSON.stringify(payload) });
       $("#meal-dialog").close();
-      toast("식사 기록을 저장했어요.");
+      savedFeedback("식사 기록", payload.date);
       await loadPatient(patientId);
     } catch (error) {
       if ($("#meal-dialog").open) formError("#meal-error", error.message);
-      else toast("저장은 완료됐지만 화면을 갱신하지 못했어요. 다시 불러와 주세요.");
+      else savedRefreshFailed();
     } finally {
       state.saving = null;
       setFormBusy("#meal-form", false);
@@ -500,6 +542,10 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       if (value !== state.dailyBaseline[name] && (value !== null || ["steps", "sleepHours", "weightKg"].includes(name))) payload[name] = value;
     }
     if (Object.keys(payload).length === 1) { toast("바뀐 항목이 없어요. 기록할 값을 입력해 주세요."); return; }
+    payload.expectedRevision = state.dailyRevision;
+    const signature = JSON.stringify(payload);
+    if (signature !== state.dailySubmissionPayload) { state.dailySubmissionPayload = signature; state.dailySubmissionKey = crypto.randomUUID(); }
+    payload.clientSubmissionId = state.dailySubmissionKey;
     state.saving = "daily";
     setFormBusy("#daily-form", true);
     button.textContent = "저장하고 있어요…";
@@ -507,11 +553,11 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     try {
       await api(`/api/patients/${encodeURIComponent(patientId)}/daily`, { method: "POST", body: JSON.stringify(payload) });
       $("#daily-dialog").close();
-      toast("건강 기록을 저장했어요.");
+      savedFeedback("건강 기록", payload.date);
       await loadPatient(patientId);
     } catch (error) {
-      if ($("#daily-dialog").open) formError("#daily-error", error.message);
-      else toast("저장은 완료됐지만 화면을 갱신하지 못했어요. 다시 불러와 주세요.");
+      if ($("#daily-dialog").open) { formError("#daily-error", error.message); $("#daily-reload-record").hidden = error.status !== 409; }
+      else savedRefreshFailed();
     } finally {
       state.saving = null;
       setFormBusy("#daily-form", false);
@@ -536,6 +582,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       const result = await api(`/api/patients/${encodeURIComponent(patientId)}/daily?date=${encodeURIComponent(date)}`);
       if (requestId !== state.dateRequestId || patientId !== state.patientId || !$("#daily-dialog").open) return;
       applyDailyRecord(result.record);
+      $("#daily-reload-record").hidden = true;
       const effective = state.summary?.trends.find(entry => entry.date === date);
       const automatic = [state.dailyMode === "sleep" ? "sleepHours" : "steps", ...(state.dailyMode === "all" ? ["sleepHours"] : [])].filter(name => numeric(effective?.[name]) && ["health-connect", "apple-health"].includes(effective[name === "steps" ? "stepsSource" : "sleepSource"]));
       $("#daily-scope-note").textContent = dailyModes[state.dailyMode].hint + (automatic.length ? " 현재 건강 연결에서 받은 값이 있어요. 직접 입력한 값이 우선 표시되며, 입력값을 지우면 연결 자료로 돌아가요." : "");
@@ -572,6 +619,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     const patientId = state.patientId;
     const imageData = state.imageData;
     const date = $("#meal-date").value;
+    if (state.analysis) $$('#meal-form input[name="foodType"]').forEach(input => { input.checked = false; });
     state.analysis = null;
     state.analysisBusy = true;
     $("#meal-manual-food").hidden = false;
@@ -628,13 +676,17 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       medicationPhoto.refresh(); medicationPhoto.renderReports(photos.reports);
       renderMedicationSummary(schedule);
       if (date === today()) { state.todayMedication = schedule; renderHome(state.summary.todayRecord); }
-      $("#medication-list").innerHTML = (schedule.slots || []).map((slot, index) => {
+      const slotForms = (schedule.slots || []).map((slot, index) => {
         const labels = { pending: "미보고", taken: "복용 보고", missed: "미복용 보고", unknown: "기억나지 않음" };
-        return `<form id="medication-slot-${index}" class="medication-slot" data-slot-index="${index}"><div class="medication-slot-header"><div><h2>${escape(slot.time)} · ${escape(slot.name)}</h2><p class="medication-meta">${escape([slot.strength, slot.dose, slot.route].filter(Boolean).join(" · "))}</p></div><span class="medication-status ${escape(slot.status)}">${escape(labels[slot.status] || "미보고")}</span></div>${slot.instructions ? `<p class="inline-notice">${escape(slot.instructions)}</p>` : ""}<fieldset><legend>이 회차의 복약 상태</legend><div class="choice-grid three slot-actions">${[["taken", "먹었어요"], ["missed", "못 먹었어요"], ["unknown", "기억 안 나요"]].map(([value, label]) => `<label class="choice"><input type="radio" name="status" value="${value}" ${slot.status === value ? "checked" : ""}><span>${label}</span></label>`).join("")}</div></fieldset><div class="form-field slot-reason"><label for="slot-reason-${index}">사유 <span class="optional">선택</span></label><input id="slot-reason-${index}" name="reason" type="text" maxlength="500" value="${escape(slot.reason)}" placeholder="예: 잊었어요, 속이 불편했어요"></div><div class="form-field slot-note"><label for="slot-note-${index}">함께 전할 이야기 <span class="optional">선택</span></label><textarea id="slot-note-${index}" name="note" maxlength="2000" rows="2">${escape(slot.note)}</textarea></div><p class="form-error" data-slot-error role="alert" hidden></p><button class="button button-primary" type="submit">${slot.revision ? "이 회차 기록 수정하기" : "이 회차 기록 저장하기"}</button>${slot.revision ? `<p class="record-source">보고 ${slot.revision}차 · 수정 전 기록도 보관돼요.</p>` : ""}</form>`;
-      }).join("");
+        return `<form id="medication-slot-${index}" class="medication-slot" data-slot-index="${index}"><div class="medication-slot-header"><div><h2>${escape(slot.time)} · ${escape(slot.name)}</h2><p class="medication-meta">${escape([slot.strength, slot.dose, slot.route].filter(Boolean).join(" · "))}</p></div><span class="medication-status ${escape(slot.status)}">${escape(labels[slot.status] || "미보고")}</span></div>${slot.instructions ? `<p class="inline-notice">${escape(slot.instructions)}</p>` : ""}<fieldset><legend>이 회차의 복약 상태</legend><div class="choice-grid three slot-actions">${[["taken", "먹었어요"], ["missed", "못 먹었어요"], ["unknown", "기억 안 나요"]].map(([value, label]) => `<label class="choice"><input type="radio" name="status" value="${value}" ${slot.status === value ? "checked" : ""}><span>${label}</span></label>`).join("")}</div></fieldset><details class="medication-extra" ${slot.reason || slot.note ? "open" : ""}><summary>사유나 이야기도 남기기 (선택)</summary><div class="form-field slot-reason"><label for="slot-reason-${index}">사유 <span class="optional">선택</span></label><input id="slot-reason-${index}" name="reason" type="text" maxlength="500" value="${escape(slot.reason)}" placeholder="예: 잊었어요, 속이 불편했어요"></div><div class="form-field slot-note"><label for="slot-note-${index}">함께 전할 이야기 <span class="optional">선택</span></label><textarea id="slot-note-${index}" name="note" maxlength="2000" rows="2">${escape(slot.note)}</textarea></div></details><p class="form-error" data-slot-error role="alert" hidden></p><button class="button button-primary" type="submit">${slot.revision ? "이 회차 기록 수정하기" : "이 회차 기록 저장하기"}</button>${slot.revision ? `<p class="record-source">보고 ${slot.revision}차 · 수정 전 기록도 보관돼요.</p>` : ""}</form>`;
+      });
+      const times = [...new Set((schedule.slots || []).map(slot => slot.time))].sort();
+      $('#medication-list').innerHTML = times.map(time => `<section class="medication-time-group"><h2>${escape(time)} 복약</h2>${(schedule.slots || []).flatMap((slot, index) => slot.time === time ? [slotForms[index]] : []).join('')}</section>`).join('');
       if (!(schedule.orders || []).length) {
         const result = await api(`/api/patients/${encodeURIComponent(patientId)}/daily?date=${encodeURIComponent(date)}`);
         if (requestId !== state.medicationRequestId || patientId !== state.patientId || date !== state.medicationDate) return;
+        state.legacyDailyRevision = result.record?.revision ?? 0;
+        state.legacySubmissionKey = null; state.legacySubmissionPayload = null;
         $("#legacy-medication-form").reset();
         $$("#legacy-medication-form [name=medicationStatus]").forEach(input => { input.checked = input.value === result.record?.medicationStatus; });
         $("#legacy-medication-error").hidden = true;
@@ -648,9 +700,18 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     }
   }
 
+  function medicationDateMatches() {
+    const field = $('#medication-date');
+    if (field.value === state.medicationDate && field.checkValidity()) return true;
+    field.value = state.medicationDate || today();
+    formError('#medication-error', '날짜를 확인하지 못했어요. 표시된 목록의 날짜로 돌렸어요. 날짜와 약을 확인한 뒤 다시 눌러 주세요.');
+    return false;
+  }
+
   async function saveMedication(event) {
     event.preventDefault();
     if (state.saving || !state.medicationSchedule) return;
+    if (!medicationDateMatches()) return;
     const form = event.target;
     const data = new FormData(form);
     const legacy = form.id === "legacy-medication-form";
@@ -661,7 +722,12 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     const date = state.medicationDate;
     const slot = legacy ? null : state.medicationSchedule.slots[Number(form.dataset.slotIndex)];
     if (!legacy && !slot) return;
-    const payload = legacy ? { date, medicationStatus: status } : { orderId: slot.orderId, date, time: slot.time, status, reason: String(data.get("reason") || "").trim(), note: String(data.get("note") || "").trim() };
+    const payload = legacy ? { date, medicationStatus: status, expectedRevision: state.legacyDailyRevision } : { orderId: slot.orderId, date, time: slot.time, status, reason: String(data.get("reason") || "").trim(), note: String(data.get("note") || "").trim() };
+    if (legacy) {
+      const signature = JSON.stringify(payload);
+      if (signature !== state.legacySubmissionPayload) { state.legacySubmissionPayload = signature; state.legacySubmissionKey = crypto.randomUUID(); }
+      payload.clientSubmissionId = state.legacySubmissionKey;
+    }
     state.saving = "medication";
     renderNavigation();
     errorElement.hidden = true;
@@ -669,6 +735,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#patient-select").disabled = true;
     try {
       const saved = await api(`/api/patients/${encodeURIComponent(patientId)}/${legacy ? "daily" : "medication-events"}`, { method: "POST", body: JSON.stringify(payload) });
+      if (legacy) state.legacyDailyRevision = saved.record?.revision ?? state.legacyDailyRevision;
       if (!legacy) {
         Object.assign(slot, { eventId: saved.event.id, status: saved.event.status, reason: saved.event.reason,
           note: saved.event.note, revision: saved.event.revision, reportedAt: saved.event.reportedAt });
@@ -684,8 +751,8 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
         renderMedicationSummary(state.medicationSchedule);
       }
       medicationBaseline.set(form.id, formSnapshot(form));
-      toast("복약 자기보고를 저장했어요.");
-      await loadPatient(patientId, { preserveMedicationInputs: true });
+      savedFeedback(legacy ? "하루 복약 자기보고" : `${slot.time} ${slot.name} 복약`, date, "복용 상태를 저장했어요. 약별 목록에서 다시 확인할 수 있어요.");
+      try { await loadPatient(patientId, { preserveMedicationInputs: true }); } catch { savedRefreshFailed(); }
     } catch (error) {
       errorElement.textContent = error.message;
       errorElement.hidden = false;
@@ -768,6 +835,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#retry-button").addEventListener("click", () => state.patientId ? loadPatient(state.patientId).catch(() => {}) : initialize());
     $("#open-meal").addEventListener("click", openMeal);
     $('#open-medication-photo').addEventListener('click', async () => {
+      if (!medicationDateMatches()) return;
       const dirty = medicationDirty();
       if (!canLeavePatient()) return;
       if (dirty) await loadMedicationSchedule();
@@ -817,6 +885,12 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#meal-form").addEventListener("submit", saveMeal);
     $("#daily-form").addEventListener("submit", saveDaily);
     $("#daily-date").addEventListener("change", selectDailyDate);
+    $('#daily-reload-record').addEventListener('click', async () => {
+      if (state.saving || !$('#daily-dialog').open) return;
+      if (dialogDirty($('#daily-dialog')) && !window.confirm('작성 중인 내용을 저장된 최신 기록으로 바꿀까요? 바꾸기 전 필요한 내용은 확인해 주세요.')) return;
+      $('#daily-reload-record').disabled = true;
+      try { await selectDailyDate(); } finally { $('#daily-reload-record').disabled = false; }
+    });
     $("#meal-form").addEventListener("change", event => {
       if (event.target.id === "meal-date") invalidateAnalysis();
       if (event.target.name === "portion" && state.analysis) $("#meal-analysis-confirm").checked = false;
@@ -828,7 +902,8 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#remove-photo").addEventListener("click", clearPhoto);
     $("#medication-date").addEventListener("change", () => {
       const date = $("#medication-date").value;
-      if (!date || date > today() || state.saving) return;
+      if (state.saving) { $("#medication-date").value = state.medicationDate; return; }
+      if (!date || date > today() || !$("#medication-date").checkValidity()) { $("#medication-date").value = state.medicationDate; formError("#medication-error", "오늘 또는 이전 날짜를 골라 주세요. 표시된 목록의 날짜로 돌렸어요."); return; }
       if (!canLeavePatient()) { $('#medication-date').value = state.medicationDate; return; }
       state.medicationDate = date;
       syncUrl();
@@ -857,32 +932,43 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       if (requestedId && requestedId !== state.patientId && state.patients.some(patient => patient.id === requestedId)) loadPatient(requestedId, { historyMode: "none" }).catch(() => {});
       else applyView({ historyMode: "none" });
     });
-    $("#meal-photo").addEventListener("change", async (event) => {
+    async function chooseMealPhoto(event) {
       const file = event.target.files?.[0];
       if (!file) return;
-      invalidateAnalysis();
-      $("#meal-error").hidden = true;
-      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-        clearPhoto(); formError("#meal-error", "JPG, PNG, WebP 사진을 선택해 주세요."); return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        clearPhoto(); formError("#meal-error", "사진은 최대 5MB까지 저장할 수 있어요. 더 작은 사진을 선택해 주세요."); return;
-      }
-      const reader = new FileReader();
-      const photoRequestId = ++state.photoRequestId;
-      state.photoLoading = true;
-      $("#meal-submit").disabled = true;
-      reader.onload = () => {
-        if (photoRequestId !== state.photoRequestId) return;
-        state.imageData = reader.result;
-        $("#photo-preview").src = state.imageData;
-        $("#photo-preview").hidden = false;
-        $("#photo-placeholder").hidden = true;
-        $("#remove-photo").hidden = false;
-      };
-      reader.onerror = () => { if (photoRequestId !== state.photoRequestId) return; clearPhoto(); formError("#meal-error", "사진을 읽지 못했어요. 다른 사진을 선택해 주세요."); };
-      reader.onloadend = () => { if (photoRequestId !== state.photoRequestId) return; state.photoLoading = false; refreshAnalysisControls(); };
-      reader.readAsDataURL(file);
+      clearPhoto(); $('#meal-error').hidden = true;
+      const request = ++state.photoRequestId;
+      state.photoLoading = true; refreshAnalysisControls();
+      $('#meal-photo-preparation').textContent = '사진을 준비하고 있어요…';
+      try {
+        const prepared = await preparePatientImage(file);
+        if (request !== state.photoRequestId || !$('#meal-dialog').open) return;
+        state.imageData = prepared.imageData;
+        $('#photo-preview').src = prepared.imageData; $('#photo-preview').hidden = false;
+        $('#photo-placeholder').hidden = true; $('#remove-photo').hidden = false;
+        $('#meal-photo-preparation').textContent = prepared.adjusted ? '사진을 기기 안에서 줄였어요. 음식이 잘 보이는지 확인해 주세요.' : '사진을 준비했어요. 음식이 잘 보이는지 확인해 주세요.';
+      } catch (issue) { if (request === state.photoRequestId) { $('#meal-photo-preparation').textContent = ''; formError('#meal-error', issue.message); } }
+      finally { if (request === state.photoRequestId) { state.photoLoading = false; refreshAnalysisControls(); } }
+    }
+    $('#meal-photo').addEventListener('change', chooseMealPhoto);
+    $('#meal-camera').addEventListener('change', chooseMealPhoto);
+    $('#save-confirmation-dismiss').addEventListener('click', () => { $('#save-confirmation').hidden = true; });
+    window.addEventListener('online', networkNotice); window.addEventListener('offline', networkNotice);
+    if (!navigator.onLine) networkNotice();
+    $('#sleep-helper-apply').addEventListener('click', () => {
+      const hours = $('#sleep-helper-hours'), minutes = $('#sleep-helper-minutes');
+      if (hours.value === '' && minutes.value === '') { formError('#daily-error', '수면 시간 또는 분을 입력해 주세요.'); return; }
+      if (!hours.checkValidity() || !minutes.checkValidity() || Number(hours.value) * 60 + Number(minutes.value) > 1440) { formError('#daily-error', '수면 시간은 0~24시간, 분은 0~59분으로 입력해 주세요.'); return; }
+      $('#daily-sleep').value = String(Math.round((Number(hours.value) + Number(minutes.value) / 60) * 10) / 10);
+      $('#daily-sleep').dispatchEvent(new Event('input', { bubbles: true }));
+      $('#sleep-helper-status').textContent = `${hours.value || 0}시간 ${minutes.value || 0}분을 ${$('#daily-sleep').value}시간으로 넣었어요. 저장 버튼을 눌러 마쳐 주세요.`;
+      $('#daily-error').hidden = true;
+    });
+    $('#practice-start').addEventListener('click', () => { $('#practice-panel').hidden = false; $('#practice-result').textContent = ''; $('#practice-finish').hidden = true; });
+    $('#practice-choice').addEventListener('click', () => { $('#practice-result').textContent = '2. 절반을 골랐어요. 실제 기록에서는 내용을 확인하고 저장하기를 누르면 완료돼요. 이 연습은 저장하지 않았어요.'; $('#practice-finish').hidden = false; });
+    $('#practice-finish').addEventListener('click', () => { $('#practice-panel').hidden = true; $('#practice-start').focus(); });
+    $('#patient-large-text').addEventListener('click', event => {
+      const enabled = document.body.classList.toggle('patient-large-text');
+      event.currentTarget.setAttribute('aria-pressed', String(enabled)); event.currentTarget.textContent = enabled ? '기본 글자 크기로' : '글자 더 크게';
     });
   }
 

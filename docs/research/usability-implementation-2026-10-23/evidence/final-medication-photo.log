@@ -1,0 +1,4 @@
+PASS empty plan, shared X/opener focus, dirty dismissal and Escape
+PASS real server OCR draft → multiple events/photo, busy lock, lost response replay
+PASS conflict preserves input, late analysis invalidation, owned image response
+PASS clinician evidence/current-vs-snapshot, 320/390px dialog, no page errors

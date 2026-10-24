@@ -1,4 +1,4 @@
-# 구성과 화면 동작
+# 구성과 화면 동작 v0.7.0
 
 ## 실행 구조
 
@@ -12,6 +12,11 @@ Node.js 24 단일 HTTP 서버 + SQLite + `public/`의 모바일/데스크톱 웹
 |---|---|
 | server.mjs | 공통 JSON/출처/정적파일 처리, 모듈 경로 연결, 일일·식사 저장 |
 | lib/db.mjs | 기본 스키마·시드·추가 스키마 초기화 연결 |
+| lib/meals.mjs / lib/export.mjs | 식사 보존 이행·명시 섭취량·재시도, 범위 관리 CSV 미리보기/반출 |
+| lib/staff-access.mjs / lib/workflow.mjs | 서버 역할·환자 범위·업무/사진 검토·정정 감사·참여/위임 기반 |
+| lib/research.mjs / lib/evidence.mjs | 기술통계·불변 가명 스냅샷, 고정 문헌 제공자·검색보관·사람 검토 |
+| public/clinician-workflow.js / clinician-research.js / clinician-evidence.js | 공통 의료진 셸과 연결한 독립 작업 상태·dirty/busy·API 화면 |
+| public/patient-image.js | 파일 크기/형식 확인·브라우저 해상도 축소·변환 실패 안내 |
 | lib/analysis.mjs | 출처를 유지하는 요약·추이·의료진 브리핑 |
 | lib/medications.mjs | 계획·회차·복약 이벤트/수정 이력 |
 | lib/vision.mjs | 외부 사진 분석·출력 검증·초안 적용 계약 |
@@ -55,3 +60,7 @@ Health Connect/HealthKit→권한을 가진 네이티브 연결부의 일별 집
 ## 복약 사진 A단계
 
 lib/medication-photos.mjs는 기존 vision 초안의 환자·hash·종류·만료 검증과 사진+회차 원자 저장을 담당한다. public/patient-medication-photo.js는 공통 patient dialog 셸에 연결한다. 이미지 BLOB은 같은 DB 트랜잭션과 CASCADE로 보관·삭제하며 인증된 image API로만 제공한다. 상세 계약: MEDICATION_PHOTO_DEMO_SPEC.md.
+
+## v0.7.0 확장 구조
+
+공통 셸을 유지하고 clinician-workflow/research/evidence 모듈을 추가한다. 서버는 기존 라우트와 별도 workflow/research/evidence 도메인 함수를 통합한다. 공통 auth의 capability+환자 범위 검증을 재사용하며 연구자료와 원기록, 문헌 근거와 환자 임상결정을 분리한다. DB schema6 이행/보존 계약과 식사 nullable 영양량은 USABILITY_IMPLEMENTATION_PLAN에 명시했다.

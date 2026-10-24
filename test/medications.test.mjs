@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -30,6 +31,21 @@ function makeOrder(db, extra = {}) {
 }
 
 function isStatus(status) { return error => error.status === status; }
+
+test('MED-01 order retry survives a lost response without duplicating schedules', t => {
+  const { db } = fixture(t);
+  const clientRequestId=randomUUID();
+  const first=makeOrder(db,{clientRequestId});
+  assert.deepEqual(makeOrder(db,{clientRequestId}),first);
+  assert.equal(getMedicationOrders(db,'p001').length,1);
+  assert.equal(medicationSchedule(db,'p001',today).slots.length,2);
+  assert.throws(()=>makeOrder(db,{clientRequestId,dose:'2정'}),isStatus(409));
+  const other=createMedicationOrder(db,'p002',{clientRequestId,name:'다른 환자 계획',dose:'1정',times:['08:00'],startDate:today});
+  assert.notEqual(other.id,first.id);
+  assert.throws(()=>makeOrder(db,{clientRequestId:'invalid'}),isStatus(400));
+  seedDatabase(db,'empty');
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM medication_order_requests').get().n,0);
+});
 
 test('MED-01 additive schema is idempotent and legacy data does not create medication orders', t => {
   const { db } = fixture(t);

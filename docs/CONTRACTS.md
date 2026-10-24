@@ -1,14 +1,14 @@
-# 데이터와 API 계약 v0.6
+# 데이터와 API 계약 v0.7.0
 
 이 문서는 구현 전 합의한 기준이다. 세부 계약을 변경할 때 구현보다 먼저 이 문서와 CHANGELOG를 갱신한다. 기존 v0.2 경로는 삭제하지 않는다. 구현 여부는 CHANGELOG에서 확인한다.
 
 ## 공통
 
-v0.6 AUTH/COM의 세부 API·세션·권한·읽음/중복·reset 계약은 AUTH_COMMUNICATION_SPEC.md를 따른다. AUTH_MODE=kakao는 보호 API와 업로드 소유권을 서버에서 검사하며 미설정 시 공개 데모로 fallback하지 않는다. demo 호환은 명시적 합성 체험 모드뿐이다. schema4 추가 마이그레이션.
+v0.6 AUTH/COM의 세부 API·세션·권한·읽음/중복·reset 계약은 AUTH_COMMUNICATION_SPEC.md를 따른다. AUTH_MODE=kakao는 보호 API와 업로드 소유권을 서버에서 검사하며 미설정 시 공개 데모로 fallback하지 않는다. demo 호환은 명시적 합성 체험 모드뿐이다. 인증 테이블은 schema4에서 도입했으며 현재 통합 스키마는 schema6이다.
 
 - JSON 객체, unknown 필드 거부, 유효한 날짜 `YYYY-MM-DD`, 저장 기본 일자 `Asia/Seoul`.
 - 시각은 offset을 포함한 ISO8601. `0`과 `null`(미측정)을 구별한다. 미응답을 정상/미복용으로 추론하지 않는다.
-- 요청 오류 `{error:string}`, HTTP 400/404/409/413/415/429/502/503. 비밀값·사진 원문·모델 내부 응답을 오류에 노출하지 않는다.
+- 요청 오류 `{error:string}`, HTTP 400/401/403/404/409/410/413/415/429/502/503/504. 비밀값·사진 원문·모델 내부 응답을 오류에 노출하지 않는다.
 - 환자별 데이터는 경로 ID와 DB 소유권을 함께 검사한다. 로그인 없는 데모의 clinician 표시를 인증된 의료진 신원으로 해석하지 않는다.
 - 상태 변경은 같은 출처 검사. 네이티브 수신은 환자에 바인딩한 Bearer 연결 토큰을 추가 요구한다.
 
@@ -18,12 +18,12 @@ v0.6 AUTH/COM의 세부 API·세션·권한·읽음/중복·reset 계약은 AUTH
 
 환자 화면의 상단·하단·닫기·미저장/저장 중·역할 전환 계약은 SCREEN_SPEC.md가 기준이다. 단일 화면 registry와 브라우저 검증을 연결한다. 일반 서브 X는 같은 환자 홈, 입력 X는 진입 화면이며 우상단 위치를 의료진 전환으로 재사용하지 않는다.
 
-`POST /api/patients/:id/daily`는 부분 갱신이다. 활동 모드는 `{date,steps}`, 수면 모드는 `{date,sleepHours}`, 기존 일일 복약 모드는 `{date,medicationStatus}`만 보낸다. 전체 폼도 미입력 식욕·기분을 `normal`로 만들지 않는다. 직접 보고한 unknown과 미응답 null을 구별한다. 입력하지 않은 필드를 전송하지 않는다.
+`POST /api/patients/:id/daily`는 부분 갱신이다. 활동 모드는 `{date,steps}`, 수면 모드는 `{date,sleepHours}`, 기존 일일 복약 모드는 `{date,medicationStatus}`만 보낸다. 전체 폼도 미입력 식욕·기분을 `normal`로 만들지 않는다. 직접 보고한 unknown과 미응답 null을 구별한다. 입력하지 않은 필드를 전송하지 않는다. UI는 `expectedRevision`과 내용별 UUID `clientSubmissionId`를 함께 보낸다. 동일 키·동일 본문 재전송은 저장 당시 응답, 동일 키·다른 본문 또는 새로운 수정번호 충돌은409이다. 감사 이력은 성공한 새 저장에만 추가한다.
 
 ## 복약 계획/회차
 
 - `GET /api/patients/:id/medication-orders` → `{orders:MedicationOrder[]}`.
-- `POST /api/patients/:id/medication-orders` →201 `{order}`. 입력 `{name,strength,dose,route,times,startDate,endDate,instructions}`. times는 중복 없는 `HH:MM` 배열. 실제 약명·용량·시간을 합성 시드의 일반 질환명에서 추론해 자동 처방하지 않는다.
+- `POST /api/patients/:id/medication-orders` →201 `{order}`. 입력 `{name,strength,dose,route,times,startDate,endDate,instructions,clientRequestId?}`. times는 중복 없는 `HH:MM` 배열. 선택 UUID `clientRequestId`의 같은 내용 재시도는 기존 계획을 반환하며 다른 내용은409이다. 실제 약명·용량·시간을 합성 시드의 일반 질환명에서 추론해 자동 처방하지 않는다.
 - `PATCH /api/medication-orders/:id` 입력 `{endDate:'YYYY-MM-DD'}` → `{order}`. 종료일은 필수이며 오늘(KST)·시작일 이상, 기존 종료일보다 늦출 수 없다. 이미 보고된 최대 회차 날짜보다 앞선 종료는409. 시작/종료일은 포함하므로 오늘 종료는 내일부터 신규 회차가 없다. 이름/용량 변경은 종료 후 새 계획으로 만든다. status는 active/ended이며 종료한 계획도 종료일 이전 일정과 이벤트를 조회·수정할 수 있다.
 - `GET /api/patients/:id/medication-schedule?date=...` → `{date,orders,slots,summary}`. 회차 key는 `(orderId,date,time)`이며 기록 없는 회차의 status는 `pending`이다.
 - `POST /api/patients/:id/medication-events` → `{event}`. 입력 `{orderId,date,time,status,reason?,note?}`. status는 `taken|missed|unknown`; pending은 이벤트 부재로만 표현한다. 미래 날짜 보고는400. 계획/기간/시간과 환자 소유권 검사. 같은 회차 재보고는 현재 상태를 갱신하고 이전/이후 상태를 별도 이력에 보존한다. 동일 payload 재전송은 revision을 늘리지 않는다. reason/note 생략은 빈 문자열인 완전한 회차 보고다.
@@ -76,3 +76,11 @@ metadata.generation은 DB 초기 생성과 명시적 reset마다 바뀌는 UUID�
 ## MED-PHOTO-01 사진 첨부 복약 보고 (schema5)
 
 MEDICATION_PHOTO_DEMO_SPEC.md의 POST/GET medication-photo-reports 및 image 경로·expectedRevision·일괄 원자성·UUID 재전송 계약을 따른다. OCR 추정/환자 자기보고/의료진 검토 상태를 분리한다. 기존 수동 보고 API는 유지한다.
+
+## v0.7.0 변경 계약 (코드 작성 전)
+
+상세 payload·상태·단위·오류·동시성·호환성은 USABILITY_IMPLEMENTATION_PLAN의 식사/일일·기간/반출·직무/업무·문헌 API 절을 따른다. portion=null/0 허용, 식사 UUID 재전송, daily revision/감사, 약별 보고일 포함, 명시 기간, 범위 CSV, 세션/CSRF 기반 역할·scope, 동결 가명 연구자료와 출처 보존 문헌 검토를 추가한다. 기존 다른 환자/출처/null·0/사진 snapshot 보호는 유지한다.
+
+### v0.7.0 세부 기준의 위치
+
+화면별 행위·오류는 SCREEN_SPEC, 새 API와 요청 키·revision·통계 분모·스냅샷 미리보기 해시 계약은 USABILITY_IMPLEMENTATION_PLAN, 문헌의 정확한 필드와 검토 근거는 EVIDENCE_WORKSPACE_SPEC이 기준이다. 실제 생성 테이블은 generated/SCHEMA, 선언·매개변수와 코드 위치는 generated/VARIABLES에서 대조한다. 완료 범위와 미검증 항목은 USABILITY_IMPLEMENTATION_REPORT에 기록한다.

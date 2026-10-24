@@ -42,7 +42,11 @@ export function createPatientCommunications({api,getView,isBusy,setBusy,toast}) 
       if(signature===noticeSignature)return;
       noticeSignature=signature;
       const opened=new Set([...notices.querySelectorAll('details[open]')].map(el=>el.dataset.noticeId+':'+el.dataset.version));
-      notices.innerHTML=`<div class="notice-banner-heading"><strong>의료진 공지</strong><span>${result.notices.length?'최근 '+result.notices.length+'건':'등록된 공지가 없어요'}</span></div>`+result.notices.map(n=>`<details class="patient-notice" data-notice-id="${n.id}" data-version="${n.version}" ${opened.has(n.id+':'+n.version)?'open':''}><summary>${n.pinned?'<span class="notice-important">중요</span>':''}<span>${esc(n.title)}</span>${n.read?'':'<span class="notice-new">새 공지</span>'}</summary><p>${esc(n.body)}</p><time>${esc(time(n.publishedAt))}</time></details>`).join('');
+      const moreOpen = Boolean(notices.querySelector('.notice-more[open]'));
+      const renderNotice = n => `<details class="patient-notice" data-notice-id="${n.id}" data-version="${n.version}" ${opened.has(n.id+':'+n.version)?'open':''}><summary>${n.pinned?'<span class="notice-important">중요</span>':''}<span>${esc(n.title)}</span>${n.read?'':'<span class="notice-new">새 공지</span>'}</summary><p>${esc(n.body)}</p><time>${esc(time(n.publishedAt))}</time></details>`;
+      notices.innerHTML=`<div class="notice-banner-heading"><strong>의료진 공지</strong><span>${result.notices.length?'제목을 누르면 내용을 볼 수 있어요':'등록된 공지가 없어요'}</span></div>` +
+        (result.notices[0] ? renderNotice(result.notices[0]) : '') +
+        (result.notices.length > 1 ? `<details class="notice-more" id="patient-notice-more" ${moreOpen?'open':''}><summary>다른 공지 ${result.notices.length - 1}건 보기</summary>${result.notices.slice(1).map(renderNotice).join('')}</details>` : '');
     } catch(issue){if(request===generation){noticeSignature='';notices.innerHTML='<div class="notice-banner-heading"><strong>의료진 공지</strong><span role="alert">공지를 불러오지 못했어요.</span></div><button type="button" class="text-button" id="notice-retry">다시 확인</button>';}}
   }
   notices.addEventListener('click',event=>{if(event.target.closest('#notice-retry'))loadNotices();});
@@ -61,17 +65,23 @@ export function createPatientCommunications({api,getView,isBusy,setBusy,toast}) 
     try {
       await api(`/api/patients/${encodeURIComponent(target)}/messages`,{method:'POST',body:JSON.stringify({body,clientMessageId:nonce})});
       if(request!==generation)return;
-      input.value='';nonce=null;nonceBody='';await loadMessages();toast('메시지를 보냈어요.');
+      input.value='';nonce=null;nonceBody='';await loadMessages();let status=$('#patient-message-sent');if(!status){status=document.createElement('p');status.id='patient-message-sent';status.className='inline-notice';status.setAttribute('role','status');$('#patient-message-form').after(status);}status.textContent='메시지를 보냈어요. 아래 대화에 보관돼요. 즉시 답변을 보장하지 않아요.';toast('메시지를 보냈어요.');
     } catch(issue){if(request===generation){error.textContent=issue.message;error.hidden=false;}}
     finally{sending=false;setBusy(false);send.disabled=false;input.disabled=false;}
   });
+  document.querySelectorAll('[data-quick-message]').forEach(button => button.addEventListener('click', () => {
+    if (sending || isBusy()) return;
+    const phrase = button.dataset.quickMessage;
+    input.value = input.value.trim() ? `${input.value.trim()}\n${phrase}`.slice(0, 2000) : phrase;
+    input.focus();
+  }));
   older.addEventListener('click',()=>loadMessages({before:messages[0]?.id}));
   $('#patient-message-retry').addEventListener('click',()=>loadMessages());
   setInterval(()=>{if(!document.hidden && patientId && !sending)loadMessages();},15000);
   setInterval(()=>{if(!document.hidden && patientId)loadNotices();},30000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){loadNotices();loadMessages();}});
   return {
-    reset(id){patientId=id;generation++;messages=[];loading=false;hasOlder=false;nonce=null;nonceBody='';noticeSignature='';input.value='';list.innerHTML='';badge(0);loadNotices();loadMessages();},
+    reset(id){patientId=id;generation++;messages=[];loading=false;hasOlder=false;nonce=null;nonceBody='';noticeSignature='';input.value='';list.innerHTML='';$('#patient-message-sent')?.remove();badge(0);loadNotices();loadMessages();},
     activate(){if(getView()==='messages')loadMessages();},
     dirty(){return input.value.trim().length>0;},discard(){input.value='';nonce=null;nonceBody='';},
     refresh:loadNotices

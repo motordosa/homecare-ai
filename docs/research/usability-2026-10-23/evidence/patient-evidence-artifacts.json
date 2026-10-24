@@ -1,0 +1,47 @@
+[
+  {
+    "file": "apple_entering-data.json",
+    "sha256": "0c430bb7e33382add2b6c602261f719b7b39b1406dfcedb653755ebcb1116a09",
+    "bytes": 21929
+  },
+  {
+    "file": "apple_feedback.json",
+    "sha256": "242973c86c0d632467b46aeee1ad59825b70e3e8893d190f16351d14097c872a",
+    "bytes": 19462
+  },
+  {
+    "file": "apple_hig_accessibility_data.json",
+    "sha256": "be49ec0b34397f356a1e3fd8c7ad323713198515523947097913cb9c57da699b",
+    "bytes": 85010
+  },
+  {
+    "file": "apple_inclusion.json",
+    "sha256": "ab94a3172d397f21973a34ef3bd80319dcf408e4aef13e509b2a99ad733aceb7",
+    "bytes": 51352
+  },
+  {
+    "file": "apple_onboarding.json",
+    "sha256": "9a85ebb1e3dd275d5f5dbfa1729a2e18429960fc26f5273921a68dc5b323dcda",
+    "bytes": 21786
+  },
+  {
+    "file": "apple_progress-indicators.json",
+    "sha256": "76a299d47f154a13b38568a52054f96d5f784739a6aecfe1a82d6ff3a042aa7c",
+    "bytes": 27214
+  },
+  {
+    "file": "apple_typography.json",
+    "sha256": "85bf7dc78d41a6e5e16d4055f3bdadf7bac4f7d5cb2206514c8b82d5d24631ed",
+    "bytes": 281141
+  },
+  {
+    "file": "apple_voiceover.json",
+    "sha256": "859dc02ab9ba87dc545952d8f8077cf94936cd9f49f491d2e765c2425a6c76e5",
+    "bytes": 36439
+  },
+  {
+    "file": "apple_writing.json",
+    "sha256": "3c32e5d0b6dac0a2ccef96d96ea8a3eb62e425ef319fd065aa6e3010f93ea149",
+    "bytes": 37074
+  }
+]

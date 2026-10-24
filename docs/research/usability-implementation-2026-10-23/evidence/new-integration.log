@@ -1,0 +1,18 @@
+✔ UX meal missing selection, unknown quantity, actual zero and retry identity remain distinct (270.614525ms)
+✔ UX concurrent meal retries create one record and preserve the original request (51.166308ms)
+✔ UX dose-only self-report counts as participation without inventing a legacy daily score (28.896306ms)
+✔ UX daily revisions reject stale changes while preserving unrelated values (49.480272ms)
+✔ UX new staff surfaces require a session and reject patient role and missing CSRF (59.165061ms)
+✔ UX restricted support role cannot cross assigned-patient scope or write clinical orders (298.048972ms)
+✔ UX selected-patient CSV preview and actual export share date scope and quoted row counts (29.112812ms)
+✔ UX research snapshot freezes values, excludes direct identifiers and hashes exact exported bytes (55.23458ms)
+✔ UX worklist retry identity and versions protect concurrent task changes (16.905962ms)
+✔ UX correction approval rechecks source revision and preserves newer patient data (22.293994ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 989.922134

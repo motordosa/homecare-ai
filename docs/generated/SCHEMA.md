@@ -2,7 +2,7 @@
 
 자동 생성: 임시 SQLite에 현재 추가 마이그레이션을 적용한 결과다. 사용자/공개 DB에 접근하지 않으며 행 값·토큰·사진을 저장하지 않는다. 의미와 단위는 [자료 사전](../DATA_DICTIONARY.md)과 [계약](../CONTRACTS.md)을 함께 읽는다.
 
-22 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
+39 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
 
 ## auth_accounts
 
@@ -45,6 +45,36 @@ CREATE TABLE auth_sessions (
   )
 ```
 
+## caregiver_delegations
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | TEXT | no |  | 1 |
+| patient_id | TEXT | yes |  |  |
+| account_id | TEXT | yes |  |  |
+| scopes_json | TEXT | yes |  |  |
+| start_date | TEXT | yes |  |  |
+| end_date | TEXT | yes |  |  |
+| reason | TEXT | yes |  |  |
+| version | INTEGER | yes |  |  |
+| created_by | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+| revoked_by | TEXT | no |  |  |
+| revoked_at | TEXT | no |  |  |
+| revoke_reason | TEXT | no |  |  |
+
+외래키: account_id → auth_accounts.id (DELETE CASCADE); patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE caregiver_delegations (
+    id TEXT PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    account_id TEXT NOT NULL REFERENCES auth_accounts(id) ON DELETE CASCADE, scopes_json TEXT NOT NULL,
+    start_date TEXT NOT NULL, end_date TEXT NOT NULL, reason TEXT NOT NULL,
+    version INTEGER NOT NULL, created_by TEXT NOT NULL, created_at TEXT NOT NULL,
+    revoked_by TEXT, revoked_at TEXT, revoke_reason TEXT
+  )
+```
+
 ## conversation_reads
 
 | 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
@@ -65,6 +95,50 @@ CREATE TABLE conversation_reads (
   )
 ```
 
+## daily_record_audit
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | INTEGER | no |  | 1 |
+| patient_id | TEXT | yes |  |  |
+| date | TEXT | yes |  |  |
+| before_json | TEXT | no |  |  |
+| after_json | TEXT | yes |  |  |
+| actor_json | TEXT | yes |  |  |
+| reason | TEXT | yes |  |  |
+| source | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE daily_record_audit (
+    id INTEGER PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    date TEXT NOT NULL, before_json TEXT, after_json TEXT NOT NULL, actor_json TEXT NOT NULL,
+    reason TEXT NOT NULL, source TEXT NOT NULL, created_at TEXT NOT NULL
+  )
+```
+
+## daily_record_submissions
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| patient_id | TEXT | yes |  | 1 |
+| request_id | TEXT | yes |  | 2 |
+| request_hash | TEXT | yes |  |  |
+| response_json | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE daily_record_submissions (
+    patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    request_id TEXT NOT NULL, request_hash TEXT NOT NULL, response_json TEXT NOT NULL,
+    created_at TEXT NOT NULL, PRIMARY KEY(patient_id,request_id)
+  )
+```
+
 ## daily_records
 
 | 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
@@ -81,6 +155,7 @@ CREATE TABLE conversation_reads (
 | weight_kg | REAL | no |  |  |
 | created_at | TEXT | yes |  |  |
 | updated_at | TEXT | yes |  |  |
+| revision | INTEGER | yes | 1 |  |
 
 외래키: patient_id → patients.id (DELETE CASCADE)
 
@@ -89,8 +164,85 @@ CREATE TABLE daily_records (
       id TEXT PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
       date TEXT NOT NULL, steps INTEGER, sleep_hours REAL, medication_status TEXT,
       appetite TEXT, mood TEXT, note TEXT NOT NULL DEFAULT '', weight_kg REAL,
-      created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE(patient_id,date)
+      created_at TEXT NOT NULL, updated_at TEXT NOT NULL, revision INTEGER NOT NULL DEFAULT 1, UNIQUE(patient_id,date)
     )
+```
+
+## evidence_bookmarks
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | TEXT | no |  | 1 |
+| article_key | TEXT | yes |  |  |
+| article_json | TEXT | yes |  |  |
+| search_id | TEXT | yes |  |  |
+| review_status | TEXT | yes |  |  |
+| note | TEXT | yes | '' |  |
+| evidence_text | TEXT | yes | '' |  |
+| locator | TEXT | yes | '' |  |
+| review_basis | TEXT | yes | 'metadata' |  |
+| version | INTEGER | yes | 1 |  |
+| created_by | TEXT | yes |  |  |
+| updated_by | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+| updated_at | TEXT | yes |  |  |
+
+외래키: updated_by → auth_accounts.id (DELETE NO ACTION); created_by → auth_accounts.id (DELETE NO ACTION); search_id → evidence_searches.id (DELETE NO ACTION)
+
+```sql
+CREATE TABLE evidence_bookmarks (
+    id TEXT PRIMARY KEY, article_key TEXT NOT NULL UNIQUE, article_json TEXT NOT NULL,
+    search_id TEXT NOT NULL REFERENCES evidence_searches(id),
+    review_status TEXT NOT NULL CHECK(review_status IN ('saved','included','excluded','reviewed')),
+    note TEXT NOT NULL DEFAULT '', evidence_text TEXT NOT NULL DEFAULT '', locator TEXT NOT NULL DEFAULT '',
+    review_basis TEXT NOT NULL DEFAULT 'metadata' CHECK(review_basis IN ('metadata','abstract','external-fulltext')),
+    version INTEGER NOT NULL DEFAULT 1,
+    created_by TEXT NOT NULL REFERENCES auth_accounts(id), updated_by TEXT NOT NULL REFERENCES auth_accounts(id),
+    created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+  )
+```
+
+## evidence_reviews
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| bookmark_id | TEXT | yes |  | 1 |
+| version | INTEGER | yes |  | 2 |
+| actor_id | TEXT | yes |  |  |
+| snapshot_json | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: actor_id → auth_accounts.id (DELETE NO ACTION); bookmark_id → evidence_bookmarks.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE evidence_reviews (
+    bookmark_id TEXT NOT NULL REFERENCES evidence_bookmarks(id) ON DELETE CASCADE,
+    version INTEGER NOT NULL, actor_id TEXT NOT NULL REFERENCES auth_accounts(id),
+    snapshot_json TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(bookmark_id,version)
+  )
+```
+
+## evidence_searches
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | TEXT | no |  | 1 |
+| actor_id | TEXT | yes |  |  |
+| query | TEXT | yes |  |  |
+| query_signature | TEXT | yes |  |  |
+| parameters_json | TEXT | yes |  |  |
+| provider | TEXT | yes |  |  |
+| searched_at | TEXT | yes |  |  |
+| result_json | TEXT | yes |  |  |
+
+외래키: actor_id → auth_accounts.id (DELETE NO ACTION)
+
+```sql
+CREATE TABLE evidence_searches (
+    id TEXT PRIMARY KEY, actor_id TEXT NOT NULL REFERENCES auth_accounts(id),
+    query TEXT NOT NULL, query_signature TEXT NOT NULL, parameters_json TEXT NOT NULL,
+    provider TEXT NOT NULL, searched_at TEXT NOT NULL, result_json TEXT NOT NULL
+  )
 ```
 
 ## health_batches
@@ -184,6 +336,27 @@ CREATE TABLE health_daily (
     )
 ```
 
+## meal_submissions
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| patient_id | TEXT | yes |  | 1 |
+| request_id | TEXT | yes |  | 2 |
+| request_hash | TEXT | yes |  |  |
+| meal_id | TEXT | no |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: meal_id → meals.id (DELETE SET NULL); patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE meal_submissions (
+    patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    request_id TEXT NOT NULL, request_hash TEXT NOT NULL,
+    meal_id TEXT REFERENCES meals(id) ON DELETE SET NULL,
+    created_at TEXT NOT NULL, PRIMARY KEY(patient_id,request_id)
+  )
+```
+
 ## meals
 
 | 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
@@ -193,9 +366,9 @@ CREATE TABLE health_daily (
 | date | TEXT | yes |  |  |
 | meal_type | TEXT | yes |  |  |
 | food_type | TEXT | yes |  |  |
-| portion | REAL | yes |  |  |
-| calories | REAL | yes |  |  |
-| protein_grams | REAL | yes |  |  |
+| portion | REAL | no |  |  |
+| calories | REAL | no |  |  |
+| protein_grams | REAL | no |  |  |
 | image_filename | TEXT | no |  |  |
 | source | TEXT | yes | 'demo-food-table-v1' |  |
 | created_at | TEXT | yes |  |  |
@@ -206,12 +379,13 @@ CREATE TABLE health_daily (
 외래키: patient_id → patients.id (DELETE CASCADE)
 
 ```sql
-CREATE TABLE meals (
-      id TEXT PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-      date TEXT NOT NULL, meal_type TEXT NOT NULL, food_type TEXT NOT NULL, portion REAL NOT NULL,
-      calories REAL NOT NULL, protein_grams REAL NOT NULL, image_filename TEXT,
-      source TEXT NOT NULL DEFAULT 'demo-food-table-v1', created_at TEXT NOT NULL
-    , analysis_id TEXT, food_label TEXT, estimation_json TEXT)
+CREATE TABLE "meals" (
+        id TEXT PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+        date TEXT NOT NULL, meal_type TEXT NOT NULL, food_type TEXT NOT NULL,
+        portion REAL, calories REAL, protein_grams REAL, image_filename TEXT,
+        source TEXT NOT NULL DEFAULT 'demo-food-table-v1', created_at TEXT NOT NULL,
+        analysis_id TEXT, food_label TEXT, estimation_json TEXT
+      )
 ```
 
 ## medication_event_audit
@@ -273,6 +447,26 @@ CREATE TABLE medication_events (
         reported_at TEXT NOT NULL, created_at TEXT NOT NULL,
         UNIQUE(order_id,date,time), UNIQUE(id,patient_id),
         FOREIGN KEY(order_id,patient_id) REFERENCES medication_orders(id,patient_id) ON DELETE CASCADE
+      )
+```
+
+## medication_order_requests
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| patient_id | TEXT | yes |  | 1 |
+| request_id | TEXT | yes |  | 2 |
+| request_hash | TEXT | yes |  |  |
+| order_id | TEXT | yes |  |  |
+
+외래키: order_id → medication_orders.id (DELETE CASCADE); patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE medication_order_requests (
+        patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+        request_id TEXT NOT NULL, request_hash TEXT NOT NULL,
+        order_id TEXT NOT NULL REFERENCES medication_orders(id) ON DELETE CASCADE,
+        PRIMARY KEY(patient_id,request_id)
       )
 ```
 
@@ -356,6 +550,49 @@ CREATE TABLE medication_photo_reports (
     date TEXT NOT NULL, image_hash TEXT NOT NULL, image_bytes BLOB NOT NULL,
     image_mime TEXT NOT NULL, analysis_json TEXT NOT NULL, created_at TEXT NOT NULL,
     UNIQUE(patient_id,client_submission_id), UNIQUE(id,patient_id)
+  )
+```
+
+## medication_photo_review_events
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | INTEGER | no |  | 1 |
+| report_id | TEXT | yes |  |  |
+| version | INTEGER | yes |  |  |
+| actor_json | TEXT | yes |  |  |
+| snapshot_json | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: report_id → medication_photo_reports.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE medication_photo_review_events (
+    id INTEGER PRIMARY KEY, report_id TEXT NOT NULL REFERENCES medication_photo_reports(id) ON DELETE CASCADE,
+    version INTEGER NOT NULL, actor_json TEXT NOT NULL, snapshot_json TEXT NOT NULL, created_at TEXT NOT NULL,
+    UNIQUE(report_id,version)
+  )
+```
+
+## medication_photo_reviews
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| report_id | TEXT | no |  | 1 |
+| patient_id | TEXT | yes |  |  |
+| status | TEXT | yes |  |  |
+| note | TEXT | yes |  |  |
+| version | INTEGER | yes |  |  |
+| reviewed_by | TEXT | yes |  |  |
+| reviewed_at | TEXT | yes |  |  |
+
+외래키: report_id → medication_photo_reports.id (DELETE CASCADE); patient_id → medication_photo_reports.patient_id (DELETE CASCADE)
+
+```sql
+CREATE TABLE medication_photo_reviews (
+    report_id TEXT PRIMARY KEY, patient_id TEXT NOT NULL, status TEXT NOT NULL CHECK(status IN ('reviewed','needs_information')),
+    note TEXT NOT NULL, version INTEGER NOT NULL, reviewed_by TEXT NOT NULL, reviewed_at TEXT NOT NULL,
+    FOREIGN KEY(report_id,patient_id) REFERENCES medication_photo_reports(id,patient_id) ON DELETE CASCADE
   )
 ```
 
@@ -472,6 +709,27 @@ CREATE TABLE oauth_attempts (
   )
 ```
 
+## participation_events
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | INTEGER | no |  | 1 |
+| patient_id | TEXT | yes |  |  |
+| version | INTEGER | yes |  |  |
+| actor_json | TEXT | yes |  |  |
+| snapshot_json | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE participation_events (
+    id INTEGER PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    version INTEGER NOT NULL, actor_json TEXT NOT NULL, snapshot_json TEXT NOT NULL, created_at TEXT NOT NULL,
+    UNIQUE(patient_id,version)
+  )
+```
+
 ## patient_invitations
 
 | 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
@@ -542,4 +800,162 @@ CREATE TABLE photo_analyses (
       created_at TEXT NOT NULL, expires_at TEXT NOT NULL,
       applied_at TEXT, applied_meal_id TEXT
     )
+```
+
+## record_corrections
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | TEXT | no |  | 1 |
+| patient_id | TEXT | yes |  |  |
+| date | TEXT | yes |  |  |
+| source_revision | INTEGER | yes |  |  |
+| source_snapshot_json | TEXT | yes |  |  |
+| source_hash | TEXT | yes |  |  |
+| patch_json | TEXT | yes |  |  |
+| reason | TEXT | yes |  |  |
+| status | TEXT | yes |  |  |
+| version | INTEGER | yes |  |  |
+| proposed_by | TEXT | yes |  |  |
+| proposed_at | TEXT | yes |  |  |
+| reviewed_by | TEXT | no |  |  |
+| reviewed_at | TEXT | no |  |  |
+| review_reason | TEXT | no |  |  |
+
+외래키: patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE record_corrections (
+    id TEXT PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    date TEXT NOT NULL, source_revision INTEGER NOT NULL, source_snapshot_json TEXT NOT NULL,
+    source_hash TEXT NOT NULL, patch_json TEXT NOT NULL, reason TEXT NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('proposed','approved','rejected')), version INTEGER NOT NULL,
+    proposed_by TEXT NOT NULL, proposed_at TEXT NOT NULL, reviewed_by TEXT, reviewed_at TEXT, review_reason TEXT
+  )
+```
+
+## research_snapshots
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | TEXT | no |  | 1 |
+| client_request_id | TEXT | yes |  |  |
+| created_by | TEXT | yes |  |  |
+| request_hash | TEXT | yes |  |  |
+| scope_json | TEXT | yes |  |  |
+| recipe_json | TEXT | yes |  |  |
+| data_json | TEXT | yes |  |  |
+| content_hash | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+| generation | TEXT | yes |  |  |
+
+```sql
+CREATE TABLE research_snapshots (
+      id TEXT PRIMARY KEY, client_request_id TEXT NOT NULL, created_by TEXT NOT NULL,
+      request_hash TEXT NOT NULL, scope_json TEXT NOT NULL, recipe_json TEXT NOT NULL,
+      data_json TEXT NOT NULL, content_hash TEXT NOT NULL, created_at TEXT NOT NULL,
+      generation TEXT NOT NULL, UNIQUE(created_by,client_request_id)
+    )
+```
+
+## study_participation
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| patient_id | TEXT | no |  | 1 |
+| study_id | TEXT | yes |  |  |
+| status | TEXT | yes |  |  |
+| start_date | TEXT | yes |  |  |
+| end_date | TEXT | no |  |  |
+| consent_version | TEXT | yes |  |  |
+| required_domains | TEXT | yes |  |  |
+| version | INTEGER | yes |  |  |
+| reason | TEXT | yes |  |  |
+| updated_by | TEXT | yes |  |  |
+| updated_at | TEXT | yes |  |  |
+
+외래키: patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE study_participation (
+    patient_id TEXT PRIMARY KEY REFERENCES patients(id) ON DELETE CASCADE, study_id TEXT NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('active','paused','withdrawn','completed')),
+    start_date TEXT NOT NULL, end_date TEXT, consent_version TEXT NOT NULL, required_domains TEXT NOT NULL,
+    version INTEGER NOT NULL, reason TEXT NOT NULL, updated_by TEXT NOT NULL, updated_at TEXT NOT NULL
+  )
+```
+
+## workflow_mutations
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| actor_id | TEXT | yes |  | 1 |
+| client_request_id | TEXT | yes |  | 2 |
+| operation | TEXT | yes |  |  |
+| patient_id | TEXT | yes |  |  |
+| request_hash | TEXT | yes |  |  |
+| result_json | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE workflow_mutations (
+    actor_id TEXT NOT NULL, client_request_id TEXT NOT NULL, operation TEXT NOT NULL,
+    patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    request_hash TEXT NOT NULL, result_json TEXT NOT NULL, created_at TEXT NOT NULL,
+    PRIMARY KEY(actor_id,client_request_id)
+  )
+```
+
+## workflow_task_events
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | INTEGER | no |  | 1 |
+| task_id | TEXT | yes |  |  |
+| version | INTEGER | yes |  |  |
+| actor_json | TEXT | yes |  |  |
+| snapshot_json | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: task_id → workflow_tasks.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE workflow_task_events (
+    id INTEGER PRIMARY KEY, task_id TEXT NOT NULL REFERENCES workflow_tasks(id) ON DELETE CASCADE,
+    version INTEGER NOT NULL, actor_json TEXT NOT NULL, snapshot_json TEXT NOT NULL, created_at TEXT NOT NULL,
+    UNIQUE(task_id,version)
+  )
+```
+
+## workflow_tasks
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| id | TEXT | no |  | 1 |
+| patient_id | TEXT | yes |  |  |
+| type | TEXT | yes |  |  |
+| title | TEXT | yes |  |  |
+| note | TEXT | yes |  |  |
+| assignee | TEXT | yes | '' |  |
+| due_date | TEXT | no |  |  |
+| status | TEXT | yes |  |  |
+| version | INTEGER | yes |  |  |
+| created_by | TEXT | yes |  |  |
+| updated_by | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+| updated_at | TEXT | yes |  |  |
+
+외래키: patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE workflow_tasks (
+    id TEXT PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    type TEXT NOT NULL CHECK(type IN ('contact','photo_review','data_quality','clinical_review')),
+    title TEXT NOT NULL, note TEXT NOT NULL, assignee TEXT NOT NULL DEFAULT '', due_date TEXT,
+    status TEXT NOT NULL CHECK(status IN ('new','in_progress','waiting','review_requested','completed')),
+    version INTEGER NOT NULL, created_by TEXT NOT NULL, updated_by TEXT NOT NULL,
+    created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+  )
 ```

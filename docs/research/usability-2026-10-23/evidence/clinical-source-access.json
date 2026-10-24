@@ -1,0 +1,90 @@
+[
+  {
+    "id": "AHRQ-WORKFLOW",
+    "url": "https://digital.ahrq.gov/health-it-tools-and-resources/workflow-assessment-health-it-toolkit",
+    "checkedAt": "2026-10-23T07:21:28.548446+00:00",
+    "status": "failed",
+    "error": "URLError",
+    "detail": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "id": "NIST-7804",
+    "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nistir7804.pdf",
+    "checkedAt": "2026-10-23T07:21:28.549087+00:00",
+    "status": "failed",
+    "error": "URLError",
+    "detail": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "id": "FDA-HFE",
+    "url": "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/applying-human-factors-and-usability-engineering-medical-devices",
+    "checkedAt": "2026-10-23T07:21:28.549637+00:00",
+    "status": "failed",
+    "error": "URLError",
+    "detail": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "id": "STROBE",
+    "url": "https://www.strobe-statement.org/checklists/",
+    "checkedAt": "2026-10-23T07:21:28.550130+00:00",
+    "status": "failed",
+    "error": "URLError",
+    "detail": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "id": "CONSORT-2025",
+    "url": "https://www.consort-spirit.org/consort-2025",
+    "checkedAt": "2026-10-23T07:21:28.550558+00:00",
+    "status": "failed",
+    "error": "URLError",
+    "detail": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "id": "PRISMA-2020",
+    "url": "https://www.prisma-statement.org/prisma-2020-statement",
+    "checkedAt": "2026-10-23T07:21:28.551428+00:00",
+    "status": "failed",
+    "error": "URLError",
+    "detail": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "id": "CONSORT-EHEALTH",
+    "url": "https://www.jmir.org/2011/4/e126/",
+    "checkedAt": "2026-10-23T07:21:28.567500+00:00",
+    "status": "failed",
+    "error": "URLError",
+    "detail": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "id": "NLM-EUTILS",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK25501/",
+    "checkedAt": "2026-10-23T07:21:28.570559+00:00",
+    "status": "failed",
+    "error": "URLError",
+    "detail": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "id": "EUROPE-PMC",
+    "url": "https://europepmc.org/RestfulWebService",
+    "checkedAt": "2026-10-23T07:21:28.572715+00:00",
+    "status": "failed",
+    "error": "URLError",
+    "detail": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "id": "OPENALEX",
+    "url": "https://docs.openalex.org/how-to-use-the-api/api-overview",
+    "checkedAt": "2026-10-23T07:21:28.575473+00:00",
+    "status": "failed",
+    "error": "URLError",
+    "detail": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "id": "ASA-PVALUES",
+    "url": "https://www.amstat.org/asa/files/pdfs/P-ValueStatement.pdf",
+    "checkedAt": "2026-10-23T07:21:28.577702+00:00",
+    "status": "failed",
+    "error": "URLError",
+    "detail": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  }
+]

@@ -127,9 +127,14 @@ try {
     await desktop.locator('#patient-search').fill('정테스트');
     assert.equal(await desktop.locator('.patient-row').count(), 1);
     await desktop.locator('#main-nav button[data-view=records]').click();
+    await desktop.locator('.records-toolbar [data-action="export-preview"]').click();
+    assert.equal(await desktop.locator('#export-scope').inputValue(), 'selected');
+    await desktop.locator('#export-preview-form button[type=submit]').click();
+    await desktop.locator('#export-download').waitFor({ state: 'visible' });
     const downloading = desktop.waitForEvent('download');
-    await desktop.locator('.records-toolbar a[href="/api/export.csv"]').click();
-    assert.match((await downloading).suggestedFilename(), /homecare-demo.*\.csv/);
+    await desktop.locator('#export-download').click();
+    assert.match((await downloading).suggestedFilename(), /^homecare-records-\d{4}-\d{2}-\d{2}\.csv$/);
+    await desktop.locator('#modal [data-modal-action=close]').last().click();
   });
   await check('confirmed empty reset, empty screens and sample restore work through UI', async () => {
     await desktop.locator('#main-nav button[data-view=settings]').click();

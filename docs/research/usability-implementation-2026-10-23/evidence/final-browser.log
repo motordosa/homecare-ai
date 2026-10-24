@@ -1,0 +1,8 @@
+PASS landing routes and desktop dashboard
+PASS clinician adds a demo patient through the interface
+PASS mobile daily entry saves to the shared database
+PASS mobile photo and meal appear in clinician analysis
+PASS historical edit preserves fields and patient changes isolate records
+PASS mobile tabs, desktop filtering and CSV download work
+PASS confirmed empty reset, empty screens and sample restore work through UI
+7 browser scenarios passed; screenshots saved in test-results/.

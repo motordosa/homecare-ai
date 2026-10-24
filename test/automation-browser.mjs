@@ -44,6 +44,10 @@ async function until(predicate, description) {
   throw new Error(`Timed out: ${description}`);
 }
 async function flushUi(page) { await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))); }
+async function revealField(page, selector) {
+  const disclosure = page.locator(selector).locator('xpath=ancestor::details[1]');
+  if (await disclosure.count() && !await disclosure.evaluate(element => element.open)) await disclosure.locator(':scope > summary').click();
+}
 async function newPage(mobile = false) {
   const page = await browser.newPage(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width: 1440, height: 1000 } });
   page.setDefaultTimeout(12_000);
@@ -55,9 +59,12 @@ async function patientPage(page, id, suffix = '') {
   await ready(page); await settledPatient(page);
 }
 async function saveDaily(page, id, expected) {
+  const before = (await get(`/api/patients/${id}/daily?date=${expected.date}`)).record;
   const request = page.waitForRequest(request => request.url() === `${base}/api/patients/${id}/daily` && request.method() === 'POST');
   await page.locator('#daily-submit').click();
-  assert.deepEqual((await request).postDataJSON(), expected);
+  const { clientSubmissionId, expectedRevision, ...fields } = (await request).postDataJSON();
+  assert.match(clientSubmissionId, /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i); assert.equal(expectedRevision, before?.revision ?? 0);
+  assert.deepEqual(fields, expected);
   await page.locator('#daily-dialog').waitFor({ state: 'hidden' });
   await settledPatient(page);
 }
@@ -119,7 +126,7 @@ try {
     await page.goto(base);
     await page.locator('.portal.clinician').click(); await ready(page);
     const id = new URL(page.url()).searchParams.get('patientId');
-    const views = ['overview', 'patients', 'medications', 'records', 'notices', 'messages', 'settings'];
+    const views = ['overview', 'patients', 'medications', 'records', 'worklist', 'research', 'evidence', 'notices', 'messages', 'settings'];
     for (const view of views.slice(1)) {
       await page.locator(`#main-nav [data-view="${view}"]`).click();
       await clinicianRoute(page, view, id);
@@ -205,7 +212,7 @@ try {
         const close = mobile.getByRole('button', { name: '홈으로 돌아가기', exact: true });
         assert.equal(await close.isVisible(), true);
         const bounds = await close.boundingBox();
-        assert.ok(bounds.width >= 44 && bounds.height >= 44);
+        assert.ok(bounds.width >= 48 && bounds.height >= 48);
         if (closeBounds) assert.deepEqual(bounds, closeBounds); else closeBounds = bounds;
         assert.equal(await mobile.locator('.patient-header a[href^="/clinician"]').count(), 0);
         assert.equal(await mobile.locator('#guide-clinician-link').isVisible(), view === 'guide');
@@ -334,8 +341,11 @@ try {
     await mobile.locator('#legacy-medication-form').waitFor({ state: 'visible' });
     await mobile.locator('#legacy-medication-form').getByText('기억나지 않아요', { exact: true }).click();
     const request = mobile.waitForRequest(request => request.url() === `${base}/api/patients/${otherPatient.id}/daily` && request.method() === 'POST');
+    const prior = (await get(`/api/patients/${otherPatient.id}/daily?date=${today}`)).record;
     await mobile.locator('#legacy-medication-submit').click();
-    assert.deepEqual((await request).postDataJSON(), { date: today, medicationStatus: 'unknown' });
+    const { clientSubmissionId, expectedRevision, ...fields } = (await request).postDataJSON();
+    assert.match(clientSubmissionId, /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i); assert.equal(expectedRevision, prior?.revision ?? 0);
+    assert.deepEqual(fields, { date: today, medicationStatus: 'unknown' });
     await mobile.waitForFunction(() => !document.querySelector('#legacy-medication-submit').disabled);
     const record = (await get(`/api/patients/${otherPatient.id}/daily?date=${today}`)).record;
     assert.equal(record.medicationStatus, 'unknown');
@@ -401,6 +411,7 @@ try {
     assert.equal(await mobile.locator('#medication-list .medication-slot').count(), 2);
     assert.equal(await mobile.locator('#medication-list .medication-status.pending').count(), 2);
     await mobile.locator('#medication-slot-0').getByText('먹었어요', { exact: true }).click();
+    await revealField(mobile, '#slot-note-0');
     await mobile.locator('#slot-note-0').fill('처음 복용으로 보고');
     let saving = responseFor(mobile, `/api/patients/${patient.id}/medication-events`);
     await mobile.locator('#medication-slot-0 button[type=submit]').click(); assert.equal((await saving).status(), 200);
@@ -410,6 +421,7 @@ try {
     await desktop.locator('.medication-status.taken').waitFor({ state: 'visible' });
     assert.equal(await desktop.locator('.medication-status.pending').count(), 1);
     await mobile.locator('#medication-slot-0').getByText('못 먹었어요', { exact: true }).click();
+    await revealField(mobile, '#slot-reason-0');
     await mobile.locator('#slot-reason-0').fill('기억을 다시 확인');
     await mobile.locator('#slot-note-0').fill('이전 보고를 미복용으로 정정');
     saving = responseFor(mobile, `/api/patients/${patient.id}/medication-events`);
@@ -430,8 +442,10 @@ try {
   await check('saving one medication slot preserves a different slot draft and its unsaved-navigation protection', async () => {
     await patientPage(mobile, patient.id, '&view=medication');
     await mobile.locator('#medication-slot-1').waitFor({ state: 'visible' });
+    await revealField(mobile, '#slot-note-0');
     await mobile.locator('#slot-note-0').fill('첫 회차 추가 정정');
     await mobile.locator('#medication-slot-1 input[value=unknown]').check();
+    await revealField(mobile, '#slot-note-1');
     await mobile.locator('#slot-note-1').fill('다른 회차의 아직 저장하지 않은 입력');
     await mobile.locator('#medication-slot-0 button[type=submit]').click();
     await mobile.waitForFunction(() => !document.querySelector('#medication-slot-0 button[type=submit]').disabled);
@@ -472,7 +486,8 @@ try {
     };
     await patientPage(mobile, patient.id, '&view=connections');
     await mobile.locator('#connection-list .empty-state-card').waitFor({ state: 'visible' });
-    assert.ok((await mobile.locator('#view-connections .connection-help.inline-notice').innerText()).includes('Safari만으로는 건강 기록을 읽지 못해요'));
+    assert.match(await mobile.locator('#view-connections .connection-help.inline-notice').innerText(), /실제 휴대폰의 자동 수신은 검증 전/);
+    assert.match(await mobile.locator('#view-connections .connection-help.inline-notice').innerText(), /직접 입력할 수 있어요/);
     await mobile.locator('.connection-setup summary').click();
     await mobile.locator('#connection-label').fill('브라우저 연결 검증');
     await mobile.locator('#connection-create').click();
@@ -659,7 +674,11 @@ try {
     assert.equal(saved.source, 'openai-image-estimate-v1'); assert.equal(saved.foodLabel, proposal.foodLabel);
     assert.equal(saved.calories, 306); assert.equal(saved.proteinGrams, 15.4);
     assert.equal(saved.estimation.model, 'fixture-browser-not-live'); assert.equal(saved.estimation.patientConfirmed, true);
-    assert.equal((await post(`/api/patients/${patient.id}/meals`, payload)).status, 409);
+    assert.ok(payload.clientSubmissionId, 'UI keeps a stable request identity for an ambiguous retry');
+    const replay = await post(`/api/patients/${patient.id}/meals`, payload);
+    assert.ok([200, 201].includes(replay.status));
+    assert.equal((await replay.json()).meal.id, saved.id);
+    assert.equal((await post(`/api/patients/${patient.id}/meals`, { ...payload, clientSubmissionId: randomUUID() })).status, 409);
     assert.equal(calls, 1);
     await page.locator('#meal-dialog').waitFor({ state: 'hidden' });
     await page.close();
@@ -687,6 +706,8 @@ try {
     pending[0].release(); await (await late).finished(); await flushUi(page);
     await assertHidden(page.locator('#meal-analysis-review'));
     assert.equal(await page.locator('#meal-analysis-consent').isChecked(), false);
+    await page.locator('#meal-form input[name=foodType][value=balanced]').check();
+    await page.locator('#meal-form input[name=portion][value="1"]').check();
     const saving = responseFor(page, `/api/patients/${patient.id}/meals`);
     await page.locator('#meal-submit').click();
     const savedResponse = await saving; assert.equal(savedResponse.status(), 201);
@@ -736,6 +757,7 @@ try {
     for (const selector of ['#medication-dose', '#medication-route', '#medication-instructions', '#medication-times [name=times]']) assert.equal(await page.locator(selector).inputValue(), '');
     assert.equal(await page.locator('#medication-order-confirmed').isChecked(), false);
     assert.equal(calls, 1);
+    page.once('dialog', dialog => dialog.accept());
     await page.locator('#modal [data-modal-action=close]').first().click(); await page.close();
   });
 

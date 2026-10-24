@@ -9,6 +9,10 @@ import { ensureHealthSchema } from '../lib/health-sync.mjs';
 
 import { ensureAuthSchema } from '../lib/auth.mjs';
 import { ensureCommunicationSchema } from '../lib/communications.mjs';
+import { ensureMealSchema } from '../lib/meals.mjs';
+import { ensureWorkflowSchema } from '../lib/workflow.mjs';
+import { ensureResearchSchema } from '../lib/research.mjs';
+import { ensureEvidenceSchema } from '../lib/evidence.mjs';
 
 const output = new URL('../docs/generated/SCHEMA.md', import.meta.url);
 const temp = await mkdtemp(join(tmpdir(), 'homecare-schema-doc-'));
@@ -18,10 +22,14 @@ try {
   ({ db } = openDatabase(temp));
   ensureMedicationSchema(db);
   ensureVisionSchema(db);
+  ensureMealSchema(db);
   ensureMedicationPhotoSchema(db);
   ensureHealthSchema(db);
   ensureAuthSchema(db);
   ensureCommunicationSchema(db);
+  ensureWorkflowSchema(db);
+  ensureResearchSchema(db);
+  ensureEvidenceSchema(db);
   const tables = db.prepare("SELECT name,sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all();
   const sections = tables.map(table => {
     const columns = db.prepare(`PRAGMA table_info("${table.name}")`).all();

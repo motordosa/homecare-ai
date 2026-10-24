@@ -25,12 +25,21 @@ assert.deepEqual([...html.matchAll(/<dialog id="([^"]+)"/g)].map(match => match[
 const header = html.match(/<header class="patient-header">([\s\S]*?)<\/header>/)?.[1];
 assert.ok(header?.includes('id="patient-view-close"'));
 assert.ok(!header.includes('/clinician'), 'patient header must not switch roles');
-const guide = html.slice(html.indexOf('<section id="view-guide"'), html.indexOf('</section>', html.indexOf('<section id="view-guide"')));
+// Guide cards may themselves be sections; stop at the matching outer boundary.
+const guideStart = html.indexOf('<section id="view-guide"');
+assert.ok(guideStart >= 0, 'guide page exists');
+let guideDepth = 0, guideEnd = -1;
+for (const tag of html.slice(guideStart).matchAll(/<\/?section\b[^>]*>/g)) {
+  guideDepth += tag[0].startsWith('</') ? -1 : 1;
+  if (guideDepth === 0) { guideEnd = guideStart + tag.index + tag[0].length; break; }
+}
+assert.ok(guideEnd > guideStart, 'guide page has a matching boundary');
+const guide = html.slice(guideStart, guideEnd);
 assert.ok(guide.includes('id="guide-clinician-link"'));
 assert.equal((html.match(/href="\/clinician/g) ?? []).length, 1, 'role switching belongs only in the guide');
 assert.ok(html.includes('src="/patient.js" type="module"'));
 
-const clinicianIds = { overview: 'C-OVERVIEW', patients: 'C-PATIENTS', medications: 'C-MED', records: 'C-RECORDS', notices: 'C-NOTICES', messages: 'C-MESSAGES', settings: 'C-SETTINGS' };
+const clinicianIds = { overview: 'C-OVERVIEW', patients: 'C-PATIENTS', medications: 'C-MED', records: 'C-RECORDS', notices: 'C-NOTICES', messages: 'C-MESSAGES', settings: 'C-SETTINGS', worklist: 'C-WORKLIST', research: 'C-RESEARCH', evidence: 'C-EVIDENCE' };
 const clinicianSource = readFileSync(new URL('../public/clinician.js', import.meta.url), 'utf8');
 let clinicianTitles;
 function visit(node) {

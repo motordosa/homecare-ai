@@ -158,3 +158,166 @@ ul.analysis-warning{padding-left:26px}
 
 #med-photo-file { width:100%; min-height:44px; font-size:14px; }
 #medication-photo-dialog button,#medication-photo-dialog .analysis-consent { min-height:44px; }
+
+/* v0.7 patient readability contract: body 18px, help 16px, targets >=48px. */
+.patient-accessible { --patient-text:18px; --patient-help:16px; --patient-ink:#183c32; --patient-muted:#475f55; --patient-accent:#11684f; font-size:var(--patient-text); line-height:1.6; color:var(--patient-ink); }
+.patient-accessible.patient-large-text { --patient-text:22px; --patient-help:20px; }
+.patient-accessible .patient-app { padding-bottom:155px; }
+.patient-accessible main { padding:18px; }
+.patient-accessible :is(input,select,textarea,button) { font-size:var(--patient-text); }
+.patient-accessible :is(button,input:not([type=radio]):not([type=checkbox]):not([type=file]),select) { min-height:48px; }
+.patient-accessible :is(p,label,legend,summary,.message-bubble p,.guide-card p,.inline-notice,.form-scope-note) { font-size:var(--patient-text); line-height:1.6; }
+.patient-accessible :is(.eyebrow,.small-label,.today-label,.field-hint,.section-description,.optional,.record-source,.source-caption,.metric-heading,.metric-status,.meal-meta,.meal-nutrition small,.chart-note,.chart-label,.history-date span,.history-med,.medication-meta,.connection-status,.guide-detail,.message-author,.message-bubble small,.analysis-meta,.analysis-warning,.estimate-info small,.demo-strip,.patient-footer,.notice-banner-heading span,.patient-notice time,.task-chip,.auth-strip,.form-error,.toast) { font-size:var(--patient-help); line-height:1.55; color:var(--patient-muted); }
+.patient-accessible :is(h1,h2,h3,strong,legend,label,summary) { color:var(--patient-ink); }
+.patient-accessible h1 { font-size:26px; line-height:1.35; }
+.patient-accessible h2 { font-size:22px; line-height:1.45; }
+.patient-accessible h3 { font-size:20px; line-height:1.45; }
+.patient-accessible :is(.button-primary,.meal-action) { background:var(--patient-accent); color:#fff; }
+.patient-accessible .meal-action :is(strong,span) { color:#fff; }
+.patient-accessible .button-primary:hover { background:#0b503d; }
+.patient-accessible :is(.text-button,.button-secondary,.nav-item.active,.brand-ai,.notice-new,.notice-important) { color:var(--patient-accent); }
+.patient-accessible :is(.form-error,.analysis-warning) { color:#922d20; }
+.patient-accessible :is(input,select,textarea) { border-color:#879a90; }
+.patient-accessible .patient-header { gap:10px; min-height:74px; height:auto; padding:12px 18px; }
+.patient-accessible .brand { font-size:21px; flex-wrap:wrap; min-width:0; }
+.patient-accessible .patient-close { display:inline-flex; align-items:center; justify-content:center; gap:3px; width:auto; min-width:48px; height:auto; min-height:48px; padding:8px; border:1px solid #879a90; border-radius:12px; color:var(--patient-ink); background:white; flex-shrink:0; }
+.patient-accessible .patient-close svg { width:20px; height:20px; }
+.patient-accessible .patient-close span { font-size:var(--patient-help); white-space:nowrap; }
+.patient-accessible .auth-strip { display:flex; align-items:center; flex-wrap:wrap; padding:4px 18px; gap:4px 12px; }
+.patient-accessible .auth-strip :is(a,button) { display:inline-flex; align-items:center; min-height:48px; font-size:var(--patient-help); }
+.patient-accessible .patient-notices { padding:10px 18px; }
+.patient-accessible .notice-banner-heading { flex-wrap:wrap; gap:5px; }
+.patient-accessible .patient-notice summary { min-height:48px; align-items:center; font-size:var(--patient-help); padding:10px 0; }
+.patient-accessible .patient-notice summary>span { overflow-wrap:anywhere; }
+.patient-accessible .notice-more>summary { font-size:var(--patient-help); color:var(--patient-accent); min-height:48px; padding:10px 0; cursor:pointer; }
+.patient-accessible .notice-important,.patient-accessible .notice-new { font-size:var(--patient-help); flex-shrink:0; }
+.patient-accessible .patient-context { align-items:flex-start; flex-wrap:wrap; gap:6px; }
+.patient-accessible #patient-select { max-width:100%; font-size:var(--patient-help); }
+.patient-accessible .greeting { padding:8px 0 16px; min-height:0; }
+.patient-accessible .greeting h1 { margin:4px 0; font-size:25px; }
+.patient-accessible .greeting p { max-width:none; margin-bottom:0; }
+.patient-accessible .quick-actions { gap:12px; margin-bottom:18px; }
+.patient-accessible .action-card { min-height:152px; padding:18px 14px; }
+.patient-accessible .action-card strong { font-size:21px; }
+.patient-accessible .action-card>span:not(.action-icon):not(.action-arrow) { font-size:var(--patient-help); }
+.patient-accessible .action-arrow { display:none; }
+.patient-accessible .progress-card { padding:16px; margin-bottom:16px; }
+.patient-accessible .progress-card h2 { font-size:20px; }
+.patient-accessible .progress-count { font-size:24px; }
+.patient-accessible .progress-count span { font-size:var(--patient-help); }
+.patient-accessible .task-chips { flex-wrap:wrap; gap:10px; }
+.patient-accessible .quick-help { width:100%; margin:0 0 22px; }
+.patient-accessible .health-grid { gap:12px; }
+.patient-accessible .health-card { padding:16px 12px; min-width:0; }
+.patient-accessible .metric-value { font-size:23px; line-height:1.45; overflow-wrap:anywhere; }
+.patient-accessible .metric-value.empty { font-size:var(--patient-text); }
+.patient-accessible .metric-value small { font-size:var(--patient-help); }
+.patient-accessible .meal-item { grid-template-columns:56px minmax(0,1fr); align-items:start; gap:10px; }
+.patient-accessible .meal-title { font-size:var(--patient-text); overflow-wrap:anywhere; }
+.patient-accessible .meal-thumb { width:56px; height:56px; }
+.patient-accessible .meal-nutrition { grid-column:2; text-align:left; margin:0; font-size:var(--patient-text); }
+.patient-accessible .history-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 12px; }
+.patient-accessible .history-date { grid-column:1; display:flex; gap:10px; }
+.patient-accessible .history-values { grid-column:1/-1; margin:0; }
+.patient-accessible .history-med { grid-column:1; white-space:normal; }
+.patient-accessible .history-edit { grid-column:2; grid-row:1; }
+.patient-accessible .chart-tabs { gap:8px; }
+.patient-accessible .chart-tab { font-size:var(--patient-help); min-height:48px; }
+.patient-accessible .chart-data { margin-top:15px; }
+.patient-accessible :is(.chart-data,.sleep-helper,.medication-extra,.connection-help,.connection-setup) summary { min-height:48px; padding:10px 0; cursor:pointer; }
+.patient-accessible #chart-data-table table { width:100%; border-collapse:collapse; font-size:var(--patient-help); }
+.patient-accessible #chart-data-table :is(th,td) { text-align:left; padding:10px 6px; border-bottom:1px solid #bbc9c1; }
+.patient-accessible .bottom-nav { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; padding:8px 12px calc(8px + env(safe-area-inset-bottom)); }
+.patient-accessible .bottom-nav .nav-item { min-height:54px; height:auto; flex-direction:row; gap:7px; padding:10px 5px; border-radius:10px; }
+.patient-accessible .bottom-nav .nav-item span { font-size:var(--patient-help); line-height:1.4; white-space:normal; }
+.patient-accessible .nav-item svg { width:20px; height:20px; flex-shrink:0; }
+.patient-accessible .nav-item.active { background:#e4f1eb; }
+.patient-accessible .message-unread { font-size:14px; background:#11684f; color:white; }
+.patient-accessible .record-dialog { max-width:520px; }
+.patient-accessible .dialog-header { padding:16px; gap:8px; }
+.patient-accessible .dialog-header h2 { font-size:23px; }
+.patient-accessible .dialog-body { padding:18px 16px; }
+.patient-accessible .dialog-footer { padding:14px 16px calc(14px + env(safe-area-inset-bottom)); }
+.patient-accessible .dialog-footer .button { min-height:56px; }
+.patient-accessible .choice-grid.four { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.patient-accessible .choice { min-width:0; }
+.patient-accessible .choice>span { min-height:52px; height:auto; padding:12px 8px; font-size:var(--patient-text); line-height:1.5; }
+.patient-accessible .choice strong { font-size:var(--patient-text); }
+.patient-accessible .choice small { font-size:var(--patient-help); color:var(--patient-muted); }
+.patient-accessible .choice input:checked+span { border-color:#11684f; background:#e2f2e9; color:#0d543e; }
+.patient-accessible .analysis-consent { min-height:48px; padding:12px 4px; gap:12px; font-size:var(--patient-help); }
+.patient-accessible .analysis-consent input { width:24px; height:24px; flex-shrink:0; }
+.patient-accessible .medication-slot { padding:16px; margin-top:12px; }
+.patient-accessible .medication-slot-header { flex-wrap:wrap; gap:10px; }
+.patient-accessible .medication-slot-header h2 { font-size:21px; }
+.patient-accessible .medication-status { font-size:var(--patient-help); color:#264d3b; white-space:normal; }
+.patient-accessible .medication-time-group>h2 { margin-top:22px; padding:10px 0; border-bottom:2px solid #879a90; }
+.patient-accessible .medication-extra { margin:10px 0 18px; }
+.patient-accessible .medication-extra>summary { color:var(--patient-accent); font-size:var(--patient-help); }
+.patient-accessible .med-photo-slot { padding:14px; }
+.patient-accessible .med-photo-slot select { max-width:100%; width:100%; }
+.patient-accessible .photo-step { margin:16px 0 10px; }
+.patient-accessible .camera-choice { position:relative; display:flex; align-items:center; justify-content:center; margin-top:12px; min-height:48px; overflow:hidden; }
+.patient-accessible .camera-input { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
+.patient-accessible .photo-upload { min-height:160px; }
+.patient-accessible .photo-upload span span { font-size:var(--patient-help); }
+.patient-accessible .save-confirmation { border:2px solid #11684f; background:#e8f5ec; padding:16px; margin:0 0 18px; border-radius:12px; }
+.patient-accessible .save-confirmation p { margin:8px 0; }
+.patient-accessible .save-confirmation strong { display:block; }
+.patient-accessible .quick-message-choices { display:flex; flex-direction:column; gap:10px; margin:18px 0; }
+.patient-accessible .practice-card { margin-bottom:20px; }
+.patient-accessible .practice-card .button { margin:8px 0; width:100%; }
+.patient-accessible .toast { bottom:158px; background:#183c32; color:#fff; max-width:calc(100% - 28px); }
+.patient-accessible :is(button,a,input,textarea,select,summary):focus-visible { outline:3px solid #174ea6; outline-offset:3px; }
+.patient-accessible .button:disabled { opacity:.65; }
+@media (max-width:360px) {
+  .patient-accessible .brand { font-size:18px; gap:6px; }
+  .patient-accessible .brand-mark { width:32px; height:32px; }
+  .patient-accessible .choice-grid.three,.patient-accessible .form-row { grid-template-columns:1fr; }
+  .patient-accessible .action-card { padding:14px 10px; min-height:156px; }
+  .patient-accessible .health-grid { grid-template-columns:1fr; }
+  .patient-accessible .nav-item svg { display:none; }
+  .patient-accessible .bottom-nav .nav-item { padding:10px 3px; }
+}
+.patient-accessible.patient-large-text .choice-grid,.patient-accessible.patient-large-text .health-grid,.patient-accessible.patient-large-text .quick-actions { grid-template-columns:1fr; }
+/* Explicit overrides for the legacy component rules with more specific selectors. */
+.patient-accessible .bottom-nav .nav-item { color:var(--patient-muted); min-height:54px; }
+.patient-accessible .bottom-nav .nav-item.active { color:var(--patient-accent); }
+.patient-accessible .greeting>p:last-of-type,.patient-accessible .gentle-note p,.patient-accessible .medication-action>span:not(.action-icon):not(.action-arrow),.patient-accessible .guide-card p,.patient-accessible .guide-demo p,.patient-accessible .trend-summary p { color:var(--patient-muted); }
+.patient-accessible .meal-action>span:not(.action-icon):not(.action-arrow) { color:#fff; }
+.patient-accessible .meal-item { display:grid; }
+.patient-accessible .notice-banner-heading strong,.patient-accessible .gentle-note strong,.patient-accessible .patient-footer span,.patient-accessible .estimate-badge,.patient-accessible .input-unit>span,.patient-accessible .history-date strong { font-size:var(--patient-help); color:var(--patient-ink); }
+.patient-accessible .demo-strip-end,.patient-accessible .progress-count span,.patient-accessible .patient-footer span { color:var(--patient-muted); }
+.patient-accessible .medication-slot .slot-actions .choice>span { font-size:var(--patient-text); min-height:52px; padding:12px 6px; }
+.patient-accessible #med-photo-file,.patient-accessible #medication-photo-dialog button,.patient-accessible #medication-photo-dialog .analysis-consent { min-height:48px; font-size:var(--patient-help); }
+.patient-accessible .patient-notices .patient-notice p { font-size:var(--patient-text); color:var(--patient-ink); }
+.patient-accessible .section-row { flex-wrap:wrap; }
+.patient-accessible .guide-list :is(p,.guide-detail),.patient-accessible .guide-demo p { color:var(--patient-muted); }
+.patient-accessible input::placeholder,.patient-accessible textarea::placeholder { font-size:var(--patient-help); color:#596c63; }
+.patient-accessible .patient-app .bottom-nav .nav-item { min-height:54px; }
+.patient-accessible .medication-summary,.patient-accessible .form-field .field-hint,.patient-accessible .photo-upload strong,.patient-accessible .connection-token code,.patient-accessible .message-empty,.patient-accessible .trend-summary>span,.patient-accessible .analysis-result-values span { font-size:var(--patient-help); color:var(--patient-muted); }
+.patient-accessible .guide-card h2,.patient-accessible .guide-demo h2,.patient-accessible .trend-card h2 { font-size:22px; }
+.patient-accessible .med-photo-report summary,.patient-accessible .practice-card summary { min-height:48px; }
+.patient-accessible .meal-details,.patient-accessible .meal-nutrition { min-width:0; overflow-wrap:anywhere; }
+.patient-accessible .meal-nutrition small { white-space:normal; }
+.patient-accessible .medication-action { background:#eaf0fc; }
+.patient-accessible .meal-nutrition { white-space:normal; }
+.patient-accessible .meal-list { grid-template-columns:minmax(0,1fr); }
+.patient-accessible .chart-column:last-child .chart-label { color:var(--patient-accent); }
+.patient-accessible.patient-large-text .nav-item svg { display:none; }
+.patient-accessible.patient-large-text .patient-app { padding-bottom:180px; }
+.patient-accessible.patient-large-text .toast { bottom:180px; }
+.patient-accessible .camera-choice:focus-within { outline:3px solid #174ea6; outline-offset:3px; }
+.patient-accessible .brand { min-height:48px; }
+/* Empty / unselected values remain informative text, never disabled-looking text. */
+.patient-accessible :is(.metric-value.empty,.metric-value small,.empty-card,.empty-state-card,.history-empty,.history-values,.history-med.missing,.loading-state,.estimate-info,.estimate-info strong,.analysis-foods,.connection-help,.connection-token,.medication-slot details) { color:var(--patient-muted); }
+.patient-accessible .page-intro>p:last-child,.patient-accessible .error-state p,.patient-accessible .connection-card p,.patient-accessible .choice>span,.patient-accessible .photo-upload>span,.patient-accessible .photo-upload span span { color:var(--patient-muted); }
+.patient-accessible .chart-tab { color:var(--patient-muted); }
+.patient-accessible .chart-tab.active,.patient-accessible .progress-count { color:var(--patient-accent); }
+.patient-accessible .analysis-panel :is(h2,h3),.patient-accessible .empty-state-card :is(h2,h3,strong) { color:var(--patient-ink); font-size:20px; }
+.patient-accessible .guide-number { width:32px; height:32px; font-size:var(--patient-help); color:var(--patient-ink); }
+.patient-accessible .choice input:checked+span { color:#0d543e; }
+body.patient-accessible .toast { color:#fff; background:#183c32; }
+.patient-accessible a.button { font-size:var(--patient-text); }
+.patient-accessible .meal-nutrition,.patient-accessible .inline-notice,.patient-accessible .form-scope-note { color:var(--patient-muted); }
+.patient-accessible .connection-help li { font-size:var(--patient-help); }
