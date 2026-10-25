@@ -1,0 +1,47 @@
+{
+  "environment": "local Chromium / temporary SQLite",
+  "speech": "support stub only; microphone not exercised",
+  "results": [
+    {
+      "name": "A01 initial session timeout releases loading and same-page retry recovers",
+      "status": "passed"
+    },
+    {
+      "name": "A01 demo patient change timeout retries the intended patient without reload",
+      "status": "passed"
+    },
+    {
+      "name": "A02 initial 503 retry is bound before bootstrap and recovers without refresh",
+      "status": "passed"
+    },
+    {
+      "name": "A05 delayed daily lookup gates voice and exposes correct fields when ready",
+      "status": "passed"
+    },
+    {
+      "name": "A06 daily lookup failure offers direct same-date retry and cannot save unverified data",
+      "status": "passed"
+    },
+    {
+      "name": "A07 meal response loss freezes pending content and retries same UUID exactly once",
+      "status": "passed"
+    },
+    {
+      "name": "A07 daily response loss preserves frozen values and original UUID without extra revision",
+      "status": "passed"
+    },
+    {
+      "name": "A07 slow save explains waiting and timeout restores a safe retry without losing the draft",
+      "status": "passed"
+    },
+    {
+      "name": "A07 confirmed save plus summary failure retains successful result and reload recovers",
+      "status": "passed"
+    },
+    {
+      "name": "A08 connection response loss resolves original attempt then explicit reissue replaces only it",
+      "status": "passed"
+    }
+  ],
+  "pageErrors": []
+}

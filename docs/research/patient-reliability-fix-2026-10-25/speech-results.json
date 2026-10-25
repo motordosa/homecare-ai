@@ -1,0 +1,47 @@
+{
+  "cases": [
+    {
+      "name": "default Korean voice and normal speed; brief guide follows greeting with one action",
+      "passed": true,
+      "speech": "MOCK"
+    },
+    {
+      "name": "voice/speed preference is explicit, preview can stop, only non-sensitive settings persist",
+      "passed": true,
+      "speech": "MOCK"
+    },
+    {
+      "name": "missing and later voices show actionable fallback without automatic replay",
+      "passed": true,
+      "speech": "MOCK"
+    },
+    {
+      "name": "missing onstart recovers after 3 seconds and late callbacks cannot restart guide",
+      "passed": true,
+      "speech": "MOCK"
+    },
+    {
+      "name": "missing onend after onstart is bounded, duplicate callbacks and rapid stops stay idle",
+      "passed": true,
+      "speech": "MOCK"
+    },
+    {
+      "name": "full guide queues one sentence at a time and explicit stop discards remainder",
+      "passed": true,
+      "speech": "MOCK"
+    },
+    {
+      "name": "page hide and explicit speech-cancellation signal prevent stale utterance continuation",
+      "passed": true,
+      "speech": "MOCK"
+    },
+    {
+      "name": "voice off blocks previews and 320px enlarged settings retain visible usable controls",
+      "passed": true,
+      "speech": "MOCK"
+    }
+  ],
+  "errors": [],
+  "physicalAudioVerified": false,
+  "physicalMicrophoneVerified": false
+}

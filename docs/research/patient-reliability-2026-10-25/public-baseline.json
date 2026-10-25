@@ -1,0 +1,147 @@
+{
+  "timeUTC": "2026-10-25T05:03:59.703121+00:00",
+  "commit": "d58f2c4debdf9b9c9cb83fa96c4241c594484ace",
+  "readOnly": true,
+  "health": {
+    "appVersion": "0.8.0",
+    "schemaVersion": 7,
+    "ok": true
+  },
+  "files": [
+    {
+      "file": "base.css",
+      "matched": true,
+      "sha256": "ec6a7135c0e8c0eb0ed36612a13fa1282df25a10a56c54567bc8a3c4b3bd0954"
+    },
+    {
+      "file": "clinician.css",
+      "matched": true,
+      "sha256": "bf07f20ba71bad2025af7e17d727b42b6889443fc965e183bb47f91189bed039"
+    },
+    {
+      "file": "clinician.html",
+      "matched": true,
+      "sha256": "79bd68cd02215b927b41dd07bc346eff98ec2c7ee6be27c3cdf892a924622abf"
+    },
+    {
+      "file": "clinician.js",
+      "matched": true,
+      "sha256": "2d4c9f1690671f1f1b5a2189f3c02bf1d049e83094259326a8bb41166ea83f8b"
+    },
+    {
+      "file": "index.css",
+      "matched": true,
+      "sha256": "413a07e0b4ef9e1a8aa7001005812e24483643dd9f33d293a54e9cc5d263ec12"
+    },
+    {
+      "file": "index.html",
+      "matched": true,
+      "sha256": "dd77010b4afee27601fba86899fb22b4275f5d47ffefa31c996b55d5342c69ba"
+    },
+    {
+      "file": "patient-screens.js",
+      "matched": true,
+      "sha256": "e05f5c21376264b7e41b112266dd1124f6db25d4fabc5766a84d14a1ab388c77"
+    },
+    {
+      "file": "patient.css",
+      "matched": true,
+      "sha256": "533c2d631cee64353cb0589e5ea0e1b9cc9313ff9e619c384a58b32cfe3416fc"
+    },
+    {
+      "file": "patient.html",
+      "matched": true,
+      "sha256": "0fa18eeaeb4a8284985aa480adb5271a6b327b435edd53ca3f2b111045a3bdb1"
+    },
+    {
+      "file": "patient.js",
+      "matched": true,
+      "sha256": "1a168158f05b1cd54c32f9bbf9147974d1c2c7c2b9ce866fbffa29d73d752661"
+    },
+    {
+      "file": "patient-assist.js",
+      "matched": true,
+      "sha256": "30aed0bea2845e33424682ee75cae0877bd12b29d99e8723c4aaaeee01980691"
+    },
+    {
+      "file": "session.js",
+      "matched": true,
+      "sha256": "3794e45a62a3129d7e6b4d77501bfabdf4e00aef5e5250e18de000cf151d2b78"
+    },
+    {
+      "file": "clinician-workflow.js",
+      "matched": true,
+      "sha256": "24451dad35533a4c7ff85fe2048701e13a0274750208c2540816c844a5869b9b"
+    },
+    {
+      "file": "patient-communications.js",
+      "matched": true,
+      "sha256": "626f52a7a10c4b9eb257298d44403801fde53f6989ee58a496f6806ecba492de"
+    },
+    {
+      "file": "login.html",
+      "matched": true,
+      "sha256": "6df18f776f73e34699a7d51a274693182f0076ddb27df94a135e30ced81b1b19"
+    },
+    {
+      "file": "clinician-communications.js",
+      "matched": true,
+      "sha256": "39b9836e4acde60b13c103a462fe1854aab11c0f638529fded73b4edf219977d"
+    },
+    {
+      "file": "patient-assist.css",
+      "matched": true,
+      "sha256": "782d2cf6a9a14ebd237cd4e3c68c00fafcf014d26122d528cb11b1eb9dfe25a5"
+    },
+    {
+      "file": "patient-medication-photo.js",
+      "matched": true,
+      "sha256": "8e01ef4bc14c0cae5fd516a03f1de1078aa23048ae21417c352a10672137c032"
+    },
+    {
+      "file": "account.html",
+      "matched": true,
+      "sha256": "91f6c829006fe04528889f631efa328940cd1e2f5c539e41be6c21e367b2d577"
+    },
+    {
+      "file": "clinician-evidence.js",
+      "matched": true,
+      "sha256": "c309c5d35ed395027edf49dfa23092c412bc70bbe9628199005ce75f8dd0658b"
+    },
+    {
+      "file": "patient-dictation.js",
+      "matched": true,
+      "sha256": "3f916919e730b787b868f5299566f3813eb7e499601dfcbb1d0b2bcf2734874e"
+    },
+    {
+      "file": "patient-tasks.js",
+      "matched": true,
+      "sha256": "e6eb40cdeaeb81bba0382bf7b0dfacfb7ec2df7392f3fc5721db011d8755a766"
+    },
+    {
+      "file": "patient-image.js",
+      "matched": true,
+      "sha256": "a0a3a299f8e211da4f0cea8795bba3e548adf2976b2f6afba53de0be25e03680"
+    },
+    {
+      "file": "auth.css",
+      "matched": true,
+      "sha256": "12666fa41d28271b074457a7d95e6abfc944f7662742ebca2523303bd0ae5f5f"
+    },
+    {
+      "file": "voice-parser.js",
+      "matched": true,
+      "sha256": "c76e4e8f624895426334e11f32ace5ce7712e4304acb84a854189b19e49f9a1a"
+    },
+    {
+      "file": "clinician-research.js",
+      "matched": true,
+      "sha256": "35102491372bb2603cc4532477cbb839d1e6aedb7667a92a1a8d0bd5896870e1"
+    },
+    {
+      "file": "auth-page.js",
+      "matched": true,
+      "sha256": "6bbf9fa193b9e59ce1bd24d08c1f9c4dcda58ae968499e53ac595b50a29d63d7"
+    }
+  ]
+}

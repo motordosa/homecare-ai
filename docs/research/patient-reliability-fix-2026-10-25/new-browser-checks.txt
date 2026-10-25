@@ -1,0 +1,63 @@
+
+> homecare-ai-demo@0.8.1 test:reliability
+> node test/client-io-reliability-browser.mjs && node test/dictation-reliability-browser.mjs && node test/speech-reliability-browser.mjs && node test/patient-reliability-browser.mjs
+
+PASS session success keeps CSRF and patient identity
+PASS session response header stall ends at20 seconds and preserves established identity
+PASS session body stall is bounded too and POST timeout never fabricates success
+PASS explicit abort and malformed responses restore retry without mutating session
+PASS network failure gives a retryable message and successful retry retains CSRF behavior
+PASS logout CSRF denial remains an error and other401 responses retain session recovery
+PASS logout timeout releases the real button and permits explicit retry
+PASS real PNG JPEG WebP decode preserves small original bytes and releases object URLs
+PASS corrupt small PNG and mismatched MIME cannot become ready
+PASS real oversized zero and malformed PNG JPEG WebP headers are rejected before creating a decoder
+PASS oversized supported image is converted after decode within upload and dimension limits
+PASS real EXIF orientation survives JPEG conversion
+PASS MOCK decoded dimensions above80MP are rejected and image URL is released
+PASS MOCK missing decoder events are bounded and release URL without claiming ready
+PASS MOCK missing file read events are bounded and the reader is aborted
+15 client IO reliability scenarios passed; physical iPhone camera/HEIC and microphone unverified.
+PASS MOCK stop with no terminal event recovers in 2 seconds and late callbacks cannot replace final text
+PASS MOCK missing start is bounded and failed retry preserves edited transcript
+PASS MOCK delayed permission start re-aborts only the expired recognizer while a new attempt stays active
+PASS MOCK capture is bounded at 25 seconds without a manual stop
+PASS MOCK network failure restores edited draft despite new interim and final events
+PASS MOCK a first capture with final text retains that reviewable draft after a service failure
+PASS MOCK interim-only completion keeps previous draft and does not promote uncertain words
+PASS MOCK stop before start cannot reenter listening on a delayed start callback
+PASS MOCK synchronous stop completion keeps final success rather than a stale waiting message
+PASS MOCK constructor/start/stop exceptions restore manual controls without losing existing text
+PASS MOCK abort failure reports unconfirmed shutdown while manual review and real save remain available
+PASS MOCK stale-start abort failure is not cleared by a newer recognizer ending
+PASS MOCK terminal callback before an abort exception is accepted as shutdown evidence
+PASS MOCK permission denial supports retry and retains previous draft
+PASS MOCK cancelling a date change preserves the captured draft and original target
+PASS MOCK interrupt/hidden/session stop invalidates callbacks and never silently applies a value
+PASS MOCK missing recognition offers a manual path without a microphone control
+17 dictation reliability scenarios passed. Speech events MOCK; actual iPhone microphone unverified.
+PASS default Korean voice and normal speed; brief guide follows greeting with one action
+PASS voice/speed preference is explicit, preview can stop, only non-sensitive settings persist
+PASS missing and later voices show actionable fallback without automatic replay
+PASS missing onstart recovers after 3 seconds and late callbacks cannot restart guide
+PASS missing onend after onstart is bounded, duplicate callbacks and rapid stops stay idle
+PASS full guide queues one sentence at a time and explicit stop discards remainder
+PASS page hide and explicit speech-cancellation signal prevent stale utterance continuation
+PASS voice off blocks previews and 320px enlarged settings retain visible usable controls
+8 speech reliability scenarios passed; synthetic speech callbacks only.
+PASS A01 initial session timeout releases loading and same-page retry recovers
+PASS A01 demo patient change timeout retries the intended patient without reload
+PASS A02 initial 503 retry is bound before bootstrap and recovers without refresh
+PASS A05 delayed daily lookup gates voice and exposes correct fields when ready
+PASS A06 daily lookup failure offers direct same-date retry and cannot save unverified data
+PASS A07 meal response loss freezes pending content and retries same UUID exactly once
+PASS A07 daily response loss preserves frozen values and original UUID without extra revision
+PASS A07 slow save explains waiting and timeout restores a safe retry without losing the draft
+PASS A07 confirmed save plus summary failure retains successful result and reload recovers
+PASS A08 connection response loss resolves original attempt then explicit reissue replaces only it
+10 patient reliability browser scenarios passed. Network faults/timers injected; microphone and iPhone Safari unverified.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

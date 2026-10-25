@@ -47,7 +47,9 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   const dialogBaseline = new Map();
   const dialogOpeners = new Map();
   const medicationBaseline = new Map();
-  let dailyLoadedDate;
+  let dailyLoadedDate, sessionReady = false, bootstrapInFlight = false, pendingPatientId = null;
+  let recordLoadState = 'idle', pendingSave = null, operationState = 'idle';
+  let connectionCreateRequestId = null, connectionCreatePayload = null, connectionRecoveryId = null, connectionIssuedId = null, connectionIssuanceState = 'idle';
 
   function formSnapshot(form) {
     return JSON.stringify([...form.elements].filter(element => element.name && !(form.id === 'daily-form' && element.name === 'date') && !['submit', 'button', 'file'].includes(element.type)).map(element =>
@@ -66,10 +68,11 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   }
 
   function canLeavePatient() {
-    if (state.saving || state.loading) return false;
+    if (state.saving || state.loading || state.connectionBusy) return false;
     const voiceDirty=dictation?.dirty();dictation?.pause();
-    const dirty=$$('dialog[open]').some(dialogDirty)||medicationDirty()||communication.dirty()||voiceDirty;
-    if(dirty && !window.confirm('저장하지 않은 입력이 있어요. 저장하지 않고 나갈까요?'))return false;
+    const uncertainConnection = connectionIssuanceState === 'unknown';
+    const dirty=$$('dialog[open]').some(dialogDirty)||medicationDirty()||communication.dirty()||voiceDirty||uncertainConnection;
+    if(dirty && !window.confirm(uncertainConnection ? '연결 코드 발급 결과를 아직 확인하지 못했어요. 환자를 바꾸거나 새로고침하면 같은 발급 결과를 확인하기 어려워요. 그래도 나갈까요?' : pendingSave ? '저장 결과를 아직 확인하지 못했어요. 나간 뒤 다시 입력하면 중복될 수 있어요. 그래도 나갈까요?' : '저장하지 않은 입력이 있어요. 저장하지 않고 나갈까요?'))return false;
     if(dirty)communication.discard();dictation?.reset();assist?.stop();return true;
   }
 
@@ -83,14 +86,14 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
   function closeRecordDialog(dialog) {
     const voiceDirty=dictation?.belongsTo($('form',dialog))&&dictation.dirty();dictation?.pause();
-    if (state.saving || ((voiceDirty||dialogDirty(dialog)) && !window.confirm('저장하지 않은 입력이 있어요. 저장하지 않고 나갈까요?'))) return;
+    if (state.saving || ((voiceDirty||dialogDirty(dialog)) && !window.confirm(pendingSave ? '저장 결과를 아직 확인하지 못했어요. 나간 뒤 다시 입력하면 중복될 수 있어요. 그래도 나갈까요?' : '저장하지 않은 입력이 있어요. 저장하지 않고 나갈까요?'))) return;
     dialog.close();
   }
 
   function renderNavigation() {
     const screen = PATIENT_SCREENS[state.view];
     if (state.view !== 'home') $(`#view-${state.view} h1`).textContent = screen.title;
-    const locked = Boolean(state.saving || state.loading);
+    const locked = Boolean(state.saving || state.loading || state.connectionBusy);
     $('#patient-view-close').hidden = !screen.closeTarget;
     $('#voice-guide-controls').hidden=state.view!=='home';
     $('#patient-view-close').disabled = locked;
@@ -104,19 +107,33 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
   async function api(path, options = {}) {
     assertSessionActive();
+    const writing = !['GET', 'HEAD'].includes(options.method || 'GET');
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), path.endsWith("/photo-analyses") ? 65000 : 20000);
+    const scope = $('dialog[open] form') || $(`#view-${state.view}`);
+    let progress, slowTimer;
+    if (writing && scope) {
+      progress = document.createElement('p');
+      progress.className = 'inline-notice'; progress.setAttribute('role', 'status'); progress.dataset.operationStatus = '';
+      progress.textContent = path.endsWith('/photo-analyses') ? '사진을 분석하고 있어요. 잠시 기다려 주세요.' : '요청을 처리하고 있어요. 잠시 기다려 주세요.';
+      (scope.querySelector('.dialog-body') || scope).append(progress);
+      slowTimer = setTimeout(() => { progress.textContent = '평소보다 오래 걸리고 있어요. 아직 결과를 기다리고 있으니 버튼을 다시 누르지 않아도 돼요.'; }, 5000);
+    }
     try {
       const response = await fetch(path, { ...options, headers: { "Content-Type": "application/json", ...sessionHeaders(), ...(options.headers || {}) }, signal: controller.signal });
-      const payload = await response.json().catch(() => ({}));
       if(response.status===401)sessionExpired();
-      if (!response.ok) { const issue = new Error(payload.error || "기록을 처리하지 못했어요. 잠시 후 다시 시도해 주세요."); issue.status = response.status; throw issue; }
+      let payload;
+      try { payload = await response.json(); }
+      catch { const issue = new Error('서버 응답을 확인하지 못했어요. 같은 작업을 다시 시도해 주세요.'); issue.status = response.status; issue.outcomeUnknown = writing && (response.ok || response.status >= 500); throw issue; }
+      if (!response.ok) { const issue = new Error(payload.error || "기록을 처리하지 못했어요. 잠시 후 다시 시도해 주세요."); issue.status = response.status; issue.outcomeUnknown = writing && response.status >= 500; throw issue; }
       return payload;
     } catch (error) {
-      if (error.name === "AbortError") throw new Error("응답이 지연되고 있어요. 연결 상태를 확인하고 다시 시도해 주세요.");
-      if (error instanceof TypeError) throw new Error("서버에 연결하지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.");
+      if (error.name === "AbortError" || error instanceof TypeError) {
+        const issue = new Error(writing ? '서버에 반영됐는지 아직 확인하지 못했어요. 연결을 확인한 뒤 같은 작업을 다시 시도해 주세요.' : '응답을 받지 못했어요. 연결 상태를 확인하고 다시 불러와 주세요.');
+        issue.outcomeUnknown = writing; throw issue;
+      }
       throw error;
-    } finally { clearTimeout(timeout); }
+    } finally { clearTimeout(timeout); clearTimeout(slowTimer); progress?.remove(); }
   }
 
   function toast(message) {
@@ -171,6 +188,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
   async function loadPatient(patientId, { initial = false, historyMode = "replace", preserveMedicationInputs = false } = {}) {
     const requestId = ++state.requestId;
+    pendingPatientId = patientId;
     const changed = patientId !== state.patientId;
     state.loading = true;
     renderNavigation();
@@ -187,6 +205,8 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       state.mealSubmissionKey = null; state.mealSubmissionPayload = null;
       state.medicationSchedule = null;
       state.connections = null;
+      connectionCreateRequestId = null; connectionCreatePayload = null; connectionRecoveryId = null; connectionIssuedId = null;
+      connectionIssuanceState = 'idle'; renderConnectionRecovery();
       if (!state.saving) $$("dialog[open]").forEach(dialog => dialog.close());
       $("#loading-state").hidden = false;
       $("#app-content").hidden = true;
@@ -199,6 +219,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       ]);
       if (requestId !== state.requestId) return;
       state.patientId = patientId;
+      pendingPatientId = null;
       if(initial||changed)communication.reset(patientId);
       state.summary = summary;
       checkedAt=Date.now();
@@ -396,6 +417,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   function openMeal() {
     if (!state.summary || state.loading || state.saving) return;
     $("#meal-form").reset();
+    setFormBusy('#meal-form', false);
     $("#meal-form [data-voice-applied]")?.remove();
     state.mealSubmissionKey = null; state.mealSubmissionPayload = null;
     $("#meal-dialog-title").textContent = PATIENT_INPUT_SCREENS.meal.title;
@@ -437,6 +459,8 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     if (!state.summary || state.loading || state.saving || !dailyModes[mode]) return;
     ++state.dateRequestId;
     state.dailyMode = mode;
+    recordLoadState = 'idle';
+    setFormBusy('#daily-form', false);
     $("#daily-form").dataset.mode = mode;
     $("#daily-form").reset();
     const config = dailyModes[mode];
@@ -501,12 +525,55 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $$('#daily-form input:not([name="date"]), #daily-form textarea').forEach(element => { element.disabled = disabled || !dailyModes[state.dailyMode].fields.includes(element.name); });
     $$("#sleep-helper-hours, #sleep-helper-minutes, #sleep-helper-apply").forEach(element => { element.disabled = disabled || !dailyModes[state.dailyMode].fields.includes("sleepHours"); });
     $("#daily-submit").disabled = disabled;
+    const voiceButton = $('#daily-form [data-dictation="daily"]');
+    voiceButton.disabled = disabled || recordLoadState !== 'ready';
+    voiceButton.textContent = '말로 건강 기록 입력하기';
+    if (recordLoadState === 'loading') voiceButton.textContent = '기록을 불러온 뒤 말로 입력할 수 있어요';
+  }
+
+  function restoreRecordControls(kind) {
+    const uncertain = pendingSave?.kind === kind && operationState === 'unknown';
+    setFormBusy(`#${kind}-form`, uncertain);
+    if (kind === 'daily' && !uncertain) setDailyFieldsDisabled(recordLoadState !== 'ready');
+    if (kind === 'meal' && !uncertain) refreshAnalysisControls();
+    if (uncertain) $$(`#${kind}-form .close-dialog`).forEach(button => { button.disabled = false; });
+    const button = $(`#${kind}-submit`);
+    if (uncertain) button.disabled = false;
+    button.textContent = uncertain ? '저장 결과 확인하기' : kind === 'meal' ? '식사 기록 저장하기' : state.dailyMode === 'steps' ? '걸음 수 저장하기' : state.dailyMode === 'sleep' ? '수면 시간 저장하기' : '건강 기록 저장하기';
+  }
+
+  async function submitRecord(kind, payload) {
+    const patientId = pendingSave?.patientId || state.patientId;
+    const dialog = $(`#${kind}-dialog`);
+    pendingSave = { kind, patientId, payload };
+    operationState = 'saving'; state.saving = kind;
+    setFormBusy(`#${kind}-form`, true);
+    $(`#${kind}-submit`).textContent = '저장하고 있어요…';
+    $(`#${kind}-error`).hidden = true;
+    try {
+      await api(`/api/patients/${encodeURIComponent(patientId)}/${kind === 'meal' ? 'meals' : 'daily'}`, { method: 'POST', body: JSON.stringify(payload) });
+      operationState = 'confirmed'; pendingSave = null;
+      dialog.close();
+      savedFeedback(kind === 'meal' ? '식사 기록' : '건강 기록', payload.date);
+      await loadPatient(patientId);
+    } catch (error) {
+      if (dialog.open) {
+        operationState = error.outcomeUnknown ? 'unknown' : 'error';
+        if (!error.outcomeUnknown) pendingSave = null;
+        formError(`#${kind}-error`, error.outcomeUnknown ? '저장됐는지 아직 확인하지 못했어요. 입력은 그대로 보관하고 있어요. 아래 저장 결과 확인하기를 누르면 같은 기록을 중복 없이 확인해요.' : error.message);
+        if (kind === 'daily') $('#daily-reload-record').hidden = error.status !== 409;
+      } else savedRefreshFailed();
+    } finally {
+      state.saving = null;
+      restoreRecordControls(kind);
+    }
   }
 
   async function saveMeal(event) {
     event.preventDefault();
     const button = $("#meal-submit");
     if (button.disabled || state.saving || state.photoLoading || state.analysisBusy) return;
+    if (pendingSave?.kind === 'meal') return submitRecord('meal', pendingSave.payload);
     const data = new FormData(event.currentTarget);
     const patientId = state.patientId;
     if (!data.has('foodType')) { formError('#meal-error', '가장 가까운 식사 종류를 하나 골라 주세요.'); return; }
@@ -521,30 +588,15 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     const signature = JSON.stringify(payload);
     if (signature !== state.mealSubmissionPayload) { state.mealSubmissionPayload = signature; state.mealSubmissionKey = crypto.randomUUID(); }
     payload.clientSubmissionId = state.mealSubmissionKey;
-    state.saving = "meal";
-    setFormBusy("#meal-form", true);
-    button.textContent = "저장하고 있어요…";
-    $("#meal-error").hidden = true;
-    try {
-      await api(`/api/patients/${encodeURIComponent(patientId)}/meals`, { method: "POST", body: JSON.stringify(payload) });
-      $("#meal-dialog").close();
-      savedFeedback("식사 기록", payload.date);
-      await loadPatient(patientId);
-    } catch (error) {
-      if ($("#meal-dialog").open) formError("#meal-error", error.message);
-      else savedRefreshFailed();
-    } finally {
-      state.saving = null;
-      setFormBusy("#meal-form", false);
-      button.textContent = "식사 기록 저장하기";
-      refreshAnalysisControls();
-    }
+    await submitRecord('meal', payload);
   }
 
   async function saveDaily(event) {
     event.preventDefault();
     const button = $("#daily-submit");
     if (button.disabled || state.saving) return;
+    if (pendingSave?.kind === 'daily') return submitRecord('daily', pendingSave.payload);
+    if (recordLoadState !== 'ready' || dailyLoadedDate !== $('#daily-date').value) return;
     const data = new FormData(event.currentTarget);
     const patientId = state.patientId;
     const payload = { date: data.get("date") };
@@ -558,43 +610,32 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     const signature = JSON.stringify(payload);
     if (signature !== state.dailySubmissionPayload) { state.dailySubmissionPayload = signature; state.dailySubmissionKey = crypto.randomUUID(); }
     payload.clientSubmissionId = state.dailySubmissionKey;
-    state.saving = "daily";
-    setFormBusy("#daily-form", true);
-    button.textContent = "저장하고 있어요…";
-    $("#daily-error").hidden = true;
-    try {
-      await api(`/api/patients/${encodeURIComponent(patientId)}/daily`, { method: "POST", body: JSON.stringify(payload) });
-      $("#daily-dialog").close();
-      savedFeedback("건강 기록", payload.date);
-      await loadPatient(patientId);
-    } catch (error) {
-      if ($("#daily-dialog").open) { formError("#daily-error", error.message); $("#daily-reload-record").hidden = error.status !== 409; }
-      else savedRefreshFailed();
-    } finally {
-      state.saving = null;
-      setFormBusy("#daily-form", false);
-      setDailyFieldsDisabled(false);
-      button.textContent = PATIENT_INPUT_SCREENS[state.dailyMode].title.replace("기록하기", "저장하기").replace("남기기", "저장하기");
-    }
+    await submitRecord('daily', payload);
   }
 
   async function selectDailyDate() {
+    if (state.saving || pendingSave) { $('#daily-date').value = dailyLoadedDate || today(); return; }
+    const requestId = ++state.dateRequestId;
     const date = $("#daily-date").value;
-    if (!date || date > today()) return;
+    if (!date || date > today() || !$('#daily-date').checkValidity()) {
+      recordLoadState = 'error'; setDailyFieldsDisabled(true);
+      formError('#daily-error', '오늘 또는 이전 날짜를 골라 주세요.'); return;
+    }
     if (dailyLoadedDate && date !== dailyLoadedDate && dialogDirty($('#daily-dialog')) && !window.confirm('저장하지 않은 입력이 있어요. 다른 날짜를 불러올까요?')) {
       $('#daily-date').value = dailyLoadedDate;
       return;
     }
     dictation?.reset();
-    const requestId = ++state.dateRequestId;
     const patientId = state.patientId;
+    recordLoadState = 'loading';
     $("#daily-error").hidden = true;
     setDailyFieldsDisabled(true);
     $("#daily-submit").textContent = "기존 기록을 불러오고 있어요…";
     try {
       const result = await api(`/api/patients/${encodeURIComponent(patientId)}/daily?date=${encodeURIComponent(date)}`);
-      if (requestId !== state.dateRequestId || patientId !== state.patientId || !$("#daily-dialog").open) return;
+      if (requestId !== state.dateRequestId || patientId !== state.patientId || date !== $('#daily-date').value || !$("#daily-dialog").open) return;
       applyDailyRecord(result.record);
+      recordLoadState = 'ready';
       $("#daily-reload-record").hidden = true;
       const effective = state.summary?.trends.find(entry => entry.date === date);
       const automatic = [state.dailyMode === "sleep" ? "sleepHours" : "steps", ...(state.dailyMode === "all" ? ["sleepHours"] : [])].filter(name => numeric(effective?.[name]) && ["health-connect", "apple-health"].includes(effective[name === "steps" ? "stepsSource" : "sleepSource"]));
@@ -602,8 +643,11 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       setDailyFieldsDisabled(false);
       $("#daily-submit").textContent = state.dailyMode === "steps" ? "걸음 수 저장하기" : state.dailyMode === "sleep" ? "수면 시간 저장하기" : "건강 기록 저장하기";
     } catch (error) {
-      if (requestId !== state.dateRequestId || patientId !== state.patientId || !$("#daily-dialog").open) return;
-      formError("#daily-error", `${error.message} 날짜를 다시 선택해 주세요.`);
+      if (requestId !== state.dateRequestId || patientId !== state.patientId || date !== $('#daily-date').value || !$("#daily-dialog").open) return;
+      recordLoadState = 'error';
+      formError("#daily-error", `${error.message} 아래 다시 불러오기를 눌러 주세요.`);
+      $('#daily-reload-record').hidden = false;
+      setDailyFieldsDisabled(true);
       $("#daily-submit").textContent = "기존 기록을 불러오지 못했어요";
     }
   }
@@ -795,33 +839,69 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     }
   }
 
-  async function createConnection(event) {
-    event.preventDefault();
+  function renderConnectionRecovery() {
+    const unknown = connectionIssuanceState === 'unknown';
+    $('#connection-create').disabled = state.connectionBusy || connectionIssuanceState === 'codeUnavailable';
+    $('#connection-create').textContent = unknown ? '연결 코드 발급 결과 확인하기' : '테스트 연결 코드 만들기';
+    $('#connection-platform').disabled = state.connectionBusy || unknown;
+    $('#connection-label').disabled = state.connectionBusy || unknown;
+    $('#connection-reissue').hidden = !connectionRecoveryId || connectionIssuanceState !== 'codeUnavailable';
+    $('#connection-reissue').disabled = state.connectionBusy;
+    const status = $('#connection-issuance-status');
+    status.hidden = !['unknown', 'codeUnavailable'].includes(connectionIssuanceState);
+    status.textContent = unknown ? '발급 결과를 아직 확인하지 못했어요. 발급 결과 확인하기를 누르면 같은 연결을 중복 없이 확인해요.' : '이미 만들어진 연결이지만 비밀 코드를 다시 보여드릴 수 없어요. 아래 버튼을 누르면 해당 코드만 폐기하고 새 코드를 만들어요.';
+  }
+
+  async function createConnection(event, replacesConnectionId = null) {
+    event?.preventDefault();
     if (state.connectionBusy || state.loading || !state.patientId) return;
     clearConnectionToken();
     const patientId = state.patientId;
     const requestId = state.connectionRequestId;
-    const fields = new FormData(event.target);
-    const payload = { platform: fields.get("platform") };
-    if (String(fields.get("label") || "").trim()) payload.label = String(fields.get("label")).trim();
+    let payload;
+    if (connectionIssuanceState === 'unknown') payload = JSON.parse(connectionCreatePayload);
+    else {
+      const fields = new FormData($('#connection-form'));
+      payload = { platform: fields.get('platform') };
+      if (String(fields.get('label') || '').trim()) payload.label = String(fields.get('label')).trim();
+      if (replacesConnectionId) payload.replacesConnectionId = replacesConnectionId;
+      const signature = JSON.stringify(payload);
+      if (signature !== connectionCreatePayload) { connectionCreatePayload = signature; connectionCreateRequestId = crypto.randomUUID(); }
+    }
+    payload.clientRequestId = connectionCreateRequestId;
     state.connectionBusy = true;
-    $("#connection-create").disabled = true;
+    renderConnectionRecovery(); renderNavigation();
     $("#connections-error").hidden = true;
     try {
       const result = await api(`/api/patients/${encodeURIComponent(patientId)}/health-connections`, { method: "POST", body: JSON.stringify(payload) });
       if (patientId !== state.patientId || state.view !== "connections" || requestId !== state.connectionRequestId) return;
       const patient = state.summary?.patient;
-      if (!result.token || result.connection?.patientId !== patientId || patient?.id !== patientId) throw new Error("환자와 연결 정보를 확인하지 못했어요. 다시 시도해 주세요.");
-      $("#connection-server-origin").textContent = location.origin;
-      $("#connection-patient-name").textContent = patient.name;
-      $("#connection-patient-id").textContent = patientId;
-      $("#connection-token-value").textContent = result.token;
-      $("#connection-token").hidden = false;
+      if (result.connection?.patientId !== patientId || patient?.id !== patientId || (!result.token && !result.codeUnavailable)) {
+        const issue = new Error('환자와 연결 정보를 확인하지 못했어요. 발급 결과를 다시 확인해 주세요.'); issue.outcomeUnknown = true; throw issue;
+      }
+      connectionIssuanceState = result.token ? 'issued' : 'codeUnavailable';
+      connectionIssuedId = result.connection.id;
+      connectionRecoveryId = result.codeUnavailable && result.connection.status !== 'revoked' ? result.connection.id : null;
+      if (result.connection.status === 'revoked') {
+        connectionIssuanceState = 'idle'; connectionCreateRequestId = null; connectionCreatePayload = null;
+        formError('#connections-error', '이전 연결은 이미 폐기됐어요. 새 연결 코드를 만들 수 있어요.');
+      }
+      if (result.token) {
+        $('#connection-server-origin').textContent = location.origin;
+        $('#connection-patient-name').textContent = patient.name;
+        $('#connection-patient-id').textContent = patientId;
+        $('#connection-token-value').textContent = result.token;
+        $('#connection-token').hidden = false;
+      }
       await loadConnections();
-      toast("테스트 연결을 준비했어요. 자동 수집이 시작된 것은 아니에요.");
+      if (result.token) toast('테스트 연결을 준비했어요. 자동 수집이 시작된 것은 아니에요.');
     } catch (error) {
-      if (patientId === state.patientId && state.view === "connections") formError("#connections-error", error.message);
-    } finally { state.connectionBusy = false; $("#connection-create").disabled = false; }
+      if (patientId === state.patientId && state.view === 'connections') {
+        connectionIssuanceState = error.outcomeUnknown ? 'unknown' : 'idle';
+        if (!error.outcomeUnknown) { connectionCreateRequestId = null; connectionCreatePayload = null; connectionRecoveryId = null; }
+        formError('#connections-error', error.message);
+      }
+    } finally { state.connectionBusy = false; renderConnectionRecovery(); renderNavigation(); }
   }
 
   async function revokeConnection(connectionId) {
@@ -829,13 +909,17 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     if (!window.confirm("이 연결을 폐기할까요? 새 기록 수신은 중단되고 이전 기록은 남아요.")) return;
     const patientId = state.patientId;
     state.connectionBusy = true;
+    renderConnectionRecovery(); renderNavigation();
     clearConnectionToken();
     try {
       await api(`/api/patients/${encodeURIComponent(patientId)}/health-connections/${encodeURIComponent(connectionId)}`, { method: "DELETE" });
+      if (connectionId === connectionIssuedId) {
+        connectionCreateRequestId = null; connectionCreatePayload = null; connectionRecoveryId = null; connectionIssuedId = null; connectionIssuanceState = 'idle';
+      }
       if (patientId === state.patientId && state.view === "connections") { await loadConnections(); toast("연결을 폐기했어요. 이전 기록은 보관돼요."); }
     } catch (error) {
       if (patientId === state.patientId && state.view === "connections") formError("#connections-error", error.message);
-    } finally { state.connectionBusy = false; }
+    } finally { state.connectionBusy = false; renderConnectionRecovery(); renderNavigation(); }
   }
 
   function bindEvents() {
@@ -845,7 +929,12 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       if (!canLeavePatient()) { event.target.value = state.patientId; return; }
       loadPatient(event.target.value, { historyMode: "push" }).catch(() => {});
     });
-    $("#retry-button").addEventListener("click", () => state.patientId ? loadPatient(state.patientId).catch(() => {}) : initialize());
+    $("#retry-button").addEventListener("click", () => {
+      if (bootstrapInFlight || state.loading) return;
+      if (!sessionReady) bootstrapApplication();
+      else if (pendingPatientId || state.patientId) loadPatient(pendingPatientId || state.patientId, { initial: !state.summary }).catch(() => {});
+      else initialize();
+    });
     $("#open-meal").addEventListener("click", openMeal);
     $('#open-medication-photo').addEventListener('click', async () => {
       if (!medicationDateMatches()) return;
@@ -887,7 +976,8 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       dialog.addEventListener("cancel", event => { event.preventDefault(); closeRecordDialog(dialog); });
       dialog.addEventListener("close", () => {
         dialogBaseline.delete(dialog.id);
-        if (dialog.id === "daily-dialog") ++state.dateRequestId;
+        if (dialog.id === "daily-dialog") { ++state.dateRequestId; recordLoadState = 'idle'; }
+        if (pendingSave && dialog.id === `${pendingSave.kind}-dialog`) { pendingSave = null; operationState = 'idle'; }
         if (dialog.id === "meal-dialog") clearPhoto();
         dictation?.reset();
         if (dialog.id === "medication-photo-dialog") medicationPhoto.reset();
@@ -900,7 +990,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#daily-form").addEventListener("submit", saveDaily);
     $("#daily-date").addEventListener("change", selectDailyDate);
     $('#daily-reload-record').addEventListener('click', async () => {
-      if (state.saving || !$('#daily-dialog').open) return;
+      if (state.saving || pendingSave || !$('#daily-dialog').open) return;
       if (dialogDirty($('#daily-dialog')) && !window.confirm('작성 중인 내용을 저장된 최신 기록으로 바꿀까요? 바꾸기 전 필요한 내용은 확인해 주세요.')) return;
       $('#daily-reload-record').disabled = true;
       try { await selectDailyDate(); } finally { $('#daily-reload-record').disabled = false; }
@@ -926,10 +1016,18 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#medication-list").addEventListener("submit", saveMedication);
     $("#legacy-medication-form").addEventListener("submit", saveMedication);
     $("#connection-form").addEventListener("submit", createConnection);
+    $('#connection-reissue').addEventListener('click', () => {
+      if (!connectionRecoveryId || state.connectionBusy) return;
+      if (!window.confirm('받지 못한 이전 코드를 폐기하고 새 코드로 바꿀까요? 다른 연결과 이전 기록은 유지돼요.')) return;
+      createConnection(null, connectionRecoveryId);
+    });
+    $('#connection-form').addEventListener('input', () => {
+      if (!state.connectionBusy && connectionIssuanceState !== 'unknown') { connectionIssuanceState = 'idle'; connectionRecoveryId = null; renderConnectionRecovery(); }
+    });
     $("#connection-token-dismiss").addEventListener("click", clearConnectionToken);
     window.addEventListener("pagehide", clearConnectionToken);
     window.addEventListener('beforeunload', event => {
-      if (!window.__homecareLeaving && (state.saving || $$('dialog[open]').some(dialogDirty) || medicationDirty() || communication.dirty() || dictation?.dirty())) {
+      if (!window.__homecareLeaving && (state.saving || state.connectionBusy || connectionIssuanceState === 'unknown' || $$('dialog[open]').some(dialogDirty) || medicationDirty() || communication.dirty() || dictation?.dirty())) {
         dictation?.pause();
         event.preventDefault();
         event.returnValue = '';
@@ -988,6 +1086,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   }
 
   async function initialize() {
+    state.loading = true; renderNavigation();
     $("#loading-state").hidden = false;
     $("#load-error").hidden = true;
     try {
@@ -1002,11 +1101,13 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       state.patientId = patientId;
       await loadPatient(patientId, { initial: true });
     } catch (error) { showError(error.message); }
+    finally { state.loading = false; renderNavigation(); }
   }
 
   function voiceContext(button) {
     const form=button.closest('form'); if(!form || !state.patientId || state.loading || state.saving)return null;
     const kind=button.dataset.dictation;
+    if (kind === 'daily' && (recordLoadState !== 'ready' || dailyLoadedDate !== $('#daily-date').value)) return null;
     const date=kind==='daily'?$('#daily-date').value:kind==='meal'?$('#meal-date').value:kind==='dose'||kind==='legacy'?state.medicationDate:today();
     const slot=kind==='dose'?state.medicationSchedule?.slots[Number(form.dataset.slotIndex)]:null;
     const fields=[];
@@ -1039,10 +1140,20 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   dictation=createPatientDictation({getContext:voiceContext,isBusy:()=>Boolean(state.loading||state.saving),beforeListen:()=>assist.stop(),speak:text=>assist.say(text),stopSpeak:()=>assist.stop()});
 
   window.homecareCanLogout=canLeavePatient;
-  try {if(!await bootstrapSession('patient'))return;}catch(issue){showError(issue.message);return;}
-  if(sessionState.mode==='kakao' && sessionState.user?.role==='patient'){$('#patient-select').hidden=true;$('#patient-name').hidden=false;}
-  routeFromUrl();
+  async function bootstrapApplication() {
+    if (bootstrapInFlight) return;
+    bootstrapInFlight = true; state.loading = true; renderNavigation();
+    $('#retry-button').disabled = true; $('#loading-state').hidden = false; $('#load-error').hidden = true;
+    try {
+      if (!await bootstrapSession('patient')) return;
+      sessionReady = true;
+      if(sessionState.mode==='kakao' && sessionState.user?.role==='patient'){$('#patient-select').hidden=true;$('#patient-name').hidden=false;}
+      routeFromUrl();
+      await initialize();
+      loadCapabilities();
+    } catch (issue) { sessionReady = false; showError(issue.message); }
+    finally { bootstrapInFlight = false; state.loading = false; $('#retry-button').disabled = false; renderNavigation(); }
+  }
   bindEvents();
-  initialize();
-  loadCapabilities();
+  bootstrapApplication();
 })();

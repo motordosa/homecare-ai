@@ -1,0 +1,32 @@
+{
+  "version": "0.8.1",
+  "schemaVersion": 8,
+  "baselineCommit": "d58f2c4debdf9b9c9cb83fa96c4241c594484ace",
+  "environment": "Node24/Linux Chromium/temporary SQLite",
+  "checks": {
+    "node": 164,
+    "clientIoBrowser": 15,
+    "dictationBrowser": 17,
+    "speechPlaybackBrowser": 8,
+    "patientReliabilityBrowser": 10,
+    "existingVoiceBrowser": 12,
+    "browser": 7,
+    "automationBrowser": 20,
+    "authGroups": 5,
+    "medicationPhotoGroups": 4,
+    "usabilityBrowser": 14,
+    "crossMenuBrowser": 6,
+    "clinicianWorkspaceGroups": 6,
+    "docsCheck": true,
+    "diffCheck": true
+  },
+  "physicalMicrophoneVerified": false,
+  "physicalIPhoneSafariVerified": false,
+  "liveWritesPerformed": false,
+  "productionDeployed": false,
+  "publicObserved": {
+    "appVersion": "0.8.0",
+    "schemaVersion": 7
+  },
+  "mainMerged": false
+}

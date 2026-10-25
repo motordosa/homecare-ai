@@ -81,3 +81,9 @@ body.patient-accessible .action-card>span:not(.action-icon){opacity:1}
 .patient-accessible .patient-header .voice-guide-toolbar button{padding:10px 12px;min-width:100px;max-width:144px}
 .patient-accessible .patient-self-name{font-weight:700;font-size:var(--patient-text)}
 .patient-accessible .greeting{padding-bottom:12px}
+
+/* REL-08 settings stay readable at 320px and never depend on colour alone. */
+.patient-accessible .voice-playback-settings{border-top:1px solid #b2a491;margin-top:18px;padding-top:18px;min-width:0}
+.patient-accessible .voice-playback-settings label{display:block;font-size:var(--patient-text);font-weight:700;margin:12px 0 8px}
+.patient-accessible .voice-playback-settings select{display:block;box-sizing:border-box;width:100%;max-width:100%;min-width:0;padding:12px;border:2px solid #51677c;border-radius:10px;background:#fff;color:#253047}
+.patient-accessible #voice-guide-full{width:100%;margin:10px 0}

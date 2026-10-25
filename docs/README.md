@@ -1,9 +1,15 @@
 # 개발 문서의 기준과 사용 순서
 
-문서 기준: 2026-10-24 KST, v0.8.0. 새 환자·음성·공지 변경은 [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md)와 [결과 보고서](PATIENT_VOICE_REPORT.md)가 기준이다. 이전 변경 범위는 [사용자 중심 개선 실행계획](USABILITY_IMPLEMENTATION_PLAN.md), 구현·검증·보류 상태는 [실행 결과 보고서](USABILITY_IMPLEMENTATION_REPORT.md)와 [변경 이력](CHANGELOG.md)을 따른다. 소스 구현, 합성자료 검증, 공개 배포, 실제 사용자·외부 서비스 검증은 서로 다른 완료 상태다.
+문서 기준: 2026-10-25 KST, v0.8.1 배포 준비·실제 마이크 인수 미완료. 현재 수정 상태는 [오류 복구 결과](PATIENT_RELIABILITY_REPORT.md), 배포 인계는 [DEPLOY_RENDER](../DEPLOY_RENDER.md), 남은 실기기 검사는 [실제 마이크 인수](MICROPHONE_ACCEPTANCE.md)가 기준이다. 기존 환자·음성·공지 변경은 [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md)와 [결과 보고서](PATIENT_VOICE_REPORT.md)가 기준이다. 이전 변경 범위는 [사용자 중심 개선 실행계획](USABILITY_IMPLEMENTATION_PLAN.md), 구현·검증·보류 상태는 [실행 결과 보고서](USABILITY_IMPLEMENTATION_REPORT.md)와 [변경 이력](CHANGELOG.md)을 따른다. 소스 구현, 합성자료 검증, 공개 배포, 실제 사용자·외부 서비스 검증은 서로 다른 완료 상태다.
 
 | 문서 | 책임 |
 |---|---|
+| [PATIENT_RELIABILITY_REPORT.md](PATIENT_RELIABILITY_REPORT.md) |0.8.1 수정·자동검사·실기기 미검증·저장소 및 배포 상태 |
+| [MICROPHONE_ACCEPTANCE.md](MICROPHONE_ACCEPTANCE.md) | 별도 시험 서버 준비·실제 iPhone 마이크/음질 확인·운영 배포 조건 |
+| [VOICE_PLAYBACK_CONTRACT.md](VOICE_PLAYBACK_CONTRACT.md) | 짧은 안내·목소리/속도·발화 시작/종료 복구 |
+| [CLIENT_IO_RELIABILITY_SPEC.md](CLIENT_IO_RELIABILITY_SPEC.md) |20초 세션·사진 해독/크기·오류 복구 |
+| [PATIENT_RELIABILITY_AUDIT.md](PATIENT_RELIABILITY_AUDIT.md) | 수정 전 아이폰 Safari 증상에 따른 환자 오류 감사·재현 근거 |
+| [PATIENT_RELIABILITY_PLAN.md](PATIENT_RELIABILITY_PLAN.md) | A01~A12 승인된 수정 순서·초기 상태 제안·인수·배포 관문 |
 | [PATIENT_VOICE_REPORT.md](PATIENT_VOICE_REPORT.md) | v0.8.0 구현·공개/로컬 재현·메뉴별 클릭·모의 음성·실기기 제약·저장소/배포 상태 |
 | [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md) | v0.8.0 환자 행동/정보 구분·한국어 음성/할 일/입력 확인 실행계획과 제작 계약 |
 | [USABILITY_IMPLEMENTATION_PLAN.md](USABILITY_IMPLEMENTATION_PLAN.md) | v0.7.0 승인 실행 범위·단계·공통 화면·권한·API·자료 이행·검증 관문 |

@@ -1,0 +1,41 @@
+{
+  "environment": "local actual Chromium + temporary SQLite; explicit network faults and mocked clock only; no public writes",
+  "results": [
+    {
+      "id": "R01",
+      "scenario": "initial auth GET held; browser clock advanced65s",
+      "loading": true,
+      "error": false,
+      "appHidden": true,
+      "heldRequests": 1,
+      "defect": true
+    },
+    {
+      "id": "R02",
+      "scenario": "initial auth fails503, service restored, visible retry clicked",
+      "before": 1,
+      "retryCalls": 0,
+      "stillError": true,
+      "defect": true,
+      "fullReloadRecovered": true
+    },
+    {
+      "id": "R03",
+      "scenario": "demo patient switch POST held; browser clock advanced65s",
+      "lockedMenus": 6,
+      "appHidden": true,
+      "heldRequests": 1,
+      "defect": true,
+      "releasedResponseRecovered": true
+    },
+    {
+      "id": "R04",
+      "scenario": "18 rapid menu clicks, 4 back/forward pairs, enlarged type320px, close home",
+      "clicks": 18,
+      "visibleViews": 1,
+      "overflow": false,
+      "errors": [],
+      "passed": true
+    }
+  ]
+}
