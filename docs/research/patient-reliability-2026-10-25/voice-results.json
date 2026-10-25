@@ -1,0 +1,159 @@
+{
+  "scope": "real local Chromium, real HTTP/temporary SQLite, controlled mock Web Speech events; no real audio or microphone",
+  "cases": [
+    {
+      "name": "V01 stop without terminal event removes watchdog and indefinitely locks dictation",
+      "finding": "confirmed under missing-onend mock",
+      "after90seconds": {
+        "startDisabled": true,
+        "transcriptDisabled": true,
+        "reviewDisabled": true,
+        "mic": "● 마이크 사용 중 · 말씀해 주세요",
+        "status": "말하기를 마치고 있어요. 인식 결과를 확인해 주세요.",
+        "stops": 1,
+        "aborts": 0
+      },
+      "recovery": "explicit discard/close restores manual input; JS event loop itself remains responsive"
+    },
+    {
+      "name": "V02 no stop click retains25sec recognition watchdog",
+      "result": "pass",
+      "status": "25초가 지나 마이크를 껐어요. 인식한 내용을 확인해 주세요."
+    },
+    {
+      "name": "V03 first Korean voice selected even when later voice is OS default; fixed rate and text",
+      "finding": "deterministic choice and no speed selection; audio quality not measured",
+      "spoken": {
+        "text": "안녕하세요. 오늘도 함께 건강 기록을 남겨 볼까요? 현재 확인한 기록은 남겨 주셨어요. 식사를 더 하셨다면 추가로 기록할 수 있어요.",
+        "rate": 0.9,
+        "name": "Mock legacy first"
+      },
+      "textLength": 74
+    },
+    {
+      "name": "V04 guide onstart without end has no duration recovery",
+      "finding": "remains reading after90sec missing-end mock; explicit stop works",
+      "noGlobalFreeze": true
+    },
+    {
+      "name": "V05 permission error and retry preserve manual fallback",
+      "result": "pass",
+      "provider": "mock permission error and mock transcript"
+    },
+    {
+      "name": "V06 natural spoken phrase coverage and self-contradicting suggestions",
+      "finding": "phrase coverage / error guidance UX gaps; rejecting ambiguous all-day adherence must remain safe",
+      "rows": [
+        {
+          "field": "medicationStatus",
+          "text": "먹었어요",
+          "result": {
+            "ok": false,
+            "error": "먹었어요·못 먹었어요·기억 안 나요 중 분명하게 말해 주세요. 일부 복용은 의료진에게 문의해 주세요."
+          }
+        },
+        {
+          "field": "medicationStatus",
+          "text": "모두 먹었어요",
+          "result": {
+            "ok": true,
+            "value": "taken",
+            "display": "하루 전체 모두 먹었어요"
+          }
+        },
+        {
+          "field": "status",
+          "text": "약을 먹었습니다",
+          "result": {
+            "ok": false,
+            "error": "먹었어요·못 먹었어요·기억 안 나요 중 분명하게 말해 주세요. 일부 복용은 의료진에게 문의해 주세요."
+          }
+        },
+        {
+          "field": "status",
+          "text": "안 먹었습니다",
+          "result": {
+            "ok": false,
+            "error": "먹었어요·못 먹었어요·기억 안 나요 중 분명하게 말해 주세요. 일부 복용은 의료진에게 문의해 주세요."
+          }
+        },
+        {
+          "field": "portion",
+          "text": "절반",
+          "result": {
+            "ok": false,
+            "error": "모두·절반·사분의 일·사분의 삼·안 먹음·모르겠어요 중 하나를 말해 주세요."
+          }
+        },
+        {
+          "field": "portion",
+          "text": "절반 먹었어요",
+          "result": {
+            "ok": true,
+            "value": 0.5,
+            "display": "50% 먹었어요"
+          }
+        },
+        {
+          "field": "portion",
+          "text": "모두",
+          "result": {
+            "ok": false,
+            "error": "모두·절반·사분의 일·사분의 삼·안 먹음·모르겠어요 중 하나를 말해 주세요."
+          }
+        },
+        {
+          "field": "foodType",
+          "text": "밥과 반찬을 먹었어요",
+          "result": {
+            "ok": false,
+            "error": "화면에 있는 식사 종류를 말하거나 직접 골라 주세요."
+          }
+        },
+        {
+          "field": "foodType",
+          "text": "밥과 반찬",
+          "result": {
+            "ok": true,
+            "value": "balanced",
+            "display": "밥과 반찬"
+          }
+        },
+        {
+          "field": "steps",
+          "text": "오늘 삼천 오백 걸음을 걸었어요",
+          "result": {
+            "ok": false,
+            "error": "한 가지 걸음 수를 단위와 함께 말해 주세요. 예: 삼천 오백 걸음."
+          }
+        },
+        {
+          "field": "steps",
+          "text": "삼천 오백 걸음",
+          "result": {
+            "ok": true,
+            "value": 3500,
+            "display": "3,500 걸음"
+          }
+        },
+        {
+          "field": "sleepHours",
+          "text": "일곱 시간 반 잤어요",
+          "result": {
+            "ok": true,
+            "value": 7.5,
+            "display": "7시간 30분 → 저장 값 7.5시간",
+            "notice": "기존 기록의 0.1시간 단위로 반올림해요."
+          }
+        }
+      ]
+    },
+    {
+      "name": "V07 retry microphone failure discards already recognized or corrected draft",
+      "finding": "recognized draft discarded before replacement success; no recover action",
+      "before": "삼천 육백 걸음",
+      "after": "",
+      "status": "음성 서비스에 연결하지 못했어요. 연결을 확인하거나 손으로 입력해 주세요."
+    }
+  ]
+}

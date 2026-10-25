@@ -1,0 +1,15 @@
+{
+  "environment": "actual public app with deliberate 1.5-second delay on daily-record GET response; no fake response data",
+  "writes": false,
+  "voiceButtonEnabledWhileLoading": true,
+  "optionsBeforeLoad": [
+    "date"
+  ],
+  "optionsAfterLoad": [
+    "date"
+  ],
+  "optionsAfterReopen": [
+    "steps",
+    "date"
+  ]
+}

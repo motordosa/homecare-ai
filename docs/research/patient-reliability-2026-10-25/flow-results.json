@@ -1,0 +1,92 @@
+{
+  "environment": "local isolated SQLite and actual Chromium clicks; injected failed/delayed responses; no public writes",
+  "results": [
+    {
+      "name": "daily GET failure recovery visibility",
+      "status": "completed",
+      "saveDisabled": true,
+      "retryButtonVisible": false,
+      "error": "합성 네트워크 실패 날짜를 다시 선택해 주세요.",
+      "date": "2026-10-25",
+      "reopenRecovers": true,
+      "finding": "P2 direct retry missing on record-load failure"
+    },
+    {
+      "name": "meal save hangs then 20s timeout restores editing",
+      "status": "completed",
+      "during": {
+        "navDisabled": 6,
+        "closeDisabled": true,
+        "cancelVisible": 0
+      },
+      "after": {
+        "elapsedMs": 20335,
+        "saveEnabled": true,
+        "navEnabled": true,
+        "chosenFoodPreserved": true,
+        "error": "응답이 지연되고 있어요. 연결 상태를 확인하고 다시 시도해 주세요."
+      },
+      "finding": "20s bounded recovery works; complete interaction lock without progress/cancel feels frozen"
+    },
+    {
+      "name": "meal saved but summary unavailable",
+      "status": "completed",
+      "savedFeedback": "저장은 완료했어요. 최신 목록을 불러오지 못했으니 다시 불러오기를 눌러 주세요.",
+      "navigationReleased": true,
+      "savedMealId": "d70af94e-ad53-485a-add8-c37b84ac46a2",
+      "serverHasMeal": true,
+      "newRecentIds": [
+        "d70af94e-ad53-485a-add8-c37b84ac46a2"
+      ],
+      "retryRecovered": true
+    },
+    {
+      "name": "message POST failure preserves and retries once",
+      "status": "completed",
+      "draftPreserved": true,
+      "postAttempts": 2,
+      "savedMatchingMessages": 1
+    },
+    {
+      "name": "connection response loss then retry",
+      "status": "completed",
+      "beforeCount": 0,
+      "afterLossCount": 1,
+      "lostConnectionInitiallyShown": false,
+      "afterRetryCount": 2,
+      "unrevokedCount": 2,
+      "finding": "P2 non-idempotent connection creation leaves token-unrecoverable active connection after response loss"
+    },
+    {
+      "name": "invalid image type and malformed small PNG",
+      "status": "completed",
+      "invalidType": "JPG·PNG·WebP 사진을 골라 주세요. 다른 형식은 카메라로 다시 찍어 주세요.",
+      "malformed": {
+        "preparation": "사진을 준비했어요. 음식이 잘 보이는지 확인해 주세요.",
+        "imageWidth": 0,
+        "errorVisible": false
+      },
+      "finding": "P2 unsupported types rejected; supported MIME under5MB bypasses image decoding and reports malformed image ready"
+    },
+    {
+      "name": "form validation and dirty cancel",
+      "status": "completed",
+      "missingFood": "가장 가까운 식사 종류를 하나 골라 주세요.",
+      "missingPortion": "실제로 드신 양을 하나 골라 주세요. 기억나지 않으면 모르겠어요를 고를 수 있어요.",
+      "mealPosts": 0,
+      "cancelRetains": true,
+      "invalidRejected": true,
+      "dailyPosts": 0
+    },
+    {
+      "name": "offline message recovery",
+      "status": "completed",
+      "draftPreserved": true,
+      "navigationEnabled": true,
+      "offlineNotice": "인터넷 연결이 끊겼어요. 입력은 현재 화면에만 남아 있어요. 창을 닫거나 새로고침하지 말고 연결 후 저장해 주세요.",
+      "savedExactlyOnce": true
+    }
+  ],
+  "pageErrors": [],
+  "correctionNote": "Original meal post-save verification compared capped recentMeals length and yielded false negative. Targeted recheck compared saved response ID against todayMeals; actual server record present. Use consolidated results."
+}

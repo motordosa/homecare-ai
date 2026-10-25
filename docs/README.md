@@ -4,6 +4,8 @@
 
 | 문서 | 책임 |
 |---|---|
+| [PATIENT_RELIABILITY_AUDIT.md](PATIENT_RELIABILITY_AUDIT.md) | 아이폰 Safari 증상에 따른 환자 전체 오류 감사·재현 근거; 수정 미실행 |
+| [PATIENT_RELIABILITY_PLAN.md](PATIENT_RELIABILITY_PLAN.md) | A01~A12 수정 순서·제안 상태/변수·실기기 인수·배포 관문; 미구현 계획 |
 | [PATIENT_VOICE_REPORT.md](PATIENT_VOICE_REPORT.md) | v0.8.0 구현·공개/로컬 재현·메뉴별 클릭·모의 음성·실기기 제약·저장소/배포 상태 |
 | [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md) | v0.8.0 환자 행동/정보 구분·한국어 음성/할 일/입력 확인 실행계획과 제작 계약 |
 | [USABILITY_IMPLEMENTATION_PLAN.md](USABILITY_IMPLEMENTATION_PLAN.md) | v0.7.0 승인 실행 범위·단계·공통 화면·권한·API·자료 이행·검증 관문 |
