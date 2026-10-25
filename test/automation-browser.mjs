@@ -29,6 +29,7 @@ child.stderr.on('data', data => { output += data; });
 let browser;
 let fixtureDb;
 let completed = 0;
+let activeCheck = 'automation startup';
 const pageErrors = [];
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6WlEAAAAASUVORK5CYII=', 'base64');
 const pngFile = { name: 'browser-fixture-not-a-real-meal.png', mimeType: 'image/png', buffer: png };
@@ -38,7 +39,7 @@ const responseFor = (page, suffix, method = 'POST') => page.waitForResponse(resp
 const ready = page => page.locator('#app-content').waitFor({ state: 'visible' });
 const settledPatient = page => page.waitForFunction(() => !document.querySelector('#patient-select')?.disabled);
 const assertHidden = async locator => assert.equal(await locator.isVisible(), false);
-async function check(name, action) { await action(); completed++; console.log(`PASS ${name}`); }
+async function check(name, action) { activeCheck = name; await action(); completed++; console.log(`PASS ${name}`); activeCheck = 'automation between scenarios'; }
 async function until(predicate, description) {
   for (let attempt = 0; attempt < 120; attempt++) { if (predicate()) return; await delay(25); }
   throw new Error(`Timed out: ${description}`);
@@ -770,9 +771,15 @@ try {
     await page.locator('#modal [data-modal-action=close]').first().click(); await page.close();
   });
 
+  activeCheck = 'final browser page-error check';
   assert.deepEqual(pageErrors, []);
   console.log(`${completed} automation browser scenarios passed. AI scenarios used mocked provider fixtures only; actual AI and native device integration remain unverified.`);
 } catch (error) {
+  if (process.env.GITHUB_ACTIONS === 'true') {
+    const escapeAnnotation = value => String(value).replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
+    const detail = `${activeCheck}\n${error?.stack || error}`.slice(0, 6000);
+    console.error(`::error title=Automation browser failure::${escapeAnnotation(detail)}`);
+  }
   console.error(error);
   process.exitCode = 1;
 } finally {
