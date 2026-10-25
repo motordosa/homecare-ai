@@ -11,7 +11,7 @@
 | P-VOICE-INPUT | PATIENT_VOICE_SPEC의 시작/중지 제한·늦은 결과 무효·초안 보존. 수동 입력 대안, 실제 마이크 종료 확인과 UI 복구를 구별 |
 | P-VOICE-GUIDE/P-GUIDE | VOICE_PLAYBACK_CONTRACT의 짧은 안내/전체 듣기/목소리·속도 미리듣기·발화 제한. 한국어 미지원이면 텍스트 대안 |
 
-기존 상단/하단 메뉴와 X 복귀 규약을 그대로 사용한다. 새 배포는 실제 iPhone Safari 마이크 검증 이후에만 가능하다.
+기존 상단/하단 메뉴와 X 복귀 규약을 그대로 사용한다. 최신 사용자 지시에 따라 main 배포 준비를 진행한다. 실제 iPhone Safari 마이크 검증은 미완료 상태로 인계하며 자동 검사로 대신하지 않는다.
 
 현재 기준일: 2026-10-24 KST. 요구사항 NAV-04/GOV-02/QA-02/AUTH-01..03/COM-01..03 및 사용자 중심 개선 B/P/W/S/L 작업. 최초 제작 기준에 승인된 변경을 통합한 현행 명세다. 현재 환자 화면·음성/공지 변경 범위는 [실행계획·제작 명세](PATIENT_VOICE_SPEC.md), 기존 v0.7.0 변경은 [이전 실행계획](USABILITY_IMPLEMENTATION_PLAN.md), 완료·검증·보류 상태는 [현재 실행 결과 보고서](PATIENT_VOICE_REPORT.md)와 [변경 이력](CHANGELOG.md)을 따른다. 제품 목적·의료 의미는 PRODUCT_PLAN/CONTRACTS가 기준이며, 이 문서만으로 공개 배포나 실제 사용자 검증 완료를 뜻하지 않는다.
 

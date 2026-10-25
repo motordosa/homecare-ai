@@ -1,8 +1,17 @@
 # Render 무료 데모 배포
 
-## v0.8.1 수정본: 실제 마이크 인수 전 운영 배포 보류
+## 최신 v0.8.1 배포 준비 (2026-10-25)
 
-2026-10-25 사용자 지시로 실제 마이크 인식까지 검증한 후에만 운영 배포한다. `codex/patient-reliability-fixes`의0.8.1/schema8 수정본과 운영0.8.0/schema7을 구별한다. [실제 iPhone 인수 절차](docs/MICROPHONE_ACCEPTANCE.md)에 별도 무료 테스트 서버 준비·실제로 듣고 말하기·저장 검증·운영 배포 관문을 정리했다. 지금 아래0.8.0 절차를 다시 실행해도 수정본이 반영되지 않는다. 실제 기기 인수 전 main 병합과 운영 배포를 수행하지 않는다.
+실제 마이크 미검증 보고 후 사용자가 **최종 커밋을 배포할 수 있도록 준비**하라고 지시했다. PR #2를 `main`에 반영하고 같은 배포 커밋의 CI를 확인한다. 이 준비는 실제 iPhone 마이크 검사나 Render Live 완료를 의미하지 않는다. 실제 말소리·권한·중지·수정 후 저장 검증은 [마이크 인수 절차](docs/MICROPHONE_ACCEPTANCE.md)의 남은 항목이다.
+
+1. [기존 Render 서비스](https://dashboard.render.com/web/srv-db923oss728c73bgipug)를 연다. **Settings → Build & Deploy → Branch**가 **main**인지 확인한다. 별도 개발 브랜치나 이전 배포 브랜치를 그대로 선택하면 최신 수정본이 배포되지 않을 수 있다.
+2. [PR #2](https://github.com/motordosa/homecare-ai/pull/2)의 병합 상태와 [main 최신 커밋](https://github.com/motordosa/homecare-ai/commits/main)을 확인한다. 배포할 SHA는 완료 보고의 **main 병합 커밋**과 같아야 한다. 수정 코드 `d3dd1dd`를 포함하고 `package.json`은 **0.8.1**, `server.mjs`는 **schema8**이어야 한다. feature 브랜치 CI만으로 main 검사 완료라고 표시하지 않는다.
+3. 필요한 테스트 자료가 있다면 먼저 보존한다. 무료 서버의 임시 DB·사진은 재배포 시 사라질 수 있으며 CSV는 전체 복원본이 아니다. 이번 버전은 DB를 전체 초기화할 필요가 없다.
+4. **Manual Deploy → Deploy latest commit**을 선택한다. 가능하면 **Deploy a specific commit**에서 완료 보고의 SHA를 지정한다. 새 서비스나 새 환경 변수는 필요 없다. 기존 GPT 키·로그인 설정을 유지한다. 자동 배포 설정을 켤 필요도 없다.
+5. **Live** 후 [서버 상태](https://homecare-ai-demo.onrender.com/api/health)에서 `appVersion:"0.8.1"`, `schemaVersion:8`, `ok:true`를 확인하고 Render의 배포 SHA도 대조한다.0.8.0/schema7이면 이전 버전이다.
+6. [환자 화면](https://homecare-ai-demo.onrender.com/patient?patientId=p001)을 새로고침하고 안내 듣기/중지, 이용 안내의 목소리·속도 설정, 걸음 수 음성 입력과 손 입력·저장을 확인한다. 실제 iPhone 마이크 인수는 아직 통과했다고 표시하지 않는다. [의료진 화면](https://homecare-ai-demo.onrender.com/clinician?patientId=p001)에서 같은 합성 기록을 확인한다.
+
+현재 작업의 범위는 저장소 병합·동일 SHA CI·배포 인계다. 실제 Render 실행/공개 화면 확인은 별도 상태로 보고한다. 아래0.8.0 절차는 이전 이력이며 이번 배포 목표로 사용하지 않는다.
 
 ## 기존 v0.8.0 배포 기준 (2026-10-25)
 
@@ -18,7 +27,7 @@
 
 소스 확인: [main package.json](https://github.com/motordosa/homecare-ai/blob/main/package.json), [main 최신 커밋](https://github.com/motordosa/homecare-ai/commits/main), [v0.8.0 PR #1](https://github.com/motordosa/homecare-ai/pull/1).
 
-위 절은 기존0.8.0 배포 기준이다.0.8.1은 최상단의 실제 마이크 인수 조건을 먼저 따른다. 아래 이전 버전의 schema 값과 검증 기록은 도입 이력이며 v0.8.0 배포 완료의 증거가 아니다. 구현·검증 근거는 [환자 음성·공지 보고서](docs/PATIENT_VOICE_REPORT.md)를 따른다. GitHub 병합/검사 통과와 Render Live는 각각 확인한다. 최종 배포는 사용자가 Render에서 실행한다.
+위 절은 기존0.8.0 배포 기준이다.0.8.1은 최상단의 최신 배포 준비 절을 따른다. 아래 이전 버전의 schema 값과 검증 기록은 도입 이력이며 v0.8.0 배포 완료의 증거가 아니다. 구현·검증 근거는 [환자 음성·공지 보고서](docs/PATIENT_VOICE_REPORT.md)를 따른다. GitHub 병합/검사 통과와 Render Live는 각각 확인한다. 최종 배포는 사용자가 Render에서 실행한다.
 
 이 구성은 `plan: free`인 Docker 웹서비스 하나만 생성합니다. 유료 디스크, 유료 데이터베이스, 추가 유료 서비스는 포함하지 않습니다. 환자 사이트·의료진 사이트·SQLite API를 같은 서버에서 실행합니다.
 

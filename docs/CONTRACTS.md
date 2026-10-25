@@ -6,7 +6,7 @@
 - 일일 입력의 `recordLoadState=idle/loading/ready/error`에서 ready와 선택 날짜 일치만 저장/말로 입력이 가능하다. 조회 실패에는 같은 날짜의 직접 재시도를 제공한다. 늦은 응답은 환자·요청 세대·열린 폼·날짜를 모두 검사한다.
 - 변경 요청의 타임아웃/전송 오류/5xx는 서버 반영 여부가 불명일 수 있다. 식사·일일 기록은 기존 clientSubmissionId/동일 본문을 유지해 결과를 재확인한다. 결과 불명 상태에서 내용을 바꿔 신규 키를 만드는 경로를 막는다. 읽기 오류와 저장 후 요약 갱신 오류를 구별한다.
 - 건강 연결 POST의 선택 `clientRequestId`(UUID)와 `replacesConnectionId`(명시 교체, UUID 필수)는 SMARTPHONE_SYNC_SPEC의 schema8 영수증 계약을 따른다. 같은 내용 재시도는 기존 connection과 `token:null,duplicate:true,codeUnavailable:true`, 최초는 최초1회 token과 false 플래그다. 같은 키 다른 내용409. 교체는 해당 이전 연결만 원자적으로 폐기하고 새 연결을 만들며 다른 선택 출처/과거 기록을 보존한다.
-- 음성 인식/발화의 브라우저 모의 이벤트 통과는 실제 iPhone 마이크·음질 인수와 다르다. 사용자 조건에 따라 실제 마이크 검증 전 공개 배포는 보류한다.
+- 음성 인식/발화의 브라우저 모의 이벤트 통과는 실제 iPhone 마이크·음질 인수와 다르다. 최신 사용자 지시는 최종 커밋의 main 병합·CI·배포 준비다. 이를 실제 마이크 검증 완료나 Render 배포 완료로 해석하지 않는다.
 
 이 문서는 구현 전 합의한 기준이다. 세부 계약을 변경할 때 구현보다 먼저 이 문서와 CHANGELOG를 갱신한다. 기존 v0.2 경로는 삭제하지 않는다. 구현 여부는 CHANGELOG에서 확인한다.
 

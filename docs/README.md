@@ -1,6 +1,6 @@
 # 개발 문서의 기준과 사용 순서
 
-문서 기준: 2026-10-25 KST, v0.8.1 개발본·실제 마이크 인수 대기. 현재 수정 상태는 [오류 복구 결과](PATIENT_RELIABILITY_REPORT.md), 배포 관문은 [실제 마이크 인수](MICROPHONE_ACCEPTANCE.md)가 기준이다. 기존 환자·음성·공지 변경은 [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md)와 [결과 보고서](PATIENT_VOICE_REPORT.md)가 기준이다. 이전 변경 범위는 [사용자 중심 개선 실행계획](USABILITY_IMPLEMENTATION_PLAN.md), 구현·검증·보류 상태는 [실행 결과 보고서](USABILITY_IMPLEMENTATION_REPORT.md)와 [변경 이력](CHANGELOG.md)을 따른다. 소스 구현, 합성자료 검증, 공개 배포, 실제 사용자·외부 서비스 검증은 서로 다른 완료 상태다.
+문서 기준: 2026-10-25 KST, v0.8.1 배포 준비·실제 마이크 인수 미완료. 현재 수정 상태는 [오류 복구 결과](PATIENT_RELIABILITY_REPORT.md), 배포 인계는 [DEPLOY_RENDER](../DEPLOY_RENDER.md), 남은 실기기 검사는 [실제 마이크 인수](MICROPHONE_ACCEPTANCE.md)가 기준이다. 기존 환자·음성·공지 변경은 [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md)와 [결과 보고서](PATIENT_VOICE_REPORT.md)가 기준이다. 이전 변경 범위는 [사용자 중심 개선 실행계획](USABILITY_IMPLEMENTATION_PLAN.md), 구현·검증·보류 상태는 [실행 결과 보고서](USABILITY_IMPLEMENTATION_REPORT.md)와 [변경 이력](CHANGELOG.md)을 따른다. 소스 구현, 합성자료 검증, 공개 배포, 실제 사용자·외부 서비스 검증은 서로 다른 완료 상태다.
 
 | 문서 | 책임 |
 |---|---|

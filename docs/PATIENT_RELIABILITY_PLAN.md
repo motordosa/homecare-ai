@@ -1,6 +1,6 @@
 # 환자 오류 개선 세부 실행계획 — 승인 후 구현·인수 관리
 
-2026-10-25 KST. 사용자 우선 기기는 **iPhone Safari**. 근거는 [오류 점검 보고서](PATIENT_RELIABILITY_AUDIT.md)의 A01~A12다. 최초 제안 이후 사용자가 수정·마이크 검증·조건부 배포를 지시했다. REL-01~08의 구현·자동검사 결과는 [수정 결과](PATIENT_RELIABILITY_REPORT.md), 실제 기기와 배포 관문은 [마이크 인수](MICROPHONE_ACCEPTANCE.md)에서 관리한다. 아래 제안 변수는 초기 설계이며 최종 이름/상태는 개별 명세·DATA_DICTIONARY·generated/VARIABLES를 따른다. REL-09 미완료이므로 운영 배포는 보류한다.
+2026-10-25 KST. 사용자 우선 기기는 **iPhone Safari**. 근거는 [오류 점검 보고서](PATIENT_RELIABILITY_AUDIT.md)의 A01~A12다. 최초 제안 이후 사용자가 수정·마이크 검증·조건부 배포를 지시했다. REL-01~08의 구현·자동검사 결과는 [수정 결과](PATIENT_RELIABILITY_REPORT.md), 실제 기기와 배포 관문은 [마이크 인수](MICROPHONE_ACCEPTANCE.md)에서 관리한다. 아래 제안 변수는 초기 설계이며 최종 이름/상태는 개별 명세·DATA_DICTIONARY·generated/VARIABLES를 따른다. REL-09는 미완료다. 이후 사용자의 최종 커밋 배포 준비 지시에 따라 REL-10의 main 병합·동일 SHA CI·배포 인계는 진행한다.
 
 ## 실행 순서와 완료 관문
 
@@ -64,4 +64,4 @@
 
 자동 검사에는 이 보고서의19개 묶음과 A05 회귀를 정식 테스트로 옮긴다. 조건부 요청 보류·이벤트 누락은 무한 waitForTimeout 대신 명시 상태를 관찰한다. 정상 API20초 제한, 중복 방지, CSRF/환자 범위, 기존 기록 보존을 유지한다. 관련 검사 통과 후 기존 Node·voice·menus·auth·automation·medication-photo·usability·docs:check를 실행한다.
 
-최신 코드 main 병합→동일 커밋 CI 통과→Render Branch/main·SHA 인계→사용자 수동 배포→health 버전·스키마·정적 파일 대조→합성 공지/기록/음성 실기기 인수 순서다. 무료 Render 재시작의 자료 보존 조건은 기존 배포 문서를 따른다. 이번 보고서 작성은 구현·실기기검증·배포 완료가 아니다.
+최신 사용자 지시에 따른 배포 준비는 main 병합→동일 커밋 CI 통과→Render Branch/main·SHA 인계 순서다. Render 수동 배포 이후 health·정적 파일·합성 기록·실제 음성 인수를 각각 확인한다. 무료 Render 재시작의 자료 보존 조건은 기존 배포 문서를 따른다. 이번 보고서 작성은 구현·실기기검증·배포 완료가 아니다.

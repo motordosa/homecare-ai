@@ -1,12 +1,12 @@
 # 실제 iPhone Safari 마이크 인수
 
-2026-10-25 KST. v0.8.1의 **미완료 배포 조건**이다. SpeechRecognition 모의 콜백·문장 파서 검사·실제 Chromium 클릭은 실제 iPhone 마이크 검사와 다르다. 현재 개발 환경에는 iPhone/오디오 장치 원격 제어와 Render 관리 인증이 없다. 미검증 상태에서 운영 서비스로 올리지 않는다.
+2026-10-25 KST. v0.8.1의 **미완료 실기기 검증 항목**이다. SpeechRecognition 모의 콜백·문장 파서 검사·실제 Chromium 클릭은 실제 iPhone 마이크 검사와 다르다. 현재 개발 환경에는 iPhone/오디오 장치 원격 제어와 Render 관리 인증이 없다. 미검증 보고 후 사용자가 최종 커밋을 배포할 수 있도록 준비하라고 지시했다. 이에 따라 main 병합·CI·배포 인계는 진행하되 실제 마이크 검증 완료로 표시하지 않는다.
 
 ## 검사할 버전과 테스트 서버
 
-운영 사이트는 https://homecare-ai-demo.onrender.com 의0.8.0/schema7이다. 그 사이트에서 검사해도0.8.1 수정 검증이 되지 않는다. 소스는 `codex/patient-reliability-fixes`에서 검토하고 실제 시험 SHA를 기록한다. 시험 서버의 `/api/health`가0.8.1/schema8인지 확인한다.
+운영 사이트는 https://homecare-ai-demo.onrender.com 의0.8.0/schema7이다. 그 사이트에서 검사해도0.8.1 수정 검증이 되지 않는다. 수정 코드는 `d3dd1dd`에 있으며 PR #2를 main에 병합한 뒤 실제 시험 SHA를 기록한다. 시험 서버의 `/api/health`가0.8.1/schema8인지 확인한다.
 
-아이폰에서 접속할 별도 HTTPS 시험 서버가 필요하다. Render 관리 접근이 없는 현재 환경에서는 소유자가 아래 절차로 준비할 수 있다. 기존 운영 서비스의 Branch를 바꾸지 않는다.
+아이폰에서 수정본에 접속할 HTTPS 환경이 필요하다. 별도 시험 서버를 쓰려면 다음 절차를 사용하고, 기존 데모 서비스 배포는 DEPLOY_RENDER.md의 main 기준 절차를 따른다. Render 관리 접근이 없는 현재 환경에서는 소유자가 아래 절차로 준비할 수 있다. 기존 운영 서비스의 Branch를 바꾸지 않는다.
 
 1. [Render 대시보드](https://dashboard.render.com) → **New → Web Service**. 기존 GitHub 저장소 `motordosa/homecare-ai` 선택.
 2. 이름은 `homecare-ai-voice-test` 등 별도 이름, Branch는 **codex/patient-reliability-fixes**, Runtime은 **Docker**, Instance Type은 **Free**, Health Check Path는 `/api/health`, 자동 배포는 **Off**. 유료 선택만 가능하면 생성하지 않고 다른 무료 시험 환경을 정한다.
@@ -38,4 +38,4 @@
 
 ## 운영 배포 관문
 
-실기기 인수→수정 SHA 자동 검사/검토→main 병합→**main의 동일 SHA** CI→기존 자료 보존 확인→운영 Render 수동 배포→health0.8.1/schema8·정적 파일·합성 기록 대조 순서다. 지금은 실제 마이크 인수에서 보류한다. 시험 서비스와 운영 배포 상태도 구별한다.
+최신 지시에 따른 준비는 main 병합→**main의 동일 SHA** CI→배포 SHA 인계다. Render 실제 배포와 health0.8.1/schema8·정적 파일·합성 기록 확인, 위 실제 마이크 인수 결과는 각각 따로 기록한다. main 반영이나 Live 표시만으로 실기기 통과로 바꾸지 않는다.
