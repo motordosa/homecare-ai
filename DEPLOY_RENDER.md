@@ -1,17 +1,20 @@
 # Render 무료 데모 배포
 
-## 최신 v0.7.0 배포 (2026-10-24)
+## 최신 v0.8.0 배포 (2026-10-25)
 
 기존 서비스 관리 화면: https://dashboard.render.com/web/srv-db923oss728c73bgipug
 
-1. GitHub `main`에 **v0.7.0 사용자 중심 개선** 커밋이 올라왔는지 확인한다. 작업 공간의 수정만으로 Render가 새 코드를 받을 수는 없다.
-2. 위 기존 서비스에서 **Settings → Build & Deploy → Branch**가 `main`인지 확인한다. 이전 `codex/free-demo-deploy` 브랜치를 사용 중이면 `main`으로 변경한다.
+1. GitHub `main`에 **v0.8.0 환자 음성·공지 개선**이 병합됐는지 확인한다. 기능 커밋 `92e8259`를 포함해야 하며, `main`의 `package.json`은 `0.8.0`, `server.mjs`는 schema7이다. 최종 배포 커밋은 아래의 소스 확인 링크와 개발 완료 보고를 대조한다. 별도 개발 브랜치에만 새 커밋이 있는 상태로 배포하지 않는다.
+2. 위 기존 서비스에서 **Settings → Build & Deploy → Branch**가 `main`인지 확인한다. 이전 `codex/free-demo-deploy` 브랜치를 사용 중이면 `main`으로 변경한다. **Deploy latest commit은 이 Branch의 최신 커밋**이며 저장소 전체의 최신 개발 커밋을 자동으로 선택하지 않는다.
 3. 필요한 기존 테스트 결과를 먼저 내보낸다. 무료 서버의 임시 DB·사진은 재배포 시 사라질 수 있으며 CSV는 전체 복원본이 아니다.
-4. 오른쪽 위 **Manual Deploy → Deploy latest commit**을 선택한다. 새 서비스·DB 생성이나 환경 변수 변경은 이번 사용성 개선에 필요하지 않다.
-5. 상태가 **Live**가 되면 https://homecare-ai-demo.onrender.com/api/health 에서 `appVersion:"0.7.0"`, `schemaVersion:6`, `ok:true`를 확인한다. 실제 배포 커밋도 GitHub의 대상 커밋과 대조한다.
-6. 환자 화면을 새로고침해 큰 메뉴와 공지 요약을 확인하고 의료진 화면에서 업무 목록·연구 분석·문헌 검토 메뉴를 확인한다. 실제 Kakao 모드에서는 계정 권한에 맞는 메뉴만 표시된다.
+4. 오른쪽 위 **Manual Deploy → Deploy latest commit**을 선택한다. 새 서비스·DB 생성이나 환경 변수 변경은 이번 음성·공지 개선에 필요하지 않다. 기존 GPT 키·로그인 설정은 유지한다. 이번 릴리스를 위해 전체 DB 리셋을 실행하지 않는다.
+5. 상태가 **Live**가 되면 https://homecare-ai-demo.onrender.com/api/health 에서 `appVersion:"0.8.0"`, `schemaVersion:7`, `ok:true`를 확인한다. Render Events의 배포 커밋도 GitHub `main`의 대상 커밋과 대조한다. `0.7.0/schema6`이면 최신 배포 완료가 아니다.
+6. 환자 홈에서 색으로 구분한 식사/복약 버튼·‘안내 듣기’와 정지/설정을 확인한다. 음성 입력은 인식→수치/날짜 확인·수정→입력란 반영→별도 저장 순서다. 실제 기기의 한국어 음성·마이크 권한은 별도 확인한다.
+7. 같은 브라우저의 의료진·환자 탭을 열고 식별 가능한 합성 공지를 ‘환자에게 게시’로 게시한다. 환자 수신·새로고침 유지·수정 반영을 확인하고 자신이 만든 공지만 보관한다. 식사·복약·건강 기록→의료진 조회도 확인한다. 실제 Kakao 모드에서는 계정 권한에 맞는 메뉴만 표시된다.
 
-위 절이 현재 버전의 배포 기준이다. 아래 이전 버전의 schema 값과 검증 기록은 도입 이력이며 v0.7.0 배포 완료의 증거가 아니다. 이번 버전의 로컬 검증 근거는 [구현·검증 보고서](docs/USABILITY_IMPLEMENTATION_REPORT.md)를 따른다.
+소스 확인: [main package.json](https://github.com/motordosa/homecare-ai/blob/main/package.json), [main 최신 커밋](https://github.com/motordosa/homecare-ai/commits/main), [v0.8.0 PR #1](https://github.com/motordosa/homecare-ai/pull/1).
+
+위 절이 현재 버전의 배포 기준이다. 아래 이전 버전의 schema 값과 검증 기록은 도입 이력이며 v0.8.0 배포 완료의 증거가 아니다. 구현·검증 근거는 [환자 음성·공지 보고서](docs/PATIENT_VOICE_REPORT.md)를 따른다. GitHub 병합/검사 통과와 Render Live는 각각 확인한다. 최종 배포는 사용자가 Render에서 실행한다.
 
 이 구성은 `plan: free`인 Docker 웹서비스 하나만 생성합니다. 유료 디스크, 유료 데이터베이스, 추가 유료 서비스는 포함하지 않습니다. 환자 사이트·의료진 사이트·SQLite API를 같은 서버에서 실행합니다.
 

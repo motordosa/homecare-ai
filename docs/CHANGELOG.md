@@ -1,5 +1,11 @@
 # 의사결정과 검증 이력
 
+## CHG-2026-10-25-17 — v0.8.0 배포 브랜치 인계 보완
+
+사용자가 Render 재배포 전에 필요한 모든 준비를 완료하도록 지시했다. 원격 main은9c6351a/v0.7.0이고, v0.8.0/92e8259는 Draft PR #1에만 있었다. 공개 patient.js가 main의 파일과 바이트 일치하고 health0.7.0/schema6·신규 음성 JS404를 확인했다. Render의 Branch 필드/실제 배포 SHA는 관리 도구 부재로 직접 조회하지 못했다.
+
+DEPLOY_RENDER의 최상단을 v0.8.0/schema7·main·기능 커밋92e8259 포함 기준으로 정정하고 구버전 안내는 이력으로 명시했다. 사용자 인계 문서와 개발 절차에 원격 배포 브랜치 병합·동일 커밋 CI·Render 배포 SHA/health/실제 화면 대조 관문을 추가했다. 기능/API/DB 코드는 이번 준비에서 변경하지 않는다. PR 준비 완료→main 병합→해당 CI 확인을 수행하고, 실제 최종 SHA/CI 결과는 완료 보고로 남긴다. Render 수동 배포는 사용자 실행이며 자동 배포를 켜거나 공개 DB를 변경하지 않는다.
+
 ## CHG-2026-10-21-14 · MED-PHOTO-01 제작 기준 확정
 
 사용자가 빠른 A단계 데모 개발을 승인했다. 코드보다 먼저 MEDICATION_PHOTO_DEMO_SPEC와 기획·화면·계약·구조·사전을 변경했다. v0.6.1 구현 완료: 환자 P-MED-PHOTO를 공통 dialog/동일 X·dirty·busy에 연결했다. 기존 GPT의 포장 글자 후보와 개인 계획을 정확한 이름 문자열로 대조하고, 약·회차·상태 직접 선택 후 다중 이벤트와 이미지 BLOB을 원자 저장한다. C-MED와 환자 복약에 당시 사진·보고 snapshot을 표시한다. schema5/22tables 추가 마이그레이션, 기존 기록 보존·reset CASCADE, expectedRevision 충돌·전송 UUID 재시도·이미지/환자/종류/만료 검증·strict ACL/CSRF를 적용했다. 국내 약품 API·낱알 식별·실제 API 인식 정확도 검증은 후속이다.

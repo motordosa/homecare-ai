@@ -12,6 +12,8 @@
 6. 변수 목록을 재생성하고 문서/계약/테스트 연결과 diff를 확인한다. 완료/실패/미실행/자격증명·기기 대기를 분리해 CHANGELOG에 기록한다.
 7. 배포 전 무료 서버의 DB 유실 가능성과 내보내기 한계를 확인한다. 변경이 Git에 저장된 상태와 실제 공개 배포 버전을 구별한다. 공개 검증은 GET 먼저, 필요한 쓰기는 본인이 만든 임시 자료만 정리한다.
 
+배포 인계 시에는 개발 브랜치 HEAD와 배포 브랜치 HEAD를 실제 원격에서 비교한다. 기존 서비스가 `main`을 쓰면 승인된 변경을 `main`에 병합하고 해당 커밋의 CI 결과를 확인한 뒤 사용자에게 수동 배포를 안내한다. Draft PR·다른 브랜치의 검사 통과만으로 배포 준비 완료로 보고하지 않는다. `DEPLOY_RENDER.md`의 목표 버전·스키마·브랜치와 사용자 안내를 함께 갱신한다. 최종 보고에는 배포 대상 커밋 SHA, CI 링크, Render 설정 확인 경로, 배포 후 health·실제 화면 인수조건을 포함한다. Render가 제공하는 배포 SHA와 공개 파일/버전을 대조하기 전에는 공개 배포 완료로 보고하지 않는다.
+
 저장소 CI는 `npm run docs:check`, `npm test`, 기존 및 자동화 브라우저 검사, `npm run test:auth`의 임시 DB·모의 Kakao 보안/소통 검사, 별도 Android job의 `assembleDebug`·`lintDebug`를 수행하도록 구성한다. Android는 JDK17/Gradle8.11.1/SDK36·build-tools35.0.0을 명시한다. 별도 macOS iOS job에서 production Swift core와 unsigned simulator 앱 빌드를 검사하며 기기 서명·설치·HealthKit 실수신과 구별한다. 변수 목록이 오래되면 실패한다. CI 정의를 저장한 것과 GitHub에서 실제 실행·통과한 것을 구별한다. 기획·의료적 의미의 일치와 실제 기기 검증은 CI만으로 증명할 수 없으므로 PR 양식의 요구사항/계약/검증/배포 기록으로 함께 검토한다.
 
 ## 기획 변경 기록 양식
