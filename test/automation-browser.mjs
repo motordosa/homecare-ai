@@ -520,9 +520,20 @@ try {
     await mobile.locator('#view-connections').waitFor({ state: 'visible' });
     await mobile.locator('#connection-list [data-action=revoke-connection]').first().waitFor({ state: 'visible' });
     await assertCredentialsCleared();
+    const revokeButton = mobile.locator('#connection-list [data-action=revoke-connection]');
+    assert.equal(await revokeButton.count(), 1);
+    const revokedId = await revokeButton.getAttribute('data-connection-id');
+    const revoked = responseFor(mobile, `/api/patients/${patient.id}/health-connections/${revokedId}`, 'DELETE');
     mobile.once('dialog', dialog => dialog.accept());
-    await mobile.locator('#connection-list [data-action=revoke-connection]').first().click();
-    await mobile.locator('.connection-status.revoked').waitFor({ state: 'visible' });
+    await revokeButton.click();
+    assert.equal((await revoked).status(), 200);
+    // Reissue already revoked the original connection; wait for BOTH old and new rows.
+    await mobile.waitForFunction(() => document.querySelectorAll('#connection-list .connection-status.revoked').length === 2
+      && document.querySelectorAll('#connection-list [data-action=revoke-connection]').length === 0);
+    const afterRevoke = await get(`/api/patients/${patient.id}/health-connections`);
+    assert.equal(afterRevoke.connections.length, 2);
+    assert.equal(afterRevoke.connections.find(connection => connection.id === revokedId)?.status, 'revoked');
+    assert.ok(afterRevoke.connections.every(connection => connection.status === 'revoked'));
     await assertCredentialsCleared();
   });
 
