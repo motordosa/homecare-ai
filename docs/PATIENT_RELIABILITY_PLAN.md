@@ -1,6 +1,6 @@
-# 환자 오류 개선 세부 실행계획 — 제안, 미구현
+# 환자 오류 개선 세부 실행계획 — 승인 후 구현·인수 관리
 
-2026-10-25 KST. 사용자 우선 기기는 **iPhone Safari**. 근거는 [오류 점검 보고서](PATIENT_RELIABILITY_AUDIT.md)의 A01~A12다. 이 문서의 변수·상태·API 변경은 구현 예정 계약이며 현재 동작으로 해석하지 않는다.
+2026-10-25 KST. 사용자 우선 기기는 **iPhone Safari**. 근거는 [오류 점검 보고서](PATIENT_RELIABILITY_AUDIT.md)의 A01~A12다. 최초 제안 이후 사용자가 수정·마이크 검증·조건부 배포를 지시했다. REL-01~08의 구현·자동검사 결과는 [수정 결과](PATIENT_RELIABILITY_REPORT.md), 실제 기기와 배포 관문은 [마이크 인수](MICROPHONE_ACCEPTANCE.md)에서 관리한다. 아래 제안 변수는 초기 설계이며 최종 이름/상태는 개별 명세·DATA_DICTIONARY·generated/VARIABLES를 따른다. REL-09 미완료이므로 운영 배포는 보류한다.
 
 ## 실행 순서와 완료 관문
 

@@ -7,7 +7,7 @@ export function koreaClock(now = new Date()) {
 const known=value=>typeof value==='number'&&Number.isFinite(value);
 export function buildPatientTasks({summary,schedule,now=new Date()}={}) {
   const clock=koreaClock(now);
-  if(!summary||summary.today!==clock.date) return {date:clock.date,stale:true,tasks:[],pending:[],speech:'새 날짜의 기록을 다시 확인해 주세요.',signature:'stale:'+clock.date};
+  if(!summary||summary.today!==clock.date) return {date:clock.date,stale:true,tasks:[],pending:[],speech:'새 날짜의 기록을 다시 확인해 주세요.',shortSpeech:'새 날짜의 기록을 다시 확인해 주세요.',signature:'stale:'+clock.date};
   const record=summary.todayRecord;
   const meals=(summary.todayMeals||[]).filter(m=>m.date===clock.date);
   const slots=schedule?.date===clock.date?schedule.slots||[]:[];
@@ -23,5 +23,6 @@ export function buildPatientTasks({summary,schedule,now=new Date()}={}) {
   const pending=tasks.filter(t=>t.state==='pending');
   const missingSchedule=tasks.find(t=>t.state==='unavailable');
   const speech='안녕하세요. 오늘도 함께 건강 기록을 남겨 볼까요? '+(pending.length?pending.map(t=>t.say).join(' '):'현재 확인한 기록은 남겨 주셨어요. 식사를 더 하셨다면 추가로 기록할 수 있어요.')+(missingSchedule?' 약 일정은 확인하지 못했으니 다시 확인해 주세요.':'');
-  return {date:clock.date,stale:false,tasks,pending,speech,signature:JSON.stringify(tasks.map(t=>[t.id,t.state,t.detail]))};
+  const shortSpeech='안녕하세요. '+(missingSchedule?'약 일정을 확인하지 못했어요. 다시 확인해 주세요.':pending.length?pending[0].say:'현재 확인한 기록은 남겨 주셨어요. 식사는 더 추가할 수 있어요.');
+  return {date:clock.date,stale:false,tasks,pending,speech,shortSpeech,signature:JSON.stringify(tasks.map(t=>[t.id,t.state,t.detail]))};
 }

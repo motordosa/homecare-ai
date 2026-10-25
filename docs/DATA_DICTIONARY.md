@@ -1,5 +1,18 @@
 # 변수·자료 사전
 
+## v0.8.1 오류 복구 변수 (구현 전 확정)
+
+| 변수 | 의미·규칙 |
+|---|---|
+| sessionReady / bootstrapInFlight | 환자 초기화의 인증 성공/단일 실행. 실패 재시도는 인증부터, 이벤트는1회 등록 |
+| recordLoadState / dailyLoadedDate / dateRequestId | 일일 원본 조회 상태/실제 읽은 날짜/세대. ready와 현재 날짜 일치가 입력·음성·저장 조건 |
+| pendingSave / operationState | 결과 불명인 식사/일일 요청의 대상·본문·UUID와 saving/unknown/confirmed/error. 메모리에만 보관, 재확인 전 임의 변경 재저장 금지 |
+| connectionCreateRequestId / connectionCreatePayload | 연결 발급 요청 UUID와 정규화 내용. 응답 유실 시 같은 시도를 재조회하며 토큰은 저장하지 않음 |
+| connectionRecoveryId / connectionIssuedId / connectionIssuanceState / replacesConnectionId | 코드 재표시 불가인 기존 연결과 명시 교체 대상. 재발급은 새 요청 UUID로 원자 교체 |
+| health_connection_issuances | patient/request UUID 유일 영수증, payload hash와 connection ID. 원문 토큰 보관 금지, 환자 삭제 CASCADE |
+
+음성/이미지 내부 변수의 확정 의미는 PATIENT_VOICE_SPEC·VOICE_PLAYBACK_CONTRACT·CLIENT_IO_RELIABILITY_SPEC과 generated/VARIABLES를 함께 대조한다.
+
 전체 선언/매개변수 위치는 `generated/VARIABLES.md`로 생성한다. 이 문서는 코드에서 자동 추출할 수 없는 의미·단위·책임을 설명한다. 파생 변수와 임시 루프 변수까지 목록에 포함하되, 변경 계약은 외부에 영향을 주는 아래 의미를 중심으로 관리한다.
 
 | 이름/영역 | 의미/단위 | 규칙/책임 |
@@ -129,7 +142,7 @@ medication_photo_reports의 OCR snapshot은 openai-package-text-v1 추정이다.
 | demoToken / X-HomeCare-Demo-Session | 명시적 demo 모드의 탭별 세션, RAM 보관. 서버 hash/만료/CSRF 검사, Kakao 모드 무시 |
 | notice_submissions / clientRequestId | 공지 actor/UUID·요청 해시·결과·공지FK; reset/공지 삭제 시 CASCADE |
 | koreaClock / taskData / checkedAt | KST 날짜/시각·현재 할 일·마지막 서버 확인, 예전 날짜/실패/오래된 자료로 자동알림 금지 |
-| homecarePatientAssist | localStorage 비민감 boolean voiceEnabled/remindersEnabled만 보관. 건강값/원고/계정토큰 저장 금지 |
+| homecarePatientAssist | localStorage 비민감 voiceEnabled/remindersEnabled와 speechRate/selectedVoiceURI만 보관. 건강값/원고/계정토큰 저장 금지 |
 | generation / context.key / finalParts | 음성 인식 세대·환자/폼/날짜/필드/약 회차 고정·세션 최종 문장, 탭 RAM만 사용 |
 | parsed / confirmedText | 단위/범위 검사 결과와 읽을 확인문구; 체크 후 입력칸 적용, 자동 DB 저장 없음 |
 | recording / lastFailureAt / fresh | 마이크 사용 상태·최신조회 실패 시각·알림 가능한 최신자료 여부 |

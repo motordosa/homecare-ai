@@ -1,10 +1,18 @@
-# 데이터와 API 계약 v0.8.0
+# 데이터와 API 계약 v0.8.1 개발 기준
+
+## REL-01~08 오류 복구 계약 (2026-10-25, 구현 전 확정)
+
+- 세션 요청 GET/POST는20초 후 복구 가능한 오류를 반환한다. 인증 실패를 demo 전환으로 숨기지 않는다. 초기 실패 재시도는 이벤트 중복 등록 없이 인증부터 다시 실행한다.
+- 일일 입력의 `recordLoadState=idle/loading/ready/error`에서 ready와 선택 날짜 일치만 저장/말로 입력이 가능하다. 조회 실패에는 같은 날짜의 직접 재시도를 제공한다. 늦은 응답은 환자·요청 세대·열린 폼·날짜를 모두 검사한다.
+- 변경 요청의 타임아웃/전송 오류/5xx는 서버 반영 여부가 불명일 수 있다. 식사·일일 기록은 기존 clientSubmissionId/동일 본문을 유지해 결과를 재확인한다. 결과 불명 상태에서 내용을 바꿔 신규 키를 만드는 경로를 막는다. 읽기 오류와 저장 후 요약 갱신 오류를 구별한다.
+- 건강 연결 POST의 선택 `clientRequestId`(UUID)와 `replacesConnectionId`(명시 교체, UUID 필수)는 SMARTPHONE_SYNC_SPEC의 schema8 영수증 계약을 따른다. 같은 내용 재시도는 기존 connection과 `token:null,duplicate:true,codeUnavailable:true`, 최초는 최초1회 token과 false 플래그다. 같은 키 다른 내용409. 교체는 해당 이전 연결만 원자적으로 폐기하고 새 연결을 만들며 다른 선택 출처/과거 기록을 보존한다.
+- 음성 인식/발화의 브라우저 모의 이벤트 통과는 실제 iPhone 마이크·음질 인수와 다르다. 사용자 조건에 따라 실제 마이크 검증 전 공개 배포는 보류한다.
 
 이 문서는 구현 전 합의한 기준이다. 세부 계약을 변경할 때 구현보다 먼저 이 문서와 CHANGELOG를 갱신한다. 기존 v0.2 경로는 삭제하지 않는다. 구현 여부는 CHANGELOG에서 확인한다.
 
 ## 공통
 
-v0.6 AUTH/COM의 세부 API·세션·권한·읽음/중복·reset 계약은 AUTH_COMMUNICATION_SPEC.md를 따른다. AUTH_MODE=kakao는 보호 API와 업로드 소유권을 서버에서 검사하며 미설정 시 공개 데모로 fallback하지 않는다. demo 호환은 명시적 합성 체험 모드뿐이다. 인증 테이블은 schema4에서 도입했으며 현재 통합 스키마는 schema6이다.
+v0.6 AUTH/COM의 세부 API·세션·권한·읽음/중복·reset 계약은 AUTH_COMMUNICATION_SPEC.md를 따른다. AUTH_MODE=kakao는 보호 API와 업로드 소유권을 서버에서 검사하며 미설정 시 공개 데모로 fallback하지 않는다. demo 호환은 명시적 합성 체험 모드뿐이다. 인증 테이블은 schema4에서 도입했으며 현재 개발 기준 통합 스키마는 schema8이다.
 
 - JSON 객체, unknown 필드 거부, 유효한 날짜 `YYYY-MM-DD`, 저장 기본 일자 `Asia/Seoul`.
 - 시각은 offset을 포함한 ISO8601. `0`과 `null`(미측정)을 구별한다. 미응답을 정상/미복용으로 추론하지 않는다.
@@ -53,7 +61,7 @@ v0.5는 IOS_CONNECTOR.md에 따라 iPhone을 우선한다. preflight에 `serverT
 v0.4 부분 권한/항목별 revision 확장은 SMARTPHONE_SYNC_SPEC.md가 기준이다. day의 steps/sleepMinutes는 최소 하나 필수이며 생략은 보존, null은 명시적 삭제다. health_daily의 steps_updated_at/sleep_updated_at으로 각 항목의 최신 수정만 적용한다. 이전 전체 스냅샷 및 batch hash 호환은 유지한다. preflight는 partialMetrics:true/selected를 추가하며 새 Android는 이를 먼저 확인한다. schemaVersion3 추가 마이그레이션으로 기존 자료를 보존한다. 아래 v0.3의 두 항목 전체 전송은 계속 유효하다.
 
 - `GET /api/patients/:id/health-connections`: 연결과 마지막 수신, 웹 직접수집 불가, 선택 출처, 준비 상태.
-- `POST /api/patients/:id/health-connections`: `{platform:'health-connect'|'apple-health',label?}` → 연결 ID와 최초1회 표시하는 비밀 token. 토큰 hash만 DB 저장. 새 선택 출처는 기존 자료를 삭제하거나 두 플랫폼 합계를 가산하지 않는다.
+- `POST /api/patients/:id/health-connections`: `{platform:'health-connect'|'apple-health',label?,clientRequestId?,replacesConnectionId?}` → 최초201의 연결 ID와 최초1회 비밀 token, 동일 요청 재시도200의 기존 연결과 token:null/codeUnavailable:true. 명시 교체에는 새 UUID가 필수다. 토큰 hash만 DB 저장. 새 선택 출처는 기존 자료를 삭제하거나 두 플랫폼 합계를 가산하지 않는다.
 - 웹의 일회성 연결 안내에는 서버 origin, 환자 이름, 정확한 patientId를 함께 표시한다. 앱 입력값과 대조할 수 있어야 하며 화면 이동·환자 변경·코드 숨김 시 token과 함께 이전 연결 정보를 지운다. URL 전체나 환자 이름을 patientId 대신 사용하지 않는다.
 - `DELETE /api/patients/:id/health-connections/:connectionId`: 해당 연결 폐기. 새 수신 차단, 과거 자료 보존.
 - `POST /api/health-sync`: `Authorization: Bearer ...`, `{batchId,timeZone:'Asia/Seoul',days:[{date,steps,sleepMinutes,updatedAt}]}`. 최대31일, steps정수0..100000 또는null, sleepMinutes0..1440 또는null. updatedAt은 플랫폼 집계 revision의 시각이다. 같은 connection/date는 upsert, 오래된 revision은 무시, 같은 batch 재전송은 중복 생성 금지.
@@ -61,7 +69,7 @@ v0.4 부분 권한/항목별 revision 확장은 SMARTPHONE_SYNC_SPEC.md가 기�
 - 일별 입력은 플랫폼이 폰·워치 원자료 중복을 정리한 집계다. 서버가 서로 다른 기기/플랫폼 값을 더하지 않는다. 원자료 삭제로 수정된 합계는 더 최신 revision의 null/0을 포함해 교체한다.
 - 수동 일일 기록과 기기 전송을 별도 저장한다. 요약 출처의 우선순위는 명시적 수동값이 있으면 수동, 없으면 선택된 연결의 집계다. 0도 명시적 수동값이다. 수동 보완을 지우면 기기값으로 복귀한다. UI에 선택 출처·마지막 수신·미연결을 표시한다.
 - 이 수신 API의 구현/fixture 테스트는 실제 폰·워치 자동 연동 완료를 뜻하지 않는다. 네이티브 권한/기기/백그라운드 검증은 별도 인수조건이다.
-- connections 응답은 `{connections,selectedConnectionId,webDirectCollection:false,nativeBridge:{implemented:false,verified:false}}`. 연결은 id,patientId,platform,label,status(awaiting_native/connected/revoked),selected,createdAt,lastReceivedAt,revokedAt. 생성은 `{connection,token}`, 폐기는 `{connection}`. 새 연결 선택은 기존을 선택 해제하며, 선택 연결 폐기 시 자동 다른 출처로 전환하지 않는다.
+- connections 응답은 `{connections,selectedConnectionId,webDirectCollection:false,nativeBridge:{implemented:false,verified:false}}`. 연결은 id,patientId,platform,label,status(awaiting_native/connected/revoked),selected,createdAt,lastReceivedAt,revokedAt. 생성은 `{connection,token,duplicate:false,codeUnavailable:false}`, UUID 재시도는 `{connection,token:null,duplicate:true,codeUnavailable:true}`, 폐기는 `{connection}`. 새 연결 선택은 기존을 선택 해제하며, 선택 연결 폐기 시 자동 다른 출처로 전환하지 않는다.
 - 수신 결과는 `{connectionId,patientId,batchId,duplicate,acceptedDays,ignoredDays,receivedAt}`. 같은 batchId에 다른 payload는409. 요약용 선택 연결의 자료는 date,steps,sleepMinutes,sleepHours,updatedAt,receivedAt,connectionId,platform,source를 포함한다. 비밀 token은 이 응답/자료에 재노출하지 않는다.
 - 요약의 todayRecord/recentRecords/trends는 표시용 유효값이며 stepsSource/sleepSource가 `patient-self-report|health-connect|apple-health|null`, dataOrigin이 `manual|device|mixed`이다. metrics.steps/sleepHours.sourceCounts는 출처별 보고 일수다. `GET .../daily`는 수동 원본만 반환해 기기값을 다시 수동값으로 저장하지 않는다. CSV 일일자료도 유효값과 각 출처를 표시하고 복약 회차·기기 수신 원본은 recordType으로 구별한다. 비밀 연결 토큰은 내보내지 않는다.
 

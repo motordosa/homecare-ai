@@ -1,6 +1,10 @@
 # Render 무료 데모 배포
 
-## 최신 v0.8.0 배포 (2026-10-25)
+## v0.8.1 수정본: 실제 마이크 인수 전 운영 배포 보류
+
+2026-10-25 사용자 지시로 실제 마이크 인식까지 검증한 후에만 운영 배포한다. `codex/patient-reliability-fixes`의0.8.1/schema8 수정본과 운영0.8.0/schema7을 구별한다. [실제 iPhone 인수 절차](docs/MICROPHONE_ACCEPTANCE.md)에 별도 무료 테스트 서버 준비·실제로 듣고 말하기·저장 검증·운영 배포 관문을 정리했다. 지금 아래0.8.0 절차를 다시 실행해도 수정본이 반영되지 않는다. 실제 기기 인수 전 main 병합과 운영 배포를 수행하지 않는다.
+
+## 기존 v0.8.0 배포 기준 (2026-10-25)
 
 기존 서비스 관리 화면: https://dashboard.render.com/web/srv-db923oss728c73bgipug
 
@@ -14,7 +18,7 @@
 
 소스 확인: [main package.json](https://github.com/motordosa/homecare-ai/blob/main/package.json), [main 최신 커밋](https://github.com/motordosa/homecare-ai/commits/main), [v0.8.0 PR #1](https://github.com/motordosa/homecare-ai/pull/1).
 
-위 절이 현재 버전의 배포 기준이다. 아래 이전 버전의 schema 값과 검증 기록은 도입 이력이며 v0.8.0 배포 완료의 증거가 아니다. 구현·검증 근거는 [환자 음성·공지 보고서](docs/PATIENT_VOICE_REPORT.md)를 따른다. GitHub 병합/검사 통과와 Render Live는 각각 확인한다. 최종 배포는 사용자가 Render에서 실행한다.
+위 절은 기존0.8.0 배포 기준이다.0.8.1은 최상단의 실제 마이크 인수 조건을 먼저 따른다. 아래 이전 버전의 schema 값과 검증 기록은 도입 이력이며 v0.8.0 배포 완료의 증거가 아니다. 구현·검증 근거는 [환자 음성·공지 보고서](docs/PATIENT_VOICE_REPORT.md)를 따른다. GitHub 병합/검사 통과와 Render Live는 각각 확인한다. 최종 배포는 사용자가 Render에서 실행한다.
 
 이 구성은 `plan: free`인 Docker 웹서비스 하나만 생성합니다. 유료 디스크, 유료 데이터베이스, 추가 유료 서비스는 포함하지 않습니다. 환자 사이트·의료진 사이트·SQLite API를 같은 서버에서 실행합니다.
 

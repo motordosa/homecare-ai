@@ -1,6 +1,49 @@
 export const sessionState = { mode: null, user: null, csrfToken: null, demoToken:null };
 export const sessionHeaders = () => ({...(sessionState.csrfToken ? { 'X-CSRF-Token': sessionState.csrfToken } : {}),...(sessionState.mode==='demo'&&sessionState.demoToken?{'X-HomeCare-Demo-Session':sessionState.demoToken}:{})});
 let recoveryIdentity = null;
+const SESSION_TIMEOUT_MS = 20_000;
+function sessionFailure(code, message) {
+  return Object.assign(new Error(message), { code });
+}
+// Covers both the response headers and its body; a stalled body is still a stalled request.
+async function sessionJson(path, options = {}) {
+  const controller = new AbortController();
+  const externalSignal = options.signal;
+  let timer, rejectDeadline;
+  const deadline = new Promise((_, reject) => { rejectDeadline = reject; });
+  const cancel = () => {
+    rejectDeadline(sessionFailure('session_cancelled', '연결 확인을 멈췄어요. 다시 시도해 주세요.'));
+    controller.abort();
+  };
+  if (externalSignal?.aborted) cancel();
+  else externalSignal?.addEventListener('abort', cancel, { once: true });
+  timer = setTimeout(() => {
+    rejectDeadline(sessionFailure('session_timeout', '연결 확인에 시간이 오래 걸려 멈췄어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.'));
+    controller.abort();
+  }, SESSION_TIMEOUT_MS);
+  try {
+    return await Promise.race([deadline, (async () => {
+      const response = await fetch(path, { ...options, signal: controller.signal });
+      let result;
+      try { result = await response.json(); }
+      catch (error) {
+        if (controller.signal.aborted) throw error;
+        if (!response.ok) result = {};
+        else throw sessionFailure('session_response', '연결 확인 결과를 읽지 못했어요. 다시 시도해 주세요.');
+      }
+      if (!result || typeof result !== 'object' || Array.isArray(result)) {
+        throw sessionFailure('session_response', '연결 확인 결과를 읽지 못했어요. 다시 시도해 주세요.');
+      }
+      return { response, result };
+    })()]);
+  } catch (error) {
+    if (typeof error.code === 'string' && error.code.startsWith('session_')) throw error;
+    throw sessionFailure('session_network', '서버에 연결하지 못했어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.');
+  } finally {
+    clearTimeout(timer);
+    externalSignal?.removeEventListener('abort', cancel);
+  }
+}
 const identityKey = user => JSON.stringify(user ? [user.id,user.role,user.patientId,user.staffRoles,user.capabilities,user.assignedPatientIds] : null);
 export function sessionExpired() {
   if (sessionState.mode !== 'kakao') return;
@@ -45,9 +88,9 @@ export function sessionExpired() {
   document.body.append(dialog);dialog.showModal();check.focus();
 }
 async function readSession() {
-  const response = await fetch('/api/auth/session', { cache: 'no-store',headers:sessionHeaders() });
-  if (!response.ok) throw new Error('로그인 상태를 확인하지 못했습니다. 다시 열어 주세요.');
-  return response.json();
+  const { response, result } = await sessionJson('/api/auth/session', { cache: 'no-store', headers: sessionHeaders() });
+  if (!response.ok) throw new Error('로그인 상태를 확인하지 못했어요. 다시 시도해 주세요.');
+  return result;
 }
 export function assertSessionActive() {
   if (recoveryIdentity || document.querySelector('#session-recovery')) throw new Error('같은 계정으로 로그인 상태를 확인한 뒤 이어서 작성해 주세요.');
@@ -59,8 +102,9 @@ export async function refreshSession() {
 }
 export async function sessionRequest(path, options = {}) {
   assertSessionActive();
-  const response = await fetch(path, { ...options, headers: { 'Content-Type': 'application/json', ...sessionHeaders(), ...options.headers } });
-  const result = await response.json().catch(() => ({}));
+  const { response, result } = await sessionJson(path, { ...options, headers: { 'Content-Type': 'application/json', ...sessionHeaders(), ...options.headers } });
+  // A lost successful logout response must not force the patient to log back in to log out.
+  if (response.status === 401 && path === '/api/auth/logout' && options.method?.toUpperCase() === 'POST') return { ok: true, alreadyLoggedOut: true };
   if (!response.ok) { if(response.status===401)sessionExpired();throw new Error(result.error || '요청을 처리하지 못했습니다.'); }
   return result;
 }

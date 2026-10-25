@@ -504,6 +504,11 @@ try {
     await mobile.locator('#connection-token-dismiss').click();
     await assertCredentialsCleared();
     await mobile.locator('#connection-create').click();
+    await mobile.locator('#connection-reissue').waitFor({ state: 'visible' });
+    // A replay never exposes a stored secret or silently creates another connection.
+    assert.equal((await get(`/api/patients/${patient.id}/health-connections`)).connections.filter(connection => connection.status !== 'revoked').length, 1);
+    mobile.once('dialog', dialog => dialog.accept());
+    await mobile.locator('#connection-reissue').click();
     await mobile.locator('#connection-token').waitFor({ state: 'visible' });
     await assertConnectionIdentity();
     await mobile.locator('.bottom-nav [data-view=guide]').click();

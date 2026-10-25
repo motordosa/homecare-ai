@@ -2,7 +2,7 @@
 
 자동 생성: 임시 SQLite에 현재 추가 마이그레이션을 적용한 결과다. 사용자/공개 DB에 접근하지 않으며 행 값·토큰·사진을 저장하지 않는다. 의미와 단위는 [자료 사전](../DATA_DICTIONARY.md)과 [계약](../CONTRACTS.md)을 함께 읽는다.
 
-40 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
+41 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
 
 ## auth_accounts
 
@@ -269,6 +269,30 @@ CREATE TABLE health_batches (
       accepted_days INTEGER NOT NULL,
       ignored_days INTEGER NOT NULL,
       PRIMARY KEY(connection_id,batch_id),
+      FOREIGN KEY(connection_id,patient_id) REFERENCES health_connections(id,patient_id) ON DELETE CASCADE
+    )
+```
+
+## health_connection_issuances
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| patient_id | TEXT | yes |  | 1 |
+| client_request_id | TEXT | yes |  | 2 |
+| body_hash | TEXT | yes |  |  |
+| connection_id | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: connection_id → health_connections.id (DELETE CASCADE); patient_id → health_connections.patient_id (DELETE CASCADE); patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE health_connection_issuances (
+      patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+      client_request_id TEXT NOT NULL,
+      body_hash TEXT NOT NULL,
+      connection_id TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      PRIMARY KEY(patient_id,client_request_id),
       FOREIGN KEY(connection_id,patient_id) REFERENCES health_connections(id,patient_id) ON DELETE CASCADE
     )
 ```

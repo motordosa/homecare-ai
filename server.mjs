@@ -35,10 +35,10 @@ ensureWorkflowSchema(db);
 ensureResearchSchema(db);
 ensureEvidenceSchema(db);
 const evidenceService=createEvidenceService({db});
-db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','7') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
+db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','8') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
 const port = Number(process.env.PORT || 3000);
 const bodyLimit = 7 * 1024 * 1024;
-const schemaVersion = 7;
+const schemaVersion = 8;
 
 function respond(res, status, value, extraHeaders = {}) {
   const body = JSON.stringify(value);
@@ -108,7 +108,7 @@ function assertSameOrigin(req) {
 function health() {
   const counts = {};
   for (const [key, table] of [['patients', 'patients'], ['dailyRecords', 'daily_records'], ['meals', 'meals']]) counts[key] = db.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get().count;
-  return { ok: true, status: 'ok', app: 'HomeCare AI Demo', schemaVersion, appVersion:'0.8.0', dataMode: 'demo', seedMode: db.prepare("SELECT value FROM metadata WHERE key='mode'").get()?.value ?? 'seed', today: todayKorea(), timezone: 'Asia/Seoul', storage: 'sqlite', counts, resetAt: db.prepare("SELECT value FROM metadata WHERE key='reset_at'").get()?.value ?? null, provenance };
+  return { ok: true, status: 'ok', app: 'HomeCare AI Demo', schemaVersion, appVersion:'0.8.1', dataMode: 'demo', seedMode: db.prepare("SELECT value FROM metadata WHERE key='mode'").get()?.value ?? 'seed', today: todayKorea(), timezone: 'Asia/Seoul', storage: 'sqlite', counts, resetAt: db.prepare("SELECT value FROM metadata WHERE key='reset_at'").get()?.value ?? null, provenance };
 }
 
 function createPatient(body) {
@@ -247,7 +247,7 @@ const server = http.createServer(async (req, res) => {
       if(!messages[2] && method==='POST')return respond(res,201,sendMessage(db,actor,messages[1],await readJson(req)));
       if(messages[2] && method==='POST')return respond(res,200,readMessages(db,actor,messages[1],await readJson(req)));
     }
-    if (path === '/api/health' && method === 'GET') return respond(res, 200, auth.capabilities().mode==='kakao'?{ok:true,status:'ok',storage:'sqlite',schemaVersion,appVersion:'0.8.0'}:health());
+    if (path === '/api/health' && method === 'GET') return respond(res, 200, auth.capabilities().mode==='kakao'?{ok:true,status:'ok',storage:'sqlite',schemaVersion,appVersion:'0.8.1'}:health());
     if (path === '/api/capabilities' && method === 'GET') return respond(res, 200, {
       auth: auth.capabilities(),
       vision: visionCapabilities(process.env),
@@ -339,7 +339,10 @@ const server = http.createServer(async (req, res) => {
       if (operation === 'medication-photo-reports' && method === 'POST') return respond(res, 201, saveMedicationPhotoReport(db, id, await readJson(req)));
       if (operation === 'photo-analyses' && method === 'POST') return respond(res, 201, await analyzePhoto({ db, patientId: id, body: await readJson(req) }));
       if (operation === 'health-connections' && method === 'GET') return respond(res, 200, getHealthConnections(db, id));
-      if (operation === 'health-connections' && method === 'POST') return respond(res, 201, createHealthConnection(db, id, await readJson(req)));
+      if (operation === 'health-connections' && method === 'POST') {
+        const result = createHealthConnection(db, id, await readJson(req));
+        return respond(res, result.duplicate ? 200 : 201, result);
+      }
     }
     match = /^\/api\/patients\/([^/]+)\/medication-photo-reports\/([^/]+)\/image$/.exec(path);
     if (match && method === 'GET') {
