@@ -3,6 +3,7 @@ import { createClinicianCommunications } from './clinician-communications.js';
 import { createClinicalWorklist } from './clinician-workflow.js';
 import { createResearchWorkspace } from './clinician-research.js';
 import { createEvidenceWorkspace } from './clinician-evidence.js';
+import { createVoiceGuidanceWorkspace } from './clinician-voice-guidance.js';
 'use strict';
 (async () => {
   const icons = {
@@ -68,6 +69,7 @@ import { createEvidenceWorkspace } from './clinician-evidence.js';
     evidence:['EVIDENCE WORKSPACE','연구 문헌 검토','검색 조건과 실제 출처를 보존하고 근거를 직접 검토하세요.','문헌 검토'],
     notices:['CARE ANNOUNCEMENTS','의료진 공지','환자 화면 상단에 표시할 공지를 작성하고 관리하세요.','공지 관리'],
     messages:['PATIENT MESSAGES','환자 메시지','환자별로 내용을 보내고 답변과 읽음 여부를 확인하세요.','환자 메시지'],
+    'voice-guidance':['CONTEXTUAL VOICE GUIDANCE','음성 안내 설정','환자가 필요한 순간에 들을 짧은 안내와 입력 확인 조건을 설정하세요.','음성 안내 설정'],
     settings:['DEMO WORKSPACE SETTINGS','데모 설정','테스트 데이터를 관리하고 다음 시연을 준비하세요.','데모 설정'],
   };
   if(!/^\d{4}-\d{2}-\d{2}$/.test(state.medicationDate||''))state.medicationDate=null;
@@ -76,10 +78,10 @@ import { createEvidenceWorkspace } from './clinician-evidence.js';
   const $ = selector => document.querySelector(selector);
   document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon); });
   const communication=createClinicianCommunications({api,getState:()=>state,toast,selectPatient,invite:openInvitation});
-  const workspaces={worklist:createClinicalWorklist({api,getState:()=>state,toast,selectPatient}),research:createResearchWorkspace({api,getState:()=>state,toast}),evidence:createEvidenceWorkspace({api,getState:()=>state,toast})};
+  const workspaces={worklist:createClinicalWorklist({api,getState:()=>state,toast,selectPatient}),research:createResearchWorkspace({api,getState:()=>state,toast}),evidence:createEvidenceWorkspace({api,getState:()=>state,toast}),'voice-guidance':createVoiceGuidanceWorkspace({api,getState:()=>state,toast,selectPatient})};
   const currentWorkspace=()=>workspaces[state.view];
   const can=capability=>Boolean(state.staffAccess?.capabilities?.includes(capability));
-  const viewPermissions={overview:'patient.read',patients:'patient.read',records:'patient.read',medications:'patient.read',worklist:'patient.read',research:'research.read',evidence:'evidence.read',notices:'notice.write',messages:'message.write',settings:'admin.reset'};
+  const viewPermissions={overview:'patient.read',patients:'patient.read',records:'patient.read',medications:'patient.read',worklist:'patient.read',research:'research.read',evidence:'evidence.read',notices:'notice.write',messages:'message.write','voice-guidance':'patient.read',settings:'admin.reset'};
   function authorizedView(view){return can(viewPermissions[view])?view:Object.keys(viewTitles).find(key=>can(viewPermissions[key]))||'settings';}
   function lockModal(locked){$('#modal').querySelectorAll('input,select,textarea,button').forEach(el=>{if(locked){el.dataset.beforeLock=el.disabled?'1':'0';el.disabled=true;}else if(el.dataset.beforeLock!==undefined){el.disabled=el.dataset.beforeLock==='1';delete el.dataset.beforeLock;}});}
   const periodQuery=()=>state.startDate&&state.endDate?'?'+new URLSearchParams({startDate:state.startDate,endDate:state.endDate}):'';
@@ -105,7 +107,7 @@ import { createEvidenceWorkspace } from './clinician-evidence.js';
     const response = await fetch(path, { ...options, headers:{ 'Content-Type':'application/json', ...sessionHeaders(), ...options.headers } });
     const result = await response.json().catch(() => ({}));
     if(response.status===401)sessionExpired();
-    if (!response.ok) throw new Error(result.error || result.message || `요청을 처리하지 못했습니다. (${response.status})`);
+    if (!response.ok) { const error = new Error(result.error || result.message || `요청을 처리하지 못했습니다. (${response.status})`); error.status=response.status; throw error; }
     return result;
   }
   function syncUrl(historyMode = 'replace') {

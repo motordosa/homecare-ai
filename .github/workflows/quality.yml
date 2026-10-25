@@ -25,6 +25,7 @@ jobs:
       - run: npm run test:auth
       - run: npm run test:medication-photo
       - run: npm run test:usability
+      - run: npm run test:guidance
       - run: npm run test:voice
       - run: npm run test:reliability
       - run: npm run test:menus

@@ -146,3 +146,8 @@ medication_photo_reports의 OCR snapshot은 openai-package-text-v1 추정이다.
 | generation / context.key / finalParts | 음성 인식 세대·환자/폼/날짜/필드/약 회차 고정·세션 최종 문장, 탭 RAM만 사용 |
 | parsed / confirmedText | 단위/범위 검사 결과와 읽을 확인문구; 체크 후 입력칸 적용, 자동 DB 저장 없음 |
 | recording / lastFailureAt / fresh | 마이크 사용 상태·최신조회 실패 시각·알림 가능한 최신자료 여부 |
+
+
+## v0.9.0 의료진 설정형 자동 음성 안내 (구현 전 계약)
+
+configurationKey는 공통/환자 설정 revision을 반영한 현재 설정 식별자, rule.id는 편집해도 유지되는 반복 억제 키, claimId는30초 예약 ID, outcome=started/released는 발화 시작/취소 기록이다. 서버 환자별 preference.enabled는 동기화된 음성 on/off이며 clinician enabled가 우선한다. 폼 contextId·recordDate·field·exact value·configurationKey는 확인 상태 지문으로 RAM에만 보관한다. 음성/인식 원고/건강값을 새 재생 영수증에 저장하지 않는다. 숫자 bucket은 hash로 보관한다. 기존 homecarePatientAssist의 voiceEnabled/speechRate/selectedVoiceURI는 더 이상 환자 안내 설정 기준이 아니다. 상세 제작·인수 기준은 [CONTEXTUAL_VOICE_GUIDANCE_SPEC.md](CONTEXTUAL_VOICE_GUIDANCE_SPEC.md)다.

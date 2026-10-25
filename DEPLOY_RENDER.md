@@ -1,6 +1,12 @@
 # Render 무료 데모 배포
 
-## 최신 v0.8.1 배포 준비 (2026-10-25)
+## v0.9.0 자동 음성 안내 개발본 (2026-10-25)
+
+현재 새 변경은 `codex/clinician-voice-guidance` 브랜치의 **0.9.0/schema9**다. 공통/환자별 음성 안내 규칙과 입력값 확인을 추가했다. 구현/검사/저장소/배포 상태는 [자동 음성 안내 결과](docs/CONTEXTUAL_VOICE_GUIDANCE_REPORT.md)를 따른다. 이 절의 존재가 main 병합이나 Render 배포 완료의 증거는 아니다.
+
+후속 배포에서는 해당 PR이 main에 포함됐는지 먼저 확인하고 그 SHA의 CI 통과 후 기존 Render 서비스의 `Manual Deploy → Deploy latest commit`을 실행한다. main에 새 기능이 들어가기 전에 누르면 이전0.8.1이 배포된다. Live 뒤 배포 SHA 및 `/api/health`의 `appVersion:"0.9.0"`, `schemaVersion:9`를 함께 확인한다. 기존 DB는 추가 이행으로 보존하되, 무료 Render의 임시 디스크 특성은 별개다. 현재 구현은 별도 API 키·유료 음성 서비스가 필요 없다. 실제 iPhone 자동재생·한국어 음질·마이크 인수는 별도로 확인한다.
+
+## 이전 v0.8.1 배포 준비 (2026-10-25)
 
 실제 마이크 미검증 보고 후 사용자가 **최종 커밋을 배포할 수 있도록 준비**하라고 지시했다. PR #2를 `main`에 반영하고 같은 배포 커밋의 CI를 확인한다. 이 준비는 실제 iPhone 마이크 검사나 Render Live 완료를 의미하지 않는다. 실제 말소리·권한·중지·수정 후 저장 검증은 [마이크 인수 절차](docs/MICROPHONE_ACCEPTANCE.md)의 남은 항목이다.
 

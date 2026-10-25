@@ -29,6 +29,7 @@ child.stderr.on('data', data => { output += data; });
 let browser;
 let fixtureDb;
 let completed = 0;
+let activeCheck = 'automation startup';
 const pageErrors = [];
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6WlEAAAAASUVORK5CYII=', 'base64');
 const pngFile = { name: 'browser-fixture-not-a-real-meal.png', mimeType: 'image/png', buffer: png };
@@ -38,7 +39,7 @@ const responseFor = (page, suffix, method = 'POST') => page.waitForResponse(resp
 const ready = page => page.locator('#app-content').waitFor({ state: 'visible' });
 const settledPatient = page => page.waitForFunction(() => !document.querySelector('#patient-select')?.disabled);
 const assertHidden = async locator => assert.equal(await locator.isVisible(), false);
-async function check(name, action) { await action(); completed++; console.log(`PASS ${name}`); }
+async function check(name, action) { activeCheck = name; await action(); completed++; console.log(`PASS ${name}`); activeCheck = 'automation between scenarios'; }
 async function until(predicate, description) {
   for (let attempt = 0; attempt < 120; attempt++) { if (predicate()) return; await delay(25); }
   throw new Error(`Timed out: ${description}`);
@@ -314,6 +315,8 @@ try {
     await assertHidden(mobile.locator('#daily-sleep'));
     await assertHidden(mobile.locator('#medication-fieldset'));
     await mobile.locator('#daily-steps').fill('0');
+    await mobile.locator('#daily-steps').blur();
+    await mobile.locator('[data-value-confirmation=steps] [data-value-confirm]').click();
     await saveDaily(mobile, patient.id, { date: today, steps: 0 });
     let record = (await get(`/api/patients/${patient.id}/daily?date=${today}`)).record;
     assert.equal(record.steps, 0);
@@ -517,9 +520,20 @@ try {
     await mobile.locator('#view-connections').waitFor({ state: 'visible' });
     await mobile.locator('#connection-list [data-action=revoke-connection]').first().waitFor({ state: 'visible' });
     await assertCredentialsCleared();
+    const revokeButton = mobile.locator('#connection-list [data-action=revoke-connection]');
+    assert.equal(await revokeButton.count(), 1);
+    const revokedId = await revokeButton.getAttribute('data-connection-id');
+    const revoked = responseFor(mobile, `/api/patients/${patient.id}/health-connections/${revokedId}`, 'DELETE');
     mobile.once('dialog', dialog => dialog.accept());
-    await mobile.locator('#connection-list [data-action=revoke-connection]').first().click();
-    await mobile.locator('.connection-status.revoked').waitFor({ state: 'visible' });
+    await revokeButton.click();
+    assert.equal((await revoked).status(), 200);
+    // Reissue already revoked the original connection; wait for BOTH old and new rows.
+    await mobile.waitForFunction(() => document.querySelectorAll('#connection-list .connection-status.revoked').length === 2
+      && document.querySelectorAll('#connection-list [data-action=revoke-connection]').length === 0);
+    const afterRevoke = await get(`/api/patients/${patient.id}/health-connections`);
+    assert.equal(afterRevoke.connections.length, 2);
+    assert.equal(afterRevoke.connections.find(connection => connection.id === revokedId)?.status, 'revoked');
+    assert.ok(afterRevoke.connections.every(connection => connection.status === 'revoked'));
     await assertCredentialsCleared();
   });
 
@@ -547,6 +561,8 @@ try {
     await mobile.locator('#today-metrics [data-action=steps]').click();
     await mobile.waitForFunction(() => !document.querySelector('#daily-submit').disabled);
     await mobile.locator('#daily-steps').fill('0');
+    await mobile.locator('#daily-steps').blur();
+    await mobile.locator('[data-value-confirmation=steps] [data-value-confirm]').click();
     await saveDaily(mobile, fixturePatient.id, { date: today, steps: 0 });
     summary = await get(`${path}/summary`);
     assert.equal(summary.todayRecord.steps, 0);
@@ -766,9 +782,15 @@ try {
     await page.locator('#modal [data-modal-action=close]').first().click(); await page.close();
   });
 
+  activeCheck = 'final browser page-error check';
   assert.deepEqual(pageErrors, []);
   console.log(`${completed} automation browser scenarios passed. AI scenarios used mocked provider fixtures only; actual AI and native device integration remain unverified.`);
 } catch (error) {
+  if (process.env.GITHUB_ACTIONS === 'true') {
+    const escapeAnnotation = value => String(value).replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
+    const detail = `${activeCheck}\n${error?.stack || error}`.slice(0, 6000);
+    console.error(`::error title=Automation browser failure::${escapeAnnotation(detail)}`);
+  }
   console.error(error);
   process.exitCode = 1;
 } finally {

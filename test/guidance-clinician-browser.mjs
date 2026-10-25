@@ -1,0 +1,76 @@
+// Actual Chromium editor and HTTP save checks against an isolated synthetic SQLite database.
+import { chromium } from 'playwright';
+import { spawn } from 'node:child_process';
+import { mkdtemp, rm, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { createServer } from 'node:net';
+import { setTimeout as delay } from 'node:timers/promises';
+import assert from 'node:assert/strict';
+const temp = await mkdtemp('/tmp/homecare-guidance-editor-'), listener = createServer();
+await new Promise(resolve => listener.listen(0, '127.0.0.1', resolve)); const port = listener.address().port; await new Promise(resolve => listener.close(resolve));
+const base = `http://127.0.0.1:${port}`;
+const child = spawn(process.execPath, ['--disable-warning=ExperimentalWarning', 'server.mjs'], { cwd: new URL('..', import.meta.url), env: { ...process.env, PORT: String(port), DATA_DIR: temp, AUTH_MODE: 'demo', APP_ORIGIN: '', STAFF_ACCESS_JSON: '', VISION_ENABLED: 'false', HOMECARE_VISION_API_KEY: '', OPENAI_API_KEY: '' }, stdio: ['ignore', 'pipe', 'pipe'] });
+let output = '', browser; child.stdout.on('data', data => output += data); child.stderr.on('data', data => output += data);
+try {
+  for (let attempt = 0; attempt < 80; attempt++) { try { if ((await fetch(base + '/api/health')).ok) break; } catch {} await delay(100); }
+  browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || (existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined) });
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } }); page.setDefaultTimeout(10000); const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.addInitScript(() => {
+    window.__previewTexts = [];
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', { value: class { constructor(text) { this.text = text; } } });
+    Object.defineProperty(window, 'speechSynthesis', { value: { getVoices: () => [{ lang: 'ko-KR', name: '합성 검증 목소리', localService: true, default: true }], cancel() {}, speak(utterance) { window.__previewTexts.push(utterance.text); setTimeout(() => utterance.onstart?.(), 5); } } });
+  });
+  await page.goto(base + '/clinician?patientId=p001&view=voice-guidance'); await page.locator('#guidance-form').waitFor();
+  assert.equal(await page.locator('.guidance-rule').count(), 11);
+  assert.equal(await page.locator('#guidance-scope').inputValue(), 'global');
+  assert.equal(await page.locator('#main-nav [data-view="voice-guidance"]').getAttribute('aria-current'), 'page');
+  console.log('PASS clinician detailed menu and 11 default rules loaded');
+  await page.click('[data-guidance="add"]');
+  const rule = page.locator('.guidance-rule').last(), id = await rule.getAttribute('data-rule-id');
+  await rule.locator('[data-rule-field="label"]').fill('합성 검증 안내');
+  await rule.locator('[data-rule-field="enabled"]').check();
+  await rule.locator('[data-rule-field="trigger"]').selectOption('value_check');
+  await rule.locator('[data-rule-field="metric"]').selectOption('sleepHours');
+  assert.equal(await rule.locator('[data-rule-field="minValue"]').inputValue(), '2');
+  assert.equal(await rule.locator('[data-rule-field="maxValue"]').inputValue(), '14');
+  await rule.locator('[data-rule-field="text"]').fill('합성 시험: 수면 {value}{unit}을 확인해 주세요.');
+  await rule.locator('[data-rule-field="minValue"]').fill('0');
+  await rule.locator('[data-rule-field="maxValue"]').fill('');
+  await rule.locator('[data-rule-field="startTime"]').fill('05:00');
+  await rule.locator('[data-rule-field="endTime"]').fill('24:00');
+  await rule.locator('[data-rule-field="activeFrom"]').fill('2026-01-01');
+  await rule.locator('[data-rule-field="activeUntil"]').fill('2027-12-31');
+  await rule.locator('[data-rule-field="priority"]').fill('99');
+  await rule.locator('[data-rule-day="0"]').uncheck();
+  await page.selectOption('#guidance-rate', '1.15');
+  const responsePromise = page.waitForResponse(response => response.url().endsWith('/api/clinician/voice-guidance') && response.request().method() === 'PUT');
+  await page.click('#guidance-save'); const response = await responsePromise; assert.equal(response.status(), 200);
+  const saved = await response.json(), savedRule = saved.configuration.rules.find(item => item.id === id);
+  assert.equal(savedRule.minValue, 0); assert.equal(savedRule.maxValue, null); assert.equal(savedRule.metric, 'sleepHours'); assert.equal(savedRule.frequency, 'value'); assert.equal(savedRule.priority, 99); assert.equal(savedRule.cooldownMinutes, 0); assert.equal(savedRule.startTime, '05:00'); assert.deepEqual(savedRule.daysOfWeek, [1, 2, 3, 4, 5, 6]); assert.equal(saved.configuration.rate, 1.15);
+  await page.locator('#guidance-status').filter({ hasText: '설정을 저장했습니다' }).waitFor();
+  console.log('PASS all detailed fields, zero vs blank, trigger-dependent fields and actual HTTP save');
+  await page.locator(`[data-rule-id="${id}"] summary`).click();
+  await rule.locator('[data-guidance="preview"]').click(); await page.waitForFunction(() => window.__previewTexts.length === 1);
+  assert.match((await page.evaluate(() => window.__previewTexts))[0], /0.2시간/);
+  await page.click('#guidance-preview-stop'); assert.equal(await page.locator('#guidance-preview-stop').isVisible(), false);
+  console.log('PASS mocked Korean preview example, explicit stop and no patient receipt');
+  await rule.locator('[data-rule-field="minValue"]').fill(''); await page.click('#guidance-save');
+  await page.locator('#guidance-error').filter({ hasText: '확인 기준을 하나 이상' }).waitFor(); assert.equal(await rule.locator('[data-rule-field="minValue"]').inputValue(), '');
+  page.once('dialog', dialog => dialog.accept()); await page.click('#guidance-cancel');
+  await page.locator(`[data-rule-id="${id}"] summary`).click(); assert.equal(await rule.locator('[data-rule-field="minValue"]').inputValue(), '0');
+  console.log('PASS invalid numeric threshold preserves edits and cancel restores saved zero');
+  await rule.locator('[data-rule-field="label"]').fill('떠나기 전 합성 원고');
+  page.once('dialog', dialog => dialog.dismiss()); await page.click('#main-nav [data-view="records"]');
+  assert.equal(await page.locator('#guidance-scope').count(), 1); assert.equal(await rule.locator('[data-rule-field="label"]').inputValue(), '떠나기 전 합성 원고');
+  await page.click('#refresh-button'); assert.equal(await rule.locator('[data-rule-field="label"]').inputValue(), '떠나기 전 합성 원고');
+  console.log('PASS leave rejection and manual refresh preserve unsaved editor');
+  page.once('dialog', dialog => dialog.accept()); await page.click('#guidance-cancel');
+  await mkdir('test-results/guidance', { recursive: true });
+  await page.screenshot({ path: 'test-results/guidance/clinician-1440.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
+  await page.screenshot({ path: 'test-results/guidance/clinician-390.png', fullPage: true });
+  assert.deepEqual(errors, []); console.log('PASS desktop and narrow layout with no page exceptions');
+} catch (error) { console.error(error); console.error(output); process.exitCode = 1; }
+finally { await browser?.close(); child.kill('SIGTERM'); await new Promise(resolve => child.exitCode !== null ? resolve() : child.once('exit', resolve)); await rm(temp, { recursive: true, force: true }); }

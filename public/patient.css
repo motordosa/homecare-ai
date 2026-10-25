@@ -321,3 +321,12 @@ body.patient-accessible .toast { color:#fff; background:#183c32; }
 .patient-accessible a.button { font-size:var(--patient-text); }
 .patient-accessible .meal-nutrition,.patient-accessible .inline-notice,.patient-accessible .form-scope-note { color:var(--patient-muted); }
 .patient-accessible .connection-help li { font-size:var(--patient-help); }
+
+/* Contextual guidance stays readable inside the active modal as well as the page. */
+.guidance-status { margin: 0; padding: 10px 20px; font-size: 18px; line-height: 1.6; color: #244b45; overflow-wrap: anywhere; }
+.guidance-status:empty, .modal-guidance p:empty { display: none; }
+.modal-guidance p { font-size: 20px; line-height: 1.6; margin: 0 0 12px; }
+.value-confirmation { margin-top: 12px; padding: 16px; border: 2px solid #936312; border-radius: 14px; background: #fff8e7; color: #44310b; min-width: 0; }
+.value-confirmation strong { display: block; font-size: 22px; line-height: 1.5; overflow-wrap: anywhere; }
+.value-confirmation p { font-size: 18px; line-height: 1.6; margin: 10px 0; }
+.value-confirmation .button { width: 100%; min-height: 56px; margin-top: 8px; white-space: normal; }
