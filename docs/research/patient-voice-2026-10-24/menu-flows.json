@@ -1,0 +1,32 @@
+{
+  "environment": "local isolated synthetic SQLite; actual Chromium clicks",
+  "version": "0.8.0/schema7",
+  "checks": [
+    {
+      "name": "patient registration through clinician UI persists and selected patient survives refresh",
+      "status": "passed"
+    },
+    {
+      "name": "same browser clinician and patient tabs can publish with lost-response retry exactly once",
+      "status": "passed"
+    },
+    {
+      "name": "manual meal and measurement clicks reach clinician records and survive reload",
+      "status": "passed"
+    },
+    {
+      "name": "clinician dose plan is reported in patient UI and retained in clinician dose view",
+      "status": "passed"
+    },
+    {
+      "name": "messages flow both ways in shared browser with stable patient scope",
+      "status": "passed"
+    },
+    {
+      "name": "all clinician and patient menus navigate, cancel and refresh without role collision",
+      "status": "passed"
+    }
+  ],
+  "pageErrors": [],
+  "cleanup": "temporary DB removed; no public writes"
+}

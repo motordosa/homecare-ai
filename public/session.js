@@ -1,5 +1,5 @@
-export const sessionState = { mode: null, user: null, csrfToken: null };
-export const sessionHeaders = () => sessionState.csrfToken ? { 'X-CSRF-Token': sessionState.csrfToken } : {};
+export const sessionState = { mode: null, user: null, csrfToken: null, demoToken:null };
+export const sessionHeaders = () => ({...(sessionState.csrfToken ? { 'X-CSRF-Token': sessionState.csrfToken } : {}),...(sessionState.mode==='demo'&&sessionState.demoToken?{'X-HomeCare-Demo-Session':sessionState.demoToken}:{})});
 let recoveryIdentity = null;
 const identityKey = user => JSON.stringify(user ? [user.id,user.role,user.patientId,user.staffRoles,user.capabilities,user.assignedPatientIds] : null);
 export function sessionExpired() {
@@ -12,6 +12,7 @@ export function sessionExpired() {
     return;
   }
   recoveryIdentity = identityKey(sessionState.user);
+  window.dispatchEvent(new Event("homecare-session-expired"));
   sessionState.csrfToken = null;
   const dialog=document.createElement('dialog');
   dialog.id='session-recovery';dialog.setAttribute('aria-labelledby','session-recovery-title');
@@ -44,7 +45,7 @@ export function sessionExpired() {
   document.body.append(dialog);dialog.showModal();check.focus();
 }
 async function readSession() {
-  const response = await fetch('/api/auth/session', { cache: 'no-store' });
+  const response = await fetch('/api/auth/session', { cache: 'no-store',headers:sessionHeaders() });
   if (!response.ok) throw new Error('로그인 상태를 확인하지 못했습니다. 다시 열어 주세요.');
   return response.json();
 }
@@ -65,7 +66,8 @@ export async function sessionRequest(path, options = {}) {
 }
 export async function demoPatient(patientId) {
   if(sessionState.mode!=='demo' || (sessionState.user?.role==='patient' && sessionState.user.patientId===patientId))return;
-  await sessionRequest('/api/auth/demo',{method:'POST',headers:{'X-HomeCare-Demo':'1'},body:JSON.stringify({role:'patient',patientId})});
+  const demo=await sessionRequest('/api/auth/demo',{method:'POST',headers:{'X-HomeCare-Demo':'1'},body:JSON.stringify({role:'patient',patientId})});
+  sessionState.demoToken=demo.demoToken;
   await refreshSession();renderSession();
 }
 function renderSession() {
@@ -84,8 +86,9 @@ function renderSession() {
 export async function bootstrapSession(role) {
   await refreshSession();
   if(sessionState.mode==='demo') {
-    if(!sessionState.user || sessionState.user.role!==role) {
-      await sessionRequest('/api/auth/demo',{method:'POST',headers:{'X-HomeCare-Demo':'1'},body:JSON.stringify({role})});
+    {
+      const demo=await sessionRequest('/api/auth/demo',{method:'POST',headers:{'X-HomeCare-Demo':'1'},body:JSON.stringify({role})});
+      sessionState.demoToken=demo.demoToken;
       await refreshSession();
     }
   } else if(!sessionState.user) {sessionExpired();return false;}

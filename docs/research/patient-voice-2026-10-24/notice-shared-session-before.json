@@ -1,0 +1,7 @@
+{
+  "environment": "local baseline server v0.7.0, same browser cookie context",
+  "status": 403,
+  "body": {
+    "error": "요청 확인 정보가 만료되었습니다. 화면을 새로 열어 주세요."
+  }
+}

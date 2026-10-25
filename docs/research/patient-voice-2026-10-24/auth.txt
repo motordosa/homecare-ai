@@ -1,0 +1,14 @@
+
+> homecare-ai-demo@0.8.0 test:auth
+> node test/auth-browser.mjs
+
+PASS strict OAuth fixture, enrollment, CSRF, chart/role/photo isolation
+PASS notice draft/publish/read/edit/archive, escaped rendering, version conflict
+PASS private messages/replies/read receipts, drafts, navigation, 320/390 layout
+PASS expired session draft preservation, wrong-account recovery rejection, same-account reauthentication
+PASS invitation modal cleanup, logout revocation and protected direct navigation
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

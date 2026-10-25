@@ -1,0 +1,15 @@
+
+> homecare-ai-demo@0.8.0 test:workspaces
+> node test/clinical-workspace-browser.mjs
+
+PASS create worklist task
+PASS workflow versioned update
+PASS participation plan
+PASS correction proposal and review
+PASS research preview snapshot replay
+PASS page errors absent and screenshots captured
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

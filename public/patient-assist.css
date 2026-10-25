@@ -1,0 +1,83 @@
+/* v0.8.0: clear actions, quiet information, large Korean type. */
+body.patient-accessible{--patient-text:20px;--patient-help:18px;--patient-ink:#253047;--patient-muted:#465469;--patient-accent:#164e63;background:#fff8ef;color:var(--patient-ink)}
+body.patient-accessible.patient-large-text{--patient-text:24px;--patient-help:22px}
+.patient-accessible .patient-app{background:#fff8ef;padding-bottom:180px}
+.patient-accessible .patient-header{background:#fff;border-bottom:2px solid #dfd4c4}
+.patient-accessible .greeting h1{font-size:28px;color:#253047}.patient-accessible .greeting p{color:#465469}
+.patient-accessible .patient-context{gap:10px;flex-wrap:wrap}.patient-accessible .patient-context select{min-height:56px;max-width:100%;width:auto}
+.patient-accessible :is(button,.button,input,select,summary){min-height:56px}
+.patient-accessible :is(button,.button){font-size:var(--patient-help);line-height:1.5}
+.patient-accessible :is(p,label,legend,textarea){overflow-wrap:anywhere}
+.patient-accessible .button{border:2px solid #164e63;border-radius:12px;font-weight:700;padding:12px 16px;white-space:normal}
+.patient-accessible :is(.button-primary,.voice-listen,.voice-start){background:#164e63;color:#fff;box-shadow:0 3px 0 #0b3343}
+.patient-accessible .button-secondary{background:#fff;color:#164e63;border:2px solid #164e63;box-shadow:0 2px 0 #9aaeb7}
+.patient-accessible .voice-entry{background:#f3eaff;border:2px solid #61318c;color:#4c2074;width:100%;margin:12px 0 18px;box-shadow:0 3px 0 #d2bde8}
+.patient-accessible .voice-guide-toolbar{margin:12px 0 18px;display:flex;flex-wrap:wrap;gap:10px}
+.patient-accessible .voice-guide-toolbar button{flex:1;min-width:140px}.patient-accessible .voice-guide-toolbar p{flex-basis:100%;font-size:var(--patient-help);margin:0;line-height:1.5}
+.patient-accessible .voice-stop{background:#a61d24;color:#fff;border-color:#7b1218}
+.patient-accessible .quick-actions{gap:12px}.patient-accessible .action-card{border:2px solid;border-radius:16px;min-height:166px;box-shadow:0 4px 0 #9b8269;display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:7px;padding:14px 12px}
+.patient-accessible .action-card strong{font-size:24px;line-height:1.35}.patient-accessible .action-card .action-icon{width:34px;height:34px}
+.patient-accessible .meal-action{background:#9b3c10;border-color:#76300f;color:#fff}
+.patient-accessible .medication-action{background:#2845a1;border-color:#1d3278;color:#fff}
+.patient-accessible .action-card>span:not(.action-icon):not(.action-arrow){font-size:var(--patient-help);color:#fff}
+.patient-accessible .action-card .action-arrow{display:block;position:static;width:auto;height:auto;border:0;font-size:var(--patient-help);color:#fff;margin-top:auto}
+.patient-accessible :is(.progress-card,.meal-item,.trend-card,.section-card){box-shadow:none;background:#fffdf9;border:1px solid #cfc6b8}
+.patient-accessible .health-card{background:#fff;border:2px solid #164e63;border-radius:14px;box-shadow:0 3px 0 #9aaeb7;padding:16px;text-align:left;display:flex;flex-direction:column;gap:8px}
+.patient-accessible .health-card .metric-heading{font-size:var(--patient-help);color:#253047}.patient-accessible .health-card .metric-value{font-size:26px;color:#253047}.patient-accessible .health-card .metric-status{font-size:var(--patient-help);color:#465469}
+.patient-accessible .metric-action{display:block;align-self:stretch;background:#164e63;color:#fff;font-size:var(--patient-help);font-weight:700;border-radius:8px;padding:8px 10px;margin-top:auto}
+.patient-accessible :is(.today-task-card,.voice-input-panel){padding:18px;border:2px solid #b2a491;border-radius:16px;background:#fff;margin:18px 0}
+.patient-accessible .today-task-card h2{font-size:24px}.patient-accessible .today-task-card>p{margin:10px 0}
+.patient-accessible #patient-task-list{list-style:none;padding:0;margin:14px 0;display:grid;gap:14px}
+.patient-accessible .patient-task{border-top:1px solid #d5dce3;padding-top:14px;min-width:0}.patient-accessible .patient-task strong{font-size:var(--patient-text)}
+.patient-accessible .patient-task p{font-size:var(--patient-help);margin:6px 0 12px}.patient-accessible .patient-task .task-open{background:#164e63;color:#fff;width:100%;box-shadow:0 3px 0 #0b3343}
+.patient-accessible .patient-task.recorded .task-open{background:#fff;color:#164e63;box-shadow:none}.patient-accessible .patient-task.recorded strong{color:#146044}
+.patient-accessible .voice-script summary{font-size:var(--patient-help);padding:10px 0}.patient-accessible .today-task-card>.button{width:100%;margin-top:10px}
+.patient-accessible .text-button{border:1px solid #51677c;border-radius:10px;padding:8px 12px;text-decoration:underline;background:#fff;color:#164e63}
+.patient-accessible .bottom-nav{border-top:2px solid #164e63;background:#fff}.patient-accessible .bottom-nav .nav-item{border:1px solid #7a899b;border-radius:10px;color:#26384c;min-height:58px}
+.patient-accessible .bottom-nav .nav-item.active{background:#164e63;color:#fff;border:2px solid #164e63;font-weight:700}
+.patient-accessible .bottom-nav .nav-item span{font-size:var(--patient-help)}.patient-accessible .patient-app .bottom-nav .nav-item{min-height:58px}
+.patient-accessible .choice>span{border:2px solid #6b7788;background:#fff;color:#253047;min-height:56px;padding:12px 8px}
+.patient-accessible .choice input:checked+span{border:3px solid #164e63;background:#e5f1ff;color:#173952;font-weight:700}.patient-accessible .choice input:checked+span:before{content:'✓ ';font-weight:bold}
+.patient-accessible .voice-input-panel{border-color:#61318c;background:#faf6ff;min-width:0}.patient-accessible .voice-input-panel h3{font-size:24px;margin:4px 0 12px}
+.patient-accessible .voice-input-panel :is(label,p,textarea,select){font-size:var(--patient-help)}.patient-accessible .voice-input-panel label{display:block;margin:12px 0}
+.patient-accessible .voice-input-panel :is(select,textarea){width:100%;box-sizing:border-box;padding:12px;border:2px solid #606b7b;border-radius:8px;background:#fff;color:#253047}
+.patient-accessible .voice-button-row{display:grid;gap:12px}.patient-accessible .voice-input-panel button{width:100%;margin:8px 0}
+.patient-accessible .voice-input-panel .voice-check,.patient-accessible .assist-settings .voice-check{display:flex;align-items:flex-start;gap:12px;font-size:var(--patient-help);padding:12px;background:#fff;border:1px solid #758093;border-radius:10px;min-height:56px}
+.patient-accessible .voice-check input{width:28px;height:28px;min-height:28px;flex-shrink:0;accent-color:#61318c}
+.patient-accessible .is-listening [data-voice-mic]{display:block;padding:12px;background:#a61d24;color:#fff;border-radius:10px}.patient-accessible [data-voice-status]{font-weight:600}
+.patient-accessible .voice-review{border:3px solid #164e63;background:#fff;padding:14px;border-radius:12px}.patient-accessible [data-voice-value]{font-size:24px;font-weight:700}
+.patient-accessible .assist-settings{margin-bottom:22px}.patient-accessible .assist-settings button{width:100%;margin:8px 0}
+.patient-accessible .record-dialog .dialog-body>.voice-entry{margin-top:0}
+.patient-accessible :is(.metric-value.empty,.empty-card,.empty-state-card,.history-empty,.history-values,.history-med.missing,.record-source,.notice-banner-heading,.guide-card p,.field-hint){color:#465469}
+.patient-accessible .notice-banner-heading,.patient-accessible .notice-banner-heading strong{font-size:var(--patient-help)}
+.patient-accessible .patient-notices{background:#fff2ca;border:1px solid #a98833}.patient-accessible .notice-important{background:#80500a;color:#fff}
+.patient-accessible .auth-strip{font-size:var(--patient-help);gap:8px}.patient-accessible .auth-strip :is(button,a){font-size:var(--patient-help)}
+.patient-accessible .toast{bottom:180px}.patient-accessible :is(input,select,textarea){font-size:var(--patient-text)}
+@media(max-width:360px){.patient-accessible .quick-actions{grid-template-columns:1fr 1fr}.patient-accessible .action-card{padding:12px 10px;min-height:178px}.patient-accessible .action-card strong{font-size:22px}.patient-accessible .today-task-card,.patient-accessible .voice-input-panel{padding:12px}.patient-accessible .health-grid{grid-template-columns:1fr}.patient-accessible .greeting h1{font-size:26px}.patient-accessible .brand{font-size:20px}.patient-accessible .bottom-nav .nav-item{padding:8px 3px}}
+.patient-accessible.patient-large-text .quick-actions,.patient-accessible.patient-large-text .health-grid{grid-template-columns:1fr}
+@media(prefers-reduced-motion:reduce){.patient-accessible *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.patient-accessible .auth-strip{display:flex;justify-content:space-between;align-items:center;padding:8px 18px;flex-wrap:nowrap;min-height:72px}
+.patient-accessible .auth-strip>[data-auth-label]{min-width:0;font-size:var(--patient-help)}
+.patient-accessible .patient-account{position:relative;flex-shrink:0}.patient-accessible .patient-account>summary{padding:10px;border:2px solid #51677c;border-radius:10px;background:#fff;font-size:var(--patient-help);color:#164e63}
+.patient-accessible .patient-account>div{position:absolute;right:0;z-index:20;background:#fff;box-shadow:0 4px 18px #0003;padding:16px;border:2px solid #51677c;border-radius:10px;min-width:180px;display:grid;gap:12px}
+.patient-accessible .patient-account a{display:block;min-height:56px;padding:12px 0}
+.patient-accessible .action-card strong{color:#fff}
+.patient-accessible .patient-close{min-width:56px;min-height:56px}
+.patient-accessible .voice-guide-toolbar{margin-top:18px}
+.patient-accessible .bottom-nav .nav-item span{white-space:normal;overflow-wrap:anywhere}
+/* The previous :is(input:not(...)) rule carries extra specificity, including on buttons. */
+body.patient-accessible :is(button,input:not([type=radio]):not([type=checkbox]):not([type=file]),select){min-height:56px}
+body.patient-accessible .patient-app .bottom-nav button.nav-item{min-height:58px}
+.patient-accessible .patient-notice>summary{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.patient-accessible .patient-notice:not([open])>summary>span:not(.notice-important):not(.notice-new){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.patient-accessible .patient-notice>summary>:is(.notice-important,.notice-new){flex-shrink:0}
+.patient-accessible .notice-banner-heading>span{font-size:var(--patient-help);white-space:nowrap}
+body.patient-accessible .action-card>span:not(.action-icon){opacity:1}
+.patient-accessible .check-dot{font-size:18px;min-width:24px;width:24px;height:24px;line-height:20px}
+.patient-accessible .task-chip.done .check-dot{background:#146044;border-color:#146044;color:#fff}
+.patient-accessible .text-button span{font-size:var(--patient-help)}
+.patient-accessible .patient-header{gap:8px;flex-wrap:nowrap}
+.patient-accessible .patient-header .voice-guide-toolbar{margin:0 0 0 auto;flex-wrap:nowrap;flex:0 0 auto;min-width:0;max-width:144px}
+.patient-accessible .patient-header .voice-guide-toolbar button{padding:10px 12px;min-width:100px;max-width:144px}
+.patient-accessible .patient-self-name{font-weight:700;font-size:var(--patient-text)}
+.patient-accessible .greeting{padding-bottom:12px}

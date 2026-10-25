@@ -25,6 +25,9 @@ jobs:
       - run: npm run test:auth
       - run: npm run test:medication-photo
       - run: npm run test:usability
+      - run: npm run test:voice
+      - run: npm run test:menus
+      - run: npm run test:workspaces
   android:
     runs-on: ubuntu-latest
     timeout-minutes: 20

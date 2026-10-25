@@ -1,0 +1,24 @@
+
+> homecare-ai-demo@0.8.0 test:usability
+> node test/usability-browser.mjs
+
+PASS patient navigation is readable, high contrast, touchable and within 320/390px
+PASS ten notices preserve the first record action while all notices remain reachable
+PASS meal has no implicit food or portion, unknown stays null and saved confirmation persists
+PASS a quick help request can be composed and sent without free text typing
+PASS all medication modal exit paths preserve drafts until explicitly discarded
+PASS saving medication plan locks dismissal and does not create duplicate plans
+PASS medication date errors restore the shown date and ordinary patient dose entry saves
+PASS a lost daily save response keeps the draft and an identical retry creates one revision
+PASS clinician charts offer numeric tables and refresh preserves an opened reading position
+PASS CSV preview matches selected patient and becomes invalid when scope changes
+PASS staff worklist saves the selected patient and preserves a dirty editor during refresh
+PASS research UI exports frozen CSV with exactly the manifest hash
+PASS new worklist, research and evidence screens share real Back/Forward history
+PASS MOCK literature search requires privacy confirmation and preserves source identification
+14 usability browser scenarios passed. Live provider, device and participant validation remain separate.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

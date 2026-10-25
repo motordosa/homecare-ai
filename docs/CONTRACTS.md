@@ -1,4 +1,4 @@
-# 데이터와 API 계약 v0.7.0
+# 데이터와 API 계약 v0.8.0
 
 이 문서는 구현 전 합의한 기준이다. 세부 계약을 변경할 때 구현보다 먼저 이 문서와 CHANGELOG를 갱신한다. 기존 v0.2 경로는 삭제하지 않는다. 구현 여부는 CHANGELOG에서 확인한다.
 
@@ -84,3 +84,7 @@ MEDICATION_PHOTO_DEMO_SPEC.md의 POST/GET medication-photo-reports 및 image 경
 ### v0.7.0 세부 기준의 위치
 
 화면별 행위·오류는 SCREEN_SPEC, 새 API와 요청 키·revision·통계 분모·스냅샷 미리보기 해시 계약은 USABILITY_IMPLEMENTATION_PLAN, 문헌의 정확한 필드와 검토 근거는 EVIDENCE_WORKSPACE_SPEC이 기준이다. 실제 생성 테이블은 generated/SCHEMA, 선언·매개변수와 코드 위치는 generated/VARIABLES에서 대조한다. 완료 범위와 미검증 항목은 USABILITY_IMPLEMENTATION_REPORT에 기록한다.
+
+## v0.8.0 환자 화면·음성 개선 (2026-10-24, 구현 전)
+
+현재 새 변경의 요구·화면/상태·데이터·지원 범위·변수·검증 기준은 [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md)를 따른다. 기존 v0.7.0 공통 규약을 계승하며 환자 본문20/도움18/누름56 목표, 행동/정보 구분과 인라인 음성 안내·음성 입력·할 일 알림을 추가한다. 기존 의료진/네이티브와 환자 기록 API는 유지하고 공지 영수증 테이블은 schema7로 추가한다. 음성 인식 결과는 확인 후 기존 입력칸에만 반영한다. 녹음·원고 자동 저장·백그라운드 전달을 구현 완료로 표시하지 않는다.

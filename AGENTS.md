@@ -4,7 +4,7 @@
 
 화면 변경은 반드시 `docs/SCREEN_SPEC.md`의 해당 화면ID와 공통 규약을 먼저 읽고 수정한다. 새 화면/동작은 문서의 진입·상단/하단·닫기·자료/상태·코드 대응·인수조건을 먼저 채운다. `public/patient-screens.js` registry/HTML/문서 일치 검사를 통과해야 한다. 변수 목록 생성만으로 화면 검증을 대체하지 않는다. 스마트폰 변경은 `docs/SMARTPHONE_SYNC_SPEC.md` 및 아이폰 우선 `docs/IOS_CONNECTOR.md`를 먼저 읽으며 외부 실행 요청은 `docs/USER_ACTION_REPORT.md`에 기록한다.
 
-로그인·권한·공지·메시지 변경은 `docs/AUTH_COMMUNICATION_SPEC.md`를 먼저 읽는다. 실사용 모드의 환자 범위·CSRF·의료진 허용목록을 유지하며 공개 DB로 메시지/공지를 시험하지 않는다.
+로그인·권한·공지·메시지 변경은 `docs/AUTH_COMMUNICATION_SPEC.md`를 먼저 읽는다. 실사용 모드의 환자 범위·CSRF·의료진 허용목록을 유지하며 기본 검증은 임시 DB를 사용한다. 사용자가 공개 합성 테스트를 명시 허용한 경우에는 그 범위에서만 시험하고, 자신이 만든 자료를 식별·정리해 환경과 결과를 기록한다.
 
 사진 GPT 활성화는 `docs/GPT_ACTIVATION.md`를 먼저 읽는다. 키·flag·모델 존재를 실제 제공자 인증/추론 검증으로 표시하지 않는다. iOS의 빈 HealthKit 결과는 읽기 권한 거절과 구별할 수 없어 자동 null 삭제를 보내지 않는다.
 
@@ -17,3 +17,5 @@
 7. 저장소 변경·테스트 통과·실제 Render 배포 완료를 구별한다. 무료 Render 재배포는 테스트 DB를 잃을 수 있다. 배포 전 필요한 데이터 보존을 고려한다.
 
 기존 체크아웃을 사용한다. 사용자의 명시적 요청 없이 Git worktree를 만들지 않는다. 비밀값을 문서·로그·Git에 기록하지 않는다.
+
+환자 음성·할 일·알림 변경은 `docs/PATIENT_VOICE_SPEC.md`와 해당 결과 보고서를 먼저 읽는다. 기존 입력 확인·대상/날짜·세대·세션/마이크·수동 대안을 유지하고 `npm run test:voice`, 역할/공지·전달 변경은 `npm run test:menus` 및 인증 회귀로 검증한다. 모의 음성/알림·실제 브라우저 클릭·실기기·공개 HTTP·실제 배포 상태를 구별한다.

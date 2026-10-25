@@ -1,0 +1,30 @@
+
+> homecare-ai-demo@0.8.0 test:automation
+> node test/automation-browser.mjs
+
+PASS clinician menus preserve real Back/Forward history from the landing page without refresh duplicates
+PASS clinician Back/Forward restores selected patients and medication dates, including reload and direct URL
+PASS clinician Back invalidates a delayed patient selection response and preserves the restored route
+PASS every patient subpage uses the same upper-right close control and role switching is confined to the guide
+PASS a failed medication lookup does not turn a legacy self-report into verified daily completion
+PASS all input close controls return to the opener and unsaved input survives a cancelled close
+PASS unsaved medication input blocks accidental role, patient and home changes, and save locks navigation
+PASS purpose-specific activity/sleep forms send only changed fields and preserve zero, null and unrelated values
+PASS legacy medication-only reporting leaves unanswered health fields null and isolates other patients
+PASS nutrition and recent-meal links open the actual meal list and URL navigation restores view and patient
+PASS clinician registers two dose slots; patient reports and revises one while pending and the clinician audit remain accurate
+PASS saving one medication slot preserves a different slot draft and its unsaved-navigation protection
+PASS health connection shows the exact server and patient identity and clears its one-time credentials on dismissal and navigation
+PASS partial-permission device fixtures merge independently into patient cards and manual zero remains authoritative
+PASS iPhone is the default connector and Apple Health fixtures reach the web without clearing unrelated metrics
+PASS clinician GPT setup shows missing, ready and unavailable states and never sends a paid analysis request
+PASS unconfigured photo AI offers a working manual meal path and makes no analysis request
+PASS MOCK AI fixture requires consent and draft/portion confirmation, then saves through the real hash-bound one-use meal API
+PASS MOCK AI late responses cannot survive a changed image or a closed and reopened meal form
+PASS MOCK medication OCR requires consent and label verification and imports only the candidate name and strength
+20 automation browser scenarios passed. AI scenarios used mocked provider fixtures only; actual AI and native device integration remain unverified.
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

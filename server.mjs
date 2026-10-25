@@ -35,10 +35,10 @@ ensureWorkflowSchema(db);
 ensureResearchSchema(db);
 ensureEvidenceSchema(db);
 const evidenceService=createEvidenceService({db});
-db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','6') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
+db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','7') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
 const port = Number(process.env.PORT || 3000);
 const bodyLimit = 7 * 1024 * 1024;
-const schemaVersion = 6;
+const schemaVersion = 7;
 
 function respond(res, status, value, extraHeaders = {}) {
   const body = JSON.stringify(value);
@@ -108,7 +108,7 @@ function assertSameOrigin(req) {
 function health() {
   const counts = {};
   for (const [key, table] of [['patients', 'patients'], ['dailyRecords', 'daily_records'], ['meals', 'meals']]) counts[key] = db.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get().count;
-  return { ok: true, status: 'ok', app: 'HomeCare AI Demo', schemaVersion, appVersion:'0.7.0', dataMode: 'demo', seedMode: db.prepare("SELECT value FROM metadata WHERE key='mode'").get()?.value ?? 'seed', today: todayKorea(), timezone: 'Asia/Seoul', storage: 'sqlite', counts, resetAt: db.prepare("SELECT value FROM metadata WHERE key='reset_at'").get()?.value ?? null, provenance };
+  return { ok: true, status: 'ok', app: 'HomeCare AI Demo', schemaVersion, appVersion:'0.8.0', dataMode: 'demo', seedMode: db.prepare("SELECT value FROM metadata WHERE key='mode'").get()?.value ?? 'seed', today: todayKorea(), timezone: 'Asia/Seoul', storage: 'sqlite', counts, resetAt: db.prepare("SELECT value FROM metadata WHERE key='reset_at'").get()?.value ?? null, provenance };
 }
 
 function createPatient(body) {
@@ -222,7 +222,7 @@ const server = http.createServer(async (req, res) => {
     }
     if(path==='/api/auth/session' && method==='GET')return respond(res,200,auth.sessionInfo(req));
     if(path==='/api/auth/demo' && method==='POST') {
-      const result=auth.demoLogin(req,await readJson(req));return respond(res,200,{ok:true},{'Set-Cookie':result.cookie});
+      const result=auth.demoLogin(req,await readJson(req));return respond(res,200,{ok:true,demoToken:result.demoToken},{'Set-Cookie':result.cookie});
     }
     if(path==='/api/auth/logout' && method==='POST')return respond(res,200,{ok:true},{'Set-Cookie':auth.logout(req)});
     if(path==='/api/auth/enroll' && method==='POST')return respond(res,200,auth.enroll(req,await readJson(req)));
@@ -247,7 +247,7 @@ const server = http.createServer(async (req, res) => {
       if(!messages[2] && method==='POST')return respond(res,201,sendMessage(db,actor,messages[1],await readJson(req)));
       if(messages[2] && method==='POST')return respond(res,200,readMessages(db,actor,messages[1],await readJson(req)));
     }
-    if (path === '/api/health' && method === 'GET') return respond(res, 200, auth.capabilities().mode==='kakao'?{ok:true,status:'ok',storage:'sqlite',schemaVersion}:health());
+    if (path === '/api/health' && method === 'GET') return respond(res, 200, auth.capabilities().mode==='kakao'?{ok:true,status:'ok',storage:'sqlite',schemaVersion,appVersion:'0.8.0'}:health());
     if (path === '/api/capabilities' && method === 'GET') return respond(res, 200, {
       auth: auth.capabilities(),
       vision: visionCapabilities(process.env),
