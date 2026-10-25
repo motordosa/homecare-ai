@@ -6,6 +6,7 @@ import { createPatientCommunications } from './patient-communications.js';
 import { preparePatientImage } from './patient-image.js';
 import { createPatientAssist } from './patient-assist.js';
 import { createPatientDictation } from './patient-dictation.js';
+import { createValueConfirmation } from './patient-value-confirmation.js';
 
 import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
@@ -43,7 +44,9 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   const weekday = (date) => date ? dateObject(date).toLocaleDateString("ko-KR", { weekday: "short", timeZone: "Asia/Seoul" }) : "";
   const fallbackToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
   const today = () => state.summary?.today || fallbackToday();
-  let toastTimer, assist, dictation, checkedAt=0;
+  let toastTimer, assist, dictation, valueConfirmation, checkedAt=0;
+  let guidanceContextId = crypto.randomUUID(), medicationGuidancePending = false, guidanceValidation = false;
+  const guidanceFormKey = () => JSON.stringify([state.patientId, state.view, $('dialog[open]')?.id || null, $('dialog[open] [name="date"]')?.value || state.medicationDate, guidanceContextId]);
   const dialogBaseline = new Map();
   const dialogOpeners = new Map();
   const medicationBaseline = new Map();
@@ -78,6 +81,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
 
   function openRecordDialog(id) {
     assist?.stop(); dictation?.reset();
+    guidanceContextId = crypto.randomUUID(); valueConfirmation?.reset();
     const dialog = $(`#${id}`);
     dialogBaseline.set(id, formSnapshot($('form', dialog)));
     dialogOpeners.set(id, document.activeElement);
@@ -95,7 +99,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     if (state.view !== 'home') $(`#view-${state.view} h1`).textContent = screen.title;
     const locked = Boolean(state.saving || state.loading || state.connectionBusy);
     $('#patient-view-close').hidden = !screen.closeTarget;
-    $('#voice-guide-controls').hidden=state.view!=='home';
+    $('#voice-guide-controls').hidden = false;
     $('#patient-view-close').disabled = locked;
     $('#patient-view-close').dataset.screenId = screen.id;
     $('#patient-home-link').href = `/patient?patientId=${encodeURIComponent(state.patientId || '')}`;
@@ -411,7 +415,10 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     state.view = view;
     state.section = section;
     if (metrics.includes(metric)) state.metric = metric;
+    guidanceContextId = crypto.randomUUID();
+    medicationGuidancePending = view === 'medication';
     applyView({ historyMode });
+    assist?.update({ automatic: view === 'home' });
   }
 
   function openMeal() {
@@ -431,6 +438,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     $("#meal-error").hidden = true;
     updateEstimate();
     openRecordDialog(PATIENT_INPUT_SCREENS.meal.dialog);
+    assist?.notify('meal_open', { contextId: guidanceContextId, recordDate: $('#meal-date').value });
   }
 
   function fieldValue(name, record) {
@@ -438,6 +446,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   }
 
   function applyDailyRecord(record) {
+    valueConfirmation?.reset();
     $("#daily-form [data-voice-applied]")?.remove();
     state.dailyBaseline = {};
     state.dailyRevision = record?.revision ?? 0;
@@ -594,7 +603,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
   async function saveDaily(event) {
     event.preventDefault();
     const button = $("#daily-submit");
-    if (button.disabled || state.saving) return;
+    if (button.disabled || state.saving || guidanceValidation) return;
     if (pendingSave?.kind === 'daily') return submitRecord('daily', pendingSave.payload);
     if (recordLoadState !== 'ready' || dailyLoadedDate !== $('#daily-date').value) return;
     const data = new FormData(event.currentTarget);
@@ -606,6 +615,17 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       if (value !== state.dailyBaseline[name] && (value !== null || ["steps", "sleepHours", "weightKg"].includes(name))) payload[name] = value;
     }
     if (Object.keys(payload).length === 1) { toast("바뀐 항목이 없어요. 기록할 값을 입력해 주세요."); return; }
+    const changedMetrics = ['steps', 'sleepHours'].filter(name => Object.hasOwn(payload, name) && payload[name] !== null);
+    if (changedMetrics.length) {
+      const form = event.currentTarget, contextId = guidanceContextId, snapshot = formSnapshot(form), date = $('#daily-date').value;
+      guidanceValidation = true; button.disabled = true;
+      try {
+        await assist.refreshConfiguration({force:true});
+        if (patientId !== state.patientId || contextId !== guidanceContextId || !$('#daily-dialog').open || date !== $('#daily-date').value || snapshot !== formSnapshot(form)) return;
+        if (!assist.getConfiguration().ready) { formError('#daily-error', '입력 확인 설정을 불러오지 못했어요. 입력은 남아 있어요. 연결을 확인하고 저장을 다시 눌러 주세요.'); return; }
+        if (!valueConfirmation.validate(changedMetrics)) return;
+      } finally { guidanceValidation = false; if (recordLoadState === 'ready' && !state.saving) button.disabled = false; }
+    }
     payload.expectedRevision = state.dailyRevision;
     const signature = JSON.stringify(payload);
     if (signature !== state.dailySubmissionPayload) { state.dailySubmissionPayload = signature; state.dailySubmissionKey = crypto.randomUUID(); }
@@ -625,7 +645,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       $('#daily-date').value = dailyLoadedDate;
       return;
     }
-    dictation?.reset();
+    dictation?.reset(); assist?.stop(); valueConfirmation?.reset(); guidanceContextId = crypto.randomUUID();
     const patientId = state.patientId;
     recordLoadState = 'loading';
     $("#daily-error").hidden = true;
@@ -642,6 +662,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       $("#daily-scope-note").textContent = dailyModes[state.dailyMode].hint + (automatic.length ? " 현재 건강 연결에서 받은 값이 있어요. 직접 입력한 값이 우선 표시되며, 입력값을 지우면 연결 자료로 돌아가요." : "");
       setDailyFieldsDisabled(false);
       $("#daily-submit").textContent = state.dailyMode === "steps" ? "걸음 수 저장하기" : state.dailyMode === "sleep" ? "수면 시간 저장하기" : "건강 기록 저장하기";
+      assist?.notify(state.dailyMode === "steps" ? "steps_open" : state.dailyMode === "sleep" ? "sleep_open" : "daily_open", { contextId: guidanceContextId, recordDate: date });
     } catch (error) {
       if (requestId !== state.dateRequestId || patientId !== state.patientId || date !== $('#daily-date').value || !$("#daily-dialog").open) return;
       recordLoadState = 'error';
@@ -750,6 +771,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
         $("#legacy-medication").hidden = false;
       }
       $$('#medication-list form, #legacy-medication-form').forEach(form => medicationBaseline.set(form.id, formSnapshot(form)));
+      if (state.view === 'medication' && medicationGuidancePending) { medicationGuidancePending = false; assist?.notify('medication_open', { contextId: guidanceContextId, recordDate: date }); }
     } catch (error) {
       if (requestId === state.medicationRequestId && patientId === state.patientId) formError("#medication-error", `${error.message} 목록을 확인하지 못해 복약 상태를 저장할 수 없어요.`);
     } finally {
@@ -942,6 +964,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       if (!canLeavePatient()) return;
       if (dirty) await loadMedicationSchedule();
       medicationPhoto.open();
+      if ($('#medication-photo-dialog').open) assist?.notify('medication_photo_open', { contextId: guidanceContextId, recordDate: state.medicationDate });
     });
     $("#open-medication").addEventListener("click", () => switchView("medication"));
     $("#open-daily").addEventListener("click", () => openDaily("all"));
@@ -975,7 +998,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       });
       dialog.addEventListener("cancel", event => { event.preventDefault(); closeRecordDialog(dialog); });
       dialog.addEventListener("close", () => {
-        dialogBaseline.delete(dialog.id);
+        dialogBaseline.delete(dialog.id); assist?.stop(); valueConfirmation?.reset(); guidanceContextId = crypto.randomUUID();
         if (dialog.id === "daily-dialog") { ++state.dateRequestId; recordLoadState = 'idle'; }
         if (pendingSave && dialog.id === `${pendingSave.kind}-dialog`) { pendingSave = null; operationState = 'idle'; }
         if (dialog.id === "meal-dialog") clearPhoto();
@@ -1043,7 +1066,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       ++state.medicationRequestId;
       if (!state.saving) $$("dialog[open]").forEach(dialog => dialog.close());
       if (requestedId && requestedId !== state.patientId && state.patients.some(patient => patient.id === requestedId)) loadPatient(requestedId, { historyMode: "none" }).catch(() => {});
-      else applyView({ historyMode: "none" });
+      else { guidanceContextId = crypto.randomUUID(); medicationGuidancePending = state.view === 'medication'; applyView({ historyMode: "none" }); assist?.update({automatic: state.view === 'home'}); }
     });
     async function chooseMealPhoto(event) {
       const file = event.target.files?.[0];
@@ -1073,6 +1096,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       if (!hours.checkValidity() || !minutes.checkValidity() || Number(hours.value) * 60 + Number(minutes.value) > 1440) { formError('#daily-error', '수면 시간은 0~24시간, 분은 0~59분으로 입력해 주세요.'); return; }
       $('#daily-sleep').value = String(Math.round((Number(hours.value) + Number(minutes.value) / 60) * 10) / 10);
       $('#daily-sleep').dispatchEvent(new Event('input', { bubbles: true }));
+      valueConfirmation?.check('sleepHours');
       $('#sleep-helper-status').textContent = `${hours.value || 0}시간 ${minutes.value || 0}분을 ${$('#daily-sleep').value}시간으로 넣었어요. 저장 버튼을 눌러 마쳐 주세요.`;
       $('#daily-error').hidden = true;
     });
@@ -1119,6 +1143,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
         else controls[0].value=String(value);
         const target=controls.find(el=>el.checked)||controls[0];
         target.dispatchEvent(new Event('input',{bubbles:true})); target.dispatchEvent(new Event('change',{bubbles:true}));target.focus();
+        if (kind === 'daily' && ['steps', 'sleepHours'].includes(key)) valueConfirmation?.check(key);
       }});
     };
     if(kind==='daily'){add('steps','걸음 수','삼천 오백 걸음');add('sleepHours','수면 시간','일곱 시간 삼십 분');add('weightKg','몸무게','육십이 점 오 킬로그램');add('medicationStatus','하루 전체 복약 상태','모두 먹었어요');add('note','함께 전할 이야기','오늘은 산책을 했어요');add('date','기록 날짜','오늘 또는 2026년 10월 23일');}
@@ -1136,9 +1161,11 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
     if(patientId!==state.patientId||request!==state.requestId||state.view!=='home'||$('dialog[open]')||state.saving||dictation?.dirty())return false;
     state.summary=summary;state.todayMedication=schedule;checkedAt=Date.now();render();return true;
   }
-  assist=createPatientAssist({getContext:()=>({summary:state.summary,schedule:state.todayMedication,patientId:state.patientId,view:state.view,checkedAt}),isBusy:automatic=>Boolean(state.loading||state.saving||$('#app-content').hidden||!$('#load-error').hidden||dictation?.recording()||(automatic&&($('dialog[open]')||dictation?.dirty()||medicationDirty()||communication.dirty()))),refresh:refreshAssistance,onAction(action){if(action==='meal')openMeal();if(action==='medication')switchView('medication');if(action==='steps'||action==='sleep')openDaily(action);}});
-  dictation=createPatientDictation({getContext:voiceContext,isBusy:()=>Boolean(state.loading||state.saving),beforeListen:()=>assist.stop(),speak:text=>assist.say(text),stopSpeak:()=>assist.stop()});
+  assist=createPatientAssist({getContext:()=>({summary:state.summary,schedule:state.todayMedication,patientId:state.patientId,view:state.view,checkedAt,formKey:guidanceFormKey()}),isBusy:automatic=>Boolean(state.loading||state.saving||$('#app-content').hidden||!$('#load-error').hidden||dictation?.recording()||(automatic&&($('dialog[open]')||dictation?.dirty()||medicationDirty()||communication.dirty()))),refresh:refreshAssistance,onAction(action){if(action==='meal')openMeal();if(action==='medication')switchView('medication');if(action==='steps'||action==='sleep')openDaily(action);}});
+  dictation=createPatientDictation({getContext:voiceContext,isBusy:()=>Boolean(state.loading||state.saving),beforeListen:()=>assist.stop(),stopSpeak:()=>assist.stop()});
+  valueConfirmation=createValueConfirmation({form:$('#daily-form'),getContext:()=>({patientId:state.patientId,contextId:guidanceContextId,recordDate:$('#daily-date').value,ready:recordLoadState==='ready'&&$('#daily-dialog').open&&!state.saving}),getConfiguration:()=>assist.getConfiguration(),matchingRule:(...args)=>assist.matchingValueRule(...args),notify:(...args)=>assist.notify(...args),stop:()=>assist.stop()});
 
+  window.addEventListener('homecare-guidance-config-changed', () => valueConfirmation.reset());
   window.homecareCanLogout=canLeavePatient;
   async function bootstrapApplication() {
     if (bootstrapInFlight) return;
@@ -1149,6 +1176,7 @@ import { PATIENT_SCREENS, PATIENT_INPUT_SCREENS } from './patient-screens.js';
       sessionReady = true;
       if(sessionState.mode==='kakao' && sessionState.user?.role==='patient'){$('#patient-select').hidden=true;$('#patient-name').hidden=false;}
       routeFromUrl();
+      medicationGuidancePending = state.view === 'medication';
       await initialize();
       loadCapabilities();
     } catch (issue) { sessionReady = false; showError(issue.message); }

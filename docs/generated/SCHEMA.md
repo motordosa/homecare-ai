@@ -2,7 +2,7 @@
 
 자동 생성: 임시 SQLite에 현재 추가 마이그레이션을 적용한 결과다. 사용자/공개 DB에 접근하지 않으며 행 값·토큰·사진을 저장하지 않는다. 의미와 단위는 [자료 사전](../DATA_DICTIONARY.md)과 [계약](../CONTRACTS.md)을 함께 읽는다.
 
-41 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
+45 tables. 생성: `npm run docs:variables`, 최신 검사: `npm run docs:check`.
 
 ## auth_accounts
 
@@ -929,6 +929,92 @@ CREATE TABLE study_participation (
     start_date TEXT NOT NULL, end_date TEXT, consent_version TEXT NOT NULL, required_domains TEXT NOT NULL,
     version INTEGER NOT NULL, reason TEXT NOT NULL, updated_by TEXT NOT NULL, updated_at TEXT NOT NULL
   )
+```
+
+## voice_guidance_config
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| scope_key | TEXT | no |  | 1 |
+| patient_id | TEXT | no |  |  |
+| revision | INTEGER | yes |  |  |
+| configuration_json | TEXT | no |  |  |
+| updated_by | TEXT | yes |  |  |
+| updated_at | TEXT | yes |  |  |
+
+외래키: patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE voice_guidance_config (
+      scope_key TEXT PRIMARY KEY, patient_id TEXT UNIQUE REFERENCES patients(id) ON DELETE CASCADE,
+      revision INTEGER NOT NULL, configuration_json TEXT, updated_by TEXT NOT NULL, updated_at TEXT NOT NULL,
+      CHECK ((scope_key='global' AND patient_id IS NULL AND configuration_json IS NOT NULL) OR (patient_id IS NOT NULL AND scope_key='patient:'||patient_id))
+    )
+```
+
+## voice_guidance_playbacks
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| claim_id | TEXT | no |  | 1 |
+| patient_id | TEXT | yes |  |  |
+| rule_id | TEXT | yes |  |  |
+| date | TEXT | yes |  |  |
+| bucket | TEXT | yes |  |  |
+| configuration_key | TEXT | yes |  |  |
+| state | TEXT | yes |  |  |
+| reserved_at | TEXT | yes |  |  |
+| expires_at | TEXT | yes |  |  |
+| started_at | TEXT | no |  |  |
+
+외래키: patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE voice_guidance_playbacks (
+      claim_id TEXT PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+      rule_id TEXT NOT NULL, date TEXT NOT NULL, bucket TEXT NOT NULL,
+      configuration_key TEXT NOT NULL, state TEXT NOT NULL CHECK(state IN ('reserved','started','released')),
+      reserved_at TEXT NOT NULL, expires_at TEXT NOT NULL, started_at TEXT,
+      UNIQUE(patient_id,rule_id,date,bucket)
+    )
+```
+
+## voice_guidance_preferences
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| patient_id | TEXT | no |  | 1 |
+| enabled | INTEGER | yes |  |  |
+| updated_at | TEXT | yes |  |  |
+
+외래키: patient_id → patients.id (DELETE CASCADE)
+
+```sql
+CREATE TABLE voice_guidance_preferences (
+      patient_id TEXT PRIMARY KEY REFERENCES patients(id) ON DELETE CASCADE,
+      enabled INTEGER NOT NULL CHECK(enabled IN (0,1)), updated_at TEXT NOT NULL
+    )
+```
+
+## voice_guidance_submissions
+
+| 컬럼 | SQL형 | NOT NULL | 기본값 | PK |
+|---|---|---|---|---|
+| actor_id | TEXT | yes |  | 1 |
+| scope_key | TEXT | yes |  | 2 |
+| request_id | TEXT | yes |  | 3 |
+| request_hash | TEXT | yes |  |  |
+| response_json | TEXT | yes |  |  |
+| created_at | TEXT | yes |  |  |
+
+외래키: scope_key → voice_guidance_config.scope_key (DELETE CASCADE)
+
+```sql
+CREATE TABLE voice_guidance_submissions (
+      actor_id TEXT NOT NULL, scope_key TEXT NOT NULL REFERENCES voice_guidance_config(scope_key) ON DELETE CASCADE,
+      request_id TEXT NOT NULL, request_hash TEXT NOT NULL, response_json TEXT NOT NULL, created_at TEXT NOT NULL,
+      PRIMARY KEY(actor_id,scope_key,request_id)
+    )
 ```
 
 ## workflow_mutations

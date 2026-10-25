@@ -39,7 +39,7 @@ assert.ok(guide.includes('id="guide-clinician-link"'));
 assert.equal((html.match(/href="\/clinician/g) ?? []).length, 1, 'role switching belongs only in the guide');
 assert.ok(html.includes('src="/patient.js" type="module"'));
 
-const clinicianIds = { overview: 'C-OVERVIEW', patients: 'C-PATIENTS', medications: 'C-MED', records: 'C-RECORDS', notices: 'C-NOTICES', messages: 'C-MESSAGES', settings: 'C-SETTINGS', worklist: 'C-WORKLIST', research: 'C-RESEARCH', evidence: 'C-EVIDENCE' };
+const clinicianIds = { overview: 'C-OVERVIEW', patients: 'C-PATIENTS', medications: 'C-MED', records: 'C-RECORDS', notices: 'C-NOTICES', messages: 'C-MESSAGES', settings: 'C-SETTINGS', worklist: 'C-WORKLIST', research: 'C-RESEARCH', evidence: 'C-EVIDENCE', 'voice-guidance': 'C-VOICE-GUIDANCE' };
 const clinicianSource = readFileSync(new URL('../public/clinician.js', import.meta.url), 'utf8');
 let clinicianTitles;
 function visit(node) {

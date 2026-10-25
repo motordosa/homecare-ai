@@ -314,6 +314,8 @@ try {
     await assertHidden(mobile.locator('#daily-sleep'));
     await assertHidden(mobile.locator('#medication-fieldset'));
     await mobile.locator('#daily-steps').fill('0');
+    await mobile.locator('#daily-steps').blur();
+    await mobile.locator('[data-value-confirmation=steps] [data-value-confirm]').click();
     await saveDaily(mobile, patient.id, { date: today, steps: 0 });
     let record = (await get(`/api/patients/${patient.id}/daily?date=${today}`)).record;
     assert.equal(record.steps, 0);
@@ -547,6 +549,8 @@ try {
     await mobile.locator('#today-metrics [data-action=steps]').click();
     await mobile.waitForFunction(() => !document.querySelector('#daily-submit').disabled);
     await mobile.locator('#daily-steps').fill('0');
+    await mobile.locator('#daily-steps').blur();
+    await mobile.locator('[data-value-confirmation=steps] [data-value-confirm]').click();
     await saveDaily(mobile, fixturePatient.id, { date: today, steps: 0 });
     summary = await get(`${path}/summary`);
     assert.equal(summary.todayRecord.steps, 0);

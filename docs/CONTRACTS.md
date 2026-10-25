@@ -96,3 +96,8 @@ MEDICATION_PHOTO_DEMO_SPEC.md의 POST/GET medication-photo-reports 및 image 경
 ## v0.8.0 환자 화면·음성 개선 (2026-10-24, 구현 전)
 
 현재 새 변경의 요구·화면/상태·데이터·지원 범위·변수·검증 기준은 [PATIENT_VOICE_SPEC.md](PATIENT_VOICE_SPEC.md)를 따른다. 기존 v0.7.0 공통 규약을 계승하며 환자 본문20/도움18/누름56 목표, 행동/정보 구분과 인라인 음성 안내·음성 입력·할 일 알림을 추가한다. 기존 의료진/네이티브와 환자 기록 API는 유지하고 공지 영수증 테이블은 schema7로 추가한다. 음성 인식 결과는 확인 후 기존 입력칸에만 반영한다. 녹음·원고 자동 저장·백그라운드 전달을 구현 완료로 표시하지 않는다.
+
+
+## v0.9.0 의료진 설정형 자동 음성 안내 (구현 전 계약)
+
+새 voice-guidance 설정/상속·revision/UUID·환자 선호·claims/receipts 계약은 CONTEXTUAL_VOICE_GUIDANCE_SPEC의 API 절을 따른다. 환자 본인·직원 capability/배정 범위·CSRF를 적용하며 schema9 추가 이행으로 기존 기록을 보존한다. KST·규칙 ID·빈도 bucket의 원자 예약, 발화 시작 영수증,30초 예약 만료를 사용한다. 음성 안내 기록은 청취나 임상 필요의 증명이 아니다. 입력 확인 기준은 임상 정상범위가 아니며 확인한 실제 값은 기존 허용범위 내에서 저장한다. 상세 제작·인수 기준은 [CONTEXTUAL_VOICE_GUIDANCE_SPEC.md](CONTEXTUAL_VOICE_GUIDANCE_SPEC.md)다.

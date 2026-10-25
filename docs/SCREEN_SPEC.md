@@ -9,7 +9,7 @@
 | P-MEAL/P-DAILY 저장 | 진행 상태와5초 뒤 지연 안내. 응답 유실이면 저장 결과 확인 버튼으로 같은 본문/UUID 재시도. 결과 확인 전 수정은 잠시 잠그되 X/수동 이탈은 경고 후 가능. 확정 저장 뒤 목록 조회 실패는 별도 표시 |
 | P-CONNECT | 발급 요청 UUID 재사용, 응답 유실 시 같은 시도 결과 확인. token 재표시 불가이면 그 연결만 명시 재발급. 폐기·새 발급도 중복 클릭 차단. 다른 정상 연결/기록 보존 |
 | P-VOICE-INPUT | PATIENT_VOICE_SPEC의 시작/중지 제한·늦은 결과 무효·초안 보존. 수동 입력 대안, 실제 마이크 종료 확인과 UI 복구를 구별 |
-| P-VOICE-GUIDE/P-GUIDE | VOICE_PLAYBACK_CONTRACT의 짧은 안내/전체 듣기/목소리·속도 미리듣기·발화 제한. 한국어 미지원이면 텍스트 대안 |
+| P-VOICE-GUIDE/P-GUIDE | CONTEXTUAL_VOICE_GUIDANCE_SPEC의 의료진 설정형 자동 안내/on-off·중지·발화 제한. 환자 재생/미리듣기 없음. 한국어 미지원이면 텍스트 대안 |
 
 기존 상단/하단 메뉴와 X 복귀 규약을 그대로 사용한다. 최신 사용자 지시에 따라 main 배포 준비를 진행한다. 실제 iPhone Safari 마이크 검증은 미완료 상태로 인계하며 자동 검사로 대신하지 않는다.
 
@@ -17,7 +17,7 @@
 
 ## 1. 공통 화면 구조와 책임
 
-인증·공지·메시지는 [AUTH_COMMUNICATION_SPEC.md](AUTH_COMMUNICATION_SPEC.md), v0.7.0 화면·직무·통계·문헌 변경은 [USABILITY_IMPLEMENTATION_PLAN.md](USABILITY_IMPLEMENTATION_PLAN.md)를 따른다. 공통 header/X 바로 아래 auth strip(계정 조작은 펼치는 ‘계정 관리’)→P-NOTICES→본문 순서다. 환자는 홈/내 기록/복약/메시지/건강 연결/이용 안내의 6개 경로를 유지하고 하단을 3열×2행으로 배치한다. 의료진은 케어 대시보드/환자 관리/복약 계획/건강 기록/업무 목록/연구 분석/문헌 검토/공지 관리/환자 메시지/데모 설정의 10개 경로 중 서버가 허용한 메뉴만 표시한다. 과거 5개·7개 메뉴 규약은 현행 기준이 아니다.
+인증·공지·메시지는 [AUTH_COMMUNICATION_SPEC.md](AUTH_COMMUNICATION_SPEC.md), v0.7.0 화면·직무·통계·문헌 변경은 [USABILITY_IMPLEMENTATION_PLAN.md](USABILITY_IMPLEMENTATION_PLAN.md)를 따른다. 공통 header/X 바로 아래 auth strip(계정 조작은 펼치는 ‘계정 관리’)→P-NOTICES→본문 순서다. 환자는 홈/내 기록/복약/메시지/건강 연결/이용 안내의 6개 경로를 유지하고 하단을 3열×2행으로 배치한다. 의료진은 케어 대시보드/환자 관리/복약 계획/건강 기록/업무 목록/연구 분석/문헌 검토/공지 관리/환자 메시지/음성 안내 설정/데모 설정의 11개 경로 중 서버가 허용한 메뉴만 표시한다. 과거 5개·7개 메뉴 규약은 현행 기준이 아니다.
 
 환자는 모바일 웹, 의료진은 데스크톱 웹이다. 각 화면은 아래 ID로 관리한다. 화면별 명세 없이 새 버튼·메뉴·페이지를 추가하지 않는다. 화면 ID, 진입점, 상단/하단 메뉴, 닫기 목적지, API, 입력값, 상태, 코드 위치, 인수 사례를 먼저 정한다.
 
@@ -93,7 +93,7 @@ P-MEAL의 GPT 동작·오류는 [GPT_ACTIVATION.md](GPT_ACTIVATION.md), P-CONNEC
 
 C-SETTINGS의 초기화 카드 제목 옆 database SVG는 24×24px, flex 축소 없음으로 제한한다. 아이콘이 카드 너비를 차지하거나 제목을 밀어내지 않으며 GPT 설정 카드와 같은 제목/버튼 체계를 유지한다.
 
-데스크톱 공통 셸은 앞서 정한 10개 메뉴 순서에서 권한 없는 항목을 제외하고, 상단 페이지 제목/새로고침/기간과 선택 환자를 유지한다. 일반 페이지 X를 환자 앱처럼 임의 추가하지 않는다. 등록·종료·이력 대화상자는 우상단 X/취소 후 열었던 페이지로 복귀한다. 다른 역할로 이동하는 링크는 ‘환자 화면’이라고 명시한다.
+데스크톱 공통 셸은 앞서 정한 11개 메뉴 순서에서 권한 없는 항목을 제외하고, 상단 페이지 제목/새로고침/기간과 선택 환자를 유지한다. 일반 페이지 X를 환자 앱처럼 임의 추가하지 않는다. 등록·종료·이력 대화상자는 우상단 X/취소 후 열었던 페이지로 복귀한다. 다른 역할로 이동하는 링크는 ‘환자 화면’이라고 명시한다.
 
 메뉴 접근은 서버가 제공한 `capabilities`로 판단한다. `overview/patients/medications/records/worklist`는 `patient.read`, 연구는 `research.read`, 문헌은 `evidence.read`, 공지는 `notice.write`, 메시지는 `message.write`, 설정은 `admin.reset`이 필요하다. 지원 인력의 자료 정리와 임상 검토 완료·정정 승인을 구별하고 각 API도 권한·배정 환자를 재검사한다. 클라이언트의 역할 표시나 메뉴 숨김만으로 접근을 통제하지 않는다. 상세 직무표는 실행계획과 `lib/staff-access.mjs`를 따른다.
 
@@ -106,7 +106,8 @@ C-SETTINGS의 초기화 카드 제목 옆 database SVG는 24×24px, flex 축소 
 | C-WORKLIST / `worklist`, clinician-workflow.js | 업무 목록 메뉴 | 선택 환자의 업무 담당/기한/상태, 사진 검토, 정정 요청/승인, 참여·위임 계획 | 공통 셸/history·dirty/busy·빈자료/실패/재시도. 권한·revision·당시 원자료 보존. 지원 인력은 전문 검토 완료·원자료 승인 불가. 참여/위임 계획 저장은 실제 동의·보호자 로그인 활성화가 아님. 상세는 [실행계획](USABILITY_IMPLEMENTATION_PLAN.md) |
 | C-RESEARCH / `research`, clinician-research.js | 연구 분석 메뉴 | 기간/대상/출처 미리보기, 기술통계, 자료 동결, 가명 스냅샷 반출 | 조건·환자N/관측수/분모/결측/출처 표시. null/0 구별, 표본SD·분위수·환자평균 구분. 입력 해시 변경이면 동결 전 재확인. 스냅샷 재현·현재 접근 범위 검사. 자동 대치·추론검정 없음. 상세는 [실행계획](USABILITY_IMPLEMENTATION_PLAN.md) |
 | C-EVIDENCE / `evidence`, clinician-evidence.js | 문헌 검토 메뉴 | 일반화한 수동 검색어·연도·개인정보 미포함 확인, Europe PMC 검색/재열람/보관, 사람 검토 근거표 | 검색 중 취소·입력 보존·제공자 실패와0건 구별. PMID/DOI/출처·검색 시각·초록 확보 범위·철회 불명 보존. 검토 완료는 evidence.review 필요. AI 요약·환자자료 자동 전송 없음. 상세는 [EVIDENCE_WORKSPACE_SPEC.md](EVIDENCE_WORKSPACE_SPEC.md) |
-| C-MED-PHOTOS / clinician.js C-MED 내부 접기식 상세 | 날짜별 사진 첨부 보고·OCR·당시 revision 조회 | 권한 image API·당시 자기보고, 별도 화면/닫기 없음 | 공통10개 경로·history 유지, 최신20건·빈 상태. 사진 검토 상태와 복용 사실을 구별. 상세는 [약봉투 사진 명세](MEDICATION_PHOTO_DEMO_SPEC.md)와 C-WORKLIST |
+| C-VOICE-GUIDANCE / `voice-guidance`, clinician-voice-guidance.js | 음성 안내 설정 메뉴·직접 URL | 공통 기본/선택 환자, 전체 사용·속도, 규칙별 문구·트리거·시간·요일·기간·기록 조건·빈도·간격·상한·우선순위·수치 기준, 추가·삭제·기본값·미리듣기·저장·취소·상속 | patient.read 조회, canWrite 편집. 읽기/저장 실패 원고 유지·명시 재시도, revision 충돌 재조회 선택, 응답 불명 재전송 UUID/본문 유지. 공통 셸 상단/탐색·history·dirty/busy 적용. 상세는 아래 규약과 CONTEXTUAL_VOICE_GUIDANCE_SPEC |
+| C-MED-PHOTOS / clinician.js C-MED 내부 접기식 상세 | 날짜별 사진 첨부 보고·OCR·당시 revision 조회 | 권한 image API·당시 자기보고, 별도 화면/닫기 없음 | 공통11개 경로·history 유지, 최신20건·빈 상태. 사진 검토 상태와 복용 사실을 구별. 상세는 [약봉투 사진 명세](MEDICATION_PHOTO_DEMO_SPEC.md)와 C-WORKLIST |
 | C-SETTINGS / `settings`, `settingsView` | 데모 설정 메뉴 | reset seed/empty 대화상자, CSV | 초기화 확인 문구 필수. 공개 검수 중 전체 초기화 금지 |
 | C-ORDER / `openMedicationOrder` | 계획 추가 버튼 | 이름/함량/1회량/경로/시각/기간/주의, OCR 후보 대조·확정 | 우상단 X/취소→C-MED, 오류 시 입력 유지. 사진 후보를 용법으로 자동 확정하지 않음 |
 | C-END / `openMedicationEnd` | 계획 종료 버튼 | 명시적 endDate PATCH | 과거 보고 훼손409. 종료 성공→같은 환자·날짜 C-MED |
@@ -115,11 +116,21 @@ C-SETTINGS의 초기화 카드 제목 옆 database SVG는 24×24px, flex 축소 
 
 새 의료진 화면을 변경할 때 해당 render 함수·dialog와 인수 사례를 이 표에 먼저 연결한다. 기존 동작을 바꾸지 않은 행은 이번 환자 화면 수정만으로 재검증 완료라고 표시하지 않는다.
 
+### 의료진 음성 안내 설정 C-VOICE-GUIDANCE / CVG-02 (2026-10-25, 구현 전)
+
+- 진입은 기존 의료진 왼쪽 ‘음성 안내 설정’ 메뉴 또는 `?view=voice-guidance&patientId=...`다. 공통 페이지 제목·새로고침·환자 선택/URL/history를 유지한다. 별도 닫기나 환자용 재생 버튼은 만들지 않는다. 다른 메뉴/환자/뒤로/로그아웃은 공통 미저장·저장 중 이탈 규약을 적용한다.
+- 상단에서 ‘공통 기본’과 ‘선택 환자’를 명시한다. patient.read는 조회하며 API의 canWrite가 false면 편집/저장/복구를 비활성화한다. 선택 환자에는 기존 환자 목록/현재 대상 이름을 표시한다. 환자별 덮어쓰기가 없으면 ‘공통 설정을 따르는 중’이라고 표시한다.
+- 본문은 전체 음성 안내 사용 여부·속도와 규칙별 접기식 편집기다. 간단 요약(시점/문구/사용)을 먼저 보여 주고 상세 조건은 펼친다. 각 규칙 ID는 읽기 전용으로 유지하며 문구 수정으로 같은 날 재생 횟수를 초기화하지 않는다. 새로운 규칙만 새 ID를 생성한다. 기준값은 임상 정상 범위가 아닌 ‘입력 확인 기준’이라고 표시한다.
+- 하단 저장/변경 취소와 상단 기본 예시/규칙 추가를 제공한다. 환자별 ‘공통 설정 따르기’는 확인 후 명시 저장한다. 변경 취소는 현재 서버에서 받은 원본으로 돌아가며 서버를 쓰지 않는다. 저장은 revision+UUID로 보낸다. 응답 불명 오류에서는 동일 본문/UUID로 결과 확인 후 편집을 재개하고,409에서는 원고를 보존하며 사용자가 재조회할지 선택한다.
+- 미리듣기/멈춤은 의료진만 제공한다. 현재 문구와 속도로 한국어 브라우저 음성을 재생하며 수치 치환은 예시임을 표시한다. 미지원·한국어 목소리 없음·시작/종료 누락은 텍스트 안내로 복구한다. 환자 재생 영수증은 만들지 않는다.
+- 코드 대응: createVoiceGuidanceWorkspace의 mount/load/render·save/inherit·dirty/canLeave·preview/stopPreview. API/규칙/상속/시간은 CONTEXTUAL_VOICE_GUIDANCE_SPEC에 따른다. 자동 새로고침은 편집기·포커스를 덮지 않는다. 늦은 조회 응답은 활성 화면/환자/요청 세대로 폐기한다.
+- 인수: 공통 저장→환자 유효 설정, 환자 override→상속 복구, 원고/입력 및 포커스 유지, 권한별 읽기/쓰기, 저장/응답 유실 재시도/409/네트워크 오류, 미저장 이동 취소·뒤로 복원, 미리듣기 중지·미지원,1280px/좁은 화면 넘침을 임시 DB·실제 브라우저로 확인한다. 모의 TTS 시작·종료는 실제 기기 음질 검증과 구별한다.
+
 ### 의료진 방문 기록 C-SHELL / NAV-05
 
 - 메뉴 클릭과 본문 메뉴 바로가기는 `changeView`에서 실제 목적지가 달라질 때만 `pushState`한다. 환자 선택과 복약 날짜 변경도 각각 하나의 방문 기록이다. 동일 메뉴 재클릭·검색·필터·20초 자동 갱신·수동 새로고침·조회 응답은 새 기록을 추가하지 않는다.
 - `syncUrl(mode)`는 view/patientId/medicationDate/startDate/endDate를 동기화한다. 최초 진입·잘못된 경로의 정규화는 replace, 사용자 이동은 push로 구별한다. `render`의 기본 동작은 현재 항목 정규화이며 명시적인 사용자 이동만 push를 요청한다. 초안·사진·토큰은 URL에 넣지 않는다.
-- `restoreRoute`는 popstate에서 URL을 읽어 10개 경로 중 허용된 view·환자·복약 날짜·공통 기간을 복원하고 활성 메뉴/제목/본문/환자 화면 링크를 일치시킨다. 복원 자체는 push하지 않는다. 초기 진입 전 시작 화면 방문 기록은 그대로 유지하며 의료진 메뉴 이력이 소진된 뒤에만 시작 화면으로 돌아간다.
+- `restoreRoute`는 popstate에서 URL을 읽어 11개 경로 중 허용된 view·환자·복약 날짜·공통 기간을 복원하고 활성 메뉴/제목/본문/환자 화면 링크를 일치시킨다. 복원 자체는 push하지 않는다. 초기 진입 전 시작 화면 방문 기록은 그대로 유지하며 의료진 메뉴 이력이 소진된 뒤에만 시작 화면으로 돌아간다.
 - 환자 변경을 복원할 때 이전 환자의 요약을 지우고 로딩/실패 상태를 표시한다. selectionRequest/medicationRequest 세대로 이전 비동기 응답을 무효화한다. 환자가 삭제됐으면 현재 목록의 기본 환자(없으면 빈 상태)로 replace한다. 복원 중 실패 시 URL/메뉴를 시작 화면으로 바꾸지 않고 새로고침 재시도를 제공한다.
 - 모든 입력 대화상자는 baseline/dirty/busy를 추적한다. X/Escape/취소/메뉴/환자/날짜/뒤로/로그아웃은 같은 이탈 판단을 거친다. 미저장 이탈을 거절하면 값과 현재 history를 보존하며, 저장·분석 중에는 문맥 이동을 막는다. 이탈이 허용된 뒤 대화상자와 사진 초안을 정리한다. v0.5 NAV-05의 ‘대화상자 미저장 보호 미보장’ 범위는 v0.7.0에서 이 규약으로 대체했다.
 - 공지·메시지와 업무/연구/문헌 작업 영역에도 dirty/busy를 적용한다. 같은 문맥의 조회 갱신은 열린 편집기·상세·포커스를 덮어쓰지 않는다. popstate는 서버 쓰기를 발생시키지 않는다. 새로고침·탭 닫기는 beforeunload로 확인을 요청하되 브라우저 정책이나 강제 종료를 통제한다고 보장하지 않는다.
@@ -145,9 +156,20 @@ v0.5는 iPhone/GPT와 의료진5개 메뉴의 방문 기록 복원을, v0.6은 �
 
 | 화면ID / 구성 | 진입·상태·코드·인수 |
 |---|---|
-| P-VOICE-GUIDE / 홈 듣기 | 홈 헤더의 큰 듣기/중지(재생 시 교체), 서브에서는 기존 X 유지; 이름은 환자 문맥, 짧은 인사 뒤 기록 행동 표시; 한국어 미준비/재생실패 텍스트 대안, P-GUIDE에서 음성 off; patient-assist.js |
+| P-VOICE-GUIDE / 자동 안내 | 의료진이 정한 시점·조건에 짧은 안내, 재생 버튼 없음. 안내 중 멈춤·동일 문구 표시, 모달에서도 조작 가능. 한국어 미지원/차단은 글 대안, P-GUIDE에서 on/off; patient-assist.js |
 | P-TASKS / 홈 할 일 | 서버 기록·약 일정의 예정/미보고/보고/불명 구별, 안전한 GET 새로고침·정적 리스트와 명시 버튼; patient-tasks.js |
 | P-VOICE-INPUT / 기존 입력 인라인 | P-MEAL/DAILY/STEPS/SLEEP/MED/MESSAGES의 말로 입력 버튼; 마이크 상태/동의/중지/문장 정정/날짜·값 확인/입력칸 적용→기존 저장, 지연 무효화·수동대안; patient-dictation.js |
 | P-REMIND-SETTINGS / P-GUIDE |15분 화면열림 알림·브라우저 권한 직접 선택·끄기·미지원; 숨김/종료 전달 없음; patient-assist.js |
 
 기존 누름 건강 카드는 입력/수정/보기 동사·진한 하단 띠·명확한 버튼 경계와 그림자로 정적 정보와 구분한다. P-HOME의 식사·약은 서로 다른 진한 색과 ‘기록하기/누르세요’ 문구를 함께 사용한다. 인라인 음성 패널은 새 dialog/경로를 만들지 않는다. 닫기/뒤로/세션/환자·날짜 변화와 권한은 PATIENT_VOICE_SPEC 및 AUTH_COMMUNICATION_SPEC의 현행 규약을 따른다.
+
+
+## v0.9.0 환자 자동 안내·수치 확인 제작 규약 (CVG-03/04, 구현 전)
+
+P-GUIDE의 환자 음성 설정은 서버 동기화된 켜기/끄기와 실패/재시도 상태다. 환자 목소리·속도·다시 듣기·전체 듣기·인식 확인문 읽기 버튼은 제거한다. 알림 설정은 유지하되 반복 음성은 없다. P-VOICE-GUIDE는 화면 또는 열린 모달에서 읽을 수 있는 동일 안내 글과 발화 중 멈춤만 제공한다. 안내는 현재 환자/날짜/화면/폼 세대에 연결하고 닫기·다른 날짜·마이크 시작·숨김에서 취소한다.
+
+P-MEAL은 새 폼 진입 후 meal_open, P-MED는 일정 조회 완료 후 medication_open, P-MED-PHOTO는 사진 폼 진입 후 medication_photo_open, P-STEPS/SLEEP/DAILY는 날짜 원자료 ready 후 해당 이벤트를 호출한다. 단순 다시 그리기는 새로운 메뉴 진입이 아니다. 오전/오후/저녁은 최신 자료가 준비된 홈에서만 평가한다.
+
+P-STEPS/SLEEP/DAILY 수치 필드 아래 [data-value-confirmation]에 값/단위·확인 사유와 [이 값이 맞아요]/[수정하기]를 표시한다. blur·음성 적용·시간/분 변환·저장 시 확인하고 매 글자 입력 시 안내하지 않는다. 빈값은0으로 바꾸지 않는다. 확인은 환자/폼UUID/기록일/항목/정확한값/설정키에 묶인다. 값/날짜/설정 변경은 확인을 무효화한다. 실제로 낮거나 높은 값도 확인 후 기존 API로 저장할 수 있으며 확인 자체는 저장이 아니다. 설정 조회 실패는 입력을 보존하고 재시도 안내, 이전 저장 결과 확인은 기존 UUID로 그대로 재전송한다. patient.js가 폼/저장, patient-value-confirmation.js가 시각 확인 상태, patient-assist.js가 음성을 소유한다.
+
+인수: 메뉴 이벤트/중복 억제·모달 멈춤·on/off 즉시취소·수치 변경 재확인/확인후 저장/빈값·0·기기값/직접입력 유지·320px·설정실패 입력보존·기존 음성 입력 회귀. 상세 계약은 CONTEXTUAL_VOICE_GUIDANCE_SPEC이다.

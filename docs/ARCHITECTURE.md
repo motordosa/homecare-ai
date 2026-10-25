@@ -85,3 +85,8 @@ lib/medication-photos.mjs는 기존 vision 초안의 환자·hash·종류·만�
 - patient-dictation.js: 브라우저 인식·마이크 상태·원고 수정·검토·확인 후 기존 폼 반영, 세대/대상/세션 경계.
 - patient-assist.css: 기존 기본 레이아웃 위의 행동/정보·큰 글자·헤더 소리 제어 토큰/컴포넌트 규칙.
 - 공지 저장 receipt는 communications 모듈에서 기존 공지/이력과 원자 저장한다. 실제 Kakao 인증 채널은 cookie 기반이고, demo 탭 보조 헤더는 그 모드에서만 유효하다.
+
+
+## v0.9.0 의료진 설정형 자동 음성 안내 (구현 전 계약)
+
+공유 voice-guidance-rules.js 기본값 → lib/voice-guidance.mjs 설정/권한/재생 기록 → clinician-voice-guidance.js 의료진 설정 → patient-assist.js 조건별 자동 발화 → patient-value-confirmation.js 입력 확인으로 연결한다. patient.js는 폼·환자·날짜 세대와 실제 저장을 소유한다. 인식기 수명주기는 patient-dictation.js에 유지하며 안내와 마이크는 동시에 실행하지 않는다. 타이머/오류 복구와 직접 입력 대안은 유지한다. 상세 제작·인수 기준은 [CONTEXTUAL_VOICE_GUIDANCE_SPEC.md](CONTEXTUAL_VOICE_GUIDANCE_SPEC.md)다.
