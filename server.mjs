@@ -19,6 +19,7 @@ import { ensureMedicationPhotoSchema, saveMedicationPhotoReport, getMedicationPh
 import { healthCapabilities, ensureHealthSchema, getHealthConnections, createHealthConnection, revokeHealthConnection, receiveHealthBatch, getHealthConnectionIdentity } from './lib/health-sync.mjs';
 
 import { createAuthService } from './lib/auth.mjs';
+import { ensureVoiceGuidanceSchema, clinicianVoiceGuidance, saveClinicianVoiceGuidance, patientVoiceGuidance, saveVoiceGuidancePreference, claimVoiceGuidance, receiveVoiceGuidanceReceipt } from './lib/voice-guidance.mjs';
 import { ensureCommunicationSchema, listNotices, createNotice, updateNotice, activeNotices, readNotice, listMessages, sendMessage, readMessages, conversations } from './lib/communications.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
@@ -34,11 +35,12 @@ ensureCommunicationSchema(db);
 ensureWorkflowSchema(db);
 ensureResearchSchema(db);
 ensureEvidenceSchema(db);
+ensureVoiceGuidanceSchema(db);
 const evidenceService=createEvidenceService({db});
-db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','8') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
+db.prepare("INSERT INTO metadata (key,value) VALUES ('schema_version','9') ON CONFLICT(key) DO UPDATE SET value=excluded.value").run();
 const port = Number(process.env.PORT || 3000);
 const bodyLimit = 7 * 1024 * 1024;
-const schemaVersion = 8;
+const schemaVersion = 9;
 
 function respond(res, status, value, extraHeaders = {}) {
   const body = JSON.stringify(value);
@@ -108,7 +110,7 @@ function assertSameOrigin(req) {
 function health() {
   const counts = {};
   for (const [key, table] of [['patients', 'patients'], ['dailyRecords', 'daily_records'], ['meals', 'meals']]) counts[key] = db.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get().count;
-  return { ok: true, status: 'ok', app: 'HomeCare AI Demo', schemaVersion, appVersion:'0.8.1', dataMode: 'demo', seedMode: db.prepare("SELECT value FROM metadata WHERE key='mode'").get()?.value ?? 'seed', today: todayKorea(), timezone: 'Asia/Seoul', storage: 'sqlite', counts, resetAt: db.prepare("SELECT value FROM metadata WHERE key='reset_at'").get()?.value ?? null, provenance };
+  return { ok: true, status: 'ok', app: 'HomeCare AI Demo', schemaVersion, appVersion:'0.9.0', dataMode: 'demo', seedMode: db.prepare("SELECT value FROM metadata WHERE key='mode'").get()?.value ?? 'seed', today: todayKorea(), timezone: 'Asia/Seoul', storage: 'sqlite', counts, resetAt: db.prepare("SELECT value FROM metadata WHERE key='reset_at'").get()?.value ?? null, provenance };
 }
 
 function createPatient(body) {
@@ -228,6 +230,20 @@ const server = http.createServer(async (req, res) => {
     if(path==='/api/auth/enroll' && method==='POST')return respond(res,200,auth.enroll(req,await readJson(req)));
     const invite=/^\/api\/clinician\/patients\/([^/]+)\/invitations$/.exec(path);
     if(invite && method==='POST'){allowedKeys(await readJson(req),[]);return respond(res,201,{invitation:auth.issueInvitation(req,invite[1])});}
+    if(path==='/api/clinician/voice-guidance' && ['GET','PUT'].includes(method)) {
+      const patientId=url.searchParams.get('patientId') || null;
+      const actor=staffActor(req,method==='PUT'?'clinical.write':'patient.read',patientId,method==='PUT');
+      return respond(res,200,method==='PUT'?saveClinicianVoiceGuidance(db,actor,patientId,await readJson(req)):clinicianVoiceGuidance(db,actor,patientId));
+    }
+    const guidance=/^\/api\/patients\/([^/]+)\/voice-guidance(?:\/(preference|claims|receipts\/([0-9a-f-]+)))?$/.exec(path);
+    if(guidance) {
+      const patientId=guidance[1], operation=guidance[2];
+      const actor=auth.authorize(req,{patientId,communication:true,write:method!=='GET'});
+      if(!operation && method==='GET')return respond(res,200,patientVoiceGuidance(db,actor,patientId));
+      if(operation==='preference' && method==='PUT')return respond(res,200,saveVoiceGuidancePreference(db,actor,patientId,await readJson(req)));
+      if(operation==='claims' && method==='POST')return respond(res,200,claimVoiceGuidance(db,actor,patientId,await readJson(req)));
+      if(guidance[3] && method==='POST')return respond(res,200,receiveVoiceGuidanceReceipt(db,actor,patientId,guidance[3],await readJson(req)));
+    }
     if(path==='/api/clinician/notices') {
       const actor=staffActor(req,'notice.write',null,method==='POST');
       if(method==='GET')return respond(res,200,listNotices(db,actor));
@@ -247,7 +263,7 @@ const server = http.createServer(async (req, res) => {
       if(!messages[2] && method==='POST')return respond(res,201,sendMessage(db,actor,messages[1],await readJson(req)));
       if(messages[2] && method==='POST')return respond(res,200,readMessages(db,actor,messages[1],await readJson(req)));
     }
-    if (path === '/api/health' && method === 'GET') return respond(res, 200, auth.capabilities().mode==='kakao'?{ok:true,status:'ok',storage:'sqlite',schemaVersion,appVersion:'0.8.1'}:health());
+    if (path === '/api/health' && method === 'GET') return respond(res, 200, auth.capabilities().mode==='kakao'?{ok:true,status:'ok',storage:'sqlite',schemaVersion,appVersion:'0.9.0'}:health());
     if (path === '/api/capabilities' && method === 'GET') return respond(res, 200, {
       auth: auth.capabilities(),
       vision: visionCapabilities(process.env),
